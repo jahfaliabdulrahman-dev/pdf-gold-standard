@@ -12,7 +12,8 @@
 | المسار | الوصف |
 |---|---|
 | `docs/PDF-Gold-Standard.md` | **المعيار المرجعي** — فحص جنائي كامل لدليل مرجعي حقيقي: 155 رابطاً، 38 مدخلاً، أزرار بمواضع بكسلية |
-| `docs/recipes/` | **الوصفات الموثقة**: الطبقة التفاعلية · الفن المولّد · المعيار المهني |
+| `docs/recipes/` | **الوصفات الموثقة (5)**: الطبقة التفاعلية · الفن المولّد · المعيار المهني · تقاطعات الطباعة · تدقيق PDF الجنائي |
+| `skill/arabic-rtl-pdf/` | **مهارة Hermes الجاهزة** — الدليل التشغيلي الكامل (SKILL.md + 5 مراجع): انسخ المجلد إلى `~/.hermes/skills/productivity/` |
 | `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` |
 | `gen_art.py` | توليد فن الأغلفة (OpenRouter Image API — `gemini-3-pro-image`) |
 | `fonts/` | IBM Plex Sans Arabic + Amiri (SIL OFL 1.1) — تُضمَّن base64 في البناء |
@@ -35,6 +36,15 @@ python3 build.py guide-v2.html out.pdf
 - **Tagged PDF** — بنية وصول كاملة ونص Unicode قابل للبحث والنسخ
 - **فن مولّد**: غلاف 4K (~433DPI) وعائلة فنية موحّدة (مرجع أسلوب واحد)
 
+## المهارة الجاهزة (Hermes Skill)
+
+`skill/arabic-rtl-pdf/` هي المهارة التشغيلية الكاملة التي تُدير هذا الخط من البداية للنهاية —
+قواعد القرار، الوصفة، تقاطعاتها، وتدقيق أي PDF مرجعي جنائياً. لتثبيتها:
+
+```bash
+cp -R skill/arabic-rtl-pdf ~/.hermes/skills/productivity/
+```
+
 ## خارطة الطريق
 
 [ROADMAP.md](ROADMAP.md) — ثيمات الألوان الستة · LangChain · خدمة للجمهور.
@@ -45,5 +55,6 @@ Arabic-first pipeline producing genuinely interactive PDFs (nav buttons, multi-l
 bookmarks, RTL reading direction) from designed HTML: HTML → Chrome headless →
 PyMuPDF interactivity layer. Deterministic, offline, font-embedded.
 The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
+The operating Hermes skill ships under `skill/arabic-rtl-pdf/` — copy it into your skills directory.
 
 MIT © 2026 Abdulrahman Jahfali
