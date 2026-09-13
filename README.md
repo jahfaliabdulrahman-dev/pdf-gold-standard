@@ -3,6 +3,8 @@
 معيار إنتاج ملفات PDF تفاعلية عربية بجودة دار نشر: أزرار تنقل دائمة، فهرس جانبي
 متعدد المستويات، اتجاه RTL أصيل، وفن مولّد ثلاثي الأبعاد — من HTML مصمم إلى PDF نهائي.
 
+[![Build PDF](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/actions/workflows/build-pdf.yml/badge.svg)](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/actions/workflows/build-pdf.yml)
+
 **⬇️ التحميل:** [دليل المعيار — الإصدار الثاني (PDF)](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/releases/latest/download/guide-v2-ar.pdf)
 
 ![غلاف الدليل](docs/images/cover.jpg)
@@ -13,6 +15,7 @@
 |---|---|
 | `docs/PDF-Gold-Standard.md` | **المعيار المرجعي** — فحص جنائي كامل لدليل مرجعي حقيقي: 155 رابطاً، 38 مدخلاً، أزرار بمواضع بكسلية |
 | `docs/recipes/` | **الوصفات الموثقة (5)**: الطبقة التفاعلية · الفن المولّد · المعيار المهني · تقاطعات الطباعة · تدقيق PDF الجنائي |
+| `docs/automation-plan.md` | **خطة الأتمتة** — بوابة الاختيار، تحليل سير العمل، الحوكمة، مؤشرات KPI (وفق دليل الأتمتة) |
 | `skill/arabic-rtl-pdf/` | **مهارة Hermes الجاهزة** — الدليل التشغيلي الكامل (SKILL.md + 5 مراجع): انسخ المجلد إلى `~/.hermes/skills/productivity/` |
 | `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` |
 | `gen_art.py` | توليد فن الأغلفة (OpenRouter Image API — `gemini-3-pro-image`) |

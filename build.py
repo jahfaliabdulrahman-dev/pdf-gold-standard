@@ -30,7 +30,9 @@ def chrome_bin() -> str:
     cands = [os.environ.get("CHROME_PATH", ""),
              "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
              shutil.which("google-chrome") or "",
-             shutil.which("chromium") or ""]
+             shutil.which("google-chrome-stable") or "",
+             shutil.which("chromium") or "",
+             shutil.which("chromium-browser") or ""]
     for c in cands:
         if c and os.path.exists(c):
             return c
