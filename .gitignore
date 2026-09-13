@@ -1,0 +1,14 @@
+# build artifacts / local outputs
+out*.pdf
+/tmp-*
+
+# working art (masters & tests stay local; embeds ship)
+art/*
+!art/embed-*.jpg
+
+# macOS noise
+.DS_Store
+
+# python
+__pycache__/
+*.pyc

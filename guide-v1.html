@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>معيار إنتاج ملفات PDF — دليل المعيار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*__FONTS__*/
+  :root{
+    --c-cosmic1:#3b1e9e; --c-cosmic2:#1a0b70; --c-cosmic3:#0b0327; --c-deep:#070218;
+    --c-purple:#4928b5; --c-violeting:#571cbd; --c-vivid:#6d3ff0; --c-accent:#7449e7;
+    --c-teal:#57e3d8; --c-teal2:#79e9e0; --c-lav:#b596fd; --c-lav2:#c9c4f0;
+    --c-paper:#f8f6fb; --c-card:#ffffff; --c-line:#e4defa; --c-ink:#0f0c26; --c-muted:#4f5d75;
+    --f-sans:'IBM Plex Sans Arabic','SF Arabic',sans-serif; --f-serif:'Amiri','Noto Naskh Arabic',serif;
+  }
+  @page{ size:A4; margin:0; }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ font-family:var(--f-sans); -webkit-font-smoothing:antialiased; color:var(--c-ink); direction:rtl; text-align:right; }
+  .page{ width:210mm; height:296.8mm; position:relative; overflow:hidden; page-break-after:always; background:var(--c-paper); }
+  .page:last-child{ page-break-after:auto; }
+  .dark{ color:#fff; }
+  .cosmic{ background:radial-gradient(130% 75% at 50% -12%, var(--c-cosmic1) 0%, var(--c-cosmic2) 36%, var(--c-cosmic3) 76%, var(--c-deep) 100%); }
+  .beam{ position:absolute; top:-40mm; left:50%; width:95mm; height:190mm; transform:translateX(-50%) rotate(-7deg);
+    background:linear-gradient(180deg, rgba(150,120,255,.38), rgba(150,120,255,.10) 55%, rgba(150,120,255,0) 100%);
+    filter:blur(22px); }
+  .stars1{ position:absolute; top:0; left:0; width:1.5px; height:1.5px; border-radius:50%; background:#cdb9ff; opacity:.85;
+    box-shadow:
+     30px 60px 0 #cdb9ff, 96px 150px 0 #9f8be0, 180px 90px 0 #ede7ff, 264px 210px 0 #8f7cd8,
+     60px 300px 0 #cdb9ff, 210px 360px 0 #b9a6f2, 320px 300px 0 #ede7ff, 130px 450px 0 #9f8be0,
+     350px 520px 0 #cdb9ff, 40px 560px 0 #b9a6f2, 240px 620px 0 #ede7ff, 140px 700px 0 #8f7cd8,
+     330px 760px 0 #cdb9ff, 70px 830px 0 #b9a6f2, 260px 900px 0 #ede7ff, 180px 980px 0 #9f8be0,
+     60px 1030px 0 #cdb9ff, 300px 1090px 0 #b9a6f2, 150px 1120px 0 #8f7cd8, 460px 240px 0 #b9a6f2, 560px 420px 0 #cdb9ff, 640px 160px 0 #9f8be0, 500px 620px 0 #ede7ff, 680px 540px 0 #b9a6f2, 600px 830px 0 #cdb9ff, 730px 320px 0 #9f8be0, 470px 900px 0 #b9a6f2; }
+  .stars2{ position:absolute; top:0; left:0; width:2.2px; height:2.2px; border-radius:50%; background:#e6ddff; opacity:.9;
+    box-shadow:
+     120px 120px 0 #e6ddff, 280px 240px 0 #cabcf7, 60px 420px 0 #e6ddff, 300px 480px 0 #b7a4f0,
+     170px 560px 0 #e6ddff, 90px 680px 0 #cabcf7, 280px 720px 0 #e6ddff, 200px 850px 0 #b7a4f0,
+     110px 930px 0 #e6ddff, 320px 990px 0 #cabcf7, 50px 1060px 0 #b7a4f0, 580px 260px 0 #e6ddff, 660px 700px 0 #cabcf7, 540px 1050px 0 #b7a4f0; }
+  .stars3{ position:absolute; top:0; left:0; width:2.6px; height:2.6px; border-radius:50%; background:#8fe8e0; opacity:.75;
+    box-shadow: 220px 180px 0 #8fe8e0, 80px 750px 0 #8fe8e0, 250px 1030px 0 #8fe8e0; }
+  .platform{ position:absolute; left:50%; transform:translateX(-50%); bottom:30mm; width:120mm; height:26mm; border-radius:50%;
+    background:radial-gradient(50% 50% at 50% 50%, rgba(123,88,240,.55), rgba(123,88,240,.12) 55%, rgba(123,88,240,0) 78%);
+    filter:blur(6px); }
+  .globe{ position:absolute; left:50%; bottom:42mm; transform:translateX(-50%); width:46mm; height:46mm; border-radius:50%;
+    background:radial-gradient(circle at 34% 30%, rgba(139,240,229,.5), rgba(109,63,240,.35) 45%, rgba(20,8,60,.1) 72%);
+    border:1px solid rgba(160,200,255,.35); box-shadow:0 10mm 28mm rgba(0,0,0,.5), inset 0 0 12mm rgba(120,90,255,.35); }
+  .panel{ position:absolute; border-radius:3.4mm;
+    background:linear-gradient(155deg, rgba(255,255,255,.26), rgba(255,255,255,.10) 60%);
+    border:1px solid rgba(255,255,255,.38);
+    box-shadow:0 5mm 14mm rgba(2,0,20,.45), inset 0 1px 0 rgba(255,255,255,.30);
+    backdrop-filter:blur(2px); }
+  .pchip{ position:absolute; border-radius:1.6mm; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.30); }
+  .pbar{ position:absolute; height:1.6mm; border-radius:1mm; background:rgba(230,225,255,.55); }
+  .pbar.v{ background:rgba(139,112,255,.8); }
+  .pdia{ position:absolute; width:5mm; height:5mm; border-radius:1.2mm; background:rgba(87,227,216,.85);
+    transform:rotate(45deg); box-shadow:0 2mm 5mm rgba(0,0,0,.35); }
+  .cube{ position:absolute; width:7mm; height:7mm; border-radius:1.6mm; transform:rotate(45deg);
+    background:linear-gradient(140deg, rgba(180,150,255,.55), rgba(90,50,200,.35));
+    border:1px solid rgba(220,205,255,.5); box-shadow:0 4mm 10mm rgba(0,0,0,.4); }
+  .loz{ display:inline-block; transform:rotate(-6deg); background:var(--c-vivid); color:#fff; border-radius:2mm;
+    padding:0.4mm 3.5mm 1mm; box-shadow:0 3mm 8mm rgba(109,63,240,.45); }
+  .eyebrow{ font-size:10.5pt; font-weight:500; color:var(--c-lav); }
+  .eyebrow.dk{ color:var(--c-violeting); }
+  .latin{ font-family:'IBM Plex Sans Arabic',sans-serif; }
+  h1.page-t{ font-size:20pt; font-weight:700; color:var(--c-violeting); margin:0 0 4.5mm; line-height:1.25; text-wrap:balance; }
+  .lead{ font-size:12.5pt; line-height:1.85; max-width:168mm; margin:0 0 11mm; }
+  .lead b, .lead strong{ color:var(--c-violeting); font-weight:600; }
+  .content{ padding:23mm 20.46mm 0; }
+  .nav{ position:absolute; top:13.05mm; left:20.46mm; display:flex; gap:4.35mm; direction:ltr; z-index:9; }
+  .nav i{ display:block; width:8.82mm; height:8.82mm; }
+  .nav i svg{ display:block; width:100%; height:100%; }
+  .foot{ position:absolute; bottom:11.5mm; left:20.46mm; right:20.46mm; display:flex; justify-content:space-between;
+    font-size:8pt; font-weight:300; letter-spacing:.02em; }
+  .foot .num{ font-variant-numeric:tabular-nums; font-weight:500; }
+  .light .foot{ color:var(--c-muted); }
+  .dark .foot{ color:var(--c-lav2); }
+  /* TOC */
+  .toc-h{ text-align:center; padding-top:34mm; }
+  .toc-h h1{ font-size:23pt; font-weight:700; color:var(--c-violeting); margin:0; }
+  .toc-h p{ font-size:10.5pt; color:var(--c-muted); margin:3mm 0 0; }
+  .toc-row{ position:absolute; right:20.46mm; width:150mm; height:13mm; border:0.35mm solid var(--c-line); border-radius:2.6mm;
+    background:#fff; display:flex; align-items:center; padding:0 5mm; }
+  .toc-row .n{ width:8.5mm; height:8.5mm; border-radius:2mm; background:rgba(87,227,216,.22); border:0.3mm solid rgba(30,150,140,.35);
+    color:#0d6b63; font-weight:600; font-size:11pt; display:flex; align-items:center; justify-content:center; margin-left:4.5mm; }
+  .toc-row .t{ font-size:13pt; font-weight:600; color:var(--c-violeting); flex:1; text-align:right; }
+  .toc-row .p{ font-size:10.5pt; font-weight:600; color:#0d6b63; background:rgba(87,227,216,.16); border-radius:1.6mm; padding:0.6mm 2.8mm 1.2mm; }
+  .toc-hint{ position:absolute; right:20.46mm; left:20.46mm; top:176mm; text-align:center; font-size:9.5pt; color:var(--c-muted); }
+  /* cards */
+  .cards3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:7mm; margin:4mm 0 14mm; }
+  .card{ background:#fff; border:0.35mm solid var(--c-line); border-radius:3mm; padding:6mm 5.5mm; }
+  .card .big{ font-size:26pt; font-weight:700; color:var(--c-violeting); line-height:1; font-variant-numeric:tabular-nums; }
+  .card .cap{ font-size:10pt; color:var(--c-muted); margin-top:2.5mm; line-height:1.6; }
+  .card .ttl{ font-size:12.5pt; font-weight:600; color:var(--c-violeting); margin-bottom:2mm; }
+  .card .tx{ font-size:10.5pt; line-height:1.7; color:var(--c-ink); }
+  .cards2{ display:grid; grid-template-columns:1fr 1fr; gap:6mm; }
+  .insight{ display:flex; gap:4mm; margin:0 0 8mm; align-items:flex-start; }
+  .insight .b{ flex:0 0 auto; width:7mm; height:7mm; border-radius:50%; background:rgba(87,227,216,.25); border:0.3mm solid rgba(30,150,140,.4);
+    color:#0d6b63; font-size:9.5pt; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:0.8mm; }
+  .insight .x{ font-size:11.5pt; line-height:1.75; }
+  .insight .x b{ color:var(--c-violeting); }
+  .band{ margin-top:4mm; background:linear-gradient(135deg, rgba(109,63,240,.10), rgba(87,227,216,.10));
+    border:0.35mm solid rgba(109,63,240,.28); border-radius:3mm; padding:5.5mm 6mm; font-size:11pt; line-height:1.8; }
+  .band b{ color:var(--c-violeting); }
+  /* divider */
+  .div-title{ position:absolute; top:78mm; right:20.46mm; }
+  .div-title .eyebrow{ margin-bottom:4mm; }
+  .div-title h2{ font-size:31pt; font-weight:700; margin:0; line-height:1.2; }
+  .div-title p{ font-size:12.5pt; color:var(--c-lav2); margin:5mm 0 0; }
+  /* palette + type */
+  .sw-row{ display:flex; gap:5mm; margin:3mm 0 9mm; }
+  .sw{ flex:1; text-align:center; }
+  .sw .cbox{ height:15mm; border-radius:2.6mm; border:0.3mm solid rgba(15,12,38,.12); box-shadow:inset 0 0 0 .8mm rgba(255,255,255,.25); }
+  .sw .chex{ font-size:7.5pt; color:var(--c-muted); margin-top:1.8mm; direction:ltr; font-variant-numeric:tabular-nums; }
+  .ts-row{ display:flex; align-items:baseline; justify-content:space-between; border-bottom:0.3mm solid var(--c-line); padding:4.2mm 1mm 3.2mm; }
+  .ts-row .smp{ text-wrap:balance; }
+  .ts-row .spec{ font-size:8.5pt; color:var(--c-muted); direction:rtl; white-space:nowrap; }
+  .ts-row .spec .mono{ direction:ltr; display:inline-block; }
+  /* rhythm */
+  .rhythm{ background:#fff; border:0.35mm solid var(--c-line); border-radius:3mm; padding:5mm 5.5mm; }
+  .rh-intro{ font-size:10pt; color:var(--c-muted); margin:0 0 4mm; line-height:1.7; }
+  .chips{ display:flex; flex-wrap:wrap; gap:1.6mm; justify-content:flex-start; }
+  .chip{ width:6.6mm; height:8.6mm; border-radius:1.2mm; border:0.3mm solid var(--c-line); background:#fff; position:relative; }
+  .chip.d{ background:linear-gradient(160deg,var(--c-purple),#2a1590); border-color:#2a1590; }
+  .chip.m{ background:linear-gradient(120deg,#fff 48%,var(--c-purple) 52%); }
+  .chip s{ position:absolute; bottom:-3.6mm; right:50%; transform:translateX(50%); font-size:5.5pt; color:var(--c-muted); text-decoration:none; }
+  /* gate */
+  .gate{ background:#fff; border:0.4mm solid rgba(30,150,140,.45); border-radius:3mm; padding:7mm; }
+  .gate h3{ margin:0 0 4mm; font-size:12.5pt; color:#0d6b63; font-weight:700; }
+  .gate .g-row{ display:flex; gap:4mm; align-items:flex-start; margin-bottom:3.4mm; }
+  .gate .g-row:last-child{ margin-bottom:0; }
+  .gate .g-n{ flex:0 0 auto; width:7mm; height:7mm; border-radius:50%; background:rgba(87,227,216,.25); border:0.3mm solid rgba(30,150,140,.4);
+    color:#0d6b63; font-weight:700; font-size:9.5pt; display:flex; align-items:center; justify-content:center; }
+  .gate .g-t{ font-size:10.5pt; line-height:1.7; }
+  .gate .g-t b{ color:#0d6b63; }
+  ul.checks{ margin:0 0 8mm; padding:0 6mm 0 0; }
+  ul.checks li{ font-size:12pt; line-height:1.85; margin-bottom:6.5mm; }
+  ul.checks li b{ color:var(--c-violeting); }
+  /* refs */
+  .ref-row{ position:absolute; right:20.46mm; width:158mm; height:22mm; background:#fff; border:0.35mm solid var(--c-line);
+    border-radius:3mm; display:flex; align-items:center; gap:5mm; padding:0 5mm; }
+  .ref-row .qr{ width:17.5mm; height:17.5mm; border-radius:1.8mm; border:0.3mm solid var(--c-line); }
+  .ref-row .meta{ flex:1; }
+  .ref-row .meta .nm{ font-size:12.5pt; font-weight:600; color:var(--c-violeting); }
+  .ref-row .meta .sb{ font-size:9.5pt; color:var(--c-muted); margin-top:1.2mm; }
+  .ref-row .go{ width:8mm; height:8mm; border-radius:2mm; background:rgba(109,63,240,.11); border:0.3mm solid rgba(109,63,240,.3);
+    display:flex; align-items:center; justify-content:center; color:var(--c-vivid); font-size:11pt; }
+  .ref-note{ position:absolute; right:20.46mm; left:20.46mm; bottom:26mm; text-align:center; font-size:9.5pt; color:var(--c-muted); }
+  /* cover/basmala/back */
+  .cover-t{ position:absolute; top:22mm; right:0; left:0; text-align:center; }
+  .cover-t .eyebrow{ margin-bottom:6mm; }
+  .cover-t h1{ font-size:35pt; font-weight:700; line-height:1.3; margin:0; text-wrap:balance; }
+  .cover-t .sub{ font-size:12pt; color:var(--c-lav2); margin:6mm auto 0; max-width:150mm; line-height:1.8; }
+  .cover-chips{ position:absolute; top:92mm; right:0; left:0; text-align:center; }
+  .cover-chips span{ display:inline-block; margin:0 1.6mm; padding:1.2mm 4mm 1.8mm; border-radius:2mm;
+    background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.25); font-size:9.5pt; color:#e9e3ff; }
+  .cover-tags{ position:absolute; bottom:12mm; right:20.46mm; left:20.46mm; display:flex; justify-content:space-between; font-size:8.5pt; color:var(--c-lav2); }
+  .basmala{ text-align:center; padding-top:64mm; }
+  .basmala .b-t{ font-family:'.SF Arabic','SF Arabic','GeezaPro','Damascus',serif; font-size:30pt; color:var(--c-violeting); line-height:1.6; }
+  .orn{ margin:9mm auto 10mm; width:70mm; }
+  .basmala p{ font-size:11.5pt; color:var(--c-muted); max-width:132mm; margin:0 auto; line-height:1.9; }
+  .back-center{ position:absolute; top:88mm; right:0; left:0; text-align:center; }
+  .back-center .bchip{ display:inline-block; padding:6mm 10mm 7mm; border-radius:4mm; background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.26); box-shadow:0 6mm 18mm rgba(0,0,0,.4); }
+  .back-center h2{ font-size:19pt; font-weight:700; margin:0; }
+  .back-center .s1{ font-size:10.5pt; color:var(--c-lav2); margin-top:3.5mm; }
+  .back-foot{ position:absolute; bottom:12mm; right:0; left:0; text-align:center; font-size:8pt; color:#8f83c9; }
+  .tail{ position:absolute; bottom:23mm; right:0; left:0; text-align:center; }
+  .tail i{ display:inline-block; width:2.4mm; height:2.4mm; margin:0 1.8mm; transform:rotate(45deg); background:#d9d0f5; }
+  .tail i.c{ background:#57e3d8; }
+  @media print{ .chip s{ display:block; } }
+</style>
+</head>
+<body>
+
+<!-- ============ 1 · COVER ============ -->
+<div class="page dark cosmic">
+  <div class="beam"></div><div class="stars1"></div><div class="stars2"></div><div class="stars3"></div>
+  <div class="platform"></div>
+  <div class="globe"></div>
+  <div class="panel" style="left:26mm; bottom:60mm; width:62mm; height:17mm; transform:rotate(-7deg);">
+    <i class="pchip" style="right:4mm; top:4mm; width:9mm; height:9mm;"></i>
+    <i class="pbar" style="right:16mm; top:5.2mm; width:24mm;"></i>
+    <i class="pbar" style="right:16mm; top:9.6mm; width:15mm; opacity:.55;"></i>
+  </div>
+  <div class="panel" style="left:34mm; bottom:80mm; width:62mm; height:17mm; transform:rotate(5deg);">
+    <i class="pchip" style="right:4mm; top:4mm; width:9mm; height:9mm; border-radius:50%;"></i>
+    <i class="pbar v" style="right:16mm; top:5.2mm; width:19mm;"></i>
+    <i class="pbar" style="right:16mm; top:9.6mm; width:26mm; opacity:.55;"></i>
+  </div>
+  <div class="panel" style="left:20mm; bottom:100mm; width:62mm; height:17mm; transform:rotate(-4deg);">
+    <i class="pchip" style="right:4mm; top:4mm; width:9mm; height:9mm;"></i>
+    <i class="pbar" style="right:16mm; top:5.2mm; width:14mm; opacity:.55;"></i>
+    <i class="pbar v" style="right:16mm; top:9.6mm; width:28mm;"></i>
+  </div>
+  <i class="cube" style="left:34mm; bottom:126mm;"></i>
+  <i class="cube" style="left:108mm; bottom:64mm; width:5mm; height:5mm; opacity:.8;"></i>
+  <i class="pdia" style="left:96mm; bottom:120mm;"></i>
+
+  <div class="cover-t">
+    <div class="eyebrow">معيار الإنتاج المؤسسي · <span class="latin">GOLD STANDARD</span></div>
+    <h1>معيار إنتاج ملفات <span class="loz">PDF</span></h1>
+    <p class="sub">بعد تفكيك أعمق دليل عربي مرجعي صفحة بعد صفحة —<br>نظام إنتاج موحد للمستندات التفاعلية: أزرار تنقل، فهرس جانبي، ودعم عربي كامل.</p>
+  </div>
+  <div class="cover-chips">
+    <span>أزرار تنقل دائمة</span><span>فهرس جانبي بثلاثة مستويات</span><span>طبقة نص قابلة للنسخ</span>
+  </div>
+  <div class="cover-tags">
+    <span>الإصدار الأول · ٢٠٢٦</span>
+    <span>إعداد: م. عبدالرحمن جحفلي · إشراف تقني: سوليمان</span>
+  </div>
+</div>
+
+<!-- ============ 2 · BASMALA ============ -->
+<div class="page">
+  <div class="basmala">
+    <div class="b-t">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+    <svg class="orn" viewBox="0 0 200 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <line x1="0" y1="10" x2="82" y2="10" stroke="#cdbff4" stroke-width="1"/>
+      <rect x="94" y="5" width="10" height="10" rx="2" transform="rotate(45 99 10)" fill="none" stroke="#571cbd" stroke-width="1.4"/>
+      <line x1="118" y1="10" x2="200" y2="10" stroke="#cdbff4" stroke-width="1"/>
+      <circle cx="88" cy="10" r="1.8" fill="#57e3d8"/>
+      <circle cx="112" cy="10" r="1.8" fill="#57e3d8"/>
+    </svg>
+    <p>هذا الدليل يوثق المعيار الذي بنيت عليه مخرجاتنا الرقمية، بعد تفكيك دليل «الأتمتة» — الصادر عن أكاديمية طويق — صفحة بعد صفحة: من أزرار التنقل إلى أدق مقياس للخطوط، لتصبح كل ملفاتنا القادمة على هذا المستوى.</p>
+  </div>
+  <div class="foot"><span class="num">2</span><span>معيار إنتاج ملفات PDF — دليل المعيار</span></div>
+</div>
+
+<!-- ============ 3 · TOC ============ -->
+<div class="page">
+  <div class="toc-h">
+    <h1>جـدول المحتويـات</h1>
+    <p>ست محطات — والأزرار الأربعة في أعلى كل صفحة تعمل دائما</p>
+  </div>
+  <div class="toc-row" style="top:64mm;"><span class="n">١</span><span class="t">لماذا هذا المعيار؟</span><span class="p">٥</span></div>
+  <div class="toc-row" style="top:80.5mm;"><span class="n">٢</span><span class="t">نظام التنقل الدائم</span><span class="p">٦</span></div>
+  <div class="toc-row" style="top:97mm;"><span class="n">٣</span><span class="t">الهوية البصرية والتايبوغرافي</span><span class="p">٨</span></div>
+  <div class="toc-row" style="top:113.5mm;"><span class="n">٤</span><span class="t">الإيقاع الطباعي والمكونات</span><span class="p">٩</span></div>
+  <div class="toc-row" style="top:130mm;"><span class="n">٥</span><span class="t">دعم العربية والتحقق الآلي</span><span class="p">١٠</span></div>
+  <div class="toc-row" style="top:146.5mm;"><span class="n">٦</span><span class="t">المراجع والأدوات</span><span class="p">١١</span></div>
+  <div class="toc-hint">اضغط أي صف للانتقال مباشرة — أو استخدم الفهرس الجانبي في شريط قارئك</div>
+</div>
+
+<!-- ============ 4 · DIVIDER A ============ -->
+<div class="page dark cosmic">
+  <div class="beam"></div><div class="stars1"></div><div class="stars2"></div>
+  <div class="nav">
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="div-title">
+    <div class="eyebrow">القسم الأول</div>
+    <h2><span class="loz">الأساس</span></h2>
+    <p>من دليل «الأتمتة» إلى معيارنا — ما تعلمناه بالأرقام</p>
+  </div>
+  <div class="platform" style="bottom:20mm;"></div>
+  <div class="panel" style="left:24mm; bottom:38mm; width:58mm; height:16mm; transform:rotate(-6deg);">
+    <i class="pchip" style="right:4mm; top:3.6mm; width:8.4mm; height:8.4mm;"></i>
+    <i class="pbar" style="right:15mm; top:4.8mm; width:22mm;"></i>
+    <i class="pbar" style="right:15mm; top:8.8mm; width:13mm; opacity:.55;"></i>
+  </div>
+  <div class="panel" style="left:32mm; bottom:56mm; width:58mm; height:16mm; transform:rotate(4deg);">
+    <i class="pchip" style="right:4mm; top:3.6mm; width:8.4mm; height:8.4mm; border-radius:50%;"></i>
+    <i class="pbar v" style="right:15mm; top:4.8mm; width:17mm;"></i>
+    <i class="pbar" style="right:15mm; top:8.8mm; width:24mm; opacity:.55;"></i>
+  </div>
+  <i class="cube" style="left:30mm; bottom:78mm; width:6mm; height:6mm;"></i>
+</div>
+
+<!-- ============ 5 · WHY ============ -->
+<div class="page light">
+  <div class="nav">
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <h1 class="page-t">لماذا هذا المعيار؟</h1>
+    <p class="lead">كل ملف ننتجه من اليوم يمر ببوابة واحدة: هذا المعيار. بنيناه بعد فحص جنائي كامل لدليل «الأتمتة» — وهو <b>الأنقى عربيا</b> الذي صادفناه: صنع بـ <span class="latin">Adobe InDesign</span>، وتضمن طبقة تفاعلية نادرا ما ترى في المستندات العربية.</p>
+    <div class="cards3">
+      <div class="card"><div class="big">٣٦</div><div class="cap">صفحة في المرجع الأصلي — قيست صفحة بعد صفحة</div></div>
+      <div class="card"><div class="big">١٥٥</div><div class="cap">رابطا حيا فكك بالكامل — منها أزرار تنقل دائمة</div></div>
+      <div class="card"><div class="big">٣٨</div><div class="cap">مدخلا في الفهرس الجانبي — بثلاثة مستويات</div></div>
+    </div>
+    <div class="insight"><span class="b">١</span><span class="x"><b>التفاعل ليس ترفا:</b> زر واحد يوفر على القارئ دقيقتين في كل تنقل — في مستند من ٣٦ صفحة يعني ذلك ساعات من التصفح الأعمى.</span></div>
+    <div class="insight"><span class="b">٢</span><span class="x"><b>الترتيب رسالة:</b> تتناوب الصفحات الداكنة والفاتحة بإيقاع مقصود — يحول رحلة القراءة إلى جولة مصممة لا كومة صفحات.</span></div>
+    <div class="insight"><span class="b">٣</span><span class="x"><b>العربية تستحق أدوات النشر نفسها:</b> التفاعل والتنضيد والإيقاع — ليست حكرا على الملفات الإنجليزية.</span></div>
+  </div>
+  <div class="tail"><i></i><i class="c"></i><i></i></div>
+  <div class="foot"><span class="num">5</span><span>معيار إنتاج ملفات PDF — دليل المعيار</span></div>
+</div>
+
+<!-- ============ 6 · NAV SYSTEM ============ -->
+<div class="page light">
+  <div class="nav">
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <h1 class="page-t">نظام التنقل الدائم</h1>
+    <p class="lead">أربعة أزرار بحجم ٢٥ نقطة تسكن أعلى <b>كل</b> صفحة، بمواضع بكسلية ثابتة — وتتلون تلقائيا مع خلفية الصفحة: بيضاء على الداكنة، بنفسجية على الفاتحة.</p>
+    <div class="cards2" style="margin-bottom:6mm;">
+      <div class="card"><div class="ttl"><span class="latin" style="font-size:15pt;">←</span> · التالي</div><div class="tx">سهم أيسر — وفق منطق العربية تقلب الصفحات يسارا. موضعه: ٥٨ نقطة.</div></div>
+      <div class="card"><div class="ttl"><span class="latin" style="font-size:15pt;">→</span> · السابق</div><div class="tx">سهم أيمن، بجواره مباشرة. موضعه: ٩٥ نقطة.</div></div>
+      <div class="card"><div class="ttl"><span class="latin" style="font-size:15pt;">≡</span> · جدول المحتويات</div><div class="tx">القفز من أي مكان إلى هذه الصفحة. موضعه: ١٣٣ نقطة.</div></div>
+      <div class="card"><div class="ttl"><span class="latin" style="font-size:15pt;">⌂</span> · الغلاف</div><div class="tx">عودة فورية إلى البداية. موضعه: ١٧٠ نقطة.</div></div>
+    </div>
+    <div class="band"><b>لماذا تعمل في كل قارئ؟</b> لأنها روابط PDF أصيلة ووجهات مسماة — بلا إنترنت، وبلا برامج إضافية، وتصمد حتى لو تغير ترقيم الصفحات. وأعلى منها في شريط القارئ: <b>فهرس جانبي بثلاثة مستويات</b> يفتح كل فصل بابا مباشرا.</div>
+  </div>
+  <div class="tail"><i></i><i class="c"></i><i></i></div>
+  <div class="foot"><span class="num">6</span><span>معيار إنتاج ملفات PDF — دليل المعيار</span></div>
+</div>
+
+<!-- ============ 7 · DIVIDER B ============ -->
+<div class="page dark cosmic">
+  <div class="beam" style="transform:translateX(-50%) rotate(6deg);"></div><div class="stars1"></div><div class="stars2"></div>
+  <div class="nav">
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="div-title">
+    <div class="eyebrow">القسم الثاني</div>
+    <h2><span class="loz">البناء</span></h2>
+    <p>هوية · تايبوغرافي · مكونات · تحقق آلي</p>
+  </div>
+  <div class="platform" style="bottom:20mm;"></div>
+  <div class="panel" style="left:26mm; bottom:40mm; width:58mm; height:16mm; transform:rotate(-5deg);">
+    <i class="pchip" style="right:4mm; top:3.6mm; width:8.4mm; height:8.4mm; border-radius:50%;"></i>
+    <i class="pbar v" style="right:15mm; top:4.6mm; width:20mm;"></i>
+    <i class="pbar" style="right:15mm; top:8.6mm; width:14mm; opacity:.55;"></i>
+  </div>
+  <div class="panel" style="left:36mm; bottom:58mm; width:58mm; height:16mm; transform:rotate(6deg);">
+    <i class="pchip" style="right:4mm; top:3.6mm; width:8.4mm; height:8.4mm;"></i>
+    <i class="pbar" style="right:15mm; top:4.6mm; width:13mm; opacity:.55;"></i>
+    <i class="pbar v" style="right:15mm; top:8.6mm; width:25mm;"></i>
+  </div>
+  <i class="pdia" style="left:64mm; bottom:84mm;"></i>
+</div>
+
+<!-- ============ 8 · IDENTITY & TYPE ============ -->
+<div class="page light">
+  <div class="nav">
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <h1 class="page-t">الهوية البصرية والتايبوغرافي</h1>
+    <p class="lead">لوحة من ست قيم — بنفسجي ملكي يقود، وتيل يميز. وعائلة واحدة بخمسة أوزان مدمجة في ملفك النهائي.</p>
+    <div class="sw-row">
+      <div class="sw"><div class="cbox" style="background:#1a0b70;"></div><div class="chex">#1A0B70</div></div>
+      <div class="sw"><div class="cbox" style="background:#4928b5;"></div><div class="chex">#4928B5</div></div>
+      <div class="sw"><div class="cbox" style="background:#6d3ff0;"></div><div class="chex">#6D3FF0</div></div>
+      <div class="sw"><div class="cbox" style="background:#571cbd;"></div><div class="chex">#571CBD</div></div>
+      <div class="sw"><div class="cbox" style="background:#57e3d8;"></div><div class="chex">#57E3D8</div></div>
+      <div class="sw"><div class="cbox" style="background:#f8f6fb;"></div><div class="chex">#F8F6FB</div></div>
+    </div>
+    <div class="ts-row"><span class="smp" style="font-size:20pt;font-weight:700;color:#571cbd;">عنوان الصفحة الرئيسي</span><span class="spec">Bold 20 · <span class="mono">#571CBD</span></span></div>
+    <div class="ts-row"><span class="smp" style="font-size:15pt;font-weight:600;color:#571cbd;">عنوان فرعي داخل الصفحة</span><span class="spec">SemiBold 15 · <span class="mono">#571CBD</span></span></div>
+    <div class="ts-row"><span class="smp" style="font-size:12pt;font-weight:400;">متنة قراءة مريحة عند ١٢ نقطة بارتفاع سطر ١٫٧٥</span><span class="spec">Regular 12 · <span class="mono">#0F0C26</span></span></div>
+    <div class="ts-row"><span class="smp" style="font-size:8.5pt;font-weight:300;color:#4f5d75;">تذييل خفيف: عنوان المستند ورقم الصفحة</span><span class="spec">Light 8 · <span class="mono">#4F5D75</span></span></div>
+    <div class="band" style="margin-top:7mm;"><b>معالجات عربية أصيلة:</b> كشيدة زخرفية في العناوين هكذا جـدول المحتويـات — وخلط لاتيني معزول بـ <bdi>هكذا (Automation)</bdi> بلا كسر للاتجاه — وأرقام عربية-هندية ٩٨٧٦٥.</div>
+  </div>
+  <div class="tail"><i></i><i class="c"></i><i></i></div>
+  <div class="foot"><span class="num">8</span><span>معيار إنتاج ملفات PDF — دليل المعيار</span></div>
+</div>
+
+<!-- ============ 9 · RHYTHM & COMPONENTS ============ -->
+<div class="page light">
+  <div class="nav">
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <h1 class="page-t">الإيقاع الطباعي والمكونات</h1>
+    <div class="rhythm" style="margin-bottom:7mm;">
+      <p class="rh-intro">خريطة الإيقاع في المرجع: ٣٦ صفحة تتناوب داكنة وفاتحة — الغرف الداكنة للفواصل والمشاهد، والفاتحة للقراءة. الداكن يتقدم الفاتح ولا يزاحمه.</p>
+      <div class="chips">
+        <i class="chip d"></i><i class="chip"></i><i class="chip m"></i><i class="chip d"></i><i class="chip d"></i><i class="chip"></i><i class="chip d"></i><i class="chip d"></i><i class="chip"></i><i class="chip"></i><i class="chip d"></i><i class="chip"></i><i class="chip"></i><i class="chip"></i><i class="chip"></i><i class="chip d"></i><i class="chip d"></i><i class="chip"></i>
+        <i class="chip d"></i><i class="chip"></i><i class="chip"></i><i class="chip"></i><i class="chip"></i><i class="chip d"></i><i class="chip"></i><i class="chip"></i><i class="chip"></i><i class="chip d"></i><i class="chip"></i><i class="chip d"></i><i class="chip"></i><i class="chip d"></i><i class="chip d"></i><i class="chip d"></i><i class="chip"></i><i class="chip d"></i>
+      </div>
+    </div>
+    <div class="cards3">
+      <div class="card"><div class="ttl">بطاقة معلومة</div><div class="tx">خلفية بيضاء وحد بنفسجي رقيق، عنوان ملون، ومتنة مريحة — الوحدة الأساسية لكل محتوى.</div></div>
+      <div class="card"><div class="ttl">كبسولة تيل</div><div class="tx"><span style="display:inline-block;background:rgba(87,227,216,.25);border:0.3mm solid rgba(30,150,140,.4);color:#0d6b63;border-radius:1.6mm;padding:0.2mm 2.6mm 0.8mm;font-weight:600;">أولا</span> — تفتح بها التسلسلات كما في هذه الصفحة.</div></div>
+      <div class="card"><div class="ttl">شرائح الأرقام</div><div class="tx"><span style="display:inline-block;background:rgba(87,227,216,.22);border:0.3mm solid rgba(30,150,140,.35);color:#0d6b63;border-radius:2mm;width:6.4mm;text-align:center;font-weight:600;">١</span> <span style="display:inline-block;background:rgba(87,227,216,.22);border:0.3mm solid rgba(30,150,140,.35);color:#0d6b63;border-radius:2mm;width:6.4mm;text-align:center;font-weight:600;">٢</span> <span style="display:inline-block;background:rgba(87,227,216,.22);border:0.3mm solid rgba(30,150,140,.35);color:#0d6b63;border-radius:2mm;width:6.4mm;text-align:center;font-weight:600;">٣</span> — أرقام عربية-هندية دائما في المحتوى.</div></div>
+    </div>
+  </div>
+  <div class="tail"><i></i><i class="c"></i><i></i></div>
+  <div class="foot"><span class="num">9</span><span>معيار إنتاج ملفات PDF — دليل المعيار</span></div>
+</div>
+
+<!-- ============ 10 · ARABIC & VERIFICATION ============ -->
+<div class="page light">
+  <div class="nav">
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <h1 class="page-t">دعم العربية والتحقق الآلي</h1>
+    <ul class="checks">
+      <li><b>طبقة نص Unicode كاملة:</b> البحث والتحديد والنسخ تعمل كلها — تحققنا من ذلك باستخراج فعلي للنص كاملا.</li>
+      <li><b>عائلة واحدة، خمسة أوزان:</b> <span class="latin">IBM Plex Sans Arabic</span> مدمجة في الملف — بلا خلط عائلات، وارتفاع سطر مريح للفقرات المضبوطة.</li>
+      <li><b>خلط عربي-لاتيني معزول:</b> المصطلحات الأجنبية تحاط وتبقى بترتيبها الصحيح — <bdi>(Business Process Model and Notation)</bdi>.</li>
+      <li><b>الأرقام حيث تنتمي:</b> عربية-هندية في المحتوى، ولاتينية في تذييل الصفحات.</li>
+    </ul>
+    <div class="gate">
+      <h3>بوابة التسليم الآلية — لا يخرج ملف قبل ثلاثتها</h3>
+      <div class="g-row"><span class="g-n">١</span><span class="g-t"><b>فحص البنية:</b> تدقيق كل مسارات الرسم ومصفوفات البيانات آليا قبل الطباعة — صفر مسارات مقطوعة.</span></div>
+      <div class="g-row"><span class="g-n">٢</span><span class="g-t"><b>قراءة عكسية كاملة:</b> أداة القياس تستعلم الملف النهائي — الفهرس الجانبي والأزرار وكل رابط تقرأ وتطابق وجهاتها.</span></div>
+      <div class="g-row"><span class="g-n">٣</span><span class="g-t"><b>تدقيق بصري للمناطق الحرجة:</b> الغلاف والفهرس والمراجع — ترسم وتفحص بالعين المجردة قبل التسليم.</span></div>
+    </div>
+  </div>
+  <div class="tail"><i></i><i class="c"></i><i></i></div>
+  <div class="foot"><span class="num">10</span><span>معيار إنتاج ملفات PDF — دليل المعيار</span></div>
+</div>
+
+<!-- ============ 11 · REFERENCES ============ -->
+<div class="page light">
+  <div class="nav">
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i>
+    <i><svg viewBox="0 0 24 24" fill="none" stroke="#6d3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <h1 class="page-t">المراجع والأدوات</h1>
+    <p class="lead" style="margin-bottom:6mm;">الأدوات الأربع التي تقف خلف هذا الملف — اضغط أي صف أو امسح رمزه:</p>
+  </div>
+  <div class="ref-row" style="top:66mm;">
+    <img class="qr" src="{{QR_IBM}}" alt="QR — IBM Plex">
+    <div class="meta"><div class="nm">IBM Plex Sans Arabic</div><div class="sb">عائلة الخطوط مفتوحة المصدر التي بني عليها المستند</div></div>
+    <span class="go">↗</span>
+  </div>
+  <div class="ref-row" style="top:92mm;">
+    <img class="qr" src="{{QR_PYMUPDF}}" alt="QR — PyMuPDF">
+    <div class="meta"><div class="nm">PyMuPDF</div><div class="sb">محرك الطبقة التفاعلية: الأزرار والفهرس والروابط</div></div>
+    <span class="go">↗</span>
+  </div>
+  <div class="ref-row" style="top:118mm;">
+    <img class="qr" src="{{QR_PAGEDJS}}" alt="QR — Paged.js">
+    <div class="meta"><div class="nm">Paged.js</div><div class="sb">ترقيم وتذييل تلقائي للوثائق المنسابة القادمة</div></div>
+    <span class="go">↗</span>
+  </div>
+  <div class="ref-row" style="top:144mm;">
+    <img class="qr" src="{{QR_CHROME}}" alt="QR — Chrome Headless">
+    <div class="meta"><div class="nm">Chrome Headless</div><div class="sb">محرك تحويل التصميم إلى PDF بدقة الطباعة</div></div>
+    <span class="go">↗</span>
+  </div>
+  <div class="ref-note">كل الروابط أعلاه حية داخل هذا الملف — جربها الآن</div>
+  <div class="foot"><span class="num">11</span><span>معيار إنتاج ملفات PDF — دليل المعيار</span></div>
+</div>
+
+<!-- ============ 12 · BACK COVER ============ -->
+<div class="page dark cosmic">
+  <div class="beam" style="transform:translateX(-50%) rotate(5deg); opacity:.6;"></div><div class="stars1"></div><div class="stars3"></div>
+  <div class="platform" style="bottom:20mm;"></div>
+  <div class="back-center">
+    <div class="bchip">
+      <h2>معيار إنتاج ملفات PDF</h2>
+      <div class="s1">الإصدار الأول — سبتمبر ٢٠٢٦ · ١٤٤٨هـ</div>
+    </div>
+  </div>
+  <div class="back-foot">ولد بهذه السلسلة: <span class="latin">HTML → Chrome → PyMuPDF</span> — بلا أدوات نشر تجارية</div>
+</div>
+
+</body>
+</html>
