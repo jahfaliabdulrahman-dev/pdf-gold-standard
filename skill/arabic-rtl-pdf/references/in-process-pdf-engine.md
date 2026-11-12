@@ -91,3 +91,27 @@ pdffonts forme_ar.pdf              # embed=yes, sub=? · only the intended faces
 The battery that must fail before you trust the comparison: run the same compare against a
 Chrome print of the same HTML. If Chrome also "passes", the comparison is broken (likely the bidi
 strip is missing), not the engine.
+
+## Full-guide trial (2026-11-13) — `formepdf` 0.31.0 on the real 12-page guide
+
+Same final HTML that Chrome prints (`build.py` → `/tmp/gold-guide-final.html`), full IBM Plex Sans Arabic TTFs
+(Light–Bold, from `@ibm/plex-sans-arabic`) passed via `fonts=[{family, data, weight}]`, `lang="ar"`, `tagged=True`.
+
+| Criterion | Chrome (v2.1) | formepdf 0.31.0 |
+| :-- | :-- | :-- |
+| Arabic words (≥4 letters) verbatim in `pdftotext` (bidi controls stripped) | 273/348 (78%) | 338/348 (97%) — with the font forced |
+| «الأزرار» «جنائي» «الأتمتة» «الآلية» | all fail | all pass |
+| Body text font | correct | **`?????` until forced**: `font-family: var(--f-sans)` is not resolved (CSS custom properties unsupported) |
+| Colours / backgrounds / purple headings (all `var(--c-*)`) | correct | **lost** |
+| Nav buttons (inline SVG in an absolutely positioned strip) | present | **missing** (cause not isolated) |
+| Weights | 5 | 2 (Regular, Bold) |
+| Arabic line containing a Latin run (`Chrome`, `IBM Plex Sans Arabic`) | correct | **glyphs overlap** — engine defect |
+| Pages / images | 12 / same | 12 / same |
+
+Verdict: the text-layer advantage is real and large, but the engine cannot render this house design today. `var()`
+can be pre-resolved; the mixed-direction overlap cannot be fixed from our side. Keep Chrome; re-run this trial on each
+formepdf release (the overlap is the blocking check).
+
+Viewer note from the same day: on the Chrome-built guide, **Preview's search found «الأزرار»** while PyMuPDF's
+`search_for` returned 0 — search depends on the viewer's own reconstruction; **copy/paste was garbled in Preview**
+(owner's test). Copy is the contract that fails.
