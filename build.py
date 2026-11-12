@@ -132,7 +132,7 @@ def interactivize() -> None:
         doc[NS.REF_PAGE].insert_link({"kind": fitz.LINK_URI, "from": rect, "uri": url})
 
     doc.set_metadata({
-        "title": "معيار إنتاج ملفات PDF — دليل المعيار · الإصدار الثاني",
+        "title": "معيار إنتاج ملفات PDF — دليل المعيار · الإصدار ٢٫١",
         "author": "م. عبدالرحمن جحفلي",
         "subject": "معيار جودة إنتاج ملفات PDF التفاعلية العربية",
         "keywords": "PDF, Arabic, RTL, تفاعلي, معيار, Gold Standard",
