@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Prove the gate can fail: a gate never seen failing is unverified.
+
+Usage: python3 scripts/gate_selftest.py built.pdf
+
+The built PDF must PASS. Then each mutation is applied to an in-memory copy, and the gate must
+exit non-zero AND name the expected check. Exit 0 only if every mutation is caught.
+"""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import pymupdf as fitz  # noqa: E402
+
+import nav_spec as NS  # noqa: E402
+import verify_pdf as G  # noqa: E402
+
+SRC = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
+
+
+def fresh():
+    return fitz.open(SRC)
+
+
+def reread(doc):
+    return fitz.open("pdf", doc.tobytes())
+
+
+def strip_link(doc, i, role):
+    x = NS.SLOTS[role]
+    return next(l for l in doc[i].get_links() if abs(l["from"].x0 - x) < 2 and abs(l["from"].y0 - NS.NAV_Y0) < 2)
+
+
+def swap_next_prev(doc):
+    i = NS.NAV_PAGES[2]
+    a, b = strip_link(doc, i, "next"), strip_link(doc, i, "prev")
+    a["page"], b["page"] = b["page"], a["page"]
+    doc[i].update_link(a); doc[i].update_link(b)
+
+
+def self_link(doc):
+    i = NS.NAV_PAGES[-1]
+    a = strip_link(doc, i, "next"); a["page"] = i
+    doc[i].update_link(a)
+
+
+def ltr(doc):
+    doc.xref_set_key(doc.pdf_catalog(), "ViewerPreferences", "<</Direction/L2R>>")
+
+
+def two_page_layout(doc):
+    doc.xref_set_key(doc.pdf_catalog(), "PageLayout", "/TwoPageRight")
+
+
+def drop_outline_entry(doc):
+    doc.set_toc(NS.TOC[:-1])
+
+
+def swap_contents_rows(doc):
+    rows = sorted([l for l in doc[NS.CONTENTS].get_links() if l.get("kind") == fitz.LINK_GOTO], key=lambda l: l["from"].y0)
+    rows[0]["page"], rows[1]["page"] = rows[1]["page"], rows[0]["page"]
+    doc[NS.CONTENTS].update_link(rows[0]); doc[NS.CONTENTS].update_link(rows[1])
+
+
+def foreign_font(doc):
+    doc[5].insert_text((60, 700), "->", fontname="helv", fontsize=9)   # a typed symbol in a non-house face
+
+
+def blank_page(doc):
+    # the overflow artifact: a text page reduced to its footer — body text gone, nav strip and footer kept
+    i = next(k for k in NS.NAV_PAGES if not doc[k].get_images())
+    p = doc[i]
+    p.add_redact_annot(fitz.Rect(0, NS.NAV_Y1 + 10, p.rect.width, p.rect.height - 60))
+    p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
+
+
+def drop_page(doc):
+    doc.delete_page(7)
+
+
+MUTATIONS = [
+    (swap_next_prev, "nav-buttons"),
+    (self_link, "nav-buttons"),
+    (ltr, "rtl-direction"),
+    (two_page_layout, "single-page"),
+    (drop_outline_entry, "outline"),
+    (swap_contents_rows, "contents-links"),
+    (foreign_font, "fonts"),
+    (blank_page, "no-blank-pages"),
+    (drop_page, "pages"),
+]
+
+if __name__ == "__main__":
+    base = G.gate(fresh())
+    print(f"baseline: {'PASS' if not base else 'FAIL ' + str(base)}\n")
+    missed = ["baseline"] if base else []
+    for mutate, expect in MUTATIONS:
+        d = fresh(); mutate(d); failed = G.gate(reread(d))
+        ok = expect in failed
+        print(f"\n>>> {mutate.__name__:20s} expect FAIL {expect:16s} -> {'CAUGHT' if ok else 'MISSED'} {failed}\n")
+        if not ok:
+            missed.append(mutate.__name__)
+    if missed:
+        print(f"SELFTEST FAILED — not caught: {missed}")
+        raise SystemExit(1)
+    print(f"SELFTEST PASSED — baseline clean, {len(MUTATIONS)}/{len(MUTATIONS)} mutations caught")

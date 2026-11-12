@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -11,7 +12,8 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # macOS: same system faces as the owner's Mac (GeezaPro for the vocalised basmala) and Chrome preinstalled
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v5
 
@@ -22,11 +24,22 @@ jobs:
       - name: Install dependencies
         run: python3 -m pip install --quiet "pymupdf>=1.24,<2" "segno>=1.6" "pillow>=10"
 
-      - name: Build — designed HTML -> Chrome headless -> PyMuPDF
+      - name: Build — designed HTML -> Chrome headless -> PyMuPDF -> gate -> publish
         run: python3 build.py guide-v2.html guide-v2-ar.pdf
 
-      - name: Gate — verify against the Gold Standard checklist
-        run: python3 scripts/verify_pdf.py guide-v2-ar.pdf 12 42
+      - name: Gate — verify against nav_spec (explicit, same script build.py ran)
+        run: python3 scripts/verify_pdf.py guide-v2-ar.pdf
+
+      - name: Gate self-test — every mutation must be caught
+        run: python3 scripts/gate_selftest.py guide-v2-ar.pdf
+
+      - name: Upload partial on failure (for inspection)
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: guide-v2-partial
+          path: guide-v2-ar.partial.pdf
+          if-no-files-found: ignore
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
