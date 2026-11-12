@@ -16,9 +16,13 @@ import sys
 import fitz  # PyMuPDF
 import segno
 
+import nav_spec as NS
+
 PROJ = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(PROJ, "guide-v2.html")
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.getcwd(), "out.pdf")
+# Build into a sibling .partial.pdf; only a gate PASS replaces OUT (a failed run never clobbers the last good file).
+PARTIAL = OUT[:-4] + ".partial.pdf" if OUT.endswith(".pdf") else OUT + ".partial"
 TMP_HTML = "/tmp/gold-guide-final.html"
 TMP_PDF = "/tmp/gold-guide-raw.pdf"
 
@@ -106,47 +110,26 @@ def interactivize() -> None:
     n = doc.page_count
     print("      pages:", n)
 
-    doc.set_toc([
-        [1, "الغلاف", 1],
-        [1, "البسملة", 2],
-        [1, "جدول المحتويات", 3],
-        [1, "القسم الأول — الأساس", 4],
-        [2, "لماذا هذا المعيار؟", 5],
-        [2, "نظام التنقل الدائم", 6],
-        [1, "القسم الثاني — البناء", 7],
-        [2, "الهوية البصرية والتايبوغرافي", 8],
-        [2, "الإيقاع الطباعي والمكونات", 9],
-        [2, "دعم العربية والتحقق الآلي", 10],
-        [1, "المراجع والأدوات", 11],
-        [1, "الغلاف الخلفي", 12],
-    ])
+    doc.set_toc(NS.TOC)
 
-    # nav buttons on content+divider pages (0-based idx 3..10 = pages 4..11)
-    XS = [58.0, 95.33, 132.67, 170.0]
-    for i in range(3, 11):
+    # nav buttons on content+divider pages — geometry and targets from nav_spec (one set of numbers)
+    for i in NS.NAV_PAGES:
         pg = doc[i]
-        pg.insert_link({"kind": fitz.LINK_GOTO, "from": fitz.Rect(XS[3], 37, XS[3] + 25, 62), "page": 0})      # home -> cover
-        pg.insert_link({"kind": fitz.LINK_GOTO, "from": fitz.Rect(XS[2], 37, XS[2] + 25, 62), "page": 2})      # toc
-        pg.insert_link({"kind": fitz.LINK_GOTO, "from": fitz.Rect(XS[1], 37, XS[1] + 25, 62), "page": i - 1})  # prev
-        pg.insert_link({"kind": fitz.LINK_GOTO, "from": fitz.Rect(XS[0], 37, XS[0] + 25, 62), "page": i + 1})  # next
+        for role, x in NS.SLOTS.items():
+            pg.insert_link({"kind": fitz.LINK_GOTO, "from": fitz.Rect(x, NS.NAV_Y0, x + NS.NAV_W, NS.NAV_Y1),
+                            "page": NS.nav_target(role, i)})
 
-    # TOC rows (page idx 2) -> content pages 5,6,8,9,10,11 (0-based 4,5,7,8,9,10)
-    for k, target in enumerate([4, 5, 7, 8, 9, 10]):
-        top = (64 + k * 16.5) * MM
-        rect = fitz.Rect(39.54 * MM, top, 189.54 * MM, top + 13 * MM)
-        doc[2].insert_link({"kind": fitz.LINK_GOTO, "from": rect, "page": target})
+    # contents rows -> section pages
+    for k, target in enumerate(NS.TOC_ROWS):
+        top = NS.toc_row_top(k)
+        rect = fitz.Rect(NS.TOC_ROW_X0, top, NS.TOC_ROW_X1, top + NS.TOC_ROW_H)
+        doc[NS.CONTENTS].insert_link({"kind": fitz.LINK_GOTO, "from": rect, "page": target})
 
-    # references rows (page idx 10) -> URI links
-    urls = [
-        "https://github.com/IBM/plex",
-        "https://pymupdf.readthedocs.io",
-        "https://pagedjs.org",
-        "https://developer.chrome.com/docs/chromium/headless",
-    ]
-    for k, url in enumerate(urls):
+    # references rows -> URI links
+    for k, url in enumerate(NS.REF_URLS):
         top = (66 + k * 26) * MM
         rect = fitz.Rect(31.54 * MM, top, 189.54 * MM, top + 22 * MM)
-        doc[10].insert_link({"kind": fitz.LINK_URI, "from": rect, "uri": url})
+        doc[NS.REF_PAGE].insert_link({"kind": fitz.LINK_URI, "from": rect, "uri": url})
 
     doc.set_metadata({
         "title": "معيار إنتاج ملفات PDF — دليل المعيار · الإصدار الثاني",
@@ -164,12 +147,12 @@ def interactivize() -> None:
     vpx = doc.get_new_xref()
     doc.update_object(vpx, "<< /Type /ViewerPreferences /Direction /R2L /DisplayDocTitle true >>")
     doc.xref_set_key(cat, "ViewerPreferences", f"{vpx} 0 R")
-    doc.save(OUT, deflate=True, garbage=3)
-    print("[3/4] interactivity injected + saved:", OUT, os.path.getsize(OUT), "bytes")
+    doc.save(PARTIAL, deflate=True, garbage=3)
+    print("[3/4] interactivity injected + saved:", PARTIAL, os.path.getsize(PARTIAL), "bytes")
 
 
 def verify() -> None:
-    v = fitz.open(OUT)
+    v = fitz.open(PARTIAL)
     toc = v.get_toc()
     print("[4/4] VERIFY")
     print("      outline entries:", len(toc))
@@ -191,3 +174,8 @@ if __name__ == "__main__":
     print_pdf()
     interactivize()
     verify()
+    gate = subprocess.run([sys.executable, os.path.join(PROJ, "scripts", "verify_pdf.py"), PARTIAL])
+    if gate.returncode != 0:
+        raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
+    os.replace(PARTIAL, OUT)
+    print("[5/5] gate passed — published:", OUT)
