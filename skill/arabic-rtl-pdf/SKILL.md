@@ -182,8 +182,9 @@ every subset keeps its own `unicode-range` under the one family name.
 </html>
 ```
 
-Gate: the embedded family list must be exactly `IBMPlexSansArabic-*`; `sans-serif` is only a safety net and its
-appearance fails the build. Tashkeel still needs the system font — see "Arabic type" below.
+Gate: the embedded family list must be exactly `IBMPlexSansArabic-*`, plus the macOS system face (`GeezaPro`) on the
+vocalised basmala page only — tashkeel still needs the system font, see "Arabic type" below. `sans-serif` is only a
+safety net and its appearance fails the build. The allow-list lives in `nav_spec.py`.
 
 **Quick internal report on the owner's Mac only (no embedding):** `font-family: "GeezaPro", "Helvetica Neue",
 sans-serif` in EVERY stack including `@page` boxes. `SF Arabic` / `.SF Arabic` exist on macOS but Chrome does NOT
@@ -267,7 +268,7 @@ geometry (4 fixed buttons per content page) and full code:
   correct fonts.
 - **Local-first fonts**: base64-embed the woff2 files into the print HTML
   (deterministic + offline) and drop the remote `<link>`s in the build step —
-  see the working implementation below.
+  see "1. Write the HTML file" above and `build.py`.
 
 ## Forensic audit of a reference PDF
 
