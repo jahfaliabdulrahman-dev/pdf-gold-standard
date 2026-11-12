@@ -52,4 +52,16 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" guide-v2-ar.pdf --generate-notes
+        # Up to 3 tries, idempotent: a 5xx from the API can arrive after the release was created,
+        # so each retry first checks whether it exists and then only (re)uploads the asset.
+        run: |
+          TAG="${{ github.ref_name }}"
+          for i in 1 2 3; do
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              gh release upload "$TAG" guide-v2-ar.pdf --clobber && exit 0
+            else
+              gh release create "$TAG" guide-v2-ar.pdf --generate-notes && exit 0
+            fi
+            echo "attempt $i failed; retrying in $((i * 20))s"; sleep $((i * 20))
+          done
+          exit 1
