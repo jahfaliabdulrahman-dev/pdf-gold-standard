@@ -1,7 +1,7 @@
 ---
 name: arabic-rtl-pdf
-description: "Use when producing an Arabic/RTL PDF report (عربي — تقرير PDF عربي). Chrome print + PyMuPDF layer, house gold standard."
-version: 1.3.0
+description: "Use when producing an Arabic/RTL PDF report or fixing broken Arabic in a PDF (عربي — تقرير PDF عربي): Chrome print, PyMuPDF bookmarks and nav buttons, and a delivery gate proven able to fail. House gold standard."
+version: 1.3.1
 metadata:
   hermes:
     tags: [pdf, arabic, rtl, report, chrome, weasyprint, pymupdf, interactive, bookmarks, gold-standard]
@@ -182,18 +182,19 @@ every subset keeps its own `unicode-range` under the one family name.
 </html>
 ```
 
-Gate: the embedded family list must be exactly `IBMPlexSansArabic-*`; `sans-serif` is only a safety net and its
-appearance fails the build. Tashkeel still needs the system font — see "Arabic type" below.
+Gate: the embedded family list must be exactly `IBMPlexSansArabic-*`, plus the macOS system face (`GeezaPro`) on the
+vocalised basmala page only — tashkeel still needs the system font, see "Arabic type" below. `sans-serif` is only a
+safety net and its appearance fails the build. The allow-list lives in `nav_spec.py`.
 
 **Quick internal report on the owner's Mac only (no embedding):** `font-family: "GeezaPro", "Helvetica Neue",
 sans-serif` in EVERY stack including `@page` boxes. `SF Arabic` / `.SF Arabic` exist on macOS but Chrome does NOT
 resolve either name (measured 2026-11-13; Pitfall 12c). Not reproducible on any other machine.
 
-### 2. Print via execute_code (NOT raw terminal)
+### 2. Print
 
-The raw `terminal` tool's lifecycle guard can false-positive on the Chrome
-binary path (crash: "embedded null byte" from `pathlib.resolve`). Use
-`execute_code` with `subprocess.run` — proven to work:
+Run Chrome through Python `subprocess.run` (on Hermes: inside `execute_code` — see "Agent notes"). On Linux use
+the `google-chrome` / `chromium` binary; Playwright works too: `page.pdf(path=…, format="A4",
+print_background=True, prefer_css_page_size=True)`.
 
 ```python
 import subprocess, os
@@ -238,7 +239,7 @@ rules — HTML-escape the text FIRST, then re-apply inline markup. Working shape
 `tools/to_pdf.py --md <doc> --out <file>`, with the converter unit-tested (RTL
 attributes present, table rows parsed, HTML escaped).
 
-Deliver with `MEDIA:/absolute/path.pdf` in the response.
+Deliver the file with the agent's own file-delivery mechanism (see "Agent notes").
 
 ## Interactive layer — nav buttons, bookmarks, live links
 
@@ -267,7 +268,7 @@ geometry (4 fixed buttons per content page) and full code:
   correct fonts.
 - **Local-first fonts**: base64-embed the woff2 files into the print HTML
   (deterministic + offline) and drop the remote `<link>`s in the build step —
-  see the working implementation below.
+  see "1. Write the HTML file" above and `build.py`.
 
 ## Forensic audit of a reference PDF
 
@@ -314,9 +315,7 @@ correct document. Measurements, commands and the decision rule:
 
 ## Pitfalls
 
-1. **Raw terminal + Chrome path → false-positive guard crash.** Use
-   `execute_code` + `subprocess.run` instead of the `terminal` tool for the
-   Chrome invocation.
+1. **(Hermes only) Raw terminal + Chrome path → false-positive guard crash.** See "Agent notes".
 2. **fpdf2 cannot shape Arabic.** Letters render disconnected — do not attempt
    RTL reports with fpdf2. Use Chrome HTML→PDF (or WeasyPrint after the fix).
 3. **WeasyPrint on macOS needs `DYLD_LIBRARY_PATH=/opt/homebrew/lib`** set per
@@ -418,3 +417,16 @@ correct document. Measurements, commands and the decision rule:
    the page stays vector, and the gate sees no foreign font. Measured on a production
    report: the same figure went from a font-gate failure to a clean build with a
    smaller PDF.
+
+## Agent notes — the only agent-specific part of this skill
+
+Everything above applies to every agent. This file lives in ONE place — the `pdf-gold-standard` repo,
+`skill/arabic-rtl-pdf/` — and each agent reads that copy; change it there first (PR → CI gate + selftest → merge).
+
+- **Hermes:** loaded via `skills.external_dirs` in `~/.hermes/config.yaml`. Run Chrome with `execute_code` +
+  `subprocess.run`, not the raw `terminal` tool: its lifecycle guard false-positives on the Chrome binary path
+  ("embedded null byte" from `pathlib.resolve`). Deliver with `MEDIA:/absolute/path.pdf` in the response.
+- **Claude:** the account copy holds this SKILL.md only. The `references/` files and the reference implementation
+  (`build.py`, `nav_spec.py`, `scripts/verify_pdf.py`, `scripts/gate_selftest.py`) are in the repo — when linked to
+  the owner's computer: `~/Projects/pdf-gold-standard/`; otherwise clone
+  `github.com/jahfaliabdulrahman-dev/pdf-gold-standard`. Deliver the PDF as a file to the user.
