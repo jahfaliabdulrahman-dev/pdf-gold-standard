@@ -96,7 +96,7 @@ def gate(doc) -> list[str]:
                 foreign.append(f"p{i+1}:<unnamed {f[1]}>")
             elif not name.startswith(NS.HOUSE_FONT_PREFIX) and name not in allowed_extra:
                 foreign.append(f"p{i+1}:{name}")
-    check("fonts", not foreign, ", ".join(sorted(set(foreign))[:6]) or f"only {NS.HOUSE_FONT_PREFIX}*")
+    check("fonts", not foreign, ", ".join(sorted(set(foreign))[:6]) or f"only {NS.HOUSE_FONT_PREFIX}* (+ {'/'.join(sorted(NS.BASMALA_FACES))} on the basmala page)")
 
     # 8. title metadata
     title = (doc.metadata or {}).get("title", "")
