@@ -1,5 +1,6 @@
 # build artifacts / local outputs
 out*.pdf
+*.partial.pdf
 /tmp-*
 
 # working art (masters & tests stay local; embeds ship)

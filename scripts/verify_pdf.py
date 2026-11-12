@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Verify a built PDF against the Gold Standard checklist.
+"""Delivery gate — verify a built PDF against the Gold Standard and nav_spec.py.
 
-Usage: python3 scripts/verify_pdf.py out.pdf [expected_pages] [expected_links]
+Usage: python3 scripts/verify_pdf.py out.pdf
 
-Exit 0 = artifact passes every gate; exit 1 = a gate failed (details printed).
-This is the same gate the CI workflow runs — a build that fails it is not a release.
+Exit 0 = every check passed; exit 1 = at least one FAIL (names printed). The same script runs
+locally, inside build.py (before publishing) and in CI. Every check compares element by element
+against nav_spec — never a count or a sorted set, which two swapped buttons would still pass.
+A check that cannot read what it needs FAILS; it never passes by default.
 """
+import os
+import statistics
 import sys
 
-import fitz
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import pymupdf as fitz  # noqa: E402
 
-PDF = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
-PAGES = int(sys.argv[2]) if len(sys.argv) > 2 else 12
-LINKS = int(sys.argv[3]) if len(sys.argv) > 3 else 42
+import nav_spec as NS  # noqa: E402
 
-fails = []
+fails: list[str] = []
 
 
 def check(name: str, ok: bool, detail: str) -> None:
@@ -23,30 +26,121 @@ def check(name: str, ok: bool, detail: str) -> None:
         fails.append(name)
 
 
-doc = fitz.open(PDF)
+def goto_links(page):
+    return [l for l in page.get_links() if l.get("kind") == fitz.LINK_GOTO]
 
-check("pages", doc.page_count == PAGES, f"{doc.page_count} (expected {PAGES})")
 
-total_links = sum(len(p.get_links()) for p in doc)
-check("links", total_links == LINKS, f"{total_links} (expected {LINKS})")
+def gate(doc) -> list[str]:
+    fails.clear()
 
-outline = doc.get_toc()
-check("outline", len(outline) >= PAGES, f"{len(outline)} entries")
+    # 1. page count = intended build
+    check("pages", doc.page_count == NS.PAGES, f"{doc.page_count} (expected {NS.PAGES})")
+    if doc.page_count != NS.PAGES:
+        return fails  # every later check maps by page index; stop rather than report noise
 
-cat = doc.pdf_catalog()
-layout = doc.xref_get_key(cat, "PageLayout")[1]
-check("single-page", layout == "/SinglePage", str(layout))
+    # 2. viewer preferences: single page + right-to-left reading
+    cat = doc.pdf_catalog()
+    layout = doc.xref_get_key(cat, "PageLayout")[1]
+    check("single-page", layout == "/SinglePage", layout)
+    kind, val = doc.xref_get_key(cat, "ViewerPreferences")
+    vp = doc.xref_object(int(val.split()[0])) if kind == "xref" else val
+    check("rtl-direction", "/Direction/R2L" in vp.replace(" ", ""), " ".join(vp.split())[:70])
 
-vpx = doc.xref_get_key(cat, "ViewerPreferences")
-check("viewer-prefs", vpx[0] != "null", str(vpx[1])[:40])
+    # 3. nav buttons: each slot -> its own expected target; no self-links; no strip links elsewhere
+    bad = []
+    for i, page in enumerate(doc):
+        strip = [l for l in goto_links(page) if abs(l["from"].y0 - NS.NAV_Y0) < 2]
+        if i not in NS.NAV_PAGES:
+            if strip:
+                bad.append(f"p{i+1}: {len(strip)} unexpected nav links")
+            continue
+        for role, x in NS.SLOTS.items():
+            hits = [l for l in strip if abs(l["from"].x0 - x) < 2]
+            want = NS.nav_target(role, i)
+            if len(hits) != 1:
+                bad.append(f"p{i+1} {role}: {len(hits)} links in slot")
+            elif hits[0]["page"] != want:
+                bad.append(f"p{i+1} {role}: ->{hits[0]['page']+1} want {want+1}")
+            elif want == i:
+                bad.append(f"p{i+1} {role}: self-link")
+        if len(strip) != len(NS.SLOTS):
+            bad.append(f"p{i+1}: {len(strip)} strip links, want {len(NS.SLOTS)}")
+    check("nav-buttons", not bad, "; ".join(bad[:4]) or f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots")
 
-fonts = {f[3] for p in doc for f in p.get_fonts()}
-check("fonts-embedded", bool(fonts), ", ".join(sorted(fonts))[:90])
+    # 4. outline = spec (titles, levels, pages)
+    toc = doc.get_toc()
+    check("outline", toc == NS.TOC, f"{len(toc)} entries (expected {len(NS.TOC)})")
 
-md = doc.metadata or {}
-check("title", bool(md.get("title")), str(md.get("title"))[:80])
+    # 5. contents page: clickable rows top-to-bottom -> spec targets, and printed page numbers equal them
+    rows = sorted(goto_links(doc[NS.CONTENTS]), key=lambda l: l["from"].y0)
+    got = [l["page"] for l in rows]
+    check("contents-links", got == NS.TOC_ROWS, f"{[g+1 for g in got]} (expected {[t+1 for t in NS.TOC_ROWS]})")
+    printed = printed_page_numbers(doc[NS.CONTENTS])
+    want = [t + 1 for t in NS.TOC_ROWS]
+    outline_pages = {e[2] for e in NS.TOC}
+    check("contents-numbers", printed == want and set(want) <= outline_pages,
+          f"printed {printed} vs links/outline {want}" if printed else "could not parse printed numbers")
 
-if fails:
-    print(f"\n{len(fails)} gate(s) FAILED: {fails}")
-    raise SystemExit(1)
-print("\nALL GATES PASSED")
+    # 6. external links on the references page
+    uris = [l.get("uri") for l in sorted(doc[NS.REF_PAGE].get_links(), key=lambda l: l["from"].y0)
+            if l.get("kind") == fitz.LINK_URI]
+    check("ref-links", uris == NS.REF_URLS, f"{len(uris)} URIs")
+
+    # 7. fonts: house family only; the basmala page may add the macOS vocalisation face
+    foreign = []
+    for i, page in enumerate(doc):
+        allowed_extra = NS.BASMALA_FACES if i == NS.BASMALA else set()
+        for f in page.get_fonts():
+            name = f[3].split("+")[-1]
+            if not name:
+                foreign.append(f"p{i+1}:<unnamed {f[1]}>")
+            elif not name.startswith(NS.HOUSE_FONT_PREFIX) and name not in allowed_extra:
+                foreign.append(f"p{i+1}:{name}")
+    check("fonts", not foreign, ", ".join(sorted(set(foreign))[:6]) or f"only {NS.HOUSE_FONT_PREFIX}* (+ {'/'.join(sorted(NS.BASMALA_FACES))} on the basmala page)")
+
+    # 8. title metadata
+    title = (doc.metadata or {}).get("title", "")
+    check("title", bool(title), title[:60])
+
+    # 9. no blank / overflow pages: far below the median text, excluding cover + contents, and no image
+    body = [i for i in range(doc.page_count) if i not in (NS.COVER, NS.CONTENTS)]
+    lens = {i: len("".join(doc[i].get_text().split())) for i in body}
+    med = statistics.median(lens.values())
+    blank = [f"p{i+1}({n})" for i, n in lens.items() if n < 0.15 * med and not doc[i].get_images()]
+    check("no-blank-pages", not blank, ", ".join(blank) or f"median {med:.0f} chars")
+    return list(fails)
+
+
+def printed_page_numbers(page) -> list[int]:
+    """Page numbers printed in the contents table, top to bottom.
+
+    Chrome's text layer is visual-order, so multi-digit numbers come out reversed in plain text
+    («١٠» -> «٠١»). Read digit glyphs with positions, group them into numbers by line, rebuild each
+    number left-to-right, and keep the LEFT column (the page column in an RTL table)."""
+    nums = []
+    for b in page.get_text("rawdict")["blocks"]:
+        for line in b.get("lines", []):
+            for s in line["spans"]:
+                ds = [c for c in s["chars"] if c["c"].isdigit()]
+                if ds and len(ds) == len("".join(c["c"] for c in s["chars"]).strip()):
+                    ds.sort(key=lambda c: c["bbox"][0])
+                    val = int("".join(str(int(c["c"])) for c in ds))   # int() reads Arabic-Indic digits
+                    nums.append((round(ds[0]["bbox"][1]), ds[0]["bbox"][0], val))
+    if not nums:
+        return []
+    xs = sorted({round(x) for _, x, _ in nums})
+    gaps = [(xs[k + 1] - xs[k], k) for k in range(len(xs) - 1)]
+    if not gaps:
+        return []
+    cut = xs[max(gaps)[1]] + max(gaps)[0] / 2       # split the two columns at the widest x gap
+    left = sorted((y, v) for y, x, v in nums if x < cut)
+    return [v for _, v in left]
+
+
+if __name__ == "__main__":
+    pdf = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
+    failed = gate(fitz.open(pdf))
+    if failed:
+        print(f"\n{len(failed)} gate(s) FAILED: {failed}")
+        raise SystemExit(1)
+    print("\nALL GATES PASSED")
