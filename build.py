@@ -174,6 +174,12 @@ if __name__ == "__main__":
     print_pdf()
     interactivize()
     verify()
+    # rebuild the Arabic text layer (one code point per glyph) — drawing unchanged; see scripts/fix_text_layer.py
+    sys.path.insert(0, os.path.join(PROJ, "scripts"))
+    from fix_text_layer import process as fix_text_layer
+    fixed = PARTIAL[:-4] + ".textfix.pdf"
+    print("[4b] text layer rebuilt:", fix_text_layer(PARTIAL, fixed))
+    os.replace(fixed, PARTIAL)
     gate = subprocess.run([sys.executable, os.path.join(PROJ, "scripts", "verify_pdf.py"), PARTIAL])
     if gate.returncode != 0:
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")

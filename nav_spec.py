@@ -61,3 +61,9 @@ REF_URLS = [
 # (webfont subsets misplace tashkeel in Chrome — measured 2026-09-13).
 HOUSE_FONT_PREFIX = "IBMPlexSansArabic"
 BASMALA_FACES = {"GeezaPro"}
+
+# Copy/paste: the gate re-extracts the PDF with PDFium and compares it with the words of this source file.
+# Measured on guide v2.1: Chrome's raw text layer 0.387 / 0.365, after scripts/fix_text_layer.py 0.971 / 0.945.
+SOURCE_HTML = "guide-v2.html"
+COPY_MIN_RECALL = 0.95
+COPY_MIN_SEQUENCE = 0.92
