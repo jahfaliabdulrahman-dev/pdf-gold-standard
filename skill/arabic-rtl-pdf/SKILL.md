@@ -1,7 +1,7 @@
 ---
 name: arabic-rtl-pdf
 description: "Use when producing an Arabic/RTL PDF report or fixing broken Arabic in a PDF (عربي — تقرير PDF عربي): Chrome print, PyMuPDF bookmarks and nav buttons, and a delivery gate proven able to fail. House gold standard."
-version: 1.3.2
+version: 1.3.3
 metadata:
   hermes:
     tags: [pdf, arabic, rtl, report, chrome, weasyprint, pymupdf, interactive, bookmarks, gold-standard]
@@ -312,7 +312,9 @@ backwards) and pdf.js starts a new item at every `Tf` and marked-content boundar
 text objects, draws spaces with a blank glyph of the neighbouring word's font, drops redundant `Tf` and joins
 `/ReversedChars` regions across spaces: MuPDF 16→80%, pdf.js 17→59% words in order; gate check `line-order`.
 Still open: punctuation, Latin words and bold runs still cut the line for pdf.js/MuPDF; MuPDF reverses Arabic-Indic
-numbers; Acrobat copies spaces as «†».
+numbers. Acrobat pastes «†» for the spaces of an Arabic run into rich-text targets: its RTF clipboard flavour
+writes them as `\'A0` (MacArabic) under a MacRoman header; the plain-text flavour of the same copy is correct
+(clipboard inspected). An Acrobat defect, not a property of the PDF — paste as plain text.
 
 Vocalised text (tashkeel): mark glyphs are drawn above/below the letters inside the line's glyph sequence, so
 readers cut the line at every mark and the basmala was uncopyable. The script (a) moves the DRAWN marks to a text
