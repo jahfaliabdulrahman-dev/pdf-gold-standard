@@ -170,7 +170,7 @@ TD = re.compile(rb"(-?[\d.]+) (-?[\d.]+) Td")
 
 
 HM = b"%%HM%%\n"                   # tag: a text object that holds only hoisted marks (removed by join_lines)
-VM = b"%%VM%%"                      # tag: a DRAWN mark glyph (mapped to WJ) that hoist_marks() moves out of the line
+VM = b"%%VM%%"                      # tag: a DRAWN mark glyph (mapped to U+200B) that hoist_marks() moves out of the line
 HT = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|(1 0 0 -1 -?[\d.]+ -?[\d.]+ Tm)|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj(%%VM%%)?")
 
 
@@ -197,12 +197,12 @@ def hoist_marks(data, fontmap, st_of, stats):
                 out.append(body[pos:t.start()] + b"<" + t.group(6) + b"> Tj"); pos = t.end()
         out.append(body[pos:])
         if not marks: return b"".join(out)
-        pre = [b"BT\n" + HM]; cur = None; cx = cy = 0.0
+        pre = [b"BT\n" + HM + MARKS_ACTUAL]; cur = None; cx = cy = 0.0
         for font, tm, x, y, h in marks:
             if (font, tm) != cur:
                 pre.append(b"%s %s Tf\n%s\n" % (font[0], font[1], tm)); cur = (font, tm); cx = cy = 0.0
             pre.append(b"%.7f %.7f Td <%s> Tj\n" % (x - cx, y - cy, h)); cx, cy = x, y
-        pre.append(b"ET\n"); stats["marks_hoisted"] += len(marks)
+        pre.append(b"EMC\nET\n"); stats["marks_hoisted"] += len(marks)
         line = b"".join(out)
         # MuPDF starts every BT with "no direction": a line that begins with a mark copy would leave that mark
         # outside the RTL run. Start the line with an invisible zero-width RLM.
@@ -272,7 +272,10 @@ POS = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|1 0 0 -1 (-?[\d.]+) (-?[\d.]+) Tm|(-
 LRM, RLM = "\u200e", "\u200f"
 MARK_W = 20.0          # width (1/1000 em) of an invisible on-baseline mark copy
 SEP_MIN, SEP_W = 0.1, 0.8   # invisible separator after hoisted marks: at least 0.1 em, or 0.8 x the next glyph's width, above the line
-WJ = "\u2060"          # word joiner: invisible, does not affect Arabic joining; what a DRAWN mark maps to
+WJ = "\u200b"          # zero-width space: what a DRAWN mark maps to (Preview drops it; U+2060 was pasted at every line end)
+# Readers that honour /ActualText get ONE tab for the whole block of drawn marks: PDFium then skips the block (nothing
+# printable in it), poppler and MuPDF stop cutting the line at each mark. Preview ignores /ActualText (hence WJ above).
+MARKS_ACTUAL = b"/Span <</ActualText <FEFF0009>>> BDC\n"
 OPEN, CLOSE = "([{", ")]}"
 
 
@@ -421,7 +424,7 @@ def join_lines(data, fontmap, st_of, stats):
                     elif t.group(4): y += float(t.group(5))
                     elif t.group(6): last = t.group(6)[:4]
                 if last and size:
-                    g[0] = g[0][:-3] + b"0 %.7f Td 3 Tr <%s> Tj 0 Tr\nET\n" % (-max(SEP_MIN * size, SEP_W * w) - y, last)
+                    g[0] = g[0][:-7] + b"0 %.7f Td 3 Tr <%s> Tj 0 Tr\nEMC\nET\n" % (-max(SEP_MIN * size, SEP_W * w) - y, last)
             # every block must start in the font it originally started in, and the line must leave the font state
             # it originally left; then drop each Tf that changes nothing (pdf.js starts a new item at every Tf)
             parts, actual, changed = [], None, False
@@ -520,7 +523,7 @@ def process(src, dst):
 
             def split_multi(st, body, shows, gids, assign, units, size):
                 """Mark glyphs drawn on their own (any number of Tj) + a LAST glyph that stands for several letters (لَا لْآ لْأُ لًّا):
-                the drawn marks stay where they are (mapped to WJ, hoisted later); the ligature becomes its letters left to
+                the drawn marks stay where they are (mapped to U+200B, hoisted later); the ligature becomes its letters left to
                 right, each preceded by hidden copies of its own marks."""
                 lig = len(gids) - 1
                 if [i for i in assign if len([c for c in assign[i] if not is_mark(c)]) > 1] != [lig]: return None

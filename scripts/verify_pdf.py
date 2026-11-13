@@ -128,7 +128,7 @@ def gate(doc) -> list[str]:
     # 13. vocalised text: the basmala must copy exactly, marks on their letters (PDFium and MuPDF)
     import re as _re
     import unicodedata as _ud
-    ctrl = _re.compile("[\u2060\u200e\u200f\u202a-\u202e\u2066-\u2069]")
+    ctrl = _re.compile("[\u2060\u200b\u200e\u200f\u202a-\u202e\u2066-\u2069]")
     norm = lambda t: _ud.normalize("NFC", ctrl.sub("", t))
     want = _ud.normalize("NFC", NS.VOCALISED)
     got = {"MuPDF": norm(doc[NS.BASMALA].get_text())}

@@ -64,6 +64,13 @@ if __name__ == "__main__":
             s = exact(text, want); ok = s == 1.0
             print(f"{'PASS' if ok else 'FAIL'} vocalised-paragraphs/{engine} - {s:.3f} of {len(want)} words exact with their marks, in order")
             if not ok: failed.append(f"vocalised-paragraphs/{engine}")
+        # nothing but the text may be pasted: no invisible filler for the drawn marks, no lines made of it
+        for engine, text in extract(fixed).items():
+            extra = sorted({f"U+{ord(c):04X}" for c in text if not ("\u0600" <= c <= "\u06ff") and c not in " \t\r\n\u200f"})
+            lines = [l for l in text.splitlines() if l.strip()]
+            ok = not extra and len(lines) == 8
+            print(f"{'PASS' if ok else 'FAIL'} clean-paste/{engine} - {len(lines)} text lines (8 printed), foreign characters: {extra or 'none'}")
+            if not ok: failed.append(f"clean-paste/{engine}")
         a, b = pymupdf.open(RAW), pymupdf.open(fixed)
         diff = sum(a[i].get_pixmap(dpi=150).samples != b[i].get_pixmap(dpi=150).samples for i in range(len(a)))
         print(f"{'PASS' if not diff else 'FAIL'} pixels - {diff} page(s) differ at 150 dpi")
