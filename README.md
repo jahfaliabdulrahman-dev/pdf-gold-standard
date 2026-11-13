@@ -18,7 +18,7 @@
 | `docs/automation-plan.md` | **خطة الأتمتة** — بوابة الاختيار، تحليل سير العمل، الحوكمة، مؤشرات KPI (وفق دليل الأتمتة) |
 | `skill/arabic-rtl-pdf/` | **المهارة — المصدر الوحيد لها** (SKILL.md + 7 مراجع). لا تنسخها: وجّه الوكيل إلى هذا المجلد (انظر «مزامنة المهارة») |
 | `nav_spec.py` | **رقم واحد لكل شيء**: الفهرس، مواضع الأزرار ووجهاتها، صفوف المحتويات، الخطوط المسموحة — يبني منه `build.py` ويفحص عليه البوابة |
-| `scripts/verify_pdf.py` + `scripts/gate_selftest.py` | **بوابة التسليم** واختبارها الذاتي (١٧ فحصاً، منها فحص يقرأ بكسلات الأزرار وشكل كل أيقونة · ١٨ عطلاً مزروعاً يجب أن تُكشف كلها) |
+| `scripts/verify_pdf.py` + `scripts/gate_selftest.py` | **بوابة التسليم** واختبارها الذاتي (١٨ فحصاً، منها فحص يقرأ بكسلات الأزرار وشكل كل أيقونة · ٢٢ عطلاً مزروعاً يجب أن تُكشف كلها) |
 | `scripts/test_vocalised.py` + `tests/` | **اختبار النص المشكول**: فقرتان مشكولتان من مخرج Chrome الخام يجب أن تُنسخا مطابقتين بعد `fix_text_layer.py` (والخام يجب أن يفشل) |
 | `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` |
 | `gen_art.py` | توليد فن الأغلفة (OpenRouter Image API — `gemini-3-pro-image`) |
@@ -40,14 +40,14 @@ python3 -m pip install -r requirements.txt
 python3 build.py guide-v2.html out.pdf
 ```
 
-الخطوط تُضمَّن محلياً والبناء حتمي بلا إنترنت. يتطلب Google Chrome (طباعة headless).
+الخطوط تُضمَّن محلياً والبناء حتمي المحتوى بلا إنترنت (النص والصفحات والروابط نفسها في كل بناء؛ البايتات تختلف بتاريخ الإنشاء). يتطلب Google Chrome (طباعة headless).
 
 ## ما يميز المخرج؟
 
 - **٤٢ رابطاً حياً** — أربعة أزرار في كل صفحة: التالي · السابق · الفهرس · الغلاف
 - **فهرس جانبي** بثلاثة مستويات في شريط أي قارئ PDF
 - **صفحات مستقلة** (`/SinglePage`) + اتجاه قراءة `R2L` مثل المرجع الأصلي
-- **Tagged PDF** (`/MarkInfo Marked` + شجرة بنية + `Lang=ar`) و**نسخ عربي سليم**: `scripts/fix_text_layer.py` يعيد بناء طبقة النص بعد Chrome (كل شكل يحمل حرفاً واحداً) دون تغيير الرسم — ٩٩٪ من الكلمات بترتيبها في Preview. الحدود الباقية في ROADMAP
+- **Tagged PDF** (`/MarkInfo Marked` + شجرة بنية + `Lang=ar`) و**نسخ عربي سليم**: `scripts/fix_text_layer.py` يعيد بناء طبقة النص بعد Chrome (كل شكل يحمل حرفاً واحداً) دون تغيير الرسم — ٩٨٪ من الكلمات بترتيبها في Preview (٠٫٩٨٢ بمحرّكه PDFKit وبمقياس البوابة نفسه). الحدود الباقية في ROADMAP
 - **فن مولّد**: غلاف 4K (~433DPI) وعائلة فنية موحّدة (مرجع أسلوب واحد)
 
 ## المهارة الجاهزة (Hermes + Claude)
@@ -70,8 +70,8 @@ skills:
 
 Arabic-first pipeline producing genuinely interactive PDFs (nav buttons, multi-level
 bookmarks, RTL reading direction) from designed HTML: HTML → Chrome headless →
-PyMuPDF interactivity layer. Deterministic, offline, font-embedded.
+PyMuPDF interactivity layer. Content-deterministic, offline, font-embedded.
 The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
-The operating Hermes skill ships under `skill/arabic-rtl-pdf/` — copy it into your skills directory.
+The operating skill lives under `skill/arabic-rtl-pdf/` — point your agent at that directory (Hermes: `skills.external_dirs`) instead of copying it, so there is one source.
 
 MIT © 2026 Abdulrahman Jahfali
