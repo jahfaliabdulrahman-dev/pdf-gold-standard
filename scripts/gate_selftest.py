@@ -45,6 +45,12 @@ def self_link(doc):
     doc[i].update_link(a)
 
 
+def whiteout_strip(doc):
+    # every link still points where it should, but the buttons are no longer drawn on one page
+    p = doc[NS.NAV_PAGES[0]]
+    p.draw_rect(fitz.Rect(40, NS.NAV_Y0 - 10, 210, NS.NAV_Y1 + 14), color=None, fill=(1, 1, 1), overlay=True)
+
+
 def ltr(doc):
     doc.xref_set_key(doc.pdf_catalog(), "ViewerPreferences", "<</Direction/L2R>>")
 
@@ -121,6 +127,7 @@ def drop_page(doc):
 MUTATIONS = [
     (swap_next_prev, "nav-buttons"),
     (self_link, "nav-buttons"),
+    (whiteout_strip, "render"),
     (ltr, "rtl-direction"),
     (two_page_layout, "single-page"),
     (drop_outline_entry, "outline"),

@@ -22,7 +22,10 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: python3 -m pip install --quiet "pymupdf>=1.24,<2" "segno>=1.6" "pillow>=10" "pikepdf>=9" "fonttools>=4.40" "pypdfium2>=4.30"
+        run: |
+          python3 -m pip install --quiet -r requirements.txt
+          # the documented install command must be the one CI uses
+          grep -q "pip install -r requirements.txt" README.md
 
       - name: Build — designed HTML -> Chrome headless -> PyMuPDF -> gate -> publish
         run: python3 build.py guide-v2.html guide-v2-ar.pdf
