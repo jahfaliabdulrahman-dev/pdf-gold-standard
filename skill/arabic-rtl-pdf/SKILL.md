@@ -1,7 +1,7 @@
 ---
 name: arabic-rtl-pdf
 description: "Use when producing an Arabic/RTL PDF report or fixing broken Arabic in a PDF (عربي — تقرير PDF عربي): Chrome print, PyMuPDF bookmarks and nav buttons, and a delivery gate proven able to fail. House gold standard."
-version: 1.3.4
+version: 1.3.5
 metadata:
   hermes:
     tags: [pdf, arabic, rtl, report, chrome, weasyprint, pymupdf, interactive, bookmarks, gold-standard]
@@ -319,7 +319,7 @@ writes them as `\'A0` (MacArabic) under a MacRoman header; the plain-text flavou
 
 Vocalised text (tashkeel): mark glyphs are drawn above/below the letters inside the line's glyph sequence, so
 readers cut the line at every mark and the basmala was uncopyable. The script (a) moves the DRAWN marks to a text
-object of their own before the line (same positions → same pixels) and maps them to U+2060, (b) gives each letter
+object of their own before the line (same positions → same pixels) and maps them to U+200B, (b) gives each letter
 invisible 0.02 em copies of its marks on the baseline immediately left of it (stream order = reversed logical
 order, x never jumps back), (c) splits a ligature inside a cluster («لله») into letter glyphs with different
 outlines (two identical invisible glyphs with the same letter are dropped by PDFium as fake bold), (d) starts the
@@ -330,7 +330,7 @@ space before a word-final mark. Tried and dropped: text rise (`Ts`) and composit
 Whole vocalised paragraphs (measured on Surah 93, GeezaPro, two paragraphs; regression test
 `scripts/test_vocalised.py` on `tests/vocalised_raw.pdf`): words exact with their marks, in order — raw Chrome 0% in
 every reader; fixed: Preview 100%, PDFium 100%, MuPDF 100%, pdf.js 25% (every letter and mark present, a space
-before each word-final mark), poppler 5%. Three more rules were needed beyond the basmala:
+before each word-final mark), poppler 93%. Three more rules were needed beyond the basmala:
 (e) a lam-alef ligature whose marks are drawn in their own `Tj` (لَا لْآ لْأُ لًّا) is split into its letters, each
 preceded by hidden copies of ITS marks; left as one `/ActualText` cluster it cut the line in Preview and PDFium;
 (f) the marks that open a line end with one more invisible copy 0.1 em–0.8 × next-glyph-width above the line:
@@ -343,8 +343,14 @@ ligature's: an arbitrary one (a mark glyph, say) made Preview put that letter on
 PDFium needs `/ViewerPreferences /Direction /R2L` here (its text page takes an `rtl` flag from it): the same fixed
 page WITHOUT the entry comes back with every line in visual order (measured: 0% vs 100%). build.py sets it; gate
 check `rtl-direction`.
-What a reader pastes still carries invisible U+2060 (one per drawn mark) at the line ends: harmless in editors,
-visible to a diff. Unsolved.
+Clean paste (measured on the same fixture): the drawn marks used to be pasted as invisible U+2060 — a tail of them
+after every line in Preview, 150 filler lines in PDFium. Two things together remove them: the drawn marks map to
+U+200B (Preview drops a run of it; it kept U+2060, U+200C, U+200F, U+FEFF, U+00AD) and the block of drawn marks is
+wrapped in `/Span <</ActualText <FEFF0009>>> BDC … EMC` — PDFium skips a marked-content block whose ActualText has
+nothing printable, poppler and MuPDF replace the block by the one tab. Tab is the only value Preview ignores
+completely (LF gave a blank line per line, CR/FF/NUL/U+FFFF were pasted). Result: Preview, PDFium paste the text
+and nothing else; MuPDF adds a tab at the line start; poppler rises 5→93% words exact (it no longer cuts the line
+at each mark). Test: `clean-paste` in `scripts/test_vocalised.py`.
 
 Latin phrase inside an Arabic line: it is a bidi isolate in the HTML but the PDF carries no isolate, so Preview moved
 its bracket and the sentence period («Business Process(», «.Model and Notation)»). The script adds invisible
