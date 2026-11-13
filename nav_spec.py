@@ -47,6 +47,9 @@ SLOT_INK_CONTRAST, SLOT_INK_MIN, SLOT_INK_MAX = 60, 0.05, 0.60
 SLOT_SHAPE = {"next": (0.168, -0.069, -0.013, 0.180, 0.170), "prev": (0.169, 0.050, -0.016, 0.179, 0.171),
               "contents": (0.141, -0.079, -0.150, 0.233, 0.146), "home": (0.357, -0.005, 0.104, 0.306, 0.268)}
 SLOT_SHAPE_TOL = 0.03
+# ...and the SHAPE itself: the slot's ink against the icon drawn in the source HTML (both cropped to their ink, scaled to
+# 48x48), intersection over union. Measured: own icon 0.93-0.99 on all 8 pages, any other icon <= 0.41.
+SLOT_ICON_MIN_IOU = 0.80
 
 
 def nav_target(role: str, i: int) -> int:

@@ -74,6 +74,24 @@ def foreign_icon(doc):
     p.draw_circle(fitz.Point(inner.x0 + (0.5 + cx) * inner.width, inner.y0 + (0.5 + cy) * inner.height), r, color=None, fill=fg, overlay=True)
 
 
+def moment_matched_icon(doc):
+    # not an arrow at all: horizontal stripes in a rectangle chosen to match the arrow's five-number signature
+    # (ink share, centre of mass, spread) — only a comparison of the SHAPE can tell
+    x = NS.SLOTS["next"]; slot = fitz.Rect(x, NS.NAV_Y0, x + NS.NAV_W, NS.NAV_Y1)
+    inner = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
+    p = doc[NS.NAV_PAGES[3]]
+    bg = tuple(c / 255 for c in p.get_pixmap(dpi=72, clip=fitz.Rect(slot.x0, slot.y0, slot.x0 + 1, slot.y0 + 1)).pixel(0, 0)[:3])
+    fg = tuple(1 - c for c in bg) if abs(sum(bg) / 3 - 0.5) > 0.2 else (1, 1, 1)
+    ink, cx, cy, sx, sy = NS.SLOT_SHAPE["next"]
+    w, h = sx * 12 ** 0.5 * inner.width, sy * 12 ** 0.5 * inner.height          # uniform rectangle with that spread
+    box = fitz.Rect(0, 0, w, h) + (inner.x0 + (0.5 + cx) * inner.width - w / 2, inner.y0 + (0.5 + cy) * inner.height - h / 2) * 2
+    p.draw_rect(slot, color=None, fill=bg, overlay=True)
+    n = 6; duty = ink * inner.width * inner.height / (w * h)                    # stripes thin enough to match the ink share
+    for k in range(n):
+        y = box.y0 + (k + 0.5 - duty / 2) * h / n
+        p.draw_rect(fitz.Rect(box.x0, y, box.x1, y + duty * h / n), color=None, fill=fg, overlay=True)
+
+
 def extra_printed_number(doc):
     # one more page number printed in the contents column than there are rows
     p = doc[NS.CONTENTS]
@@ -191,6 +209,7 @@ MUTATIONS = [
     (whiteout_strip, "render"),
     (swap_icons, "render"),
     (foreign_icon, "render"),
+    (moment_matched_icon, "render"),
     (ltr, "rtl-direction"),
     (two_page_layout, "single-page"),
     (drop_outline_entry, "outline"),
