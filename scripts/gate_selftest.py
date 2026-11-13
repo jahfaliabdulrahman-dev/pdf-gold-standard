@@ -51,6 +51,31 @@ def whiteout_strip(doc):
     p.draw_rect(fitz.Rect(40, NS.NAV_Y0 - 10, 210, NS.NAV_Y1 + 14), color=None, fill=(1, 1, 1), overlay=True)
 
 
+def swap_icons(doc):
+    # both arrows are drawn and both links are right, but each arrow sits in the other's slot
+    p = doc[NS.NAV_PAGES[1]]
+    rect = {r: fitz.Rect(NS.SLOTS[r], NS.NAV_Y0, NS.SLOTS[r] + NS.NAV_W, NS.NAV_Y1) for r in ("next", "prev")}
+    pix = {r: p.get_pixmap(dpi=300, clip=rect[r]) for r in rect}
+    p.insert_image(rect["next"], pixmap=pix["prev"]); p.insert_image(rect["prev"], pixmap=pix["next"])
+
+
+def blank_text_page_with_decor(doc):
+    # the same overflow artifact, plus a small decorative image: "has an image" must not excuse an empty page
+    i = blank_page(doc)
+    doc[i].insert_image(fitz.Rect(300, 400, 332, 432), pixmap=fitz.Pixmap(fitz.csRGB, fitz.IRect(0, 0, 32, 32), False))
+
+
+def bfrange_two_letters(doc):
+    # two letters on one glyph, written as a range instead of a bfchar entry
+    x = _tounicode_xref(doc); s = doc.xref_stream(x)
+    doc.update_stream(x, s.replace(b"endbfchar", b"endbfchar\n1 beginbfrange\n<F000> <F000> [<06440627>]\nendbfrange", 1))
+
+
+def drop_tagging(doc):
+    doc.xref_set_key(doc.pdf_catalog(), "Lang", "null")
+    doc.xref_set_key(doc.pdf_catalog(), "MarkInfo", "null")
+
+
 def ltr(doc):
     doc.xref_set_key(doc.pdf_catalog(), "ViewerPreferences", "<</Direction/L2R>>")
 
@@ -79,6 +104,7 @@ def blank_page(doc):
     p = doc[i]
     p.add_redact_annot(fitz.Rect(0, NS.NAV_Y1 + 10, p.rect.width, p.rect.height - 60))
     p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
+    return i
 
 
 def _tounicode_xref(doc, page=4):
@@ -128,13 +154,17 @@ MUTATIONS = [
     (swap_next_prev, "nav-buttons"),
     (self_link, "nav-buttons"),
     (whiteout_strip, "render"),
+    (swap_icons, "render"),
     (ltr, "rtl-direction"),
     (two_page_layout, "single-page"),
     (drop_outline_entry, "outline"),
     (swap_contents_rows, "contents-links"),
     (foreign_font, "fonts"),
     (blank_page, "no-blank-pages"),
+    (blank_text_page_with_decor, "no-blank-pages"),
+    (drop_tagging, "tagged"),
     (presentation_form, "text-layer"),
+    (bfrange_two_letters, "text-layer"),
     (swapped_letters, "copy-fidelity"),
     (split_text_objects, "line-order"),
     (wrong_mark, "vocalised"),
