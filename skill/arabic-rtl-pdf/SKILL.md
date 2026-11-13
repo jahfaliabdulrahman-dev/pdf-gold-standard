@@ -1,7 +1,7 @@
 ---
 name: arabic-rtl-pdf
 description: "Use when producing an Arabic/RTL PDF report or fixing broken Arabic in a PDF (عربي — تقرير PDF عربي): Chrome print, PyMuPDF bookmarks and nav buttons, and a delivery gate proven able to fail. House gold standard."
-version: 1.3.3
+version: 1.3.4
 metadata:
   hermes:
     tags: [pdf, arabic, rtl, report, chrome, weasyprint, pymupdf, interactive, bookmarks, gold-standard]
@@ -260,7 +260,8 @@ geometry (4 fixed buttons per content page) and full code:
   face (GeezaPro verified inside the output). Proved by rendering the same
   verse in five stacks side by side.
 - **House rule — prose carries no tashkeel**: strip all combining marks with
-  `[\u064B-\u0652\u0653-\u0655\u0670]`, keeping U+0640 (tatweel/kashida).
+  a character class over U+064B..U+0652, U+0653..U+0655 and U+0670 (as in `scripts/verify_pdf.py`), keeping
+  U+0640 (tatweel/kashida).
   Vocalize ONLY the basmala.
 - **Never hand-type vocalized text**: source the basmala from
   `api.alquran.cloud/v1/ayah/1:1/quran-uthmani` (strip the leading BOM).
