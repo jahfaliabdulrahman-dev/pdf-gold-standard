@@ -12,10 +12,14 @@ What it does (painting is unchanged: verified pixel-identical at 300 dpi on the 
     logical letter, followed by n-1 INVISIBLE copies (Tr 3) of the same outline, one per remaining letter,
     each taking an equal share of the advance — every glyph now carries exactly one code point
   * kerning gaps inside a word (0.10–0.25 em) get an alias width so readers do not invent a space
+  * each line's per-word text objects are merged into one BT..ET, spaces are drawn with a blank glyph of the
+    neighbouring word's font, redundant Tf are dropped and /ReversedChars regions are joined across spaces, so
+    MuPDF (direction reset at every BT) and pdf.js (new item at every Tf / marked-content boundary) see whole runs
   * mark clusters (tashkeel): each glyph gets its own letter/mark; unmapped base glyphs are resolved from ActualText
   * a glyph that needs different text in different places gets alias CIDs (CIDToGIDMap), never a shared mapping
 Usage: fix_text_layer.py in.pdf out.pdf
-Measured on guide v2.1 (word sequence vs source): Preview 80.8→98.8%, PDFium 37.0→95.7%, poppler 78.3→95.1%.
+Measured on guide v2.1 (word sequence vs source): Preview 80.8→98.8%, PDFium 37.0→95.7%, poppler 78.3→95.1%,
+MuPDF 13.5→80.0%, pdf.js 12.3→58.7%.
 """
 import collections, io, re, sys, unicodedata
 import pikepdf
@@ -78,6 +82,8 @@ class FontState:
         self.dw = float(self.D.get("/DW", 1000))
         tt = TTFont(io.BytesIO(self.D.FontDescriptor.FontFile2.read_bytes()), lazy=True)
         self.nglyphs = tt["maxp"].numGlyphs
+        glyf, order = tt["glyf"], tt.getGlyphOrder()
+        self.blank = next((g for g in range(1, self.nglyphs) if glyf[order[g]].numberOfContours == 0), None)
         self.map = {}                       # cid -> final text (1 code point, or marks only)
         self.gid = {}                       # alias cid -> gid
         self.alias = {}                     # (gid, text) -> cid
@@ -101,6 +107,15 @@ class FontState:
             c = self.next; self.next += 1
             self.alias[key] = c; self.gid[c] = key[0]; self.map[c] = text
             self.neww[c] = self.width.get(cid, self.dw) if width is None else width
+        return self.alias[key]
+
+    def space_cid(self, width):
+        """A blank glyph of this font mapped to U+0020 (None if the subset has no empty glyph)."""
+        if self.blank is None: return None
+        key = ("space", round(width, 3))
+        if key not in self.alias:
+            c = self.next; self.next += 1
+            self.alias[key] = c; self.gid[c] = self.blank; self.map[c] = " "; self.neww[c] = width
         return self.alias[key]
 
     def finish(self, pdf):
@@ -177,6 +192,101 @@ def close_gaps(data, fontmap, st_of, stats):
     for pos, cid in edits:
         out[pos:pos + 4] = b"%04X" % cid
     return bytes(out)
+
+
+BLOCK = re.compile(rb"BT\n(?:(?!ET\n).)*?ET\n", re.S)
+TM_Y = re.compile(rb"1 0 0 -1 [\d.]+ ([\d.]+) Tm")
+ONE_TJ = re.compile(rb"<([0-9A-Fa-f]{4})> Tj")
+# EMC, then one space drawn on its own (Tm + Td/Tj), then the next reversed run
+RUN_GAP = re.compile(rb"EMC\n\s*((?:1 0 0 -1 [\d.]+ [\d.]+ Tm\n)?-?[\d.]+ -?[\d.]+ Td\s+<[0-9A-Fa-f]{4}> Tj\n)\s*/ReversedChars BMC\n")
+
+
+def join_lines(data, fontmap, st_of, stats):
+    """Skia paints one BT..ET per word and per space, the space in a different (Latin) subset font.
+      * pdf.js starts a new text item at every font change, so it never sees a whole Arabic line and returns its
+        words in visual order -> draw each space with a blank glyph of the NEIGHBOURING word's font;
+      * MuPDF forgets the text direction at every BT, so a space cannot inherit it and each word is reversed alone
+        -> merge the adjacent text objects of a line into one BT..ET.
+    Nothing is painted differently: a space has no ink and every block sets its own Tm."""
+    out, pos, group = [], 0, []      # group: [block bytes, font at start, font at end, is_space, tm_y]
+    font = (None, "0")
+
+    def text_of(body, f):
+        txt, cur = "", f
+        for t in TOK.finditer(body):
+            if t.group(1): cur = (t.group(1).decode(), t.group(2).decode())
+            elif t.group(5):
+                F = fontmap.get(cur[0]); st = st_of(F) if F is not None and F.get("/Subtype") == "/Type0" else None
+                h = t.group(5).decode()
+                for i in range(0, len(h), 4):
+                    c = int(h[i:i + 4], 16); txt += (st.map.get(c) or st.base(c) or "?") if st else "?"
+        return txt, cur
+
+    def flush():
+        if len(group) > 1:
+            seen = [False]                                           # is the font in force known from a Tf inside this line?
+            for g in group: seen.append(seen[-1] or bool(TF.search(g[0])))
+            for i, g in enumerate(group):
+                if not g[3]: continue
+                pj = next((j for j in range(i - 1, -1, -1) if not group[j][3]), None)
+                nj = next((j for j in range(i + 1, len(group)) if not group[j][3]), None)
+                if pj is not None and seen[pj + 1]: nf = group[pj][2]
+                elif nj is not None and TF.search(group[nj][0]) and TF.search(group[nj][0]).start() < TJ.search(group[nj][0]).start():
+                    t = TF.search(group[nj][0]); nf = (t.group(1).decode(), t.group(2).decode())
+                else: continue
+                sf = g[2]
+                if not seen[i + 1] or nf[0] == sf[0]: continue           # the space's own font must be known too
+                Fn, Fs = fontmap.get(nf[0]), fontmap.get(sf[0])
+                if Fn is None or Fs is None or Fn.get("/Subtype") != "/Type0": continue
+                sn, ss = st_of(Fn), st_of(Fs)
+                m = ONE_TJ.search(g[0]); cid = int(m.group(1), 16)
+                adv = ss.neww.get(cid, ss.width.get(cid, ss.dw)) / 1000 * float(sf[1])
+                sc = sn.space_cid(round(adv / float(nf[1]) * 1000, 4))
+                if sc is None: continue
+                body = TF.sub(b"", g[0])                               # the space no longer selects the Latin font
+                k = ONE_TJ.search(body)
+                g[0] = body[:k.start()] + b"%s %s Tf <%04X> Tj" % (nf[0].encode(), nf[1].encode(), sc) + body[k.end():]
+                g.append(nf); stats["space_refont"] += 1
+            # every block must start in the font it originally started in, and the line must leave the font state
+            # it originally left; then drop each Tf that changes nothing (pdf.js starts a new item at every Tf)
+            parts, actual, changed = [], None, False
+            for i, g in enumerate(group):
+                first_tf, first_tj = TF.search(g[0]), TJ.search(g[0])
+                own = first_tf and first_tj and first_tf.start() < first_tj.start()
+                if changed and seen[i] and not own and actual != g[1]:
+                    parts.append(b"%s %s Tf\n" % (g[1][0].encode(), g[1][1].encode())); actual = g[1]
+                for t in TF.finditer(g[0]): actual = (t.group(1).decode(), t.group(2).decode())
+                if len(g) > 5: changed = True
+                parts.append(g[0])
+            merged = b"".join(parts).replace(b"ET\nBT\n", b"")
+            if changed and actual != group[-1][2]:
+                merged = merged[:-3] + b"%s %s Tf\nET\n" % (group[-1][2][0].encode(), group[-1][2][1].encode())
+            cur, keep, p = None, [], 0
+            for t in TF.finditer(merged):
+                f = (t.group(1).decode(), t.group(2).decode())
+                keep.append(merged[p:t.start()]); p = t.end()
+                if f != cur: keep.append(t.group(0)); cur = f
+                elif merged[p:p + 1] == b"\n": p += 1
+            keep.append(merged[p:]); merged = b"".join(keep)
+            # one /ReversedChars region per run of Arabic words: a region boundary also starts a new pdf.js item
+            merged, n = RUN_GAP.subn(lambda m: m.group(1), merged)
+            out.append(merged); stats["lines_joined"] += 1; stats["rtl_runs_joined"] += n
+        else:
+            out.extend(g[0] for g in group)
+        group.clear()
+
+    for m in BLOCK.finditer(data):
+        between = data[pos:m.start()]
+        if between.strip(): flush()
+        body = m.group(0); tm = TM_Y.search(body); y = tm.group(1) if tm else None
+        txt, endfont = text_of(body, font)
+        if group and (y is None or y != group[-1][4]): flush()
+        if not group: out.append(between)
+        is_space = bool(txt) and txt.isspace() and len(ONE_TJ.findall(body)) == 1 and len(TJ.findall(body)) == 1
+        group.append([body, font, endfont, is_space, y]); font = endfont; pos = m.end()
+        if y is None: flush()
+    flush(); out.append(data[pos:])
+    return b"".join(out)
 
 
 def process(src, dst):
@@ -310,7 +420,7 @@ def process(src, dst):
                 else:
                     out.append(t.group(0)); pending = 0.0            # ET / Tm reset the line origin
             out.append(new[pos:])
-            cs.write(close_gaps(b"".join(out), fontmap, st_of, stats))
+            cs.write(join_lines(close_gaps(b"".join(out), fontmap, st_of, stats), fontmap, st_of, stats))
     for st in states.values():
         st.finish(pdf)
     pdf.save(dst)
