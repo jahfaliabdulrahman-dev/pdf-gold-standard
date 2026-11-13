@@ -75,6 +75,29 @@ def blank_page(doc):
     p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
 
 
+def _tounicode_xref(doc, page=4):
+    """ToUnicode stream of the body font with the most entries on a text page."""
+    best = None
+    for xref, *_ in doc[page].get_fonts():
+        kind, tu = doc.xref_get_key(xref, "ToUnicode")
+        if kind == "xref":
+            x = int(tu.split()[0]); n = doc.xref_stream(x).count(b"<")
+            best = max(best or (0, x), (n, x))
+    return best[1]
+
+
+def presentation_form(doc):
+    # Chrome's raw mapping: an Arabic glyph mapped to its Presentation Form (ﺎ U+FE8E) instead of ا
+    x = _tounicode_xref(doc); s = doc.xref_stream(x)
+    doc.update_stream(x, s.replace(b"<0627>", b"<FE8E>", 1))
+
+
+def swapped_letters(doc):
+    # copy produces the wrong letters while every glyph still has exactly one base code point
+    x = _tounicode_xref(doc); s = doc.xref_stream(x)
+    doc.update_stream(x, s.replace(b"<0627>", b"<TMP0>").replace(b"<0644>", b"<0627>").replace(b"<TMP0>", b"<0644>"))
+
+
 def drop_page(doc):
     doc.delete_page(7)
 
@@ -88,6 +111,8 @@ MUTATIONS = [
     (swap_contents_rows, "contents-links"),
     (foreign_font, "fonts"),
     (blank_page, "no-blank-pages"),
+    (presentation_form, "text-layer"),
+    (swapped_letters, "copy-fidelity"),
     (drop_page, "pages"),
 ]
 
