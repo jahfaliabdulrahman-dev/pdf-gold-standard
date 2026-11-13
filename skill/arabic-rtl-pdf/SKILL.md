@@ -124,7 +124,7 @@ paths below are relative to the repo root (`../../` from this file):
 `nav_spec.py` (ONE set of numbers: outline, button slots + targets, contents rows, allowed fonts —
 `build.py` injects from it and the gate checks against it), `scripts/verify_pdf.py` (the gate: per-slot
 targets, R2L, font allow-list, printed contents numbers = links = outline, blank pages),
-`scripts/gate_selftest.py` (12 mutations, each must be caught) and `.github/workflows/build-pdf.yml`
+`scripts/gate_selftest.py` (13 mutations, each must be caught) and `.github/workflows/build-pdf.yml`
 (macOS runner — same fonts as the owner's Mac — build → gate → selftest → artifact; release on `v*`).
 `build.py` builds into `<out>.partial.pdf` and publishes only after the gate passes.
 
@@ -312,7 +312,17 @@ backwards) and pdf.js starts a new item at every `Tf` and marked-content boundar
 text objects, draws spaces with a blank glyph of the neighbouring word's font, drops redundant `Tf` and joins
 `/ReversedChars` regions across spaces: MuPDF 16→80%, pdf.js 17→59% words in order; gate check `line-order`.
 Still open: punctuation, Latin words and bold runs still cut the line for pdf.js/MuPDF; MuPDF reverses Arabic-Indic
-numbers; the vocalised basmala; Acrobat copies spaces as «†».
+numbers; Acrobat copies spaces as «†».
+
+Vocalised text (tashkeel): mark glyphs are drawn above/below the letters inside the line's glyph sequence, so
+readers cut the line at every mark and the basmala was uncopyable. The script (a) moves the DRAWN marks to a text
+object of their own before the line (same positions → same pixels) and maps them to U+2060, (b) gives each letter
+invisible 0.02 em copies of its marks on the baseline immediately left of it (stream order = reversed logical
+order, x never jumps back), (c) splits a ligature inside a cluster («لله») into letter glyphs with different
+outlines (two identical invisible glyphs with the same letter are dropped by PDFium as fake bold), (d) starts the
+line with an invisible RLM (MuPDF starts each BT with no direction). Result: «بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ»
+copies exactly in Preview, PDFium and MuPDF; gate check `vocalised`. poppler still fragments it; pdf.js puts a
+space before a word-final mark. Tried and dropped: text rise (`Ts`) and composite glyphs carrying the offset.
 
 Latin phrase inside an Arabic line: it is a bidi isolate in the HTML but the PDF carries no isolate, so Preview moved
 its bracket and the sentence period («Business Process(», «.Model and Notation)»). The script adds invisible
