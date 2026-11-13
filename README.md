@@ -23,7 +23,7 @@
 | `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` |
 | `gen_art.py` | توليد فن الأغلفة (OpenRouter Image API — `gemini-3-pro-image`) |
 | `fonts/` | IBM Plex Sans Arabic + Amiri (SIL OFL 1.1) — تُضمَّن base64 في البناء |
-| `examples/` | المخرج النهائي: 12 صفحة · 42 رابطاً حياً · 2.5MB |
+| [آخر إصدار](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/releases/latest) | المخرج النهائي (12 صفحة · 42 رابطاً حياً · 2.5MB) — النسخة المنشورة الوحيدة، يبنيها CI عند كل وسم `v*`. لا نسخة PDF داخل المستودع: نسخة `main` تُبنى بـ`python3 build.py guide-v2.html out.pdf` |
 
 ## مزامنة المهارة (مصدر واحد)
 
