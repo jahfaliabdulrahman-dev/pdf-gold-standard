@@ -105,6 +105,15 @@ def split_text_objects(doc):
             doc.update_stream(x, doc.xref_stream(x).replace(b"/ReversedChars BMC", b"ET\nBT\n/ReversedChars BMC"))
 
 
+def wrong_mark(doc):
+    # a kasra that copies as a fatha: the vocalised line is no longer exact
+    for xref, *_ in doc[NS.BASMALA].get_fonts():
+        kind, tu = doc.xref_get_key(xref, "ToUnicode")
+        if kind == "xref":
+            x = int(tu.split()[0]); s = doc.xref_stream(x)
+            if b"<0650>" in s: doc.update_stream(x, s.replace(b"<0650>", b"<064E>"))
+
+
 def drop_page(doc):
     doc.delete_page(7)
 
@@ -121,6 +130,7 @@ MUTATIONS = [
     (presentation_form, "text-layer"),
     (swapped_letters, "copy-fidelity"),
     (split_text_objects, "line-order"),
+    (wrong_mark, "vocalised"),
     (drop_page, "pages"),
 ]
 
