@@ -124,7 +124,7 @@ paths below are relative to the repo root (`../../` from this file):
 `nav_spec.py` (ONE set of numbers: outline, button slots + targets, contents rows, allowed fonts —
 `build.py` injects from it and the gate checks against it), `scripts/verify_pdf.py` (the gate: per-slot
 targets, R2L, font allow-list, printed contents numbers = links = outline, blank pages),
-`scripts/gate_selftest.py` (11 mutations, each must be caught) and `.github/workflows/build-pdf.yml`
+`scripts/gate_selftest.py` (12 mutations, each must be caught) and `.github/workflows/build-pdf.yml`
 (macOS runner — same fonts as the owner's Mac — build → gate → selftest → artifact; release on `v*`).
 `build.py` builds into `<out>.partial.pdf` and publishes only after the gate passes.
 
@@ -306,8 +306,14 @@ point (Presentation Forms folded to base letters); a ligature keeps its glyph fo
 copy (`3 Tr`) of the same outline for each remaining letter; kerning gaps inside a word get an alias width. Drawing is
 untouched (0 differing pixels at 300 dpi). After: Preview 99%, PDFium 96%, poppler 95% words in order. The gate checks
 it twice: `text-layer` (no Presentation Forms, no multi-letter glyph) and `copy-fidelity` (PDFium vs the source words).
-Still open: pdf.js/MuPDF return each Arabic line's words reversed; a Latin phrase inside an Arabic line moves its
-brackets (Preview) or flips its words (PDFium); the vocalised basmala; Acrobat copies spaces as «†».
+Line order for stream-order readers: Skia paints one `BT..ET` per word and per space, the space in a Latin subset
+font. MuPDF resets the text direction at every `BT` (each word reversed alone → words of the line come out
+backwards) and pdf.js starts a new item at every `Tf` and marked-content boundary. The same script merges a line's
+text objects, draws spaces with a blank glyph of the neighbouring word's font, drops redundant `Tf` and joins
+`/ReversedChars` regions across spaces: MuPDF 16→80%, pdf.js 17→59% words in order; gate check `line-order`.
+Still open: punctuation, Latin words and bold runs still cut the line for pdf.js/MuPDF; MuPDF reverses Arabic-Indic
+numbers; a Latin phrase inside an Arabic line moves its brackets (Preview) or flips its words (PDFium); the
+vocalised basmala; Acrobat copies spaces as «†».
 
 ## Engine alternative — in-process, no browser
 

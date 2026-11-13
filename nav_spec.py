@@ -67,3 +67,5 @@ BASMALA_FACES = {"GeezaPro"}
 SOURCE_HTML = "guide-v2.html"
 COPY_MIN_RECALL = 0.95
 COPY_MIN_SEQUENCE = 0.92
+# Stream-order readers (MuPDF): raw Chrome output 0.16, after the line-joining pass 0.80 (measured on guide v2.1).
+MUPDF_MIN_SEQUENCE = 0.75
