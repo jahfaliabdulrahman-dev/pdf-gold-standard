@@ -130,9 +130,11 @@ class FontState:
         gid = self.gid.get(cid, cid)
         if not hasattr(self, "inked"):
             tt = TTFont(io.BytesIO(self.D.FontDescriptor.FontFile2.read_bytes()), lazy=True); glyf, order = tt["glyf"], tt.getGlyphOrder()
-            self.inked = [g for g in range(1, self.nglyphs) if glyf[order[g]].numberOfContours != 0]
-        pool = [g for g in self.inked if g != gid] or [gid]
-        return pool[(gid + k) % len(pool)]
+            self.inked = {g: (glyf[order[g]].yMin, glyf[order[g]].yMax) for g in range(1, self.nglyphs) if glyf[order[g]].numberOfContours != 0}
+        # nearest vertical extent first: Preview takes a companion that sits higher or lower (a mark, say) for another line
+        lo, hi = self.inked.get(gid, (0, 0))
+        pool = sorted((g for g in self.inked if g != gid), key=lambda g: (abs(self.inked[g][0] - lo) + abs(self.inked[g][1] - hi), g)) or [gid]
+        return pool[(k - 2) % len(pool)]
 
     def mark_cid(self, text):
         """A zero-width blank glyph mapped to an invisible direction mark (None if the subset has no empty glyph)."""
@@ -167,6 +169,7 @@ ADJ = re.compile(rb"%%ADJ ([\d.]+)%%\n")
 TD = re.compile(rb"(-?[\d.]+) (-?[\d.]+) Td")
 
 
+HM = b"%%HM%%\n"                   # tag: a text object that holds only hoisted marks (removed by join_lines)
 VM = b"%%VM%%"                      # tag: a DRAWN mark glyph (mapped to WJ) that hoist_marks() moves out of the line
 HT = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|(1 0 0 -1 -?[\d.]+ -?[\d.]+ Tm)|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj(%%VM%%)?")
 
@@ -194,7 +197,7 @@ def hoist_marks(data, fontmap, st_of, stats):
                 out.append(body[pos:t.start()] + b"<" + t.group(6) + b"> Tj"); pos = t.end()
         out.append(body[pos:])
         if not marks: return b"".join(out)
-        pre = [b"BT\n"]; cur = None; cx = cy = 0.0
+        pre = [b"BT\n" + HM]; cur = None; cx = cy = 0.0
         for font, tm, x, y, h in marks:
             if (font, tm) != cur:
                 pre.append(b"%s %s Tf\n%s\n" % (font[0], font[1], tm)); cur = (font, tm); cx = cy = 0.0
@@ -268,6 +271,7 @@ def close_gaps(data, fontmap, st_of, stats):
 POS = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|1 0 0 -1 (-?[\d.]+) (-?[\d.]+) Tm|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj|\bET\b")
 LRM, RLM = "\u200e", "\u200f"
 MARK_W = 20.0          # width (1/1000 em) of an invisible on-baseline mark copy
+SEP_MIN, SEP_W = 0.1, 0.8   # invisible separator after hoisted marks: at least 0.1 em, or 0.8 x the next glyph's width, above the line
 WJ = "\u2060"          # word joiner: invisible, does not affect Arabic joining; what a DRAWN mark maps to
 OPEN, CLOSE = "([{", ")]}"
 
@@ -395,6 +399,29 @@ def join_lines(data, fontmap, st_of, stats):
                 k = ONE_TJ.search(body)
                 g[0] = body[:k.start()] + b"%s %s Tf <%04X> Tj" % (nf[0].encode(), nf[1].encode(), sc) + body[k.end():]
                 g.append(nf); stats["space_refont"] += 1
+            # PDFium keeps consecutive objects on one line while they are vertically closer than a fraction of their
+            # widths, then sorts that line by x: the last hoisted mark would land inside the line's first word. End the
+            # marks with an invisible copy just far enough above the line (same glyph, Tr 3: no pixels).
+            # Only for marks that open the line: in the middle of a line the separator would cut the line for MuPDF.
+            for i, g in enumerate(group[:1]):
+                if HM not in g[0] or HM in group[i + 1][0]: continue
+                f, w, n = group[i + 1][1], 0.0, 0
+                for t in TOK.finditer(group[i + 1][0]):
+                    if t.group(1): f = (t.group(1).decode(), t.group(2).decode())
+                    elif t.group(5):
+                        F = fontmap.get(f[0])
+                        if F is None or F.get("/Subtype") != "/Type0": break
+                        st = st_of(F); c = int(t.group(5)[:4], 16); n += 1
+                        w = max(w, st.neww.get(c, st.width.get(c, st.dw)) / 1000 * float(f[1]))
+                        if n == 2: break
+                size, y, last = 0.0, 0.0, None
+                for t in HT.finditer(g[0]):
+                    if t.group(1): size = float(t.group(2))
+                    elif t.group(3): y = 0.0
+                    elif t.group(4): y += float(t.group(5))
+                    elif t.group(6): last = t.group(6)[:4]
+                if last and size:
+                    g[0] = g[0][:-3] + b"0 %.7f Td 3 Tr <%s> Tj 0 Tr\nET\n" % (-max(SEP_MIN * size, SEP_W * w) - y, last)
             # every block must start in the font it originally started in, and the line must leave the font state
             # it originally left; then drop each Tf that changes nothing (pdf.js starts a new item at every Tf)
             parts, actual, changed = [], None, False
@@ -434,7 +461,7 @@ def join_lines(data, fontmap, st_of, stats):
         group.append([body, font, endfont, is_space, y]); font = endfont; pos = m.end()
         if y is None: flush()
     flush(); out.append(data[pos:])
-    return b"".join(out)
+    return b"".join(out).replace(HM, b"")
 
 
 def process(src, dst):
@@ -491,6 +518,37 @@ def process(src, dst):
                     out += (b"3 Tr " if hidden else b"") + hexs([cid]) + b" Tj" + (b" 0 Tr\n" if hidden else (VM + b"\n" if (o, cid, hidden) in pre else b"\n"))
                 return out + body[shows[0].end():].lstrip(b"\n") + (b"%%%%ADJ %.6f%%%%\n" % cur if cur else b"")
 
+            def split_multi(st, body, shows, gids, assign, units, size):
+                """Mark glyphs drawn on their own (any number of Tj) + a LAST glyph that stands for several letters (لَا لْآ لْأُ لًّا):
+                the drawn marks stay where they are (mapped to WJ, hoisted later); the ligature becomes its letters left to
+                right, each preceded by hidden copies of its own marks."""
+                lig = len(gids) - 1
+                if [i for i in assign if len([c for c in assign[i] if not is_mark(c)]) > 1] != [lig]: return None
+                if any(is_mark(c) for c in assign[lig]): return None
+                vis = units[::-1]; letters = [u[0] for u in vis]; marks = [u[1:] for u in vis]
+                if "".join(letters[::-1]) != assign[lig]: return None
+                if sorted("".join(assign[i] for i in range(lig))) != sorted("".join(marks)): return None
+                out, pos, k = b"", 0, 0
+                for sh in shows[:-1]:
+                    n = len(sh.group(1)) // 4
+                    out += body[pos:sh.start()] + hexs([st.want(gids[i], WJ) for i in range(k, k + n)]) + b" Tj" + VM
+                    pos = sh.end(); k += n
+                last = shows[-1]; out += body[pos:last.start()]
+                pre = list(range(k, lig)); base = sum(st.width.get(gids[i], st.dw) for i in pre) / 1000 * size
+                if pre: out += hexs([st.want(gids[i], WJ) for i in pre]) + b" Tj" + VM + b"\n"
+                part_w = st.width.get(gids[lig], st.dw) / len(vis); part = part_w / 1000 * size; d = MARK_W / 1000 * size
+                plan = []
+                for j in range(len(vis)):
+                    for q, mk in enumerate(reversed(marks[j])):
+                        plan.append((base + j * part - (len(marks[j]) - q) * d, st.want(gids[lig], mk, width=MARK_W), True))
+                    plan.append((base + j * part, st.want(gids[lig] if j < 2 else st.other_gid(gids[lig], j), letters[j], width=round(part_w, 4)), j > 0))
+                cur, first = 0.0, not pre
+                for o, cid, hidden in plan:
+                    if not first or abs(o) > 1e-9: out += b"%.6f 0 Td " % (o - cur); cur = o
+                    first = False
+                    out += (b"3 Tr " if hidden else b"") + hexs([cid]) + b" Tj" + (b" 0 Tr\n" if hidden else b"\n")
+                return out + body[last.end():].lstrip(b"\n") + (b"%%%%ADJ %.6f%%%%\n" % cur if cur else b"")
+
             def repl(m):
                 text = bytes.fromhex(m.group(1).decode()).decode("utf-16-be")
                 body = m.group(2)
@@ -545,6 +603,7 @@ def process(src, dst):
                 multi = [i for i in assign if len([c for c in assign[i] if not is_mark(c)]) > 1]
                 if multi:
                     out = split_in_cluster(st, body, shows, gids, assign, units, size)
+                    if out is None: out = split_multi(st, body, shows, gids, assign, units, size)
                     if out is None:
                         stats["kept_cluster_ambiguous"] += 1; return m.group(0)
                     stats["cluster_split"] += 1; return out
