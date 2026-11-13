@@ -67,6 +67,22 @@ def gate(doc) -> list[str]:
             bad.append(f"p{i+1}: {len(strip)} strip links, want {len(NS.SLOTS)}")
     check("nav-buttons", not bad, "; ".join(bad[:4]) or f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots")
 
+    # 3b. render: every nav slot must show ink ON THE PAGE. Links, outline and text can all be right while the
+    # strip itself is not drawn (CSS change, missing icon, something painted over it) — only pixels can tell.
+    # Measured on the real build at 300 dpi: 0.14–0.36 of a slot differs from its background; a dead slot: 0.00.
+    dead, seen = [], []
+    for i in NS.NAV_PAGES:
+        for role, x in NS.SLOTS.items():
+            clip = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
+            px = doc[i].get_pixmap(dpi=300, clip=clip, colorspace=fitz.csGRAY).samples
+            bg = statistics.median(px)
+            ink = sum(abs(v - bg) > NS.SLOT_INK_CONTRAST for v in px) / len(px)
+            seen.append(ink)
+            if not NS.SLOT_INK_MIN <= ink <= NS.SLOT_INK_MAX:
+                dead.append(f"p{i+1} {role}: ink {ink:.2f}")
+    check("render", not dead, "; ".join(dead[:6]) or
+          f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots drawn (ink {min(seen):.2f}-{max(seen):.2f}, allowed {NS.SLOT_INK_MIN}-{NS.SLOT_INK_MAX})")
+
     # 4. outline = spec (titles, levels, pages)
     toc = doc.get_toc()
     check("outline", toc == NS.TOC, f"{len(toc)} entries (expected {len(NS.TOC)})")

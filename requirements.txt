@@ -1,0 +1,8 @@
+# The one list of build dependencies: CI installs from this file and README points to it.
+# Exact versions = what the macOS CI resolved while every gate was green (2026-11-13). Raise them in a PR; CI decides.
+pymupdf==1.28.2
+pypdfium2==5.15.2
+pikepdf==10.18.1
+pillow==13.0.0
+segno==1.6.6
+fonttools==4.68.0
