@@ -5,13 +5,16 @@ HTML (designed pages) -> Chrome headless print -> PyMuPDF interactivity layer.
 Usage:  python3 build.py [source.html] [output.pdf]
 Defaults: guide-v2.html -> ./out.pdf
 """
+import atexit
 import base64
+import hashlib
 import io
 import os
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 import fitz  # PyMuPDF
 import segno
@@ -23,8 +26,11 @@ SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(PROJ, "guide-v2.html")
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.getcwd(), "out.pdf")
 # Build into a sibling .partial.pdf; only a gate PASS replaces OUT (a failed run never clobbers the last good file).
 PARTIAL = OUT[:-4] + ".partial.pdf" if OUT.endswith(".pdf") else OUT + ".partial"
-TMP_HTML = "/tmp/gold-guide-final.html"
-TMP_PDF = "/tmp/gold-guide-raw.pdf"
+# Intermediate files live in a private directory of this run: two builds never collide, nothing stays in /tmp.
+TMPDIR = tempfile.mkdtemp(prefix="gold-guide-")
+atexit.register(shutil.rmtree, TMPDIR, ignore_errors=True)
+TMP_HTML = os.path.join(TMPDIR, "final.html")
+TMP_PDF = os.path.join(TMPDIR, "raw.pdf")
 
 MM = 2.83465  # 1 mm in pt
 
@@ -132,12 +138,16 @@ def interactivize() -> None:
         doc[NS.REF_PAGE].insert_link({"kind": fitz.LINK_URI, "from": rect, "uri": url})
 
     doc.set_metadata({
-        "title": "معيار إنتاج ملفات PDF — دليل المعيار · الإصدار ٢٫١",
+        "title": f"معيار إنتاج ملفات PDF — دليل المعيار · الإصدار {NS.GUIDE_VERSION_AR}",
         "author": "م. عبدالرحمن جحفلي",
         "subject": "معيار جودة إنتاج ملفات PDF التفاعلية العربية",
         "keywords": "PDF, Arabic, RTL, تفاعلي, معيار, Gold Standard",
         "creator": "Hermes PDF Gold Standard pipeline",
     })
+    # Provenance: which source this file was built from. The gate refuses a file whose stamp is not its own truth.
+    info = int(doc.xref_get_key(-1, "Info")[1].split()[0])
+    doc.xref_set_key(info, "SourceFile", fitz.get_pdf_str(os.path.basename(SRC)))
+    doc.xref_set_key(info, "SourceSHA256", fitz.get_pdf_str(hashlib.sha256(open(SRC, "rb").read()).hexdigest()))
     # Force single-page display in every compliant viewer — house standard:
     # pages must read as independent sheets (like the reference model).
     cat = doc.pdf_catalog()
@@ -151,29 +161,10 @@ def interactivize() -> None:
     print("[3/4] interactivity injected + saved:", PARTIAL, os.path.getsize(PARTIAL), "bytes")
 
 
-def verify() -> None:
-    v = fitz.open(PARTIAL)
-    toc = v.get_toc()
-    print("[4/4] VERIFY")
-    print("      outline entries:", len(toc))
-    total = 0
-    for i, pg in enumerate(v):
-        ls = pg.get_links()
-        if ls:
-            tgts = sorted({(l["kind"], l.get("page"), bool(l.get("uri"))) for l in ls})
-            print(f"      p{i+1}: {len(ls)} links -> {tgts}")
-            total += len(ls)
-    print("      total links:", total)
-    md = v.metadata
-    print("      title:", md.get("title"))
-    print("      pages:", v.page_count)
-
-
 if __name__ == "__main__":
     build_html()
     print_pdf()
     interactivize()
-    verify()
     # rebuild the Arabic text layer (one code point per glyph) — drawing unchanged; see scripts/fix_text_layer.py
     sys.path.insert(0, os.path.join(PROJ, "scripts"))
     from fix_text_layer import process as fix_text_layer

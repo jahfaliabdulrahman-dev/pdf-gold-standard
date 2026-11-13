@@ -59,6 +59,39 @@ def swap_icons(doc):
     p.insert_image(rect["next"], pixmap=pix["prev"]); p.insert_image(rect["prev"], pixmap=pix["next"])
 
 
+def foreign_icon(doc):
+    # a different icon in the "next" slot: a disc with the arrow's own ink share and centre of mass
+    import math
+    x = NS.SLOTS["next"]; slot = fitz.Rect(x, NS.NAV_Y0, x + NS.NAV_W, NS.NAV_Y1)
+    inner = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
+    p = doc[NS.NAV_PAGES[2]]
+    px = p.get_pixmap(dpi=72, clip=fitz.Rect(slot.x0, slot.y0, slot.x0 + 1, slot.y0 + 1))          # the slot's background colour
+    bg = tuple(c / 255 for c in px.pixel(0, 0)[:3])
+    fg = tuple(1 - c for c in bg) if abs(sum(bg) / 3 - 0.5) > 0.2 else (1, 1, 1)
+    ink, cx, cy = NS.SLOT_SHAPE["next"][:3]
+    p.draw_rect(slot, color=None, fill=bg, overlay=True)
+    r = math.sqrt(ink * inner.width * inner.height / math.pi)
+    p.draw_circle(fitz.Point(inner.x0 + (0.5 + cx) * inner.width, inner.y0 + (0.5 + cy) * inner.height), r, color=None, fill=fg, overlay=True)
+
+
+def extra_printed_number(doc):
+    # one more page number printed in the contents column than there are rows
+    p = doc[NS.CONTENTS]
+    xs = [c["bbox"][0] for b in p.get_text("rawdict")["blocks"] for l in b.get("lines", []) for sp in l["spans"] for c in sp["chars"] if c["c"].isdigit()]
+    p.insert_text((min(xs), p.rect.height - 120), "9", fontname="helv", fontsize=11)
+
+
+def wrong_source_stamp(doc):
+    # a file built from another source: copy fidelity would be measured against the wrong truth
+    info = int(doc.xref_get_key(-1, "Info")[1].split()[0])
+    doc.xref_set_key(info, "SourceSHA256", fitz.get_pdf_str("0" * 64))
+
+
+def stale_version(doc):
+    # the title still announces the previous version
+    md = dict(doc.metadata); md["title"] = md["title"].replace(NS.GUIDE_VERSION_AR, "٢٫١"); doc.set_metadata(md)
+
+
 def blank_text_page_with_decor(doc):
     # the same overflow artifact, plus a small decorative image: "has an image" must not excuse an empty page
     i = blank_page(doc)
@@ -100,7 +133,9 @@ def foreign_font(doc):
 
 def blank_page(doc):
     # the overflow artifact: a text page reduced to its footer — body text gone, nav strip and footer kept
-    i = next(k for k in NS.NAV_PAGES if not doc[k].get_images())
+    i = next((k for k in NS.NAV_PAGES if not doc[k].get_images()), None)
+    if i is None:
+        raise SystemExit("selftest: no text-only page among NAV_PAGES to blank - adjust blank_page()")
     p = doc[i]
     p.add_redact_annot(fitz.Rect(0, NS.NAV_Y1 + 10, p.rect.width, p.rect.height - 60))
     p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
@@ -155,14 +190,18 @@ MUTATIONS = [
     (self_link, "nav-buttons"),
     (whiteout_strip, "render"),
     (swap_icons, "render"),
+    (foreign_icon, "render"),
     (ltr, "rtl-direction"),
     (two_page_layout, "single-page"),
     (drop_outline_entry, "outline"),
     (swap_contents_rows, "contents-links"),
+    (extra_printed_number, "contents-numbers"),
     (foreign_font, "fonts"),
     (blank_page, "no-blank-pages"),
     (blank_text_page_with_decor, "no-blank-pages"),
     (drop_tagging, "tagged"),
+    (wrong_source_stamp, "provenance"),
+    (stale_version, "title"),
     (presentation_form, "text-layer"),
     (bfrange_two_letters, "text-layer"),
     (swapped_letters, "copy-fidelity"),
@@ -181,6 +220,18 @@ if __name__ == "__main__":
         print(f"\n>>> {mutate.__name__:20s} expect FAIL {expect:16s} -> {'CAUGHT' if ok else 'MISSED'} {failed}\n")
         if not ok:
             missed.append(mutate.__name__)
+    # The blank-page rule does not depend on the document's size (copy-fidelity does: one lost page of 50 is 2% of the
+    # words and would pass). Proven on a synthetic 50-page document, outside the 12-page gate.
+    big = fitz.open()
+    for k in range(50):
+        big.new_page().insert_text((72, 100), "word " * 60, fontname="helv", fontsize=10)
+    big[30].add_redact_annot(big[30].rect); big[30].apply_redactions()
+    big[30].insert_image(fitz.Rect(300, 400, 332, 432), pixmap=fitz.Pixmap(fitz.csRGB, fitz.IRect(0, 0, 32, 32), False))
+    blank, _, _ = G.blank_pages(reread(big), range(50))
+    ok = len(blank) == 1 and blank[0].startswith("p31(")
+    print(f">>> 50-page document, page 31 emptied + 32pt image -> {'CAUGHT' if ok else 'MISSED'} {blank}\n")
+    if not ok:
+        missed.append("blank_page_in_50")
     if missed:
         print(f"SELFTEST FAILED — not caught: {missed}")
         raise SystemExit(1)
