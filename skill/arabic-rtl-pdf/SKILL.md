@@ -1,7 +1,7 @@
 ---
 name: arabic-rtl-pdf
 description: "Use when producing an Arabic/RTL PDF report or fixing broken Arabic in a PDF (عربي — تقرير PDF عربي): Chrome print, PyMuPDF bookmarks and nav buttons, and a delivery gate proven able to fail. House gold standard."
-version: 1.3.1
+version: 1.3.2
 metadata:
   hermes:
     tags: [pdf, arabic, rtl, report, chrome, weasyprint, pymupdf, interactive, bookmarks, gold-standard]
@@ -323,6 +323,25 @@ outlines (two identical invisible glyphs with the same letter are dropped by PDF
 line with an invisible RLM (MuPDF starts each BT with no direction). Result: «بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ»
 copies exactly in Preview, PDFium and MuPDF; gate check `vocalised`. poppler still fragments it; pdf.js puts a
 space before a word-final mark. Tried and dropped: text rise (`Ts`) and composite glyphs carrying the offset.
+
+Whole vocalised paragraphs (measured on Surah 93, GeezaPro, two paragraphs; regression test
+`scripts/test_vocalised.py` on `tests/vocalised_raw.pdf`): words exact with their marks, in order — raw Chrome 0% in
+every reader; fixed: Preview 100%, PDFium 100%, MuPDF 100%, pdf.js 25% (every letter and mark present, a space
+before each word-final mark), poppler 5%. Three more rules were needed beyond the basmala:
+(e) a lam-alef ligature whose marks are drawn in their own `Tj` (لَا لْآ لْأُ لًّا) is split into its letters, each
+preceded by hidden copies of ITS marks; left as one `/ActualText` cluster it cut the line in Preview and PDFium;
+(f) the marks that open a line end with one more invisible copy 0.1 em–0.8 × next-glyph-width above the line:
+PDFium keeps consecutive objects on one line while they are vertically closer than a fraction of their widths and
+then sorts that line by x, so the last drawn mark landed inside the line's first word («وَمَ ا»). Not mid-line: there
+the extra object cuts the line for MuPDF, and moving the marks to the line start pulls the heading above into the
+line in Preview (both measured);
+(g) the hidden companion of a 3-letter ligature takes the inked glyph whose vertical extent is closest to the
+ligature's: an arbitrary one (a mark glyph, say) made Preview put that letter on a line of its own.
+PDFium needs `/ViewerPreferences /Direction /R2L` here (its text page takes an `rtl` flag from it): the same fixed
+page WITHOUT the entry comes back with every line in visual order (measured: 0% vs 100%). build.py sets it; gate
+check `rtl-direction`.
+What a reader pastes still carries invisible U+2060 (one per drawn mark) at the line ends: harmless in editors,
+visible to a diff. Unsolved.
 
 Latin phrase inside an Arabic line: it is a bidi isolate in the HTML but the PDF carries no isolate, so Preview moved
 its bracket and the sentence period («Business Process(», «.Model and Notation)»). The script adds invisible

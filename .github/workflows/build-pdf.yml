@@ -33,6 +33,9 @@ jobs:
       - name: Gate self-test — every mutation must be caught
         run: python3 scripts/gate_selftest.py guide-v2-ar.pdf
 
+      - name: Vocalised paragraphs — raw Chrome output must fail, the rebuilt text layer must copy exactly
+        run: python3 scripts/test_vocalised.py
+
       - name: Upload partial on failure (for inspection)
         if: failure()
         uses: actions/upload-artifact@v5
