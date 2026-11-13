@@ -1,7 +1,7 @@
 ---
 name: arabic-rtl-pdf
 description: "Use when producing an Arabic/RTL PDF report or fixing broken Arabic in a PDF (عربي — تقرير PDF عربي): Chrome print, PyMuPDF bookmarks and nav buttons, and a delivery gate proven able to fail. House gold standard."
-version: 1.3.8
+version: 1.3.9
 metadata:
   hermes:
     tags: [pdf, arabic, rtl, report, chrome, weasyprint, pymupdf, interactive, bookmarks, gold-standard]
@@ -124,8 +124,9 @@ paths below are relative to the repo root (`../../` from this file):
 `nav_spec.py` (ONE set of numbers: outline, button slots + targets, contents rows, allowed fonts —
 `build.py` injects from it and the gate checks against it), `scripts/verify_pdf.py` (the gate: per-slot
 targets, R2L, font allow-list, printed contents numbers = links = outline, blank pages),
-`scripts/gate_selftest.py` (22 mutations, each must be caught; the gate's `render` check reads the pixels of
-every nav slot — ink present AND a five-number signature of that icon (ink share, centre of mass, spread), so a
+`scripts/gate_selftest.py` (23 mutations, each must be caught; the gate's `render` check reads the pixels of
+every nav slot — ink present, a five-number signature of that icon (ink share, centre of mass, spread) AND the
+shape itself against the icon the source HTML draws (IoU ≥ 0.80; own icon 0.93–0.99, any other ≤ 0.41), so a
 strip that is not drawn, two swapped arrows or another icon fail even when every link is right; `provenance`
 refuses a file whose source stamp is not the gate's own truth) and `.github/workflows/build-pdf.yml`
 (macOS runner — same fonts as the owner's Mac — build → gate → selftest → artifact; release on `v*`).
