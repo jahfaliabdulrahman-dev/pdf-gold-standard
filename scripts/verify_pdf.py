@@ -39,6 +39,44 @@ def source_stamp() -> tuple[str, str]:
     return NS.SOURCE_HTML, hashlib.sha256(open(path, "rb").read()).hexdigest()
 
 
+def _icon_norm(mask):
+    """Ink mask (PIL 'L', ink = 255) -> 48x48, cropped to the ink, thickened one pixel: position and scale drop out."""
+    from PIL import Image, ImageFilter
+    box = mask.getbbox()
+    if box is None:
+        return None
+    m = mask.crop(box).resize((48, 48), Image.BILINEAR).filter(ImageFilter.MaxFilter(3))
+    return m.point(lambda v: 255 if v > 96 else 0)
+
+
+def source_icons():
+    """The nav icons as the source HTML draws them: one list of normalised masks per nav strip, left to right."""
+    import re
+    from PIL import Image
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", NS.SOURCE_HTML), encoding="utf-8").read()
+    strips = []
+    for nav in re.findall(r'<div class="nav">(.*?)</div>', src, re.S):
+        row = []
+        for svg in re.findall(r"<svg.*?</svg>", nav, re.S):
+            svg = re.sub(r'stroke="#[0-9a-fA-F]+"', 'stroke="#000000"', svg)
+            px = fitz.open(stream=svg.encode(), filetype="svg")[0].get_pixmap(dpi=600, colorspace=fitz.csGRAY, alpha=False)
+            row.append(_icon_norm(Image.frombytes("L", (px.width, px.height), px.samples).point(lambda v: 255 if v < 128 else 0)))
+        strips.append(row)
+    return strips
+
+
+def icon_iou(pm, ref) -> float:
+    """Shape agreement between a rendered slot (gray pixmap) and the source icon: intersection over union."""
+    from PIL import Image
+    bg = statistics.median(pm.samples)
+    top = max(abs(v - bg) for v in pm.samples)        # half the strongest contrast: background art specks stay out
+    got = _icon_norm(Image.frombytes("L", (pm.width, pm.height), pm.samples).point(lambda v: 255 if abs(v - bg) > max(NS.SLOT_INK_CONTRAST, top / 2) else 0))
+    if got is None or ref is None:
+        return 0.0
+    a, b = got.tobytes(), ref.tobytes()
+    return sum(1 for x, y in zip(a, b) if x and y) / max(1, sum(1 for x, y in zip(a, b) if x or y))
+
+
 def blank_pages(doc, body):
     """Pages of `body` far below the median text that images do not excuse -> (blank, low, median).
 
@@ -99,8 +137,15 @@ def gate(doc) -> list[str]:
     # 3b. render: every nav slot must show ink ON THE PAGE. Links, outline and text can all be right while the
     # strip itself is not drawn (CSS change, missing icon, something painted over it) — only pixels can tell.
     # Measured on the real build at 300 dpi: 0.14–0.36 of a slot differs from its background; a dead slot: 0.00.
-    dead, seen = [], []
-    for i in NS.NAV_PAGES:
+    dead, seen, ious = [], [], []
+    try:
+        icons = source_icons()
+    except Exception as e:                      # a check that cannot read what it needs fails
+        icons = []; dead.append(f"cannot render the source icons: {e}")
+    order = sorted(NS.SLOTS, key=NS.SLOTS.get)  # the HTML lists a strip's icons left to right
+    if icons and (len(icons) != len(NS.NAV_PAGES) or any(len(r) != len(order) for r in icons)):
+        dead.append(f"source HTML has {[len(r) for r in icons]} icons per strip, expected {len(NS.NAV_PAGES)} x {len(order)}"); icons = []
+    for n, i in enumerate(NS.NAV_PAGES):
         for role, x in NS.SLOTS.items():
             clip = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
             pm = doc[i].get_pixmap(dpi=300, clip=clip, colorspace=fitz.csGRAY)
@@ -119,8 +164,15 @@ def gate(doc) -> list[str]:
             if any(abs(a - b) > NS.SLOT_SHAPE_TOL for a, b in zip(sig, NS.SLOT_SHAPE[role])):
                 dead.append(f"p{i+1} {role}: not its icon - " + " ".join(f"{a:+.2f}" for a in sig) +
                             " vs " + " ".join(f"{b:+.2f}" for b in NS.SLOT_SHAPE[role]))
+                continue
+            # the same shape as the icon the source draws there (the signature alone is five numbers: a striped
+            # rectangle can match them all)
+            if icons:
+                iou = icon_iou(pm, icons[n][order.index(role)]); ious.append(iou)
+                if iou < NS.SLOT_ICON_MIN_IOU:
+                    dead.append(f"p{i+1} {role}: shape differs from the source icon (IoU {iou:.2f}, min {NS.SLOT_ICON_MIN_IOU})")
     check("render", not dead, "; ".join(dead[:6]) or
-          f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots: each icon drawn in its own slot (ink {min(seen):.2f}-{max(seen):.2f})")
+          f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots: each icon drawn in its own slot (ink {min(seen):.2f}-{max(seen):.2f}, shape IoU {min(ious or [0]):.2f}-{max(ious or [0]):.2f})")
 
     # 4. outline = spec (titles, levels, pages)
     toc = doc.get_toc()
@@ -156,9 +208,13 @@ def gate(doc) -> list[str]:
     # 8. title metadata carries the guide version, and the cover prints the same one
     title = (doc.metadata or {}).get("title", "")
     ver = f"الإصدار {NS.GUIDE_VERSION_AR}"
-    # MuPDF returns Arabic-Indic numbers reversed (known limit, ROADMAP): accept the number in either order
-    cover = " ".join(doc[NS.COVER].get_text().split())
-    on_cover = ver in cover or f"الإصدار {NS.GUIDE_VERSION_AR[::-1]}" in cover
+    # read the cover with PDFium: MuPDF returns Arabic-Indic numbers reversed (known limit, ROADMAP)
+    try:
+        import pypdfium2
+        cover = " ".join(pypdfium2.PdfDocument(doc.tobytes())[NS.COVER].get_textpage().get_text_range().split())
+    except ImportError:
+        cover = ""
+    on_cover = ver in cover
     check("title", ver in title and on_cover,
           title[:70] + ("" if ver in title else f" - missing «{ver}»") + ("" if on_cover else f" - cover does not print «{ver}»"))
 
