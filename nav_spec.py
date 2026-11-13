@@ -32,6 +32,11 @@ NAV_Y0, NAV_Y1, NAV_W = 37, 62, 25
 SLOTS = {"next": 58.0, "prev": 95.33, "contents": 132.67, "home": 170.0}
 
 
+# A drawn button: share of the slot's pixels (300 dpi, gray, slot shrunk 2pt) that differ from the slot's median by more
+# than SLOT_INK_CONTRAST. Measured on the real build: 0.14 (contents) .. 0.36 (home); a slot painted over: 0.00.
+SLOT_INK_CONTRAST, SLOT_INK_MIN, SLOT_INK_MAX = 60, 0.05, 0.60
+
+
 def nav_target(role: str, i: int) -> int:
     """Expected destination of the button `role` on page index i."""
     return {"home": COVER, "contents": CONTENTS, "prev": i - 1, "next": i + 1}[role]
