@@ -15,6 +15,9 @@ What it does (painting is unchanged: verified pixel-identical at 300 dpi on the 
   * each line's per-word text objects are merged into one BT..ET, spaces are drawn with a blank glyph of the
     neighbouring word's font, redundant Tf are dropped and /ReversedChars regions are joined across spaces, so
     MuPDF (direction reset at every BT) and pdf.js (new item at every Tf / marked-content boundary) see whole runs
+  * a Latin phrase inside an Arabic line gets invisible zero-width direction marks where its isolate edges were
+    (LRM outside its brackets, RLM outside sentence punctuation at the line edge): Preview then keeps
+    «(Business Process» and «Model and Notation).» in order
   * mark clusters (tashkeel): each glyph gets its own letter/mark; unmapped base glyphs are resolved from ActualText
   * a glyph that needs different text in different places gets alias CIDs (CIDToGIDMap), never a shared mapping
 Usage: fix_text_layer.py in.pdf out.pdf
@@ -118,6 +121,15 @@ class FontState:
             self.alias[key] = c; self.gid[c] = self.blank; self.map[c] = " "; self.neww[c] = width
         return self.alias[key]
 
+    def mark_cid(self, text):
+        """A zero-width blank glyph mapped to an invisible direction mark (None if the subset has no empty glyph)."""
+        if self.blank is None: return None
+        key = ("mark", text)
+        if key not in self.alias:
+            c = self.next; self.next += 1
+            self.alias[key] = c; self.gid[c] = self.blank; self.map[c] = text; self.neww[c] = 0.0
+        return self.alias[key]
+
     def finish(self, pdf):
         for cid, s in self.old.items():                 # glyphs never seen inside a span keep a folded default
             self.map.setdefault(cid, self.base(cid) or s)
@@ -191,6 +203,81 @@ def close_gaps(data, fontmap, st_of, stats):
     out = bytearray(data)
     for pos, cid in edits:
         out[pos:pos + 4] = b"%04X" % cid
+    return bytes(out)
+
+
+POS = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|1 0 0 -1 (-?[\d.]+) (-?[\d.]+) Tm|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj|\bET\b")
+LRM, RLM = "\u200e", "\u200f"
+OPEN, CLOSE = "([{", ")]}"
+
+
+def bidi_kind(txt):
+    for ch in txt:
+        t = unicodedata.bidirectional(ch)
+        if t in ("R", "AL", "AN"): return "R"
+        if t in ("L", "EN"): return "L"
+    return "N"
+
+
+def direction_marks(data, fontmap, st_of, stats):
+    """A Latin phrase inside an Arabic line is an isolate in the HTML, but the PDF carries no isolate: readers attach
+    its brackets (and the sentence punctuation next to it) to the wrong side. Put invisible, zero-width direction
+    marks where the isolate's edges were: LRM outside a bracket that belongs to the Latin run, RLM outside
+    sentence punctuation that sits between the run and the line edge. No ink, no advance."""
+    st = None; x = y = 0.0; ox = oy = 0.0; glyphs = []            # (y, x, text, st, hex_start, index)
+    for t in POS.finditer(data):
+        if t.group(1):
+            F = fontmap.get(t.group(1).decode()); st = st_of(F) if F is not None and F.get("/Subtype") == "/Type0" else None
+        elif t.group(3): ox, oy = float(t.group(3)), float(t.group(4)); x = y = 0.0
+        elif t.group(5): x += float(t.group(5)); y += float(t.group(6))
+        elif t.group(7):
+            if st is None: continue
+            h = t.group(7).decode(); px = x
+            for i in range(0, len(h), 4):
+                c = int(h[i:i + 4], 16)
+                glyphs.append((round(oy - y, 1), ox + px, st.map.get(c) or st.base(c) or "", st, t.start(7), i // 4, len(h) // 4, t.end()))
+                px += st.neww.get(c, st.width.get(c, st.dw)) / 1000      # only ordering matters here
+    lines = {}
+    for g in glyphs: lines.setdefault(g[0], []).append(g)
+    ins = []                                               # (hex_start, glyph index to insert before, st, mark)
+    for line in lines.values():
+        line.sort(key=lambda g: g[1])
+        kinds = [bidi_kind(g[2]) if g[2].strip() else "S" for g in line]
+        i, n = 0, len(line)
+        while i < n:
+            if kinds[i] != "L": i += 1; continue
+            j = i
+            while True:                                               # extend over letters, and neutrals/spaces followed by more letters
+                k = j + 1
+                while k < n and kinds[k] in ("N", "S"): k += 1
+                if k < n and kinds[k] == "L": j = k
+                else: break
+            a, b = i, j
+            left_attached = a > 0 and line[a - 1][2] in OPEN
+            right_attached = b + 1 < n and line[b + 1][2] in CLOSE
+            if left_attached: a -= 1
+            if right_attached: b += 1
+            if left_attached: ins.append((line[a], 0, LRM))
+            if right_attached: ins.append((line[b], 1, LRM))
+            if True:                                                  # punctuation between the run and the LEFT line edge
+                k = a - 1
+                while k >= 0 and kinds[k] in ("N", "S"): k -= 1
+                if k < 0 and a > 0 and any(kinds[m] == "N" for m in range(a)):
+                    first = next(m for m in range(a) if kinds[m] == "N")
+                    ins.append((line[first], 0, RLM))
+                    if not left_attached: ins.append((line[a], 0, LRM))
+            i = j + 1
+    edits = {}
+    for g, after, mark in ins:
+        c = g[3].mark_cid(mark)
+        if c is None: continue
+        edits.setdefault(g[4], []).append((g[5] + after, c)); stats["dir_marks"] += 1
+    out = bytearray(data)
+    for start in sorted(edits, reverse=True):
+        end = out.index(b">", start); h = out[start:end].decode()
+        cids = [h[i:i + 4] for i in range(0, len(h), 4)]
+        for idx, c in sorted(edits[start], reverse=True): cids.insert(idx, "%04X" % c)
+        out[start:end] = "".join(cids).encode()
     return bytes(out)
 
 
@@ -420,7 +507,7 @@ def process(src, dst):
                 else:
                     out.append(t.group(0)); pending = 0.0            # ET / Tm reset the line origin
             out.append(new[pos:])
-            cs.write(join_lines(close_gaps(b"".join(out), fontmap, st_of, stats), fontmap, st_of, stats))
+            cs.write(join_lines(direction_marks(close_gaps(b"".join(out), fontmap, st_of, stats), fontmap, st_of, stats), fontmap, st_of, stats))
     for st in states.values():
         st.finish(pdf)
     pdf.save(dst)
