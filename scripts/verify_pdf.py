@@ -119,6 +119,11 @@ def gate(doc) -> list[str]:
     ok = rec is not None and rec >= NS.COPY_MIN_RECALL and seq >= NS.COPY_MIN_SEQUENCE
     check("copy-fidelity", ok, f"recall {rec:.3f} / sequence {seq:.3f} (min {NS.COPY_MIN_RECALL} / {NS.COPY_MIN_SEQUENCE})"
           if rec is not None else "could not read source HTML or PDF text")
+
+    # 12. line order for stream-order readers: MuPDF (PyMuPDF, RAG extractors) must return each line's words in order
+    _, mseq = copy_fidelity(doc, engine="mupdf")
+    check("line-order", mseq is not None and mseq >= NS.MUPDF_MIN_SEQUENCE,
+          f"MuPDF sequence {mseq:.3f} (min {NS.MUPDF_MIN_SEQUENCE})" if mseq is not None else "could not read source HTML or PDF text")
     return list(fails)
 
 
@@ -147,8 +152,8 @@ def text_layer_violations(doc) -> list[str]:
     return out
 
 
-def copy_fidelity(doc):
-    """(recall, sequence) of the source words in PDFium's extraction; sequence counts words in order."""
+def copy_fidelity(doc, engine="pdfium"):
+    """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order."""
     import collections
     import difflib
     import html
@@ -165,8 +170,11 @@ def copy_fidelity(doc):
     words = lambda t: word.findall(marks.sub("", unicodedata.normalize("NFC", bidi.sub("", t))))
     src = re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I)
     truth = words(html.unescape(re.sub(r"<[^>]+>", " ", src)))
-    pd = pypdfium2.PdfDocument(doc.tobytes())
-    got = words("\n".join(pd[i].get_textpage().get_text_range() for i in range(len(pd))))
+    if engine == "mupdf":
+        got = words("\n".join(p.get_text() for p in doc))
+    else:
+        pd = pypdfium2.PdfDocument(doc.tobytes())
+        got = words("\n".join(pd[i].get_textpage().get_text_range() for i in range(len(pd))))
     if not truth or not got:
         return None, None
     ct, cg = collections.Counter(truth), collections.Counter(got)

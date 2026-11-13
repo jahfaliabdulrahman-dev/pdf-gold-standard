@@ -98,6 +98,13 @@ def swapped_letters(doc):
     doc.update_stream(x, s.replace(b"<0627>", b"<TMP0>").replace(b"<0644>", b"<0627>").replace(b"<TMP0>", b"<0644>"))
 
 
+def split_text_objects(doc):
+    # back to one text object per word: MuPDF forgets the direction at each BT and returns the words reversed
+    for page in doc:
+        for x in page.get_contents():
+            doc.update_stream(x, doc.xref_stream(x).replace(b"/ReversedChars BMC", b"ET\nBT\n/ReversedChars BMC"))
+
+
 def drop_page(doc):
     doc.delete_page(7)
 
@@ -113,6 +120,7 @@ MUTATIONS = [
     (blank_page, "no-blank-pages"),
     (presentation_form, "text-layer"),
     (swapped_letters, "copy-fidelity"),
+    (split_text_objects, "line-order"),
     (drop_page, "pages"),
 ]
 
