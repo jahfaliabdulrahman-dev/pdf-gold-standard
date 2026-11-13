@@ -312,8 +312,14 @@ backwards) and pdf.js starts a new item at every `Tf` and marked-content boundar
 text objects, draws spaces with a blank glyph of the neighbouring word's font, drops redundant `Tf` and joins
 `/ReversedChars` regions across spaces: MuPDF 16→80%, pdf.js 17→59% words in order; gate check `line-order`.
 Still open: punctuation, Latin words and bold runs still cut the line for pdf.js/MuPDF; MuPDF reverses Arabic-Indic
-numbers; a Latin phrase inside an Arabic line moves its brackets (Preview) or flips its words (PDFium); the
-vocalised basmala; Acrobat copies spaces as «†».
+numbers; the vocalised basmala; Acrobat copies spaces as «†».
+
+Latin phrase inside an Arabic line: it is a bidi isolate in the HTML but the PDF carries no isolate, so Preview moved
+its bracket and the sentence period («Business Process(», «.Model and Notation)»). The script adds invisible
+zero-width glyphs mapped to direction marks — LRM outside a bracket that belongs to the Latin run, RLM outside
+sentence punctuation at the line edge — and Preview returns «(Business Process» / «Model and Notation).». PDFium
+still swaps the words of a multi-word Latin phrase (it treats the space between them as RTL; neither marks nor
+`/ActualText` over the phrase changed that — measured).
 
 ## Engine alternative — in-process, no browser
 
