@@ -35,6 +35,12 @@ SLOTS = {"next": 58.0, "prev": 95.33, "contents": 132.67, "home": 170.0}
 # A drawn button: share of the slot's pixels (300 dpi, gray, slot shrunk 2pt) that differ from the slot's median by more
 # than SLOT_INK_CONTRAST. Measured on the real build: 0.14 (contents) .. 0.36 (home); a slot painted over: 0.00.
 SLOT_INK_CONTRAST, SLOT_INK_MIN, SLOT_INK_MAX = 60, 0.05, 0.60
+# The RIGHT icon in each slot: where the ink's centre of mass sits relative to the slot centre, as a fraction of the
+# slot (x right, y down). Measured on the real build, identical on all 8 pages to +-0.002: the "next" arrow points left
+# (RTL), "prev" right, the contents lines sit high and left, the house sits low. Tolerance well under the smallest
+# distance between two icons (0.12).
+SLOT_SHAPE = {"next": (-0.07, -0.01), "prev": (0.05, -0.015), "contents": (-0.08, -0.15), "home": (-0.005, 0.105)}
+SLOT_SHAPE_TOL = 0.03
 
 
 def nav_target(role: str, i: int) -> int:
@@ -61,6 +67,12 @@ REF_URLS = [
     "https://pagedjs.org",
     "https://developer.chrome.com/docs/chromium/headless",
 ]
+
+# Tagged PDF: declared in README, so the gate guards it.
+LANG = "ar"
+# A page far below the median text is excused only when images cover at least this share of it (cover, dividers = 1.0;
+# the references page with its QR codes = 0.018 and needs no excuse).
+BLANK_EXEMPT_IMAGE_COVER = 0.25
 
 # Fonts: the house family everywhere; the vocalised basmala alone may use the macOS system face
 # (webfont subsets misplace tashkeel in Chrome — measured 2026-09-13).

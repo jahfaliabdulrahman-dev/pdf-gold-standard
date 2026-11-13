@@ -74,14 +74,23 @@ def gate(doc) -> list[str]:
     for i in NS.NAV_PAGES:
         for role, x in NS.SLOTS.items():
             clip = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
-            px = doc[i].get_pixmap(dpi=300, clip=clip, colorspace=fitz.csGRAY).samples
+            pm = doc[i].get_pixmap(dpi=300, clip=clip, colorspace=fitz.csGRAY)
+            px = pm.samples
             bg = statistics.median(px)
-            ink = sum(abs(v - bg) > NS.SLOT_INK_CONTRAST for v in px) / len(px)
+            on = [k for k, v in enumerate(px) if abs(v - bg) > NS.SLOT_INK_CONTRAST]
+            ink = len(on) / len(px)
             seen.append(ink)
             if not NS.SLOT_INK_MIN <= ink <= NS.SLOT_INK_MAX:
                 dead.append(f"p{i+1} {role}: ink {ink:.2f}")
+                continue
+            # the right icon, not just some ink: centre of mass of the ink against the icon's measured signature
+            cx = sum(k % pm.stride for k in on) / len(on) / pm.width - 0.5
+            cy = sum(k // pm.stride for k in on) / len(on) / pm.height - 0.5
+            wx, wy = NS.SLOT_SHAPE[role]
+            if abs(cx - wx) > NS.SLOT_SHAPE_TOL or abs(cy - wy) > NS.SLOT_SHAPE_TOL:
+                dead.append(f"p{i+1} {role}: icon centre ({cx:+.2f},{cy:+.2f}), expected ({wx:+.2f},{wy:+.2f})")
     check("render", not dead, "; ".join(dead[:6]) or
-          f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots drawn (ink {min(seen):.2f}-{max(seen):.2f}, allowed {NS.SLOT_INK_MIN}-{NS.SLOT_INK_MAX})")
+          f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots: each icon drawn in its own slot (ink {min(seen):.2f}-{max(seen):.2f})")
 
     # 4. outline = spec (titles, levels, pages)
     toc = doc.get_toc()
@@ -122,8 +131,20 @@ def gate(doc) -> list[str]:
     body = [i for i in range(doc.page_count) if i not in (NS.COVER, NS.CONTENTS)]
     lens = {i: len("".join(doc[i].get_text().split())) for i in body}
     med = statistics.median(lens.values())
-    blank = [f"p{i+1}({n})" for i, n in lens.items() if n < 0.15 * med and not doc[i].get_images()]
-    check("no-blank-pages", not blank, ", ".join(blank) or f"median {med:.0f} chars")
+    def image_cover(page):          # share of the page under images; overlaps counted once per image, capped at 1
+        area = sum(abs(r & page.rect) for im in page.get_images() for r in page.get_image_rects(im[0]))
+        return min(1.0, area / abs(page.rect))
+    low = {i: image_cover(doc[i]) for i, n in lens.items() if n < 0.15 * med}
+    blank = [f"p{i+1}({lens[i]} chars, images cover {c:.0%})" for i, c in low.items() if c < NS.BLANK_EXEMPT_IMAGE_COVER]
+    check("no-blank-pages", not blank, ", ".join(blank) or
+          f"median {med:.0f} chars; low-text pages excused by image cover: " + (", ".join(f"p{i+1} {c:.0%}" for i, c in low.items()) or "none"))
+
+    # 9b. tagged PDF, as README declares: language, marked content, structure tree
+    lang = doc.xref_get_key(cat, "Lang")[1].strip("()")
+    marked = "true" in doc.xref_get_key(cat, "MarkInfo")[1].replace(" ", "").split("/Marked")[-1][:5]
+    tree = doc.xref_get_key(cat, "StructTreeRoot")[0] == "xref"
+    missing = [n for n, ok in ((f"Lang={NS.LANG}", lang == NS.LANG), ("MarkInfo/Marked", marked), ("StructTreeRoot", tree)) if not ok]
+    check("tagged", not missing, "missing: " + ", ".join(missing) if missing else f"Lang={lang}, Marked, structure tree")
 
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).
@@ -174,12 +195,22 @@ def text_layer_violations(doc) -> list[str]:
             if kind != "xref":
                 continue
             data = doc.xref_stream(int(tu.split()[0])).decode("latin1")
+            pairs = []
             for blk in re.findall(r"beginbfchar(.*?)endbfchar", data, re.S):
-                for cid, hx in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", blk):
-                    txt = bytes.fromhex(hx).decode("utf-16-be", "replace")
-                    letters = [c for c in txt if unicodedata.category(c) != "Mn"]
-                    if any(PRES_FORM(c) for c in txt) or len(letters) > 1:
-                        out.append(f"xref {xref} cid {cid}: {txt!r}")
+                pairs += re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", blk)
+            # ranges map codes too: <lo> <hi> <dst> (dst counts up) and <lo> <hi> [<d1> <d2> ...]
+            for blk in re.findall(r"beginbfrange(.*?)endbfrange", data, re.S):
+                for lo, hi, dst in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*(<[0-9A-Fa-f]+>|\[[^\]]*\])", blk):
+                    if dst.startswith("["):
+                        pairs += [(f"{int(lo, 16) + k:04X}", h) for k, h in enumerate(re.findall(r"<([0-9A-Fa-f]+)>", dst))]
+                    else:
+                        h = dst.strip("<>")
+                        pairs += [(f"{c:04X}", h[:-4] + f"{int(h[-4:], 16) + c - int(lo, 16):04X}") for c in range(int(lo, 16), int(hi, 16) + 1)]
+            for cid, hx in pairs:
+                txt = bytes.fromhex(hx).decode("utf-16-be", "replace")
+                letters = [c for c in txt if unicodedata.category(c) != "Mn"]
+                if any(PRES_FORM(c) for c in txt) or len(letters) > 1:
+                    out.append(f"xref {xref} cid {cid}: {txt!r}")
     return out
 
 
