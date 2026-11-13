@@ -18,6 +18,9 @@ What it does (painting is unchanged: verified pixel-identical at 300 dpi on the 
   * a Latin phrase inside an Arabic line gets invisible zero-width direction marks where its isolate edges were
     (LRM outside its brackets, RLM outside sentence punctuation at the line edge): Preview then keeps
     «(Business Process» and «Model and Notation).» in order
+  * vocalised text (tashkeel): the DRAWN mark glyphs move to a text object of their own before the line (same
+    positions) and map to an invisible joiner; each letter gets invisible copies of its marks on the baseline, just
+    left of it, so the line reads letter+marks in order (basmala exact in Preview, PDFium and MuPDF)
   * mark clusters (tashkeel): each glyph gets its own letter/mark; unmapped base glyphs are resolved from ActualText
   * a glyph that needs different text in different places gets alias CIDs (CIDToGIDMap), never a shared mapping
 Usage: fix_text_layer.py in.pdf out.pdf
@@ -121,6 +124,16 @@ class FontState:
             self.alias[key] = c; self.gid[c] = self.blank; self.map[c] = " "; self.neww[c] = width
         return self.alias[key]
 
+    def other_gid(self, cid, k):
+        """A different inked glyph of this font (for invisible companions: two identical glyphs side by side with the
+        same letter look like fake bold to PDFium, which then drops one)."""
+        gid = self.gid.get(cid, cid)
+        if not hasattr(self, "inked"):
+            tt = TTFont(io.BytesIO(self.D.FontDescriptor.FontFile2.read_bytes()), lazy=True); glyf, order = tt["glyf"], tt.getGlyphOrder()
+            self.inked = [g for g in range(1, self.nglyphs) if glyf[order[g]].numberOfContours != 0]
+        pool = [g for g in self.inked if g != gid] or [gid]
+        return pool[(gid + k) % len(pool)]
+
     def mark_cid(self, text):
         """A zero-width blank glyph mapped to an invisible direction mark (None if the subset has no empty glyph)."""
         if self.blank is None: return None
@@ -152,6 +165,52 @@ TJ = re.compile(rb"<([0-9A-Fa-f]+)> Tj")
 TF = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf")
 ADJ = re.compile(rb"%%ADJ ([\d.]+)%%\n")
 TD = re.compile(rb"(-?[\d.]+) (-?[\d.]+) Td")
+
+
+VM = b"%%VM%%"                      # tag: a DRAWN mark glyph (mapped to WJ) that hoist_marks() moves out of the line
+HT = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|(1 0 0 -1 -?[\d.]+ -?[\d.]+ Tm)|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj(%%VM%%)?")
+
+
+def hoist_marks(data, fontmap, st_of, stats):
+    """Tashkeel glyphs are drawn above/below the letters, inside the line's glyph sequence; poppler and PDFium then
+    cut the line at every mark. Paint the marks from a text object of their own BEFORE the line (same positions, so
+    same pixels) and leave only letters and their invisible on-baseline mark copies in the line itself."""
+    def one(m):
+        body = m.group(0)
+        if VM not in body: return body
+        first = HT.search(body)
+        if not first or not first.group(1): return body.replace(VM, b"")       # line must select its own font first
+        font = tm = None; x = y = 0.0; marks = []; out = []; pos = 0
+        for t in HT.finditer(body):
+            if t.group(1): font = (t.group(1), t.group(2))
+            elif t.group(3): tm = t.group(3); x = y = 0.0
+            elif t.group(4): x += float(t.group(4)); y += float(t.group(5))
+            elif t.group(7):
+                F = fontmap.get(font[0].decode()); st = st_of(F); h = t.group(6).decode()
+                adv = sum(st.neww.get(int(h[i:i + 4], 16), st.width.get(int(h[i:i + 4], 16), st.dw)) for i in range(0, len(h), 4))
+                if adv == 0 and tm is not None:                                     # removing it must not move the pen
+                    marks.append((font, tm, x, y, t.group(6)))
+                    out.append(body[pos:t.start()]); pos = t.end(); continue
+                out.append(body[pos:t.start()] + b"<" + t.group(6) + b"> Tj"); pos = t.end()
+        out.append(body[pos:])
+        if not marks: return b"".join(out)
+        pre = [b"BT\n"]; cur = None; cx = cy = 0.0
+        for font, tm, x, y, h in marks:
+            if (font, tm) != cur:
+                pre.append(b"%s %s Tf\n%s\n" % (font[0], font[1], tm)); cur = (font, tm); cx = cy = 0.0
+            pre.append(b"%.7f %.7f Td <%s> Tj\n" % (x - cx, y - cy, h)); cx, cy = x, y
+        pre.append(b"ET\n"); stats["marks_hoisted"] += len(marks)
+        line = b"".join(out)
+        # MuPDF starts every BT with "no direction": a line that begins with a mark copy would leave that mark
+        # outside the RTL run. Start the line with an invisible zero-width RLM.
+        f1, tm1, tj1 = HT.search(line), re.search(rb"1 0 0 -1 -?[\d.]+ -?[\d.]+ Tm\n", line), re.search(rb"<([0-9A-Fa-f]{4})", line)
+        if f1 and f1.group(1) and tm1 and tj1:
+            st = st_of(fontmap.get(f1.group(1).decode())); c0 = int(tj1.group(1), 16)
+            if all(is_mark(ch) for ch in st.map.get(c0, "x")):
+                rl = st.want(c0, RLM, width=0.0)
+                line = line[:tm1.end()] + b"3 Tr <%04X> Tj 0 Tr\n" % rl + line[tm1.end():]; stats["rlm_line_start"] += 1
+        return b"".join(pre) + line
+    return BLOCK.sub(one, data)
 
 
 def split_units(text):
@@ -208,6 +267,8 @@ def close_gaps(data, fontmap, st_of, stats):
 
 POS = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|1 0 0 -1 (-?[\d.]+) (-?[\d.]+) Tm|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj|\bET\b")
 LRM, RLM = "\u200e", "\u200f"
+MARK_W = 20.0          # width (1/1000 em) of an invisible on-baseline mark copy
+WJ = "\u2060"          # word joiner: invisible, does not affect Arabic joining; what a DRAWN mark maps to
 OPEN, CLOSE = "([{", ")]}"
 
 
@@ -416,15 +477,18 @@ def process(src, dst):
                     if marks[j]:
                         if k >= len(mark_glyphs) or sorted(assign[mark_glyphs[k]]) != sorted(marks[j]): return None
                         i = mark_glyphs[k]; k += 1
-                        pre.append((off[i], st.want(gids[i], assign[i]), False))
-                    plan.append((off[-1] + j * part, st.want(gids[-1], letters[j], width=round(part_w, 4)), j > 0))
+                        pre.append((off[i], st.want(gids[i], WJ), False))
+                        d = MARK_W / 1000 * size
+                        for q, mk in enumerate(reversed(marks[j])):
+                            plan.append((off[-1] + j * part - (len(marks[j]) - q) * d, st.want(gids[-1], mk, width=MARK_W), True))
+                    plan.append((off[-1] + j * part, st.want(gids[-1] if j < 2 else st.other_gid(gids[-1], j), letters[j], width=round(part_w, 4)), j > 0))
                 plan = pre + plan            # marks first, then letters left to right: positions never jump backwards
                 if k != len(mark_glyphs): return None
                 head = body[:shows[0].start()]; cur = 0.0; out = head
                 for o, cid, hidden in plan:
                     if out is not head: out += b"%.6f 0 Td " % (o - cur); cur = o   # Td also resets the pen to the line origin
                     elif abs(o) > 1e-9: out += b"%.6f 0 Td " % o; cur = o
-                    out += (b"3 Tr " if hidden else b"") + hexs([cid]) + b" Tj" + (b" 0 Tr\n" if hidden else b"\n")
+                    out += (b"3 Tr " if hidden else b"") + hexs([cid]) + b" Tj" + (b" 0 Tr\n" if hidden else (VM + b"\n" if (o, cid, hidden) in pre else b"\n"))
                 return out + body[shows[0].end():].lstrip(b"\n") + (b"%%%%ADJ %.6f%%%%\n" % cur if cur else b"")
 
             def repl(m):
@@ -489,6 +553,30 @@ def process(src, dst):
                         assign[i] = "".join(sorted(assign[i], key=unicodedata.combining))
                 if any(not assign[i] or (len(assign[i]) > 1 and not all(is_mark(c) for c in assign[i])) for i in assign):
                     stats["kept_cluster_ambiguous"] += 1; return m.group(0)
+                base_idx = [i for i in assign if any(not is_mark(c) for c in assign[i])]
+                if len(units) == 1 and len(base_idx) == 1 and len(units[0]) > 1:
+                    # Marks are drawn above/below the line, where readers take them for separate lines. Keep them
+                    # drawn but mapped to an invisible joiner, and give the letter invisible zero-width copies of
+                    # its marks on the baseline (stream order = reversed logical order, like the rest of the run).
+                    bi = base_idx[0]
+                    new = [st.want(g, assign[i] if i == bi else WJ) for i, g in enumerate(gids)]
+                    mk_l = units[0][1:]; d = MARK_W / 1000 * size
+                    inv = b"%.6f 0 Td 3 Tr " % (-len(mk_l) * d)
+                    for mk in reversed(mk_l):
+                        inv += hexs([st.want(gids[bi], mk, width=MARK_W)]) + b" Tj %.6f 0 Td " % d
+                    inv += b"0 Tr\n"
+                    out, pos, k = b"", 0, 0
+                    for sh in shows:
+                        n = len(sh.group(1)) // 4; cids = new[k:k + n]
+                        out += body[pos:sh.start()]; pos = sh.end()
+                        if k <= bi < k + n:
+                            if bi > k: out += hexs(cids[:bi - k]) + b" Tj" + VM + b"\n"
+                            out += inv + hexs(cids[bi - k:]) + b" Tj"
+                        else:
+                            out += hexs(cids) + b" Tj" + VM
+                        k += n
+                    stats["cluster_marks_on_baseline"] += 1
+                    return out + body[pos:]
                 new = [st.want(g, assign[i]) for i, g in enumerate(gids)]
                 it = iter(new)
                 out = TJ.sub(lambda s: hexs([next(it) for _ in range(len(s.group(1)) // 4)]) + b" Tj", body)
@@ -507,7 +595,7 @@ def process(src, dst):
                 else:
                     out.append(t.group(0)); pending = 0.0            # ET / Tm reset the line origin
             out.append(new[pos:])
-            cs.write(join_lines(direction_marks(close_gaps(b"".join(out), fontmap, st_of, stats), fontmap, st_of, stats), fontmap, st_of, stats))
+            cs.write(join_lines(direction_marks(close_gaps(hoist_marks(b"".join(out), fontmap, st_of, stats), fontmap, st_of, stats), fontmap, st_of, stats), fontmap, st_of, stats))
     for st in states.values():
         st.finish(pdf)
     pdf.save(dst)

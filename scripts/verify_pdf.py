@@ -124,6 +124,21 @@ def gate(doc) -> list[str]:
     _, mseq = copy_fidelity(doc, engine="mupdf")
     check("line-order", mseq is not None and mseq >= NS.MUPDF_MIN_SEQUENCE,
           f"MuPDF sequence {mseq:.3f} (min {NS.MUPDF_MIN_SEQUENCE})" if mseq is not None else "could not read source HTML or PDF text")
+
+    # 13. vocalised text: the basmala must copy exactly, marks on their letters (PDFium and MuPDF)
+    import re as _re
+    import unicodedata as _ud
+    ctrl = _re.compile("[\u2060\u200e\u200f\u202a-\u202e\u2066-\u2069]")
+    norm = lambda t: _ud.normalize("NFC", ctrl.sub("", t))
+    want = _ud.normalize("NFC", NS.VOCALISED)
+    got = {"MuPDF": norm(doc[NS.BASMALA].get_text())}
+    try:
+        import pypdfium2
+        got["PDFium"] = norm(pypdfium2.PdfDocument(doc.tobytes())[NS.BASMALA].get_textpage().get_text_range())
+    except ImportError:
+        got["PDFium"] = ""
+    missing = [k for k, t in got.items() if want not in t]
+    check("vocalised", not missing, f"basmala not exact in {missing}" if missing else "basmala exact in PDFium and MuPDF")
     return list(fails)
 
 
