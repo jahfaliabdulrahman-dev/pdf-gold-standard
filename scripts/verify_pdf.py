@@ -17,21 +17,50 @@ import pymupdf as fitz  # noqa: E402
 
 import nav_spec as NS  # noqa: E402
 
-fails: list[str] = []
-
-
-def check(name: str, ok: bool, detail: str) -> None:
-    print(("PASS " if ok else "FAIL ") + name + " - " + detail)
-    if not ok:
-        fails.append(name)
 
 
 def goto_links(page):
     return [l for l in page.get_links() if l.get("kind") == fitz.LINK_GOTO]
 
 
+def info_key(doc, key: str) -> str:
+    """A key of the document information dictionary ('' when absent)."""
+    kind, ref = doc.xref_get_key(-1, "Info")
+    if kind != "xref":
+        return ""
+    kind, val = doc.xref_get_key(int(ref.split()[0]), key)
+    return val.strip("()") if kind == "string" else ""
+
+
+def source_stamp() -> tuple[str, str]:
+    """(file name, sha256) of the source the gate measures copy fidelity against."""
+    import hashlib
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", NS.SOURCE_HTML)
+    return NS.SOURCE_HTML, hashlib.sha256(open(path, "rb").read()).hexdigest()
+
+
+def blank_pages(doc, body):
+    """Pages of `body` far below the median text that images do not excuse -> (blank, low, median).
+
+    A page is excused only when images cover BLANK_EXEMPT_IMAGE_COVER of it; "has an image" is not enough."""
+    lens = {i: len("".join(doc[i].get_text().split())) for i in body}
+    med = statistics.median(lens.values())
+
+    def image_cover(page):          # share of the page under images, capped at 1
+        area = sum(abs(r & page.rect) for im in page.get_images() for r in page.get_image_rects(im[0]))
+        return min(1.0, area / abs(page.rect))
+    low = {i: image_cover(doc[i]) for i, n in lens.items() if n < 0.15 * med}
+    blank = [f"p{i+1}({lens[i]} chars, images cover {c:.0%})" for i, c in low.items() if c < NS.BLANK_EXEMPT_IMAGE_COVER]
+    return blank, low, med
+
+
 def gate(doc) -> list[str]:
-    fails.clear()
+    fails: list[str] = []               # local: two gates may run in one process
+
+    def check(name: str, ok: bool, detail: str) -> None:
+        print(("PASS " if ok else "FAIL ") + name + " - " + detail)
+        if not ok:
+            fails.append(name)
 
     # 1. page count = intended build
     check("pages", doc.page_count == NS.PAGES, f"{doc.page_count} (expected {NS.PAGES})")
@@ -83,12 +112,13 @@ def gate(doc) -> list[str]:
             if not NS.SLOT_INK_MIN <= ink <= NS.SLOT_INK_MAX:
                 dead.append(f"p{i+1} {role}: ink {ink:.2f}")
                 continue
-            # the right icon, not just some ink: centre of mass of the ink against the icon's measured signature
-            cx = sum(k % pm.stride for k in on) / len(on) / pm.width - 0.5
-            cy = sum(k // pm.stride for k in on) / len(on) / pm.height - 0.5
-            wx, wy = NS.SLOT_SHAPE[role]
-            if abs(cx - wx) > NS.SLOT_SHAPE_TOL or abs(cy - wy) > NS.SLOT_SHAPE_TOL:
-                dead.append(f"p{i+1} {role}: icon centre ({cx:+.2f},{cy:+.2f}), expected ({wx:+.2f},{wy:+.2f})")
+            # the right icon, not just some ink: ink share, centre of mass and spread against the icon's signature
+            xs = [k % pm.stride for k in on]; ys = [k // pm.stride for k in on]
+            sig = (ink, statistics.fmean(xs) / pm.width - 0.5, statistics.fmean(ys) / pm.height - 0.5,
+                   statistics.pstdev(xs) / pm.width, statistics.pstdev(ys) / pm.height)
+            if any(abs(a - b) > NS.SLOT_SHAPE_TOL for a, b in zip(sig, NS.SLOT_SHAPE[role])):
+                dead.append(f"p{i+1} {role}: not its icon - " + " ".join(f"{a:+.2f}" for a in sig) +
+                            " vs " + " ".join(f"{b:+.2f}" for b in NS.SLOT_SHAPE[role]))
     check("render", not dead, "; ".join(dead[:6]) or
           f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots: each icon drawn in its own slot (ink {min(seen):.2f}-{max(seen):.2f})")
 
@@ -119,23 +149,28 @@ def gate(doc) -> list[str]:
             name = f[3].split("+")[-1]
             if not name:
                 foreign.append(f"p{i+1}:<unnamed {f[1]}>")
-            elif not name.startswith(NS.HOUSE_FONT_PREFIX) and name not in allowed_extra:
+            elif not name.startswith(NS.HOUSE_FONT_PREFIX) and not any(name.startswith(a) for a in allowed_extra):
                 foreign.append(f"p{i+1}:{name}")
     check("fonts", not foreign, ", ".join(sorted(set(foreign))[:6]) or f"only {NS.HOUSE_FONT_PREFIX}* (+ {'/'.join(sorted(NS.BASMALA_FACES))} on the basmala page)")
 
-    # 8. title metadata
+    # 8. title metadata carries the guide version, and the cover prints the same one
     title = (doc.metadata or {}).get("title", "")
-    check("title", bool(title), title[:60])
+    ver = f"الإصدار {NS.GUIDE_VERSION_AR}"
+    # MuPDF returns Arabic-Indic numbers reversed (known limit, ROADMAP): accept the number in either order
+    cover = " ".join(doc[NS.COVER].get_text().split())
+    on_cover = ver in cover or f"الإصدار {NS.GUIDE_VERSION_AR[::-1]}" in cover
+    check("title", ver in title and on_cover,
+          title[:70] + ("" if ver in title else f" - missing «{ver}»") + ("" if on_cover else f" - cover does not print «{ver}»"))
 
-    # 9. no blank / overflow pages: far below the median text, excluding cover + contents, and no image
-    body = [i for i in range(doc.page_count) if i not in (NS.COVER, NS.CONTENTS)]
-    lens = {i: len("".join(doc[i].get_text().split())) for i in body}
-    med = statistics.median(lens.values())
-    def image_cover(page):          # share of the page under images; overlaps counted once per image, capped at 1
-        area = sum(abs(r & page.rect) for im in page.get_images() for r in page.get_image_rects(im[0]))
-        return min(1.0, area / abs(page.rect))
-    low = {i: image_cover(doc[i]) for i, n in lens.items() if n < 0.15 * med}
-    blank = [f"p{i+1}({lens[i]} chars, images cover {c:.0%})" for i, c in low.items() if c < NS.BLANK_EXEMPT_IMAGE_COVER]
+    # 8b. provenance: the file says which source it was built from, and that is the source this gate compares with
+    name, digest = source_stamp()
+    got_name, got_digest = info_key(doc, "SourceFile"), info_key(doc, "SourceSHA256")
+    check("provenance", (got_name, got_digest) == (name, digest),
+          f"{name} sha256 {digest[:12]}" if (got_name, got_digest) == (name, digest) else
+          ("no source stamp" if not got_digest else f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}"))
+
+    # 9. no blank / overflow pages: far below the median text (cover + contents excluded) and not excused by image cover
+    blank, low, med = blank_pages(doc, [i for i in range(doc.page_count) if i not in (NS.COVER, NS.CONTENTS)])
     check("no-blank-pages", not blank, ", ".join(blank) or
           f"median {med:.0f} chars; low-text pages excused by image cover: " + (", ".join(f"p{i+1} {c:.0%}" for i, c in low.items()) or "none"))
 
@@ -176,7 +211,7 @@ def gate(doc) -> list[str]:
         got["PDFium"] = ""
     missing = [k for k, t in got.items() if want not in t]
     check("vocalised", not missing, f"basmala not exact in {missing}" if missing else "basmala exact in PDFium and MuPDF")
-    return list(fails)
+    return fails
 
 
 PRES_FORM = lambda ch: 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF
@@ -214,7 +249,7 @@ def text_layer_violations(doc) -> list[str]:
     return out
 
 
-def copy_fidelity(doc, engine="pdfium"):
+def copy_fidelity(doc, engine="pdfium", text=None):
     """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order."""
     import collections
     import difflib
@@ -232,7 +267,9 @@ def copy_fidelity(doc, engine="pdfium"):
     words = lambda t: word.findall(marks.sub("", unicodedata.normalize("NFC", bidi.sub("", t))))
     src = re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I)
     truth = words(html.unescape(re.sub(r"<[^>]+>", " ", src)))
-    if engine == "mupdf":
+    if text is not None:                # text extracted by another reader (Preview's PDFKit, measured on a Mac)
+        got = words(text)
+    elif engine == "mupdf":
         got = words("\n".join(p.get_text() for p in doc))
     else:
         pd = pypdfium2.PdfDocument(doc.tobytes())

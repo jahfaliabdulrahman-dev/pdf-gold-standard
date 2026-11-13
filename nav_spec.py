@@ -7,6 +7,11 @@ of numbers). All page indices are 0-based.
 
 MM = 2.83465  # 1 mm in pt
 
+# The version printed on the cover, the back cover and in the PDF title. A release tag vX.Y.Z must start with it
+# (CI checks the tag, the gate checks the title and the cover).
+GUIDE_VERSION = "2.3"
+GUIDE_VERSION_AR = GUIDE_VERSION.translate(str.maketrans("0123456789.", "٠١٢٣٤٥٦٧٨٩٫"))
+
 PAGES = 12
 COVER, BASMALA, CONTENTS = 0, 1, 2
 
@@ -35,11 +40,12 @@ SLOTS = {"next": 58.0, "prev": 95.33, "contents": 132.67, "home": 170.0}
 # A drawn button: share of the slot's pixels (300 dpi, gray, slot shrunk 2pt) that differ from the slot's median by more
 # than SLOT_INK_CONTRAST. Measured on the real build: 0.14 (contents) .. 0.36 (home); a slot painted over: 0.00.
 SLOT_INK_CONTRAST, SLOT_INK_MIN, SLOT_INK_MAX = 60, 0.05, 0.60
-# The RIGHT icon in each slot: where the ink's centre of mass sits relative to the slot centre, as a fraction of the
-# slot (x right, y down). Measured on the real build, identical on all 8 pages to +-0.002: the "next" arrow points left
-# (RTL), "prev" right, the contents lines sit high and left, the house sits low. Tolerance well under the smallest
-# distance between two icons (0.12).
-SLOT_SHAPE = {"next": (-0.07, -0.01), "prev": (0.05, -0.015), "contents": (-0.08, -0.15), "home": (-0.005, 0.105)}
+# The RIGHT icon in each slot — a five-number signature of the slot's ink, measured on the real build and identical on
+# all 8 pages to +-0.008: (ink share, centre of mass x, y relative to the slot centre, spread x, y as fractions of the
+# slot; x right, y down). The "next" arrow points left (RTL), "prev" right, the contents lines sit high and left, the
+# house sits low. Tolerance well under the smallest distance between two icons (0.12 in x between the arrows).
+SLOT_SHAPE = {"next": (0.168, -0.069, -0.013, 0.180, 0.170), "prev": (0.169, 0.050, -0.016, 0.179, 0.171),
+              "contents": (0.141, -0.079, -0.150, 0.233, 0.146), "home": (0.357, -0.005, 0.104, 0.306, 0.268)}
 SLOT_SHAPE_TOL = 0.03
 
 
