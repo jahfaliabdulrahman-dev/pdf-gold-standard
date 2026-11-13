@@ -108,7 +108,71 @@ def gate(doc) -> list[str]:
     med = statistics.median(lens.values())
     blank = [f"p{i+1}({n})" for i, n in lens.items() if n < 0.15 * med and not doc[i].get_images()]
     check("no-blank-pages", not blank, ", ".join(blank) or f"median {med:.0f} chars")
+
+    # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
+    #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).
+    bad_tu = text_layer_violations(doc)
+    check("text-layer", not bad_tu, "; ".join(bad_tu[:3]) or "one base code point per glyph")
+
+    # 11. copy fidelity, measured with PDFium (Chrome/Edge's engine) against the words of the source HTML
+    rec, seq = copy_fidelity(doc)
+    ok = rec is not None and rec >= NS.COPY_MIN_RECALL and seq >= NS.COPY_MIN_SEQUENCE
+    check("copy-fidelity", ok, f"recall {rec:.3f} / sequence {seq:.3f} (min {NS.COPY_MIN_RECALL} / {NS.COPY_MIN_SEQUENCE})"
+          if rec is not None else "could not read source HTML or PDF text")
     return list(fails)
+
+
+PRES_FORM = lambda ch: 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF
+
+
+def text_layer_violations(doc) -> list[str]:
+    import re
+    import unicodedata
+    out, seen = [], set()
+    for page in doc:
+        for xref, *_ in page.get_fonts():
+            if xref in seen:
+                continue
+            seen.add(xref)
+            kind, tu = doc.xref_get_key(xref, "ToUnicode")
+            if kind != "xref":
+                continue
+            data = doc.xref_stream(int(tu.split()[0])).decode("latin1")
+            for blk in re.findall(r"beginbfchar(.*?)endbfchar", data, re.S):
+                for cid, hx in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", blk):
+                    txt = bytes.fromhex(hx).decode("utf-16-be", "replace")
+                    letters = [c for c in txt if unicodedata.category(c) != "Mn"]
+                    if any(PRES_FORM(c) for c in txt) or len(letters) > 1:
+                        out.append(f"xref {xref} cid {cid}: {txt!r}")
+    return out
+
+
+def copy_fidelity(doc):
+    """(recall, sequence) of the source words in PDFium's extraction; sequence counts words in order."""
+    import collections
+    import difflib
+    import html
+    import re
+    import unicodedata
+    try:
+        import pypdfium2
+        src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", NS.SOURCE_HTML), encoding="utf-8").read()
+    except (ImportError, OSError):
+        return None, None
+    bidi = re.compile("[\u200e\u200f\u202a-\u202e\u2066-\u2069\u061c\u0640]")
+    marks = re.compile("[\u064B-\u0652\u0653-\u0655\u0670]")
+    word = re.compile(r"[\u0621-\u064A\u0671]+|[\u0660-\u0669]+|[A-Za-z][A-Za-z0-9.]*")
+    words = lambda t: word.findall(marks.sub("", unicodedata.normalize("NFC", bidi.sub("", t))))
+    src = re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I)
+    truth = words(html.unescape(re.sub(r"<[^>]+>", " ", src)))
+    pd = pypdfium2.PdfDocument(doc.tobytes())
+    got = words("\n".join(pd[i].get_textpage().get_text_range() for i in range(len(pd))))
+    if not truth or not got:
+        return None, None
+    ct, cg = collections.Counter(truth), collections.Counter(got)
+    recall = sum(min(ct[w], cg[w]) for w in ct) / len(truth)
+    sm = difflib.SequenceMatcher(None, truth, got, autojunk=False)
+    return recall, sum(b.size for b in sm.get_matching_blocks()) / len(truth)
 
 
 def printed_page_numbers(page) -> list[int]:
