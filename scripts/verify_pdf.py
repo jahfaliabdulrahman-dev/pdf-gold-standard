@@ -27,7 +27,7 @@ PROJ = os.path.join(HERE, "..")
 
 # Same tokeniser as copy-fidelity: NFC, bidi controls and tatweel dropped, tashkeel dropped; Arabic letters,
 # Arabic-Indic digits and Latin words are tokens. Latin footer digits are not — footer-numbers owns them.
-BIDI = re.compile("[\u200e\u200f\u202a-\u202e\u2066-\u2069\u061c\u0640]")
+BIDI = re.compile("[\u200e\u200f\u202a-\u202e\u2066-\u2069\u061c\u0640\u2060]")  # U+2060: invisible intended joiner
 MARKS = re.compile("[\u064b-\u0652\u0653-\u0655\u0670]")
 WORD = re.compile(r"[\u0621-\u064a\u0671]+|[\u0660-\u0669]+|[A-Za-z][A-Za-z0-9.]*")
 
