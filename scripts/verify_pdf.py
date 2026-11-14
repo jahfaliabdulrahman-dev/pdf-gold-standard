@@ -386,12 +386,14 @@ def pdfua_problems(pdf) -> list[str]:
             baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
             try:
                 base = tomllib.load(open(baseline_path, "rb"))
-                failing = base.get("3b", {}).get("failing", [])
             except (OSError, tomllib.TOMLDecodeError) as e:
                 bad.append(f"cannot read the 3b baseline: {type(e).__name__}")
             else:
-                if failing:
-                    bad.append(f"3b claimed while the baseline still lists {failing}")
+                # fail closed: a missing section is NOT "no failures" — it is evidence that is absent
+                if "3b" not in base or "failing" not in base["3b"]:
+                    bad.append(f"the baseline has no [3b].failing list: the claim cannot be checked")
+                elif base["3b"]["failing"]:
+                    bad.append(f"3b claimed while the baseline still lists {base['3b']['failing']}")
         elif declared:
             bad.append(f"{declared} claimed without conformance")
     cat = pdf.Root
