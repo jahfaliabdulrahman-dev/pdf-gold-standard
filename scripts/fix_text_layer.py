@@ -136,6 +136,15 @@ class FontState:
         pool = sorted((g for g in self.inked if g != gid), key=lambda g: (abs(self.inked[g][0] - lo) + abs(self.inked[g][1] - hi), g)) or [gid]
         return pool[(k - 2) % len(pool)]
 
+    def filler_cid(self, width):
+        """A blank glyph of the given width mapped to U+200B, to be shown hidden (None if the subset has no empty glyph)."""
+        if self.blank is None: return None
+        key = ("filler", round(width, 3))
+        if key not in self.alias:
+            c = self.next; self.next += 1
+            self.alias[key] = c; self.gid[c] = self.blank; self.map[c] = WJ; self.neww[c] = width
+        return self.alias[key]
+
     def mark_cid(self, text):
         """A zero-width blank glyph mapped to an invisible direction mark (None if the subset has no empty glyph)."""
         if self.blank is None: return None
@@ -228,13 +237,21 @@ def split_units(text):
 
 
 TOK = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj|\bET\b|\bTm\b")
+STRICT_WIDTHS = False  # set by process(strict_widths=True): no drawn glyph may differ from the font's width
 GAP_MIN, GAP_MAX = 0.10, 0.25      # em: a positive kern readers may read as a space; larger jumps are real gaps
 
 
 def close_gaps(data, fontmap, st_of, stats):
     """Glyphs are placed by explicit Td, so /W only tells readers how wide a glyph is. Where the next letter on the
-    same baseline starts further right than this glyph's width (kerning), give this occurrence an alias whose width
-    is the real advance. Drawing is unchanged."""
+    same baseline starts further right than this glyph's width (kerning), poppler and pdf.js read a space into the
+    word. A HIDDEN glyph gets an alias whose width is the real advance. A DRAWN glyph must keep the font's own width
+    (PDF/A 6.2.11.5, PDF/UA 7.21.5) — but the two cannot both be had (measured on the guide, 5 gaps):
+      * default: the drawn glyph gets the wider alias too. Best copy; the one class of drawn glyph left whose /W is
+        not the font's (veraPDF: 1 failed check, down from 22).
+      * STRICT_WIDTHS: the drawn glyph keeps its width and is followed by a hidden blank glyph as wide as the gap,
+        mapped to U+200B. veraPDF: 0. Price: pdf.js skips that character and still reads a space into 3 words;
+        MuPDF and poppler paste the invisible character inside 4 words; PDFium is unchanged.
+    Drawing is unchanged either way."""
     st = None; size = 0.0; x = y = 0.0; seq = []
     for t in TOK.finditer(data):
         if t.group(1):
@@ -260,17 +277,25 @@ def close_gaps(data, fontmap, st_of, stats):
             w = s.neww.get(cid, s.width.get(cid, s.dw)) / 1000 * sz
             gap = (b[0] - x0 - w) / sz
             if GAP_MIN < gap < GAP_MAX and text and nxt and not text.isspace() and not nxt.isspace():
-                edits.append((pos, s.want(cid, text, width=round((b[0] - x0) / sz * 1000, 4)))); stats["gap_closed"] += 1
+                hidden = data[pos - 6:pos - 1] == b"3 Tr "
+                fill = s.filler_cid(round(gap * 1000, 4)) if STRICT_WIDTHS and not hidden else None
+                if hidden or fill is None:
+                    edits.append((pos, 4, b"%04X" % s.want(cid, text, width=round((b[0] - x0) / sz * 1000, 4))))
+                    stats["gap_closed" if hidden else "gap_closed_by_width"] += 1
+                else:
+                    end = pos + 4 + len(b"> Tj")
+                    edits.append((end, 0, b" 3 Tr <%04X> Tj 0 Tr" % fill)); stats["gap_filled"] += 1
             break
     out = bytearray(data)
-    for pos, cid in edits:
-        out[pos:pos + 4] = b"%04X" % cid
+    for pos, n, new in sorted(edits, reverse=True):
+        out[pos:pos + n] = new
     return bytes(out)
 
 
 POS = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|1 0 0 -1 (-?[\d.]+) (-?[\d.]+) Tm|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj|\bET\b")
 LRM, RLM = "\u200e", "\u200f"
 MARK_W = 20.0          # width (1/1000 em) of an invisible on-baseline mark copy
+DUP_W = 120            # 1/1000 em between a ligature's last hidden letter and the glyph's right edge (see letters_plan)
 SEP_MIN, SEP_W = 0.1, 0.8   # invisible separator after hoisted marks: at least 0.1 em, or 0.8 x the next glyph's width, above the line
 WJ = "\u200b"          # zero-width space: what a DRAWN mark maps to (Preview drops it; U+2060 was pasted at every line end)
 # Readers that honour /ActualText get ONE tab for the whole block of drawn marks: PDFium then skips the block (nothing
@@ -353,7 +378,7 @@ BLOCK = re.compile(rb"BT\n(?:(?!ET\n).)*?ET\n", re.S)
 TM_Y = re.compile(rb"1 0 0 -1 [\d.]+ ([\d.]+) Tm")
 ONE_TJ = re.compile(rb"<([0-9A-Fa-f]{4})> Tj")
 # EMC, then one space drawn on its own (Tm + Td/Tj), then the next reversed run
-RUN_GAP = re.compile(rb"EMC\n\s*((?:1 0 0 -1 [\d.]+ [\d.]+ Tm\n)?-?[\d.]+ -?[\d.]+ Td\s+<[0-9A-Fa-f]{4}> Tj\n)\s*/ReversedChars BMC\n")
+RUN_GAP = re.compile(rb"EMC\n\s*((?:1 0 0 -1 [\d.]+ [\d.]+ Tm\n)?-?[\d.]+ -?[\d.]+ Td\s+(?:3 Tr )?<[0-9A-Fa-f]{4}> Tj(?: 0 Tr)?\n)\s*/ReversedChars BMC\n")
 
 
 def join_lines(data, fontmap, st_of, stats):
@@ -400,7 +425,7 @@ def join_lines(data, fontmap, st_of, stats):
                 if sc is None: continue
                 body = TF.sub(b"", g[0])                               # the space no longer selects the Latin font
                 k = ONE_TJ.search(body)
-                g[0] = body[:k.start()] + b"%s %s Tf <%04X> Tj" % (nf[0].encode(), nf[1].encode(), sc) + body[k.end():]
+                g[0] = body[:k.start()] + b"%s %s Tf 3 Tr <%04X> Tj 0 Tr" % (nf[0].encode(), nf[1].encode(), sc) + body[k.end():]
                 g.append(nf); stats["space_refont"] += 1
             # PDFium keeps consecutive objects on one line while they are vertically closer than a fraction of their
             # widths, then sorts that line by x: the last hoisted mark would land inside the line's first word. End the
@@ -467,7 +492,45 @@ def join_lines(data, fontmap, st_of, stats):
     return b"".join(out).replace(HM, b"")
 
 
-def process(src, dst):
+def drawn_width_mismatches(path):
+    """Drawn glyphs (text render mode other than 3) whose width in the font dictionary differs from the embedded font
+    program by more than 1/1000 em -> sorted [(base font, cid, dictionary width, font width)]. This is what PDF/A
+    6.2.11.5 and PDF/UA 7.21.5 forbid; it counts every (font, cid) pair, veraPDF fewer (60 / 5 / 0 here against 22 / 1 / 0 on the same three builds of the
+    guide - the difference is not explained); the two agree on which builds are clean."""
+    tok = re.compile(rb"(/F\w+)\s+[\d.]+\s+Tf|\b([0-7]) Tr\b|<([0-9A-Fa-f]+)> Tj|\b(q|Q)\b")
+    bad = set()
+    with pikepdf.open(path) as pdf:
+        cache = {}
+        for page in pdf.pages:
+            fonts = page.Resources.get("/Font", {})
+            data = b"".join(c.read_bytes() + b"\n" for c in (page.Contents if isinstance(page.Contents, pikepdf.Array) else [page.Contents]))
+            font, tr, stack = None, 0, []
+            for t in tok.finditer(data):
+                if t.group(1): font = t.group(1).decode()
+                elif t.group(2): tr = int(t.group(2))
+                elif t.group(4): 
+                    if t.group(4) == b"q": stack.append((font, tr))
+                    elif stack: font, tr = stack.pop()
+                elif tr != 3 and font in fonts and fonts[font].get("/Subtype") == "/Type0":
+                    F = fonts[font]; key = F.objgen
+                    if key not in cache:
+                        D = F.DescendantFonts[0]
+                        tt = TTFont(io.BytesIO(D.FontDescriptor.FontFile2.read_bytes()), lazy=True)
+                        m = D.get("/CIDToGIDMap"); gidmap = m.read_bytes() if isinstance(m, pikepdf.Stream) else None
+                        cache[key] = (str(F.BaseFont)[1:], parse_w(D.get("/W", [])), float(D.get("/DW", 1000)), tt["hmtx"], tt.getGlyphOrder(), 1000 / tt["head"].unitsPerEm, gidmap)
+                    name, W, dw, hmtx, order, k, gidmap = cache[key]
+                    h = t.group(3).decode()
+                    for i in range(0, len(h), 4):
+                        cid = int(h[i:i + 4], 16)
+                        gid = cid if gidmap is None else int.from_bytes(gidmap[2 * cid:2 * cid + 2], "big")
+                        fw = hmtx[order[gid]][0] * k if gid < len(order) else 0.0
+                        if abs(W.get(cid, dw) - fw) > 1: bad.add((name, cid, round(W.get(cid, dw), 2), round(fw, 2)))
+    return sorted(bad)
+
+
+def process(src, dst, strict_widths=False):
+    global STRICT_WIDTHS
+    STRICT_WIDTHS = strict_widths
     pdf = pikepdf.open(src)
     states, stats = {}, collections.Counter()
 
@@ -501,17 +564,13 @@ def process(src, dst):
                 vis = units[::-1]                                   # leftmost unit first
                 letters = [u[0] for u in vis]; marks = [u[1:] for u in vis]
                 if "".join(letters[::-1]) != "".join(c for c in assign[len(gids) - 1] if not is_mark(c)): return None
-                mark_glyphs = list(range(len(gids) - 1)); k = 0; plan = []; pre = []
-                part_w = st.width.get(gids[-1], st.dw) / len(vis); part = part_w / 1000 * size
+                mark_glyphs = list(range(len(gids) - 1)); k = 0; pre = []
                 for j, u in enumerate(vis):
                     if marks[j]:
                         if k >= len(mark_glyphs) or sorted(assign[mark_glyphs[k]]) != sorted(marks[j]): return None
                         i = mark_glyphs[k]; k += 1
                         pre.append((off[i], st.want(gids[i], WJ), False))
-                        d = MARK_W / 1000 * size
-                        for q, mk in enumerate(reversed(marks[j])):
-                            plan.append((off[-1] + j * part - (len(marks[j]) - q) * d, st.want(gids[-1], mk, width=MARK_W), True))
-                    plan.append((off[-1] + j * part, st.want(gids[-1] if j < 2 else st.other_gid(gids[-1], j), letters[j], width=round(part_w, 4)), j > 0))
+                plan = letters_plan(st, gids[-1], off[-1], letters, marks, size)
                 plan = pre + plan            # marks first, then letters left to right: positions never jump backwards
                 if k != len(mark_glyphs): return None
                 head = body[:shows[0].start()]; cur = 0.0; out = head
@@ -520,6 +579,39 @@ def process(src, dst):
                     elif abs(o) > 1e-9: out += b"%.6f 0 Td " % o; cur = o
                     out += (b"3 Tr " if hidden else b"") + hexs([cid]) + b" Tj" + (b" 0 Tr\n" if hidden else (VM + b"\n" if (o, cid, hidden) in pre else b"\n"))
                 return out + body[shows[0].end():].lstrip(b"\n") + (b"%%%%ADJ %.6f%%%%\n" % cur if cur else b"")
+
+            def letters_plan(st, g, at, letters, marks, size):
+                """One drawn glyph `g` at offset `at` that stands for several letters (leftmost first), each with its
+                marks -> [(offset, cid, hidden)], left to right.
+
+                The DRAWN glyph keeps the font's own width (PDF/A 6.2.11.5, PDF/UA 7.21.5: a rendered glyph's width
+                must match the font program) and carries the SECOND-TO-LAST letter (the only letter of two = the first).
+                Everything before it — earlier letters, and the marks of each — is hidden 0.02 em copies just left of
+                the glyph, where a letter's mark copies always sit. The LAST letter and its marks are hidden copies
+                against the glyph's right edge, DUP_W short of it: the next glyph may be the same letter (سس، لل) and
+                MuPDF drops a repeated character closer than 0.1 em as fake bold. pdf.js starts a new item when x
+                jumps back more than 0.2 em, so the jump from the glyph's end to that pack must stay under it:
+                0.12 + 0.02 per hidden copy (three letters of «لله» in the pack measured 0.32 and cut the line)."""
+                w = st.width.get(g, st.dw); d = MARK_W / 1000 * size; v = max(0, len(letters) - 2); nth = 0
+
+                def hidden(ch, mk, wd):
+                    nonlocal nth
+                    if mk: return st.want(g, ch, width=wd)
+                    nth += 1
+                    return st.want(g if nth == 1 else st.other_gid(g, nth), ch, width=wd)
+                before = []
+                for j in range(v + 1):
+                    before += [(mk, True) for mk in reversed(marks[j])] + ([(letters[j], False)] if j < v else [])
+                plan = [(at - (len(before) - i) * d, hidden(ch, mk, MARK_W), True) for i, (ch, mk) in enumerate(before)]
+                plan.append((at, st.want(g, letters[v]), False))
+                after = []
+                for j in range(v + 1, len(letters)):
+                    after += [(mk, True) for mk in reversed(marks[j])] + [(letters[j], False)]
+                x = at + (w - DUP_W - MARK_W * len(after)) / 1000 * size
+                for i, (ch, mk) in enumerate(after):
+                    # the last copy reaches the glyph's edge: no gap is left for a reader (or close_gaps) to take for a space
+                    plan.append((x, hidden(ch, mk, MARK_W + (DUP_W if i == len(after) - 1 else 0)), True)); x += d
+                return plan
 
             def split_multi(st, body, shows, gids, assign, units, size):
                 """Mark glyphs drawn on their own (any number of Tj) + a LAST glyph that stands for several letters (لَا لْآ لْأُ لًّا):
@@ -539,12 +631,7 @@ def process(src, dst):
                 last = shows[-1]; out += body[pos:last.start()]
                 pre = list(range(k, lig)); base = sum(st.width.get(gids[i], st.dw) for i in pre) / 1000 * size
                 if pre: out += hexs([st.want(gids[i], WJ) for i in pre]) + b" Tj" + VM + b"\n"
-                part_w = st.width.get(gids[lig], st.dw) / len(vis); part = part_w / 1000 * size; d = MARK_W / 1000 * size
-                plan = []
-                for j in range(len(vis)):
-                    for q, mk in enumerate(reversed(marks[j])):
-                        plan.append((base + j * part - (len(marks[j]) - q) * d, st.want(gids[lig], mk, width=MARK_W), True))
-                    plan.append((base + j * part, st.want(gids[lig] if j < 2 else st.other_gid(gids[lig], j), letters[j], width=round(part_w, 4)), j > 0))
+                plan = letters_plan(st, gids[lig], base, letters, marks, size)
                 cur, first = 0.0, not pre
                 for o, cid, hidden in plan:
                     if not first or abs(o) > 1e-9: out += b"%.6f 0 Td " % (o - cur); cur = o
@@ -571,15 +658,12 @@ def process(src, dst):
                         c = st.want(g, text); stats["single"] += 1
                         return body if c == g else TJ.sub(hexs([c]) + b" Tj", body)
                     chars = list(text)                               # ligature / base+mark in one glyph
-                    n = len(chars); w = st.width.get(g, st.dw); part = w / n
-                    lead = st.want(g, chars[-1], width=round(part, 4))
-                    out = TJ.sub(hexs([lead]) + b" Tj", body)
-                    h = part / 1000 * size
-                    for ch in reversed(chars[:-1]):                  # visual order: last logical letter is leftmost
-                        comp = st.want(g, ch, width=round(part, 4))   # same outline, invisible (Tr 3): no pixel changes
-                        out += b"%.6f 0 Td 3 Tr " % h + hexs([comp]) + b" Tj 0 Tr\n"
+                    plan = letters_plan(st, g, 0.0, chars[::-1], [""] * len(chars), size)   # leftmost = last logical
+                    new = b""; cur = 0.0
+                    for o, cid, hidden in plan:
+                        new += (b"%.6f 0 Td " % (o - cur) if o != cur or new else b"") + (b"3 Tr " if hidden else b"") + hexs([cid]) + b" Tj" + (b" 0 Tr\n" if hidden else b"\n"); cur = o
                     stats["ligature_split"] += 1
-                    return out + b"%%%%ADJ %.6f%%%%\n" % (h * (n - 1))
+                    return TJ.sub(lambda _: new.rstrip(b"\n"), body) + (b"%%%%ADJ %.6f%%%%\n" % cur if cur else b"")
                 # --- several glyphs (mark cluster): give every glyph its own text
                 left = collections.Counter(text); assign = {}
                 for i, g in enumerate(gids):
@@ -665,4 +749,5 @@ def process(src, dst):
 
 
 if __name__ == "__main__":
-    print(process(sys.argv[1], sys.argv[2]))
+    args = [a for a in sys.argv[1:] if a != "--strict-widths"]
+    print(process(args[0], args[1], strict_widths="--strict-widths" in sys.argv))
