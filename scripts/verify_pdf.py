@@ -345,6 +345,65 @@ def blank_pages(doc, body):
     return blank, low, med
 
 
+def art_dpi_problems(doc) -> list[str]:
+    """Art serving >ART_PAGE_SHARE of a page must not exceed ART_MAX_DPI; declared pages must match."""
+    bad = []
+    for i, page in enumerate(doc):
+        for xref in {im[0] for im in page.get_images()}:
+            info = doc.extract_image(xref)
+            for r in page.get_image_rects(xref):
+                if abs(r) < NS.ART_PAGE_SHARE * abs(page.rect):
+                    continue
+                dpi = min(info["width"] / (r.width / 72), info["height"] / (r.height / 72))
+                declared = NS.ART_DPI_DECLARED.get(i)
+                if declared is not None:
+                    if abs(dpi - declared) > 3:
+                        bad.append(f"p{i+1}: {dpi:.0f} dpi, declared {declared}")
+                elif dpi > NS.ART_MAX_DPI + 1:
+                    bad.append(f"p{i+1}: {dpi:.0f} dpi > {NS.ART_MAX_DPI}")
+    return bad
+
+
+def pdfua_problems(pdf) -> list[str]:
+    """PDF/UA-1 structural floor (not full conformance: veraPDF is the judge and is not installed)."""
+    bad = []
+    with pdf.open_metadata() as m:
+        if str(m.get("pdfuaid:part", "")) != "1":
+            bad.append(f"pdfuaid:part={m.get('pdfuaid:part')}")
+    cat = pdf.Root
+    if "/StructTreeRoot" not in cat:
+        bad.append("no StructTreeRoot")
+    elif "/ParentTree" not in cat.StructTreeRoot:
+        bad.append("StructTreeRoot has no ParentTree")
+    if str(cat.get("/Lang", "")).strip("()") != NS.LANG:
+        bad.append("Lang")
+    if "/MarkInfo" not in cat:
+        bad.append("no MarkInfo")
+    vp = cat.get("/ViewerPreferences")
+    if vp is None or not vp.get("/DisplayDocTitle"):
+        bad.append("DisplayDocTitle")
+    return bad
+
+
+def acroform_problems(pdf) -> list[str]:
+    bad = []
+    if "/AcroForm" not in pdf.Root:
+        return ["no /AcroForm"]
+    fields = pdf.Root.AcroForm.get("/Fields", [])
+    if not len(fields):
+        return ["AcroForm has no fields"]
+    for f in fields:
+        tu = str(f.get("/TU", ""))
+        if not tu or not any("\u0600" <= ch <= "\u06ff" for ch in tu):
+            bad.append("field without an Arabic /TU")
+        if not str(f.get("/DA", "")).strip():
+            bad.append("field without /DA")
+    dr = pdf.Root.AcroForm.get("/DR", {})
+    if not dr.get("/Font", {}):
+        bad.append("AcroForm /DR has no embedded font")
+    return bad
+
+
 def gate(doc) -> list[str]:
     fails: list[str] = []               # local: two gates may run in one process
     ran: list[str] = []
@@ -555,6 +614,15 @@ def gate(doc) -> list[str]:
         att_bad = attachment_problems(pdf)
         check("attachments", not att_bad, "; ".join(att_bad[:4]) or
               ", ".join(f"{n} ({len(s.get_file().read_bytes())} B)" for n, s in pdf.attachments.items()))
+        art_bad = art_dpi_problems(doc)
+        check("art-dpi", not art_bad, "; ".join(art_bad[:4]) or
+              f"page art <= {NS.ART_MAX_DPI} dpi, declared pages match")
+
+        ua_bad = pdfua_problems(pdf)
+        check("pdfua", not ua_bad, "; ".join(ua_bad[:4]) or "pdfuaid=1, ParentTree, Lang, MarkInfo, DisplayDocTitle")
+
+        form_bad = acroform_problems(pdf)
+        check("acroform", not form_bad, "; ".join(form_bad[:3]) or "1 field: Arabic /TU, /DA, embedded font in /DR")
         pdf.close()
 
 

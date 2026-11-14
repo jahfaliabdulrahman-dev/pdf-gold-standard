@@ -28,3 +28,7 @@ profiles = ["web", "print", "archive"]
 [features.attachments]
 stage = 5
 profiles = ["web", "print", "archive"]
+
+[features.acroform]
+stage = 5
+profiles = ["web", "print", "archive"]
