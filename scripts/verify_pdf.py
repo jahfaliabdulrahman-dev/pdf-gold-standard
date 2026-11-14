@@ -368,8 +368,12 @@ def pdfua_problems(pdf) -> list[str]:
     """PDF/UA-1 structural floor (not full conformance: veraPDF is the judge and is not installed)."""
     bad = []
     with pdf.open_metadata() as m:
-        if str(m.get("pdfuaid:part", "")) != "1":
-            bad.append(f"pdfuaid:part={m.get('pdfuaid:part')}")
+        # A conformance identifier is a CLAIM, not a decoration. This file does not meet 3b/ua1 (the
+        # failures are named in verapdf-baseline.toml), so it must declare neither. When a claim is
+        # added, the matching baseline must be empty — that is the closing condition, checked in CI.
+        for key in ("pdfuaid:part", "pdfaid:part", "pdfaid:conformance"):
+            if m.get(key):
+                bad.append(f"{key}={m.get(key)} claimed without conformance")
     cat = pdf.Root
     if "/StructTreeRoot" not in cat:
         bad.append("no StructTreeRoot")
@@ -619,7 +623,7 @@ def gate(doc) -> list[str]:
               f"page art <= {NS.ART_MAX_DPI} dpi, declared pages match")
 
         ua_bad = pdfua_problems(pdf)
-        check("pdfua", not ua_bad, "; ".join(ua_bad[:4]) or "pdfuaid=1, ParentTree, Lang, MarkInfo, DisplayDocTitle")
+        check("pdfua", not ua_bad, "; ".join(ua_bad[:4]) or "no conformance claim; ParentTree, Lang, MarkInfo, DisplayDocTitle")
 
         form_bad = acroform_problems(pdf)
         check("acroform", not form_bad, "; ".join(form_bad[:3]) or "1 field: Arabic /TU, /DA, embedded font in /DR")
