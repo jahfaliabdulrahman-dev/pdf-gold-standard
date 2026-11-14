@@ -1,7 +1,6 @@
-# veraPDF baseline = the state of 08e921f (before this branch), NOT of this branch.
-# A rule that fails here and is not in [regressions] is a NEW defect and fails the gate.
-# A regression listed below is a KNOWN, OPEN failure introduced by this branch: the gate
-# keeps failing until it is fixed, and the list is deleted then (no dead exceptions).
+# veraPDF baseline = 08e921f (pre-branch). failing = what failed then.
+# fixed = rules this branch made pass (a ratchet down: evidence, not an excuse).
+# regressions.open = rules this branch ADDED and has NOT fixed: the gate fails while non-empty.
 version = "1.30.0"
 measured_on = "08e921f"
 flavours = ["3b", "ua1", "4"]
@@ -15,19 +14,28 @@ failing = ["7.1", "7.18.1", "7.18.5", "7.21.5", "7.4.2"]
 [4]
 failing = ["6.1.2", "6.1.3", "6.2.10.5", "6.2.4.3", "6.2.9", "6.3.2", "6.7.2.1"]
 
+[fixed.3b]
+rules = ["6.2.10", "6.2.4.3", "6.3.2", "6.6.2.1"]
+
+[fixed.ua1]
+rules = []
+
+[fixed.4]
+rules = ["6.2.4.3", "6.2.9", "6.3.2", "6.7.2.1"]
+
 [regressions.3b]
 open = ["6.3.3", "6.4.1", "6.6.4"]
 
 [regressions.ua1]
-open = ["5", "7.18.4"]
+open = ["7.18.4"]
 
 [regressions.4]
 open = ["6.3.3", "6.4.1", "6.7.3", "6.9"]
 
 [reasons]
-"6.3.3" = "annotation flags: widget declares NeedAppearances without /AP (PDF/A forbids it)"
-"6.4.1" = "OutputIntent ICC is a display-class sRGB profile, not an output intent PDF/A accepts"
-"6.6.4" = "Info carries SourceFile/SourceSHA256 with no XMP mirror"
+"6.3.3" = "widget/annotation flags: PDF/A forbids NeedAppearances without /AP (measured by veraPDF)"
+"6.4.1" = "OutputIntent ICC is a display-class profile; PDF/A wants an output intent it accepts"
+"6.6.4" = "Info and XMP not synchronised (custom Info keys SourceFile/SourceSHA256 have no XMP mirror)"
 "6.7.3" = "Info<->XMP properties differ (same cause as 6.6.4)"
-"6.9" = "OCProperties configuration lacks a conforming /Configs entry"
+"6.9" = "OCProperties configuration is not a conforming /Configs entry"
 "7.18.4" = "link annotation has no OBJR in the structure tree"
