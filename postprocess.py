@@ -77,6 +77,8 @@ def feature_xmp(pdf, spec) -> None:
         m["xmp:CreatorTool"] = "Hermes PDF Gold Standard pipeline"
         m["pdf:Producer"] = str(pdf.docinfo.get("/Producer", "PyMuPDF + pikepdf"))
         m["xmpMM:DocumentID"] = f"sha256:{sha}" if sha else "urn:pdf-gold-standard"
+        if "dc:source" in m:
+            del m["dc:source"]
 
 
 def feature_output_intent(pdf, spec) -> None:
@@ -170,14 +172,18 @@ def normalise(pdf) -> None:
     """PDF/A hygiene owned by the file, not by a feature. Measured causes, not guesses:
     - 6.9: the OC configuration dictionary must carry /Name and must NOT carry /AS (PDF/A forbids it).
     - 6.6.4/6.7.3: Info must not carry keys XMP cannot mirror (SourceFile/SourceSHA256)."""
+    for page in pdf.pages:                     # 6.3.2: every annotation prints
+        for a in page.obj.get("/Annots", []):
+            if a.get("/Subtype") in (pikepdf.Name.Link, pikepdf.Name.Widget):
+                a["/F"] = 4
     oc = pdf.Root.get("/OCProperties")
     if oc is not None:
-        ocgs = pikepdf.Array(list(oc.get("/OCGs", [])))
+        ocgs = list(oc.get("/OCGs", []))
         pdf.Root["/OCProperties"] = pikepdf.Dictionary(
-            OCGs=ocgs,
+            OCGs=pikepdf.Array(ocgs),
             D=pikepdf.Dictionary(Name=pikepdf.String("الطبقات"),
                                  BaseState=pikepdf.Name.On,
-                                 Order=pikepdf.Array(list(ocgs))))
+                                 Order=pikepdf.Array(ocgs)))
     for k in ("/SourceFile", "/SourceSHA256"):
         if k in pdf.docinfo:
             del pdf.docinfo[k]
