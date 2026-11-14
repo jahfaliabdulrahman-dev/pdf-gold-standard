@@ -77,7 +77,6 @@ def feature_xmp(pdf, spec) -> None:
         m["xmp:CreatorTool"] = "Hermes PDF Gold Standard pipeline"
         m["pdf:Producer"] = "PyMuPDF + pikepdf"
         m["xmpMM:DocumentID"] = f"sha256:{sha}" if sha else "urn:pdf-gold-standard"
-        m["pdfuaid:part"] = "1"      # PDF/UA-1 floor: the identifier must be in XMP
 
 
 def feature_output_intent(pdf, spec) -> None:
