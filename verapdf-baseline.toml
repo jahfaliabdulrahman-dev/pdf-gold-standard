@@ -7,7 +7,10 @@ version = "1.30.0"
 # (metadata absent). With XMP the same defect reports as 6.6.4/6.7.3 (identification absent):
 # a rule SUBSTITUTION, not a regression. Base set and fixed/regression lists are unchanged.
 measured_on = "8152d99"
-flavours = ["3b", "ua1", "4"]
+# 4f is the binding flavour (owner decision 2026-11-14): PDF/A-4 with arbitrary embedded files.
+# 4 is still measured in the report as a follow-up line, NOT as a gate: it can never pass while the
+# file carries non-PDF/A attachments, and that conflict is resolved by 4f, not by deleting evidence.
+flavours = ["3b", "ua1", "4f"]
 
 # CLASSIFICATION (documentation only — enforced by the claim probe, see below):
 #   3b 6.6.4 / 4 6.7.3 / ua1 5 = identification rules: they fail while the file declares nothing.
@@ -27,5 +30,6 @@ failing = ["6.1.2", "6.1.3", "6.2.10.5", "6.7.3", "6.9"]
 [fixed.4]
 rules = ["6.2.4.3", "6.2.9", "6.3.2", "6.3.3", "6.4.1", "6.7.2.1"]
 
-[regressions.4]
-open = ["6.9"]
+
+[4f]
+failing = ["6.1.2", "6.1.3", "6.2.10.5", "6.7.3"]   # measured; 6.7.3 = identification
