@@ -3,6 +3,9 @@
 # and the claim probe (scripts/claim_probe.py) measures what would remain if it did.
 # 4 6.9-3 = "All of the embedded files shall be compliant with ISO 19005-1/2/4": OUR attachments vs PDF/A-4.
 version = "1.30.0"
+# measured_on explains the base: at 08e921f the file had NO XMP, so 6.6.2.1/6.7.2.1 failed
+# (metadata absent). With XMP the same defect reports as 6.6.4/6.7.3 (identification absent):
+# a rule SUBSTITUTION, not a regression. Base set and fixed/regression lists are unchanged.
 measured_on = "8152d99"
 flavours = ["3b", "ua1", "4"]
 

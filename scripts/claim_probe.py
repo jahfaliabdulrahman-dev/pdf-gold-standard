@@ -45,7 +45,31 @@ def probe(pdf_path, flavour, keys):
         print(f"    {rid} | {desc}")
     return got
 
+# What remains when the file DOES declare conformance. Measured on 47b479a; a rule that stays,
+# appears or disappears outside this table fails the gate — the identification claim is now guarded.
+EXPECTED = {
+    "3b": {"6.2.11.5-1"},
+    "ua1": {"7.1-3", "7.18.1-2", "7.18.5-1", "7.18.5-2", "7.21.5-1", "7.4.2-1"},
+}
+CLAIMS = {"3b": {"pdfaid:part": "3", "pdfaid:conformance": "B"},
+          "ua1": {"pdfuaid:part": "1"}}
+
+
 if __name__ == "__main__":
     src = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
-    probe(src, "3b", {"pdfaid:part": "3", "pdfaid:conformance": "B"})
-    probe(src, "ua1", {"pdfuaid:part": "1"})
+    if "--check" in sys.argv:
+        bad = 0
+        for flavour, keys in CLAIMS.items():
+            got = {rid for rid, _ in probe(src, flavour, keys)}
+            want = EXPECTED[flavour]
+            new, dead = got - want, want - got
+            ok = not new and not dead
+            print(("PASS " if ok else "FAIL ") + f"claim-{flavour} - {len(got)} remaining"
+                  + (f" · NEW {sorted(new)}" if new else "") + (f" · DEAD {sorted(dead)}" if dead else ""))
+            bad += 0 if ok else 1
+        if bad:
+            raise SystemExit(1)
+        print("CLAIM PROBE HELD — what remains under a claim is exactly what is documented")
+    else:
+        for flavour, keys in CLAIMS.items():
+            probe(src, flavour, keys)
