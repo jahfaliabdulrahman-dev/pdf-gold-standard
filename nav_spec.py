@@ -160,6 +160,17 @@ PRINTED_COUNTS_PAGE = 9      # the page that prints «N فحصا» and «M عط�
 # Declared totals. The gate counts its own checks, gate_selftest counts its mutations, and a check reads the
 # printed numbers off the document: all three must agree, so adding a check without updating the guide
 # fails the build instead of leaving the page lying.
-GATE_CHECKS = 25
-GATE_MUTATIONS = 38
+GATE_CHECKS = 30
+GATE_MUTATIONS = 44
+
+# --------------------------------------------------------------------------------------------------------------
+# Stage-5 features (postprocess.py, declared in features.toml). Metadata/structure only — no drawing.
+# --------------------------------------------------------------------------------------------------------------
+# A name -> page map, so a target is an identity, not an index that shifts when a page is added.
+DEST_NAMES = [("cover", 0), ("contents", 2), ("section-1", 3), ("section-2", 6), ("references", 10), ("back", 11)]
+# Printed numbering: (start page, style or None, prefix or start value). The cover is a prefix-only label.
+PAGE_LABELS = [(0, None, "غ"), (1, "D", 1)]
+# Minimum XMP fields the archive/search tools read.
+XMP_LANGUAGE = "ar"
+ATTACHMENTS = ["source.html", "manifest.json"]
 

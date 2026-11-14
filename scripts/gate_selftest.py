@@ -18,6 +18,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import pymupdf as fitz  # noqa: E402
+import pikepdf  # noqa: E402
 
 import nav_spec as NS  # noqa: E402
 import verify_pdf as G  # noqa: E402
@@ -356,6 +357,53 @@ def drop_page(doc):
     doc.delete_page(7)
 
 
+def _pikemutate(doc, fn):
+    """Round-trip through pikepdf (the library that wrote the feature) and return a new fitz doc."""
+    import io
+    import pikepdf
+    with pikepdf.open(io.BytesIO(doc.tobytes())) as pdf:
+        fn(pdf)
+        buf = io.BytesIO()
+        pdf.save(buf)
+    return fitz.open("pdf", buf.getvalue())
+
+
+def drop_page_labels(doc):
+    return _pikemutate(doc, lambda p: p.Root.__delitem__("/PageLabels"))
+
+
+def rename_destination(doc):
+    def fn(p):
+        p.Root.Names.Dests.Names[0] = pikepdf.String("cover-renamed")
+    return _pikemutate(doc, fn)
+
+
+def drop_xmp_title(doc):
+    def fn(p):
+        with p.open_metadata() as m:
+            del m["dc:title"]
+    return _pikemutate(doc, fn)
+
+
+def strip_output_intent(doc):
+    return _pikemutate(doc, lambda p: p.Root.__delitem__("/OutputIntents"))
+
+
+def break_box_order(doc):
+    def fn(p):
+        p.pages[0].obj["/TrimBox"] = pikepdf.Array([50, 50, 500, 800])
+        p.pages[0].obj["/BleedBox"] = pikepdf.Array([100, 100, 400, 700])   # Bleed inside Trim: invalid
+    return _pikemutate(doc, fn)
+
+
+def drop_attachment(doc):
+    def fn(p):
+        del p.attachments["source.html"]
+        p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
+    return _pikemutate(doc, fn)
+
+
+
 # (mutation, expected check, must_stay_green)
 MUTATIONS = [
     (swap_next_prev, "nav-buttons", False),
@@ -395,6 +443,12 @@ MUTATIONS = [
     (split_text_objects, "line-order", False),
     (wrong_mark, "vocalised", False),
     (wrong_printed_count, "gate-claims", False),
+    (drop_page_labels, "page-labels", False),
+    (rename_destination, "named-destinations", False),
+    (drop_xmp_title, "xmp", False),
+    (strip_output_intent, "output-intent", False),
+    (break_box_order, "output-intent", False),
+    (drop_attachment, "attachments", False),
     (drop_page, "pages", False),
 ]
 
@@ -408,7 +462,9 @@ if __name__ == "__main__":
     for mutate, expect, green in MUTATIONS:
         d = fresh()
         try:
-            mutate(d)
+            out = mutate(d)          # a mutation may return a re-serialised document (pikepdf round-trip)
+            if out is not None and hasattr(out, "page_count"):
+                d = out
             failed = G.gate(reread(d))
         finally:
             restore_all()

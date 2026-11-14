@@ -188,6 +188,114 @@ def version_spots_in_source() -> list[str]:
 
 
 # ---------------------------------------------------------------------------------------------------------
+# Stage-5 features: metadata/structure, read with pikepdf (the same library that wrote them).
+# ---------------------------------------------------------------------------------------------------------
+def pikepdf_open(doc):
+    import io
+    import pikepdf
+    return pikepdf.open(io.BytesIO(doc.tobytes()))
+
+
+def derived_page_labels(pdf) -> list[str] | None:
+    """Labels the reader will show, derived from the RAW /Nums (pymupdf drops the prefix — spec §4.2)."""
+    try:
+        nums = pdf.Root.PageLabels.Nums
+    except (AttributeError, KeyError):
+        return None
+    rules = [(int(nums[k]), nums[k + 1]) for k in range(0, len(nums), 2)]
+    out = []
+    for i in range(len(pdf.pages)):
+        rule = None
+        for start, d in rules:
+            if start <= i:
+                rule = (start, d)
+        if rule is None:
+            out.append(str(i + 1))
+            continue
+        start, d = rule
+        if "/S" in d:
+            style, st = str(d["/S"]), int(d.get("/St", 1))
+            out.append(str(st + i - start) if style == "/D" else f"{style}{st + i - start}")
+        else:
+            out.append(str(d.get("/P", "")).strip("()"))
+    return out
+
+
+def named_destination_pages(pdf) -> dict[str, int]:
+    """name -> 0-based page index, resolved from the /D array of each destination."""
+    out = {}
+    try:
+        arr = pdf.Root.Names.Dests.Names
+    except (AttributeError, KeyError):
+        return out
+    index = {page.obj.objgen: k for k, page in enumerate(pdf.pages)}
+    for k in range(0, len(arr), 2):
+        d = arr[k + 1]
+        ref = d["/D"][0]
+        out[str(arr[k])] = index.get(ref.objgen, -1)
+    return out
+
+
+def xmp_values(pdf) -> dict:
+    with pdf.open_metadata() as m:
+        return {k: m.get(k) for k in ("dc:title", "dc:creator", "dc:language", "xmp:CreatorTool",
+                                      "pdf:Producer", "xmpMM:DocumentID")}
+
+
+def output_intent_problems(pdf) -> list[str]:
+    bad = []
+    try:
+        oi = pdf.Root.OutputIntents[0]
+    except (AttributeError, KeyError, IndexError):
+        return ["no /OutputIntents"]
+    if str(oi.get("/S", "")) != "/GTS_PDFA1":
+        bad.append(f"intent subtype {oi.get('/S')}")
+    try:
+        n = int(oi.DestOutputProfile.get("/N", 0))
+        size = len(bytes(oi.DestOutputProfile.read_bytes()))
+    except Exception:
+        n, size = 0, 0
+    if n not in (3, 4):
+        bad.append(f"ICC /N={n}")
+    if size < 1024:
+        bad.append(f"ICC {size} bytes")
+    for i, page in enumerate(pdf.pages):
+        media = [float(v) for v in page.obj["/MediaBox"]]
+        trim = page.obj.get("/TrimBox")
+        bleed = page.obj.get("/BleedBox")
+        if trim is None or bleed is None:
+            bad.append(f"p{i+1} missing {'/TrimBox' if trim is None else '/BleedBox'}")
+            continue
+        trim = [float(v) for v in trim]
+        bleed = [float(v) for v in bleed]
+        inside = lambda outer, inner: outer[0] <= inner[0] and outer[1] <= inner[1] \
+            and inner[2] <= outer[2] and inner[3] <= outer[3]
+        if not inside(media, bleed):
+            bad.append(f"p{i+1} BleedBox outside MediaBox")
+        if not inside(bleed, trim):
+            bad.append(f"p{i+1} TrimBox outside BleedBox")
+    return bad
+
+
+def attachment_problems(pdf) -> list[str]:
+    bad, got = [], {}
+    for name, spec in pdf.attachments.items():
+        try:
+            data = spec.get_file().read_bytes()
+        except Exception:
+            data = b""
+        if not data:
+            bad.append(f"{name}: empty")
+        if "/AFRelationship" not in spec.obj:
+            bad.append(f"{name}: no /AFRelationship")
+        got[name] = len(data)
+    if sorted(got) != sorted(NS.ATTACHMENTS):
+        bad.append(f"attachments {sorted(got)}, expected {sorted(NS.ATTACHMENTS)}")
+    return bad
+
+
+
+# ---------------------------------------------------------------------------------------------------------
 # Icons (unchanged behaviour; H2 turns a missing input into a failure)
 # ---------------------------------------------------------------------------------------------------------
 def _icon_norm(mask):
@@ -394,6 +502,61 @@ def gate(doc) -> list[str]:
             foot_bad.append(f"p{i+1}: footer {got_nums or 'missing'} vs {want_num}")
     check("footer-numbers", not foot_bad, "; ".join(foot_bad[:5]) or
           f"{len(NS.FOOTER)} pages print their own number, {len(NS.PAGE_INK) - len(NS.FOOTER)} print none")
+
+    # 5c. stage-5 features (features.toml): every declared feature must exist and be right. A feature
+    # that was never checked is a feature that can vanish in the next refactor.
+    try:
+        pdf = pikepdf_open(doc)
+    except Exception as e:
+        pdf = None
+        for name in ("page-labels", "named-destinations", "xmp", "output-intent", "attachments"):
+            check(name, False, f"could not open with pikepdf: {e}")
+    if pdf is not None:
+        # page labels: derive what a reader will show, from the RAW /Nums
+        want_labels = []
+        for i in range(NS.PAGES):
+            rule = None
+            for start, style, value in NS.PAGE_LABELS:
+                if start <= i:
+                    rule = (start, style, value)
+            if rule is None:
+                want_labels.append(str(i + 1))
+            elif rule[1] is None:
+                want_labels.append(rule[2])
+            else:
+                want_labels.append(str(rule[2] + i - rule[0]))
+        got_labels = derived_page_labels(pdf)
+        check("page-labels", got_labels == want_labels,
+              f"labels {got_labels[:3]}...{got_labels[-2:]}" if got_labels else "no /PageLabels")
+
+        dests = named_destination_pages(pdf)
+        dest_bad = [f"{n}: {dests.get(n, 'missing')} vs {p}" for n, p in NS.DEST_NAMES if dests.get(n) != p]
+        check("named-destinations", not dest_bad and len(dests) == len(NS.DEST_NAMES),
+              "; ".join(dest_bad[:4]) or f"{len(dests)} names resolve to their pages")
+
+        x = xmp_values(pdf)
+        lang = x.get("dc:language")
+        langs = [str(v).lower() for v in (lang if isinstance(lang, (list, tuple, set)) else [lang])]
+        x_bad = [k for k, ok in (
+            ("dc:title", bool(x.get("dc:title")) and NS.GUIDE_VERSION_AR in str(x.get("dc:title"))),
+            ("dc:creator", bool(x.get("dc:creator"))),
+            ("dc:language", NS.XMP_LANGUAGE in langs),
+            ("xmp:CreatorTool", bool(x.get("xmp:CreatorTool"))),
+            ("pdf:Producer", bool(x.get("pdf:Producer"))),
+            ("xmpMM:DocumentID", bool(x.get("xmpMM:DocumentID"))),
+        ) if not ok]
+        check("xmp", not x_bad, "missing/wrong: " + ", ".join(x_bad) if x_bad else
+              f"6 fields, language {sorted(langs)}")
+
+        oi_bad = output_intent_problems(pdf)
+        check("output-intent", not oi_bad, "; ".join(oi_bad[:4]) or
+              f"GTS_PDFA1 sRGB, Trim/Bleed inside MediaBox on {len(pdf.pages)} pages")
+
+        att_bad = attachment_problems(pdf)
+        check("attachments", not att_bad, "; ".join(att_bad[:4]) or
+              ", ".join(f"{n} ({len(s.get_file().read_bytes())} B)" for n, s in pdf.attachments.items()))
+        pdf.close()
+
 
     # 6. external links on the references page
     uris = [l.get("uri") for l in sorted(doc[NS.REF_PAGE].get_links(), key=lambda l: l["from"].y0)
