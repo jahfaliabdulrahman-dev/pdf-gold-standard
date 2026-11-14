@@ -16,9 +16,9 @@ flavours = ["3b", "ua1", "4f"]
 #   3b 6.6.4 / 4 6.7.3 / ua1 5 = identification rules: they fail while the file declares nothing.
 #   scripts/claim_probe.py injects the identifiers into a COPY and measures what remains.
 [3b]
-failing = ["6.2.11.5", "6.6.4"]
+failing = ["6.6.4"]
 [fixed.3b]
-rules = ["6.2.10", "6.2.4.3", "6.3.2", "6.3.3", "6.4.1", "6.6.2.1", "6.6.2.3.1"]
+rules = ["6.2.10", "6.2.4.3", "6.2.11.5", "6.3.2", "6.3.3", "6.4.1", "6.6.2.1", "6.6.2.3.1"]
 
 [ua1]
 failing = ["5", "7.1", "7.18.1", "7.18.5", "7.21.5", "7.4.2"]
