@@ -704,10 +704,15 @@ def gate(doc) -> list[str]:
               f"page art <= {NS.ART_MAX_DPI} dpi, declared pages match")
 
         ua_bad = pdfua_problems(pdf)
-        check("pdfua", not ua_bad, "; ".join(ua_bad[:4]) or "no conformance claim; ParentTree, Lang, MarkInfo, DisplayDocTitle")
+        claim = getattr(NS, "CONFORMANCE", None)
+        detail = (f"claim {claim} checked against an empty 3b baseline" if claim
+                  else "no conformance claim") + "; ParentTree, Lang, MarkInfo, DisplayDocTitle"
+        check("pdfua", not ua_bad, "; ".join(ua_bad[:4]) or detail)
 
         form_bad = acroform_problems(pdf)
-        check("acroform", not form_bad, "; ".join(form_bad[:3]) or "1 field: Arabic /TU, /DA, embedded font in /DR")
+        n_fields = len(getattr(NS, "ACROFORM_FIELDS", [1]))
+        check("acroform", not form_bad, "; ".join(form_bad[:3]) or
+              f"{n_fields} field(s): Arabic /TU, /DA, embedded font in /DR, /StructParent -> /Form")
 
         link_bad = link_tagging_problems(pdf)
         check("link-tagging", not link_bad, "; ".join(link_bad[:4]) or
