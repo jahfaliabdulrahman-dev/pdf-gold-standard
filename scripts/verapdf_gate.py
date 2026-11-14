@@ -50,7 +50,8 @@ if __name__ == "__main__":
         want = set(base[f]["failing"])
         known = set(base.get("regressions", {}).get(f, {}).get("open", []))
         got = failing_rules(pdf, f)
-        new, dead = got - want - known, want - got
+        allowed_dead = set(base.get("fixed", {}).get(f, {}).get("rules", []))
+        new, dead = got - want - known, want - got - allowed_dead
         open_reg = got & known
         ok = not new and not dead and not open_reg
         print(("PASS " if ok else "FAIL ") + f"verapdf-{f} - {len(got)} failing rules "
