@@ -166,8 +166,8 @@ ART_MAX_DPI = 300          # spec §3.4: art serving >30% of a page is capped at
 ART_DPI_DECLARED = {3: 205, 6: 205, 11: 205}
 ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of the page
 
-GATE_CHECKS = 33
-GATE_MUTATIONS = 47
+GATE_CHECKS = 34
+GATE_MUTATIONS = 48
 
 # --------------------------------------------------------------------------------------------------------------
 # Stage-5 features (postprocess.py, declared in features.toml). Metadata/structure only — no drawing.
@@ -179,4 +179,8 @@ PAGE_LABELS = [(0, None, "غ"), (1, "D", 1)]
 # Minimum XMP fields the archive/search tools read.
 XMP_LANGUAGE = "ar"
 ATTACHMENTS = ["source.html", "manifest.json"]
+# Link accessible names, derived from the geometry the build already uses.
+LINK_LABELS = {"next": "الصفحة التالية", "prev": "الصفحة السابقة",
+               "contents": "جدول المحتويات", "home": "الغلاف"}
+EXPECTED_LINKS = 42        # 8 nav pages x 4 + 6 contents rows + 4 references
 

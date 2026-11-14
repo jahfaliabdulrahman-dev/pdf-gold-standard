@@ -408,6 +408,23 @@ def acroform_problems(pdf) -> list[str]:
     return bad
 
 
+def link_tagging_problems(pdf) -> list[str]:
+    bad, count = [], 0
+    for i, page in enumerate(pdf.pages):
+        for a in page.obj.get("/Annots", []):
+            if str(a.get("/Subtype")) != "/Link":
+                continue
+            count += 1
+            c = str(a.get("/Contents", ""))
+            if not c or not any("\u0600" <= ch <= "\u06ff" for ch in c):
+                bad.append(f"p{i+1} link without an Arabic /Contents")
+            if a.get("/StructParent") is None:
+                bad.append(f"p{i+1} link without /StructParent")
+    if count != NS.EXPECTED_LINKS:
+        bad.append(f"{count} links, expected {NS.EXPECTED_LINKS}")
+    return bad
+
+
 def gate(doc) -> list[str]:
     fails: list[str] = []               # local: two gates may run in one process
     ran: list[str] = []
@@ -627,6 +644,10 @@ def gate(doc) -> list[str]:
 
         form_bad = acroform_problems(pdf)
         check("acroform", not form_bad, "; ".join(form_bad[:3]) or "1 field: Arabic /TU, /DA, embedded font in /DR")
+
+        link_bad = link_tagging_problems(pdf)
+        check("link-tagging", not link_bad, "; ".join(link_bad[:4]) or
+              f"{NS.EXPECTED_LINKS} links: Arabic /Contents, /StructParent, /Link element")
         pdf.close()
 
 

@@ -429,6 +429,16 @@ def field_without_tu(doc):
     return _pikemutate(doc, fn)
 
 
+def link_without_contents(doc):
+    def fn(p):
+        for page in p.pages:
+            for a in page.obj.get("/Annots", []):
+                if a.get("/Subtype") == pikepdf.Name.Link:
+                    del a["/Contents"]
+                    return
+    return _pikemutate(doc, fn)
+
+
 # (mutation, expected check, must_stay_green)
 MUTATIONS = [
     (swap_next_prev, "nav-buttons", False),
@@ -477,6 +487,7 @@ MUTATIONS = [
     (art_over_dpi, "art-dpi", False),
     (drop_parent_tree, "pdfua", False),
     (field_without_tu, "acroform", False),
+    (link_without_contents, "link-tagging", False),
     (drop_page, "pages", False),
 ]
 
