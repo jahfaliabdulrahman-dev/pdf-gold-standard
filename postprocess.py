@@ -77,6 +77,7 @@ def feature_xmp(pdf, spec) -> None:
         m["xmp:CreatorTool"] = "Hermes PDF Gold Standard pipeline"
         m["pdf:Producer"] = "PyMuPDF + pikepdf"
         m["xmpMM:DocumentID"] = f"sha256:{sha}" if sha else "urn:pdf-gold-standard"
+        m["pdfuaid:part"] = "1"      # PDF/UA-1 floor: the identifier must be in XMP
 
 
 def feature_output_intent(pdf, spec) -> None:
@@ -121,7 +122,32 @@ def feature_attachments(pdf, spec) -> None:
     pdf.Root.AF = pikepdf.Array([pdf.attachments[n].obj for n in files])
 
 
+def feature_acroform(pdf, spec) -> None:
+    """One real text field with an Arabic /TU and an embedded house font in /DR.
+
+    The widget is borderless (/BS W 0) so it moves no pixel; /Q 2 asks for right alignment (bidi is the
+    reader's job — the spec says so, and Acrobat is not automatable here).
+    """
+    fonts = pdf.pages[0].obj["/Resources"]["/Font"]
+    key = next(iter(fonts.keys()))
+    da = pikepdf.String(f"{key} 10 Tf 0 g")
+    widget = pdf.make_indirect(pikepdf.Dictionary(
+        Type=pikepdf.Name.Annot, Subtype=pikepdf.Name.Widget, FT=pikepdf.Name.Tx,
+        T=pikepdf.String("applicant_name"), TU=pikepdf.String("الاسم الكامل لمقدم الطلب"),
+        Q=2, DA=da, Rect=pikepdf.Array([60, 80, 360, 112]), F=4,
+        BS=pikepdf.Dictionary(W=0), P=pdf.pages[11].obj,
+    ))
+    ann = pdf.pages[11].obj.get("/Annots", pikepdf.Array())
+    ann.append(widget)
+    pdf.pages[11].obj["/Annots"] = ann
+    pdf.Root.AcroForm = pikepdf.Dictionary(
+        Fields=pikepdf.Array([widget]),
+        DR=pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]})),
+        NeedAppearances=True, DA=da)
+
+
 STAGE5 = {
+    "acroform": feature_acroform,
     "page-labels": feature_page_labels,
     "named-destinations": feature_named_destinations,
     "xmp": feature_xmp,

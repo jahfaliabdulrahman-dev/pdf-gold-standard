@@ -404,6 +404,29 @@ def drop_attachment(doc):
 
 
 
+def art_over_dpi(doc):
+    # an image above the ceiling: a 600-dpi raster placed over the cover art
+    from PIL import Image
+    import io
+    buf = io.BytesIO()
+    # 530x780 pt = 7.36x10.83 in; at 600 dpi that is 4417x6500 px -> page art above the 300 cap
+    Image.new("RGB", (4417, 6500), "white").save(buf, "JPEG")
+    pix = fitz.Pixmap(buf.getvalue())
+    doc[0].insert_image(fitz.Rect(30, 30, 560, 810), pixmap=pix, overlay=True)
+
+
+def drop_parent_tree(doc):
+    def fn(p):
+        del p.Root.StructTreeRoot["/ParentTree"]
+    return _pikemutate(doc, fn)
+
+
+def field_without_tu(doc):
+    def fn(p):
+        del p.Root.AcroForm.Fields[0]["/TU"]
+    return _pikemutate(doc, fn)
+
+
 # (mutation, expected check, must_stay_green)
 MUTATIONS = [
     (swap_next_prev, "nav-buttons", False),
@@ -449,6 +472,9 @@ MUTATIONS = [
     (strip_output_intent, "output-intent", False),
     (break_box_order, "output-intent", False),
     (drop_attachment, "attachments", False),
+    (art_over_dpi, "art-dpi", False),
+    (drop_parent_tree, "pdfua", False),
+    (field_without_tu, "acroform", False),
     (drop_page, "pages", False),
 ]
 

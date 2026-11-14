@@ -123,7 +123,7 @@ PAGE_INK_DPI, PAGE_INK_GRID, PAGE_INK_TOL = 72, 4, 0.02
 # "nothing" from "everything" (it is larger than the whole page), so removal is judged by retention instead.
 PAGE_INK_MIN_RETENTION, PAGE_INK_CELL_FLOOR = 0.60, 0.005
 PAGE_INK = {
-    0: (0.1244, (0.0253, 0.1689, 0.0884, 0.0077, 0.0013, 0.1094, 0.2377, 0.0173, 0.0203, 0.2227, 0.2211, 0.0238, 0.0057, 0.4071, 0.4250, 0.0050)),
+    0: (0.1227, (0.0254, 0.1697, 0.0891, 0.0078, 0.0007, 0.1141, 0.2429, 0.0136, 0.0119, 0.2259, 0.2252, 0.0155, 0.0056, 0.3936, 0.4133, 0.0044)),
     1: (0.0077, (0.0000, 0.0100, 0.0132, 0.0000, 0.0049, 0.0423, 0.0395, 0.0054, 0.0000, 0.0000, 0.0000, 0.0000, 0.0051, 0.0016, 0.0000, 0.0004)),
     2: (0.0101, (0.0006, 0.0268, 0.0319, 0.0051, 0.0019, 0.0000, 0.0419, 0.0238, 0.0005, 0.0086, 0.0144, 0.0061, 0.0000, 0.0000, 0.0000, 0.0000)),
     3: (0.0313, (0.0066, 0.0066, 0.0000, 0.0000, 0.0037, 0.0137, 0.0541, 0.1330, 0.0457, 0.0838, 0.0765, 0.0266, 0.0016, 0.0244, 0.0235, 0.0011)),
@@ -160,8 +160,14 @@ PRINTED_COUNTS_PAGE = 9      # the page that prints «N فحصا» and «M عط�
 # Declared totals. The gate counts its own checks, gate_selftest counts its mutations, and a check reads the
 # printed numbers off the document: all three must agree, so adding a check without updating the guide
 # fails the build instead of leaving the page lying.
-GATE_CHECKS = 30
-GATE_MUTATIONS = 44
+ART_MAX_DPI = 300          # spec §3.4: art serving >30% of a page is capped at 300 dpi (cover was 411)
+# Divider/back art is 205-217 dpi and is DECLARED below the 290-330 band: upscaling it increases the file
+# (spec §3.4, measured). The floor is therefore enforced only on pages absent from this table.
+ART_DPI_DECLARED = {3: 205, 6: 205, 11: 205}
+ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of the page
+
+GATE_CHECKS = 33
+GATE_MUTATIONS = 47
 
 # --------------------------------------------------------------------------------------------------------------
 # Stage-5 features (postprocess.py, declared in features.toml). Metadata/structure only — no drawing.
