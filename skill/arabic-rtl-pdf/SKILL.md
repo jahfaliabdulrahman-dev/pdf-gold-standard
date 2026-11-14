@@ -1,7 +1,7 @@
 ---
 name: arabic-rtl-pdf
 description: "Use when producing an Arabic/RTL PDF report or fixing broken Arabic in a PDF (عربي — تقرير PDF عربي): Chrome print, PyMuPDF bookmarks and nav buttons, and a delivery gate proven able to fail. House gold standard."
-version: 1.3.10
+version: 1.3.11
 metadata:
   hermes:
     tags: [pdf, arabic, rtl, report, chrome, weasyprint, pymupdf, interactive, bookmarks, gold-standard]
@@ -319,10 +319,15 @@ copies just left of it, the last letter a hidden copy 0.12 em short of its right
 fake bold when the next glyph is the same letter — سس، لل); the jump back from the glyph's end to that copy must
 stay under 0.2 em or pdf.js starts a new item (0.32 em cut the line at «لله»); (b) the space redrawn in the word's
 font is a hidden glyph; (c) a kerning gap after a DRAWN glyph is the one case left: widening it (default) keeps
-every reader's text identical; `--strict-widths` fills the gap with a hidden blank glyph mapped to U+200B instead
-and costs Preview and pdf.js a space inside 3–4 words of the guide (both drop the character and see the gap).
+every reader's text identical; `--strict-widths` moves the letter to a hidden copy of the glyph as wide as the real
+advance, shown at the same place right AFTER the drawn glyph, which keeps the font's width and maps to U+2060 —
+no reader reads a space, but Preview, PDFium, MuPDF and poppler paste that invisible character inside the word
+(4 words of the guide). Dead ends, all measured: a hidden blank filler mapped to U+200B (Preview and pdf.js still
+read the space), the drawn glyph mapped to U+200B (Preview turns an in-line U+200B into a space), the hidden copy
+before the drawn glyph (pixels moved).
+veraPDF does NOT count every offender: one page of the old build alone gave 27 failures while the whole file gave
+22 — use `fix_text_layer.drawn_width_mismatches()` for the count (60 → 5 → 0 pairs), veraPDF for the verdict.
 Text in PDFium, MuPDF, poppler, pdf.js and Preview: identical to the previous build, 0 pixels changed.
-`fix_text_layer.drawn_width_mismatches()` counts the offending (font, cid) pairs without Java: 60 → 5 → 0.
 
 Line order for stream-order readers: Skia paints one `BT..ET` per word and per space, the space in a Latin subset
 font. MuPDF resets the text direction at every `BT` (each word reversed alone → words of the line come out

@@ -136,15 +136,6 @@ class FontState:
         pool = sorted((g for g in self.inked if g != gid), key=lambda g: (abs(self.inked[g][0] - lo) + abs(self.inked[g][1] - hi), g)) or [gid]
         return pool[(k - 2) % len(pool)]
 
-    def filler_cid(self, width):
-        """A blank glyph of the given width mapped to U+200B, to be shown hidden (None if the subset has no empty glyph)."""
-        if self.blank is None: return None
-        key = ("filler", round(width, 3))
-        if key not in self.alias:
-            c = self.next; self.next += 1
-            self.alias[key] = c; self.gid[c] = self.blank; self.map[c] = WJ; self.neww[c] = width
-        return self.alias[key]
-
     def mark_cid(self, text):
         """A zero-width blank glyph mapped to an invisible direction mark (None if the subset has no empty glyph)."""
         if self.blank is None: return None
@@ -237,6 +228,7 @@ def split_units(text):
 
 
 TOK = re.compile(rb"(/F\w+)\s+([\d.]+)\s+Tf|(-?[\d.]+) (-?[\d.]+) Td|<([0-9A-Fa-f]+)> Tj|\bET\b|\bTm\b")
+GAP_JOINER = "\u2060"  # what the DRAWN glyph maps to in strict mode: invisible, transparent to Arabic joining, never a space
 STRICT_WIDTHS = False  # set by process(strict_widths=True): no drawn glyph may differ from the font's width
 GAP_MIN, GAP_MAX = 0.10, 0.25      # em: a positive kern readers may read as a space; larger jumps are real gaps
 
@@ -248,9 +240,12 @@ def close_gaps(data, fontmap, st_of, stats):
     (PDF/A 6.2.11.5, PDF/UA 7.21.5) — but the two cannot both be had (measured on the guide, 5 gaps):
       * default: the drawn glyph gets the wider alias too. Best copy; the one class of drawn glyph left whose /W is
         not the font's (veraPDF: 1 failed check, down from 22).
-      * STRICT_WIDTHS: the drawn glyph keeps its width and is followed by a hidden blank glyph as wide as the gap,
-        mapped to U+200B. veraPDF: 0. Price: pdf.js skips that character and still reads a space into 3 words;
-        MuPDF and poppler paste the invisible character inside 4 words; PDFium is unchanged.
+      * STRICT_WIDTHS: the letter moves to a HIDDEN copy of the glyph, as wide as the real advance, shown at the same
+        place right after the drawn glyph; the drawn glyph keeps the font's width and maps to U+2060. veraPDF: 0.
+        No reader reads a space; Preview, PDFium, MuPDF and poppler paste the invisible U+2060 inside those words
+        (4 words of the guide), pdf.js drops it. Tried and dropped: a hidden blank filler in the gap mapped to U+200B
+        (Preview and pdf.js still read the space), the drawn glyph mapped to U+200B (Preview turns it into a space),
+        the hidden copy BEFORE the drawn glyph (pixels moved).
     Drawing is unchanged either way."""
     st = None; size = 0.0; x = y = 0.0; seq = []
     for t in TOK.finditer(data):
@@ -278,13 +273,13 @@ def close_gaps(data, fontmap, st_of, stats):
             gap = (b[0] - x0 - w) / sz
             if GAP_MIN < gap < GAP_MAX and text and nxt and not text.isspace() and not nxt.isspace():
                 hidden = data[pos - 6:pos - 1] == b"3 Tr "
-                fill = s.filler_cid(round(gap * 1000, 4)) if STRICT_WIDTHS and not hidden else None
+                fill = True if STRICT_WIDTHS and not hidden else None
                 if hidden or fill is None:
                     edits.append((pos, 4, b"%04X" % s.want(cid, text, width=round((b[0] - x0) / sz * 1000, 4))))
                     stats["gap_closed" if hidden else "gap_closed_by_width"] += 1
                 else:
-                    end = pos + 4 + len(b"> Tj")
-                    edits.append((end, 0, b" 3 Tr <%04X> Tj 0 Tr" % fill)); stats["gap_filled"] += 1
+                    wide = s.want(cid, text, width=round((b[0] - x0) / sz * 1000, 4)); drawn = s.want(cid, GAP_JOINER)
+                    edits.append((pos - 1, 4 + len(b"<> Tj"), b"<%04X> Tj 0 0 Td 3 Tr <%04X> Tj 0 Tr" % (drawn, wide))); stats["gap_filled"] += 1
             break
     out = bytearray(data)
     for pos, n, new in sorted(edits, reverse=True):
@@ -495,8 +490,9 @@ def join_lines(data, fontmap, st_of, stats):
 def drawn_width_mismatches(path):
     """Drawn glyphs (text render mode other than 3) whose width in the font dictionary differs from the embedded font
     program by more than 1/1000 em -> sorted [(base font, cid, dictionary width, font width)]. This is what PDF/A
-    6.2.11.5 and PDF/UA 7.21.5 forbid; it counts every (font, cid) pair, veraPDF fewer (60 / 5 / 0 here against 22 / 1 / 0 on the same three builds of the
-    guide - the difference is not explained); the two agree on which builds are clean."""
+    6.2.11.5 and PDF/UA 7.21.5 forbid. veraPDF 1.28.2 reports fewer: it does not repeat a check across pages (page 6
+    of an old build alone: 27 failures; that whole file: 22), so its count is a verdict, not an inventory. Every pair
+    veraPDF reported is in this list; both give zero on the same builds."""
     tok = re.compile(rb"(/F\w+)\s+[\d.]+\s+Tf|\b([0-7]) Tr\b|<([0-9A-Fa-f]+)> Tj|\b(q|Q)\b")
     bad = set()
     with pikepdf.open(path) as pdf:
