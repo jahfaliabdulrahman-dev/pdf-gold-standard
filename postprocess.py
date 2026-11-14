@@ -148,6 +148,28 @@ def feature_acroform(pdf, spec) -> None:
     ann = pdf.pages[11].obj.get("/Annots", pikepdf.Array())
     ann.append(widget)
     pdf.pages[11].obj["/Annots"] = ann
+    # 7.18.4: a Widget must be nested in a /Form structure element with an OBJR and a StructParent
+    st = pdf.Root.StructTreeRoot
+    pg = pdf.pages[11]
+    form = pdf.make_indirect(pikepdf.Dictionary(
+        Type=pikepdf.Name.StructElem, S=pikepdf.Name.Form, Pg=pg.obj,
+        K=pikepdf.Dictionary(Type=pikepdf.Name.OBJR, Obj=widget, Pg=pg.obj)))
+    form["/P"] = st          # 7.1-12: every structure element carries its parent
+    n = int(st.get("/ParentTreeNextKey", 0))
+    pt = st["/ParentTree"]
+    nums = pt.get("/Nums", pdf.make_indirect(pikepdf.Array()))
+    nums.append(n); nums.append(form)
+    pt["/Nums"] = nums
+    st["/ParentTreeNextKey"] = n + 1
+    widget["/StructParent"] = n
+    k = st.get("/K")
+    if isinstance(k, pikepdf.Array):
+        k.append(form)
+    elif k is None:
+        st["/K"] = pikepdf.Array([form])
+    else:
+        st["/K"] = pikepdf.Array([k, form])
+
     pdf.Root.AcroForm = pikepdf.Dictionary(
         Fields=pikepdf.Array([widget]),
         DR=pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]})),
