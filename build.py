@@ -182,7 +182,7 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.join(PROJ, "scripts"))
     from fix_text_layer import process as fix_text_layer
     fixed = PARTIAL[:-4] + ".textfix.pdf"
-    print("[4b] text layer rebuilt:", fix_text_layer(PARTIAL, fixed))
+    print("[4b] text layer rebuilt:", fix_text_layer(PARTIAL, fixed, strict_widths=True))
     os.replace(fixed, PARTIAL)
     # stage 5: metadata/structure declared in features.toml — applied after the text layer, before the gate
     from postprocess import apply as postprocess
