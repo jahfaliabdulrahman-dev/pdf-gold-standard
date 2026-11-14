@@ -48,11 +48,14 @@ if __name__ == "__main__":
     bad = 0
     for f in flavours:
         want = set(base[f]["failing"])
+        known = set(base.get("regressions", {}).get(f, {}).get("open", []))
         got = failing_rules(pdf, f)
-        new, dead = got - want, want - got
-        ok = not new and not dead
+        new, dead = got - want - known, want - got
+        open_reg = got & known
+        ok = not new and not dead and not open_reg
         print(("PASS " if ok else "FAIL ") + f"verapdf-{f} - {len(got)} failing rules "
-              f"(baseline {len(want)})" + (f" · NEW {sorted(new)}" if new else "") + (f" · DEAD {sorted(dead)}" if dead else ""))
+              f"(baseline {len(want)})" + (f" · NEW {sorted(new)}" if new else "")
+              + (f" · DEAD {sorted(dead)}" if dead else "") + (f" · OPEN REGRESSION {sorted(open_reg)}" if open_reg else ""))
         bad += 0 if ok else 1
     if bad:
         raise SystemExit(1)
