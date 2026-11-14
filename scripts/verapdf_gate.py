@@ -7,6 +7,7 @@ Exit 1 when a rule fails that is not named, or a named rule stopped failing (the
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import tomllib
@@ -26,7 +27,7 @@ def failing_rules(path: str, flavour: str) -> set[str]:
         if isinstance(o, dict):
             if o.get("ruleStatus") == "FAILED":
                 rid = o.get("ruleId") or o.get("clause")
-                if rid:
+                if rid and re.fullmatch(r"\d+(\.\d+)+", str(rid)):   # clause ids only, never a bare section
                     out.add(str(rid))
             for v in o.values():
                 walk(v)

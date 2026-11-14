@@ -185,9 +185,11 @@ def extra_printed_number(doc):
 
 
 def wrong_source_stamp(doc):
-    # a file built from another source: copy fidelity would be measured against the wrong truth
-    info = int(doc.xref_get_key(-1, "Info")[1].split()[0])
-    doc.xref_set_key(info, "SourceSHA256", fitz.get_pdf_str("0" * 64))
+    # a file built from another source: provenance is a claim, wherever it is written
+    def fn(p):
+        with p.open_metadata() as m:
+            m["xmpMM:DocumentID"] = "sha256:" + "0" * 64
+    return _pikemutate(doc, fn)
 
 
 def stale_version(doc):
