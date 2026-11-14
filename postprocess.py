@@ -75,7 +75,7 @@ def feature_xmp(pdf, spec) -> None:
         m["dc:description"] = "معيار جودة إنتاج ملفات PDF التفاعلية العربية"
         m["dc:language"] = ["ar"]
         m["xmp:CreatorTool"] = "Hermes PDF Gold Standard pipeline"
-        m["pdf:Producer"] = "PyMuPDF + pikepdf"
+        m["pdf:Producer"] = str(pdf.docinfo.get("/Producer", "PyMuPDF + pikepdf"))
         m["xmpMM:DocumentID"] = f"sha256:{sha}" if sha else "urn:pdf-gold-standard"
 
 
@@ -116,6 +116,7 @@ def feature_attachments(pdf, spec) -> None:
     for name, (payload, mime) in files.items():
         spec_obj = pikepdf.AttachedFileSpec(pdf, payload, mime_type=mime, filename=name)
         spec_obj.obj["/AFRelationship"] = pikepdf.Name.Source
+        spec_obj.obj["/Params"] = pikepdf.Dictionary(ModDate=pikepdf.String("D:20261114210000+03'00'"))
         pdf.attachments[name] = spec_obj
     # /AF on the document lists the associated files (PDF/A-3 asks for it)
     pdf.Root.AF = pikepdf.Array([pdf.attachments[n].obj for n in files])
@@ -159,6 +160,18 @@ STAGE5 = {
 SUPPORTED_PROFILES = {"web", "print", "archive"}
 
 
+def normalise(pdf) -> None:
+    """PDF/A hygiene that belongs to the file, not to a feature: print flags on annotations and a
+    named optional-content configuration. Both were measured as NEW failures caused by this branch."""
+    for page in pdf.pages:
+        for a in page.obj.get("/Annots", []):
+            if a.get("/Subtype") in (pikepdf.Name.Link, pikepdf.Name.Widget):
+                a["/F"] = 4                       # Print
+    oc = pdf.Root.get("/OCProperties")
+    if oc is not None and oc.get("/D") is not None:
+        oc["/D"]["/Name"] = pikepdf.String("الطبقات")
+
+
 def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -> list[str]:
     """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order."""
     if profile not in SUPPORTED_PROFILES:
@@ -173,6 +186,7 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -
                 raise SystemExit(f"postprocess: feature {name!r} is declared but has no implementation")
             STAGE5[name](pdf, f)
             applied.append(name)
+        normalise(pdf)
         pdf.save(dst)
     return applied
 
