@@ -41,6 +41,11 @@ jobs:
       - name: Gate self-test — every mutation must be caught
         run: python3 scripts/gate_selftest.py guide-v2-ar.pdf
 
+      - name: veraPDF baseline — no NEW failing rule, no DEAD exception
+        run: |
+          brew install verapdf
+          python3 scripts/verapdf_gate.py guide-v2-ar.pdf 3b ua1 4
+
       - name: Vocalised paragraphs — raw Chrome output must fail, the rebuilt text layer must copy exactly
         run: python3 scripts/test_vocalised.py
 
