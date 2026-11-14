@@ -49,7 +49,7 @@ def probe(pdf_path, flavour, keys):
 # appears or disappears outside this table fails the gate — the identification claim is now guarded.
 EXPECTED = {
     "3b": set(),                                   # strict widths: 0 rules (measured)
-    "ua1": {"7.1-3", "7.4.2-1"},
+    "ua1": {"7.1-3"},
 }
 CLAIMS = {"3b": {"pdfaid:part": "3", "pdfaid:conformance": "B"},
           "ua1": {"pdfuaid:part": "1"}}
