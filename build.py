@@ -19,10 +19,12 @@ import tempfile
 import fitz  # PyMuPDF
 import segno
 
-import nav_spec as NS
+import spec_loader
+
+NS = spec_loader.load()
 
 PROJ = os.path.dirname(os.path.abspath(__file__))
-SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(PROJ, "guide-v2.html")
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(PROJ, NS.SOURCE_HTML)
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.getcwd(), "out.pdf")
 # Build into a sibling .partial.pdf; only a gate PASS replaces OUT (a failed run never clobbers the last good file).
 PARTIAL = OUT[:-4] + ".partial.pdf" if OUT.endswith(".pdf") else OUT + ".partial"
@@ -94,15 +96,20 @@ def build_html() -> None:
         ("{{QR_CHROME}}", "https://developer.chrome.com/docs/chromium/headless"),
     ]:
         html = html.replace(ph, qr_datauri(url))
+    # Any document can carry its own reference list: {{QR_1}}..{{QR_n}} follow NS.REF_URLS in order,
+    # so the QR the page shows is the same URL the gate checks the link against.
+    for k, url in enumerate(NS.REF_URLS, start=1):
+        html = html.replace("{{QR_%d}}" % k, qr_datauri(url))
     # v2 generated-art layer: base64-embed local art so the print stays
     # deterministic (Chrome renders from /tmp; relative paths would break).
     adir = os.path.join(PROJ, "art")
-    for ph, fn in [
+    art = getattr(NS, "ART_FILES", None) or [
         ("{{ART_COVER}}", "embed-cover.jpg"),
         ("{{ART_DIVIDER}}", "embed-divider.jpg"),
         ("{{ART_BACK}}", "embed-back.jpg"),
-    ]:
-        fp = os.path.join(adir, fn)
+    ]
+    for ph, fn in art:
+        fp = fn if os.path.isabs(fn) else os.path.join(adir, fn)
         if os.path.exists(fp):
             payload = base64.b64encode(art_for_print(fp)).decode()
             html = html.replace(ph, "data:image/jpeg;base64," + payload)

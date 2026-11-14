@@ -20,7 +20,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import pymupdf as fitz  # noqa: E402
 import pikepdf  # noqa: E402
 
-import nav_spec as NS  # noqa: E402
+import spec_loader  # noqa: E402
+
+NS = spec_loader.load()  # noqa: E402
 import verify_pdf as G  # noqa: E402
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"

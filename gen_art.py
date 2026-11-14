@@ -44,6 +44,23 @@ PROMPTS = {
              "translucent violet glass panel hovering above a small softly glowing base, "
              "seen at a gentle angle, with a faint teal rim light and sparse sparkles; the "
              "rest is vast calm dark cosmic space. Vertical 3:4 premium 3D render. " + NO_TEXT),
+    # The proof report («الحرف المقلوب»): the same glass family, one idea per page — a sheet whose
+    # reflection is displaced (a letter that comes back reversed), a clean fracture (the diagnosis),
+    # a seam of light across rebuilt glass (the repair). No text is ever rendered.
+    "report-cover": ("Using the attached image only as a STYLE REFERENCE (glass material, violet-teal palette, "
+                     "cosmic dark background, lighting mood) - create a premium 3:4 cover artwork: ONE large "
+                     "translucent violet glass sheet standing upright at a slight angle, and directly beside it "
+                     "its mirrored reflection displaced a few millimetres, as if the page is copied back in the "
+                     "wrong direction; thin teal light traces the seam between them; a few small glass shards "
+                     "float; the upper third stays calm and empty. Vertical 3:4 premium 3D render. " + NO_TEXT),
+    "report-divider-a": ("Using the attached image only as a STYLE REFERENCE - create a minimal 3:4 section-divider "
+                         "artwork: a single translucent violet glass panel with a clean vertical fracture through "
+                         "its middle, the two halves slightly offset, teal light escaping the seam; vast dark "
+                         "cosmic space above and below. Vertical 3:4 premium 3D render. " + NO_TEXT),
+    "report-divider-b": ("Using the attached image only as a STYLE REFERENCE - create a minimal 3:4 section-divider "
+                         "artwork: the same fractured glass panel now reassembled, the seam filled with a precise "
+                         "line of teal light, tiny particles settling around it; calm dark cosmic space above and "
+                         "below. Vertical 3:4 premium 3D render. " + NO_TEXT),
 }
 
 
@@ -82,7 +99,8 @@ def main() -> None:
         "provider": {"only": ["google-ai-studio"], "allow_fallbacks": False},
     }
     ref = style_ref()
-    if mode in ("divider", "back") and ref:
+    if mode in ("divider", "back") or mode.startswith("report-"):
+        ref = style_ref()
         b64 = base64.b64encode(open(ref, "rb").read()).decode()
         body["input_references"] = [
             {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + b64}}
