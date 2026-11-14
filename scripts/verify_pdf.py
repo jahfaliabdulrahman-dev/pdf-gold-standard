@@ -673,7 +673,14 @@ def gate(doc) -> list[str]:
 
     # 8c. provenance: the file says which source it was built from, and that is the source this gate compares with
     name, digest = source_stamp()
-    got_name, got_digest = info_key(doc, "SourceFile"), info_key(doc, "SourceSHA256")
+    try:
+        px = pikepdf_open(doc)
+        with px.open_metadata() as m:
+            doc_id, got_name = str(m.get("xmpMM:DocumentID", "")), str(m.get("dc:source", ""))
+        px.close()
+        got_digest = doc_id.split("sha256:")[-1] if doc_id.startswith("sha256:") else ""
+    except Exception:
+        got_name = got_digest = ""
     check("provenance", (got_name, got_digest) == (name, digest),
           f"{name} sha256 {digest[:12]}" if (got_name, got_digest) == (name, digest) else
           ("no source stamp" if not got_digest else f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}"))

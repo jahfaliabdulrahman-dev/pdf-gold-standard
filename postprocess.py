@@ -77,6 +77,7 @@ def feature_xmp(pdf, spec) -> None:
         m["xmp:CreatorTool"] = "Hermes PDF Gold Standard pipeline"
         m["pdf:Producer"] = str(pdf.docinfo.get("/Producer", "PyMuPDF + pikepdf"))
         m["xmpMM:DocumentID"] = f"sha256:{sha}" if sha else "urn:pdf-gold-standard"
+        m["dc:source"] = NS.SOURCE_HTML
 
 
 def feature_output_intent(pdf, spec) -> None:
@@ -137,13 +138,19 @@ def feature_acroform(pdf, spec) -> None:
         Q=2, DA=da, Rect=pikepdf.Array([60, 80, 360, 112]), F=4,
         BS=pikepdf.Dictionary(W=0), P=pdf.pages[11].obj,
     ))
+    ap = pdf.make_stream(b"")
+    ap["/Type"] = pikepdf.Name.XObject
+    ap["/Subtype"] = pikepdf.Name.Form
+    ap["/BBox"] = pikepdf.Array([0, 0, 300, 32])
+    ap["/Resources"] = pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]}))
+    widget["/AP"] = pikepdf.Dictionary(N=pdf.make_indirect(ap))
     ann = pdf.pages[11].obj.get("/Annots", pikepdf.Array())
     ann.append(widget)
     pdf.pages[11].obj["/Annots"] = ann
     pdf.Root.AcroForm = pikepdf.Dictionary(
         Fields=pikepdf.Array([widget]),
         DR=pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]})),
-        NeedAppearances=True, DA=da)
+        DA=da)
 
 
 STAGE5 = {
@@ -186,6 +193,9 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -
                 raise SystemExit(f"postprocess: feature {name!r} is declared but has no implementation")
             STAGE5[name](pdf, f)
             applied.append(name)
+        for k in ("/SourceFile", "/SourceSHA256"):
+            if k in pdf.docinfo:
+                del pdf.docinfo[k]
         normalise(pdf)
         pdf.save(dst)
     return applied
