@@ -19,8 +19,11 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import pymupdf as fitz  # noqa: E402
+import pikepdf  # noqa: E402
 
-import nav_spec as NS  # noqa: E402
+import spec_loader  # noqa: E402
+
+NS = spec_loader.load()  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJ = os.path.join(HERE, "..")
@@ -279,6 +282,7 @@ def output_intent_problems(pdf) -> list[str]:
 
 def attachment_problems(pdf) -> list[str]:
     bad, got = [], {}
+    want = getattr(NS, "ATTACHMENTS", None) or [f[0] for f in getattr(NS, "ATTACHMENT_FILES", [])]
     for name, spec in pdf.attachments.items():
         try:
             data = spec.get_file().read_bytes()
@@ -289,8 +293,8 @@ def attachment_problems(pdf) -> list[str]:
         if "/AFRelationship" not in spec.obj:
             bad.append(f"{name}: no /AFRelationship")
         got[name] = len(data)
-    if sorted(got) != sorted(NS.ATTACHMENTS):
-        bad.append(f"attachments {sorted(got)}, expected {sorted(NS.ATTACHMENTS)}")
+    if sorted(got) != sorted(want):
+        bad.append(f"attachments {sorted(got)}, expected {sorted(want)}")
     return bad
 
 
@@ -365,15 +369,31 @@ def art_dpi_problems(doc) -> list[str]:
 
 
 def pdfua_problems(pdf) -> list[str]:
-    """PDF/UA-1 structural floor (not full conformance: veraPDF is the judge and is not installed)."""
+    """Structure floor, plus the claim rule: an identifier is allowed only when the declared baseline is empty.
+
+    A conformance identifier is a CLAIM, not a decoration. The document may declare PDF/A-3b only if
+    `verapdf-baseline.toml` records ZERO failing rules for that flavour; the gate reads the claim from XMP and
+    the evidence from the baseline, so a claim can never outlive the failures it was allowed to drop.
+    """
+    import tomllib
     bad = []
+    claim = getattr(NS, "CONFORMANCE", None)
     with pdf.open_metadata() as m:
-        # A conformance identifier is a CLAIM, not a decoration. This file does not meet 3b/ua1 (the
-        # failures are named in verapdf-baseline.toml), so it must declare neither. When a claim is
-        # added, the matching baseline must be empty — that is the closing condition, checked in CI.
-        for key in ("pdfuaid:part", "pdfaid:part", "pdfaid:conformance"):
-            if m.get(key):
-                bad.append(f"{key}={m.get(key)} claimed without conformance")
+        declared = {k: m.get(k) for k in ("pdfuaid:part", "pdfaid:part", "pdfaid:conformance") if m.get(k)}
+        if claim:
+            if declared != claim:
+                bad.append(f"conformance claim {declared or 'absent'} != spec {claim}")
+            baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
+            try:
+                base = tomllib.load(open(baseline_path, "rb"))
+                failing = base.get("3b", {}).get("failing", [])
+            except (OSError, tomllib.TOMLDecodeError) as e:
+                bad.append(f"cannot read the 3b baseline: {type(e).__name__}")
+            else:
+                if failing:
+                    bad.append(f"3b claimed while the baseline still lists {failing}")
+        elif declared:
+            bad.append(f"{declared} claimed without conformance")
     cat = pdf.Root
     if "/StructTreeRoot" not in cat:
         bad.append("no StructTreeRoot")
@@ -396,6 +416,32 @@ def acroform_problems(pdf) -> list[str]:
     fields = pdf.Root.AcroForm.get("/Fields", [])
     if not len(fields):
         return ["AcroForm has no fields"]
+    want = getattr(NS, "ACROFORM_FIELDS", None)
+    if want and len(fields) != len(want):
+        bad.append(f"{len(fields)} fields, expected {len(want)}")
+    # every widget must be reachable from its page's structure: /StructParent -> a /Form element with an OBJR
+    tree = {}
+    try:
+        nums = list(pdf.Root.StructTreeRoot["/ParentTree"]["/Nums"])
+        tree = {int(str(nums[i])): nums[i + 1] for i in range(0, len(nums), 2)}
+    except (AttributeError, KeyError):
+        bad.append("no ParentTree: widgets cannot be announced")
+    widgets = 0
+    for pi, page in enumerate(pdf.pages):
+        for a in page.obj.get("/Annots", []):
+            if str(a.get("/Subtype")) != "/Widget":
+                continue
+            widgets += 1
+            sp = a.get("/StructParent")
+            if sp is None:
+                bad.append(f"p{pi+1} widget without /StructParent")
+                continue
+            val = tree.get(int(sp))
+            arr = list(val) if isinstance(val, pikepdf.Array) else [val]
+            if not any(getattr(v, "get", lambda k, d=None: None)("/S") == pikepdf.Name.Form for v in arr if v is not None):
+                bad.append(f"p{pi+1} widget /StructParent {sp} does not resolve to a /Form element")
+    if want and widgets != len(want):
+        bad.append(f"{widgets} widgets, expected {len(want)}")
     for f in fields:
         tu = str(f.get("/TU", ""))
         if not tu or not any("\u0600" <= ch <= "\u06ff" for ch in tu):
@@ -422,6 +468,18 @@ def link_tagging_problems(pdf) -> list[str]:
                 bad.append(f"p{i+1} link without /StructParent")
     if count != NS.EXPECTED_LINKS:
         bad.append(f"{count} links, expected {NS.EXPECTED_LINKS}")
+    # A generic name on every row is a label in name only: the destination must be announced per row.
+    for pi, key in ((NS.CONTENTS, "CONTENTS_LABELS"), (NS.REF_PAGE, "REF_LABELS")):
+        want = getattr(NS, key, None)
+        if not want:
+            continue
+        h = float(pdf.pages[pi].obj["/MediaBox"][3])
+        rows = sorted([a for a in pdf.pages[pi].obj.get("/Annots", []) if str(a.get("/Subtype")) == "/Link"
+                       and float(a["/Rect"][3]) <= h - 70],
+                      key=lambda a: -float(a["/Rect"][3]))
+        got = [str(a.get("/Contents", "")) for a in rows]
+        if got != list(want):
+            bad.append(f"p{pi+1} link names {got[:2]}... != spec {list(want)[:2]}...")
     return bad
 
 
@@ -536,7 +594,11 @@ def gate(doc) -> list[str]:
     ink_bad, worst, retention = [], 0.0, 1.0
     for i, page in enumerate(doc):
         frac, cells = page_ink(page)
-        want_frac, want_cells = NS.PAGE_INK[i]
+        want = NS.PAGE_INK.get(i)
+        if want is None:
+            ink_bad.append(f"p{i+1}: no measured baseline (run scripts/calibrate.py)")
+            continue
+        want_frac, want_cells = want
         d = abs(frac - want_frac)
         worst = max(worst, d)
         if d > NS.PAGE_INK_TOL:
@@ -658,8 +720,9 @@ def gate(doc) -> list[str]:
 
     # 7. fonts: house family only; the basmala page may add the macOS vocalisation face
     foreign = []
+    vocalised_pages = set(getattr(NS, "VOCALISED_PAGES", {NS.BASMALA}))
     for i, page in enumerate(doc):
-        allowed_extra = NS.BASMALA_FACES if i == NS.BASMALA else set()
+        allowed_extra = NS.BASMALA_FACES if i in vocalised_pages else set()
         for f in page.get_fonts():
             name = f[3].split("+")[-1]
             if not name:
@@ -756,7 +819,8 @@ def gate(doc) -> list[str]:
     else:
         per = [len(source_words(t)) for t in texts]
         w_bad = [f"p{i+1} {n} vs {NS.PAGE_WORDS[i]}" for i, n in enumerate(per)
-                 if abs(n - NS.PAGE_WORDS[i]) > NS.PAGE_WORDS_TOL]
+                 if i in NS.PAGE_WORDS and abs(n - NS.PAGE_WORDS[i]) > NS.PAGE_WORDS_TOL]
+        w_bad += [f"p{i+1}: no measured word count" for i in range(len(per)) if i not in NS.PAGE_WORDS]
         check("page-words", not w_bad, "; ".join(w_bad[:4]) or
               f"{NS.PAGES} pages within +-{NS.PAGE_WORDS_TOL} words (total {sum(per)})")
 

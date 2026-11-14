@@ -1,0 +1,12 @@
+# veraPDF baseline for «الحرف المقلوب» (report-v1.html), measured with its own build.
+# 3b is EMPTY: the file declares PDF/A-3b, and the gate refuses a claim whose baseline lists a failure.
+# ua1 is NOT claimed: the numbers below are the measured remainder, kept visible instead of hidden.
+version = "1.30.0"
+measured_on = "report.pdf (17 pages, declared PDF/A-3b)"
+flavours = ["3b", "ua1"]
+
+[3b]
+failing = []
+
+[ua1]
+failing = ["5", "7.1"]   # measured on the shipped build: 1 + 612 failed checks

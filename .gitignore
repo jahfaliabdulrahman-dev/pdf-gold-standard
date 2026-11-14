@@ -16,3 +16,8 @@ __pycache__/
 
 # local virtualenv
 .venv/
+
+# second document outputs and local backups
+report.pdf
+baseline*.pdf
+.wip-content-tagging.patch

@@ -37,7 +37,8 @@ def feature_page_labels(pdf, spec) -> None:
     PDF supports only D/r/R/a/A styles (no Arabic-Indic), so the cover is a prefix-only label («غ») and
     the body counts 1..11 — the same numbers the pages print.
     """
-    import nav_spec as NS
+    import spec_loader
+    NS = spec_loader.load()
     nums = pikepdf.Array()
     for start, style, value in NS.PAGE_LABELS:
         d = pikepdf.Dictionary()
@@ -57,7 +58,8 @@ def feature_page_labels(pdf, spec) -> None:
 
 def feature_named_destinations(pdf, spec) -> None:
     """A name -> page map, so a target is an identity, not an index that shifts when a page is added."""
-    import nav_spec as NS
+    import spec_loader
+    NS = spec_loader.load()
     names = pikepdf.Array()
     for name, page in NS.DEST_NAMES:
         names.append(pikepdf.String(name))
@@ -67,16 +69,23 @@ def feature_named_destinations(pdf, spec) -> None:
 
 def feature_xmp(pdf, spec) -> None:
     """XMP is what archive/search tools read; Info alone is invisible to them."""
-    import nav_spec as NS
+    import spec_loader
+    NS = spec_loader.load()
     sha = pdf.docinfo.get("/SourceSHA256", "")
+    title = getattr(NS, "XMP_TITLE", None) or f"معيار إنتاج ملفات PDF — دليل المعيار · الإصدار {NS.GUIDE_VERSION_AR}"
+    description = getattr(NS, "XMP_DESCRIPTION", None) or "معيار جودة إنتاج ملفات PDF التفاعلية العربية"
     with pdf.open_metadata() as m:
-        m["dc:title"] = f"معيار إنتاج ملفات PDF — دليل المعيار · الإصدار {NS.GUIDE_VERSION_AR}"
-        m["dc:creator"] = ["م. عبدالرحمن جحفلي"]
-        m["dc:description"] = "معيار جودة إنتاج ملفات PDF التفاعلية العربية"
+        m["dc:title"] = title
+        m["dc:creator"] = [getattr(NS, "XMP_CREATOR", "م. عبدالرحمن جحفلي")]
+        m["dc:description"] = description
         m["dc:language"] = ["ar"]
         m["xmp:CreatorTool"] = "Hermes PDF Gold Standard pipeline"
         m["pdf:Producer"] = str(pdf.docinfo.get("/Producer", "PyMuPDF + pikepdf"))
         m["xmpMM:DocumentID"] = f"sha256:{sha}" if sha else "urn:pdf-gold-standard"
+        # A conformance identifier only when the spec declares it; the gate refuses a claim whose baseline
+        # still lists failures, so this line cannot turn into decoration.
+        for key, value in (getattr(NS, "CONFORMANCE", None) or {}).items():
+            m[key] = value
         if "dc:source" in m:
             del m["dc:source"]
 
@@ -101,8 +110,14 @@ def feature_output_intent(pdf, spec) -> None:
 
 
 def feature_attachments(pdf, spec) -> None:
-    """The file carries its own source and a manifest of hashes: reproduction is content, not a claim."""
-    import nav_spec as NS
+    """The file carries its own source and a manifest of hashes: reproduction is content, not a claim.
+
+    The file list lives in the spec (`ATTACHMENT_FILES`: name, repo-relative path, mime, /AFRelationship), so a
+    second document adds evidence without touching this code. A name with no path is generated here (the
+    manifest), which is how the hashes always describe the file that was actually built.
+    """
+    import spec_loader
+    NS = spec_loader.load()
     src_path = os.path.join(PROJ, NS.SOURCE_HTML)
     data = open(src_path, "rb").read()
     manifest = {
@@ -111,67 +126,88 @@ def feature_attachments(pdf, spec) -> None:
         "guide_version": NS.GUIDE_VERSION,
         "pages": NS.PAGES,
     }
-    files = {
-        "source.html": (data, "text/html"),
-        "manifest.json": (json.dumps(manifest, ensure_ascii=False, indent=1).encode(), "application/json"),
-    }
-    for name, (payload, mime) in files.items():
+    declared = getattr(NS, "ATTACHMENT_FILES", None) or [
+        ("source.html", NS.SOURCE_HTML, "text/html", "Source"),
+        ("manifest.json", None, "application/json", "Source"),
+    ]
+    payloads = []
+    for name, rel, mime, relationship in declared:
+        if rel is None:
+            payloads.append((name, json.dumps(manifest, ensure_ascii=False, indent=1).encode(), mime, relationship))
+        else:
+            payloads.append((name, open(os.path.join(PROJ, rel), "rb").read(), mime, relationship))
+    for name, payload, mime, relationship in payloads:
         spec_obj = pikepdf.AttachedFileSpec(pdf, payload, mime_type=mime, filename=name)
-        spec_obj.obj["/AFRelationship"] = pikepdf.Name.Source
+        spec_obj.obj["/AFRelationship"] = pikepdf.Name("/" + relationship)
         spec_obj.obj["/Params"] = pikepdf.Dictionary(ModDate=pikepdf.String("D:20261114210000+03'00'"))
         pdf.attachments[name] = spec_obj
     # /AF on the document lists the associated files (PDF/A-3 asks for it)
-    pdf.Root.AF = pikepdf.Array([pdf.attachments[n].obj for n in files])
+    pdf.Root.AF = pikepdf.Array([pdf.attachments[name].obj for name, *_ in payloads])
 
 
 def feature_acroform(pdf, spec) -> None:
-    """One real text field with an Arabic /TU and an embedded house font in /DR.
+    """Real text fields with an Arabic /TU and an embedded house font in /DR.
 
-    The widget is borderless (/BS W 0) so it moves no pixel; /Q 2 asks for right alignment (bidi is the
-    reader's job — the spec says so, and Acrobat is not automatable here).
+    The fields live in the spec (`ACROFORM_FIELDS`: name, /TU, page, rect in PDF points, optional multiline),
+    so the report can carry three and the guide one. Each widget is borderless (/BS W 0) and moves no pixel;
+    /Q 2 asks for right alignment (bidi is the reader's job — Acrobat is not automatable here).
     """
+    import spec_loader
+    NS = spec_loader.load()
+    fields = getattr(NS, "ACROFORM_FIELDS", None) or [
+        {"name": "applicant_name", "tu": "الاسم الكامل لمقدم الطلب", "page": NS.PAGES - 1,
+         "rect": [60, 80, 360, 112]},
+    ]
     fonts = pdf.pages[0].obj["/Resources"]["/Font"]
     key = next(iter(fonts.keys()))
     da = pikepdf.String(f"{key} 10 Tf 0 g")
-    widget = pdf.make_indirect(pikepdf.Dictionary(
-        Type=pikepdf.Name.Annot, Subtype=pikepdf.Name.Widget, FT=pikepdf.Name.Tx,
-        T=pikepdf.String("applicant_name"), TU=pikepdf.String("الاسم الكامل لمقدم الطلب"),
-        Q=2, DA=da, Rect=pikepdf.Array([60, 80, 360, 112]), F=4,
-        BS=pikepdf.Dictionary(W=0), P=pdf.pages[11].obj,
-    ))
-    ap = pdf.make_stream(b"")
-    ap["/Type"] = pikepdf.Name.XObject
-    ap["/Subtype"] = pikepdf.Name.Form
-    ap["/BBox"] = pikepdf.Array([0, 0, 300, 32])
-    ap["/Resources"] = pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]}))
-    widget["/AP"] = pikepdf.Dictionary(N=pdf.make_indirect(ap))
-    ann = pdf.pages[11].obj.get("/Annots", pikepdf.Array())
-    ann.append(widget)
-    pdf.pages[11].obj["/Annots"] = ann
-    # 7.18.4: a Widget must be nested in a /Form structure element with an OBJR and a StructParent
     st = pdf.Root.StructTreeRoot
-    pg = pdf.pages[11]
-    form = pdf.make_indirect(pikepdf.Dictionary(
-        Type=pikepdf.Name.StructElem, S=pikepdf.Name.Form, Pg=pg.obj,
-        K=pikepdf.Dictionary(Type=pikepdf.Name.OBJR, Obj=widget, Pg=pg.obj)))
-    form["/P"] = st          # 7.1-12: every structure element carries its parent
-    n = int(st.get("/ParentTreeNextKey", 0))
     pt = st["/ParentTree"]
     nums = pt.get("/Nums", pdf.make_indirect(pikepdf.Array()))
-    nums.append(n); nums.append(form)
+    n = int(st.get("/ParentTreeNextKey", 0))
+    widgets = []
+    for f in fields:
+        page = pdf.pages[f["page"]]
+        rect = [float(v) for v in f["rect"]]
+        widget = pdf.make_indirect(pikepdf.Dictionary(
+            Type=pikepdf.Name.Annot, Subtype=pikepdf.Name.Widget, FT=pikepdf.Name.Tx,
+            T=pikepdf.String(f["name"]), TU=pikepdf.String(f["tu"]),
+            Q=2, DA=da, Rect=pikepdf.Array(rect), F=4,
+            BS=pikepdf.Dictionary(W=0), P=page.obj,
+        ))
+        if f.get("multiline"):
+            widget["/Ff"] = 4096                       # bit 13: multiline
+        ap = pdf.make_stream(b"")
+        ap["/Type"] = pikepdf.Name.XObject
+        ap["/Subtype"] = pikepdf.Name.Form
+        ap["/BBox"] = pikepdf.Array([0, 0, rect[2] - rect[0], rect[3] - rect[1]])
+        ap["/Resources"] = pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]}))
+        widget["/AP"] = pikepdf.Dictionary(N=pdf.make_indirect(ap))
+        ann = page.obj.get("/Annots", pikepdf.Array())
+        ann.append(widget)
+        page.obj["/Annots"] = ann
+        page.obj["/Tabs"] = pikepdf.Name("/S")        # tab order follows the structure tree
+        # 7.18.4: a Widget must be nested in a /Form structure element with an OBJR and a StructParent
+        form = pdf.make_indirect(pikepdf.Dictionary(
+            Type=pikepdf.Name.StructElem, S=pikepdf.Name.Form, Pg=page.obj,
+            K=pikepdf.Dictionary(Type=pikepdf.Name.OBJR, Obj=widget, Pg=page.obj)))
+        form["/P"] = st          # 7.1-12: every structure element carries its parent
+        nums.append(n); nums.append(form)
+        widget["/StructParent"] = n
+        n += 1
+        k = st.get("/K")
+        if isinstance(k, pikepdf.Array):
+            k.append(form)
+        elif k is None:
+            st["/K"] = pikepdf.Array([form])
+        else:
+            st["/K"] = pikepdf.Array([k, form])
+        widgets.append(widget)
     pt["/Nums"] = nums
-    st["/ParentTreeNextKey"] = n + 1
-    widget["/StructParent"] = n
-    k = st.get("/K")
-    if isinstance(k, pikepdf.Array):
-        k.append(form)
-    elif k is None:
-        st["/K"] = pikepdf.Array([form])
-    else:
-        st["/K"] = pikepdf.Array([k, form])
+    st["/ParentTreeNextKey"] = n
 
     pdf.Root.AcroForm = pikepdf.Dictionary(
-        Fields=pikepdf.Array([widget]),
+        Fields=pikepdf.Array(widgets),
         DR=pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]})),
         DA=da)
 
@@ -181,24 +217,32 @@ def feature_link_tagging(pdf, spec) -> None:
 
     A screen reader announces the label; without it the link is silent. Geometry comes from nav_spec.
     """
-    import nav_spec as NS
+    import spec_loader
+    NS = spec_loader.load()
     st = pdf.Root.StructTreeRoot
     n = int(st.get("/ParentTreeNextKey", 0))
     pt = st["/ParentTree"]
     nums = pt.get("/Nums", pdf.make_indirect(pikepdf.Array()))
     for pi, page in enumerate(pdf.pages):
         h = float(page.obj["/MediaBox"][3])
-        for annot in page.obj.get("/Annots", []):
-            if annot.get("/Subtype") != pikepdf.Name.Link:
-                continue
+        h = float(page.obj["/MediaBox"][3])
+        links = [a for a in page.obj.get("/Annots", []) if a.get("/Subtype") == pikepdf.Name.Link]
+        rows = sorted([a for a in links if float(a["/Rect"][3]) <= h - 70],   # the nav strip is not a row
+                      key=lambda a: -float(a["/Rect"][3]))
+        row_of = {a.objgen: k for k, a in enumerate(rows)}
+        for annot in links:
             r = [float(v) for v in annot["/Rect"]]
             if r[3] > h - 70:                                   # nav strip (top of page in PDF space)
                 role = min(NS.SLOTS, key=lambda k: abs(NS.SLOTS[k] - r[0]))
                 label = NS.LINK_LABELS[role]
             elif pi == NS.CONTENTS:
-                label = "قسم من جدول المحتويات"
+                labels = getattr(NS, "CONTENTS_LABELS", [])
+                k = row_of.get(annot.objgen, len(labels))
+                label = labels[k] if k < len(labels) else "قسم من جدول المحتويات"
             elif pi == NS.REF_PAGE:
-                label = "مرجع خارجي"
+                labels = getattr(NS, "REF_LABELS", [])
+                k = row_of.get(annot.objgen, len(labels))
+                label = labels[k] if k < len(labels) else "مرجع خارجي"
             else:
                 label = "رابط"
             annot["/Contents"] = pikepdf.String(label)
