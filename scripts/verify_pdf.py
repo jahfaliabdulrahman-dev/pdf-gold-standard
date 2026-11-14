@@ -673,12 +673,16 @@ def gate(doc) -> list[str]:
 
     # 8c. provenance: the file says which source it was built from, and that is the source this gate compares with
     name, digest = source_stamp()
+    got_name = got_digest = ""
     try:
+        import json as _json
         px = pikepdf_open(doc)
         with px.open_metadata() as m:
-            doc_id, got_name = str(m.get("xmpMM:DocumentID", "")), str(m.get("dc:source", ""))
-        px.close()
+            doc_id = str(m.get("xmpMM:DocumentID", ""))
         got_digest = doc_id.split("sha256:")[-1] if doc_id.startswith("sha256:") else ""
+        if "manifest.json" in px.attachments:      # the file carries its own manifest: name + hash
+            got_name = _json.loads(px.attachments["manifest.json"].get_file().read_bytes()).get("source", "")
+        px.close()
     except Exception:
         got_name = got_digest = ""
     check("provenance", (got_name, got_digest) == (name, digest),
