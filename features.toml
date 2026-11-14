@@ -1,4 +1,7 @@
 # Declared feature list — order, profile and stage. The build reads this; the gate verifies against it.
+# OWNER DECISION (2026-11-14): AES-256 and PAdES are EXCLUDED from the plan and the work.
+# They are not "deferred": no stage-9/stage-10 feature is declared, and profiles secure/signed do not exist.
+# PDF/A forbids encryption anyway, so the exclusion is consistent with the archive profile.
 # stage 3 = interactivity, 5 = metadata/structure (no drawing), 9 = encryption, 10 = signature.
 #
 # DEVIATION FROM THE FEATURE SPEC (declared, not hidden): the spec assigns attachments to `archive` and
