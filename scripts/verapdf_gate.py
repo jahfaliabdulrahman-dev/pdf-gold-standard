@@ -27,7 +27,7 @@ def failing_rules(path: str, flavour: str) -> set[str]:
         if isinstance(o, dict):
             if o.get("ruleStatus") == "FAILED":
                 rid = o.get("ruleId") or o.get("clause")
-                if rid and re.fullmatch(r"\d+(\.\d+)+", str(rid)):   # clause ids only, never a bare section
+                if rid:   # keep bare ids too: PDF/UA identification is clause "5"
                     out.add(str(rid))
             for v in o.values():
                 walk(v)
