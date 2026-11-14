@@ -215,7 +215,7 @@ def feature_acroform(pdf, spec) -> None:
 def feature_link_tagging(pdf, spec) -> None:
     """Every Link annotation gets a /Link structure element, an OBJR and an Arabic /Contents.
 
-    A screen reader announces the label; without it the link is silent. Geometry comes from nav_spec.
+    A screen reader announces the label; without it the link is silent. Geometry comes from the document's spec.
     """
     import spec_loader
     NS = spec_loader.load()
@@ -224,7 +224,6 @@ def feature_link_tagging(pdf, spec) -> None:
     pt = st["/ParentTree"]
     nums = pt.get("/Nums", pdf.make_indirect(pikepdf.Array()))
     for pi, page in enumerate(pdf.pages):
-        h = float(page.obj["/MediaBox"][3])
         h = float(page.obj["/MediaBox"][3])
         links = [a for a in page.obj.get("/Annots", []) if a.get("/Subtype") == pikepdf.Name.Link]
         rows = sorted([a for a in links if float(a["/Rect"][3]) <= h - 70],   # the nav strip is not a row

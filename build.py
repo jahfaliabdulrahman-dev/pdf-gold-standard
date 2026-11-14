@@ -157,11 +157,13 @@ def interactivize() -> None:
         rect = fitz.Rect(31.54 * MM, top, 189.54 * MM, top + 22 * MM)
         doc[NS.REF_PAGE].insert_link({"kind": fitz.LINK_URI, "from": rect, "uri": url})
 
+    # Title/author/subject/keywords belong to the DOCUMENT (its spec), not to the pipeline: a second
+    # document must not inherit the first one's identity.
     doc.set_metadata({
-        "title": f"معيار إنتاج ملفات PDF — دليل المعيار · الإصدار {NS.GUIDE_VERSION_AR}",
-        "author": "م. عبدالرحمن جحفلي",
-        "subject": "معيار جودة إنتاج ملفات PDF التفاعلية العربية",
-        "keywords": "PDF, Arabic, RTL, تفاعلي, معيار, Gold Standard",
+        "title": f"{getattr(NS, 'DOC_TITLE', 'معيار إنتاج ملفات PDF — دليل المعيار')} · الإصدار {NS.GUIDE_VERSION_AR}",
+        "author": getattr(NS, "DOC_AUTHOR", "م. عبدالرحمن جحفلي"),
+        "subject": getattr(NS, "DOC_SUBJECT", "معيار جودة إنتاج ملفات PDF التفاعلية العربية"),
+        "keywords": getattr(NS, "DOC_KEYWORDS", "PDF, Arabic, RTL"),
         "creator": "Hermes PDF Gold Standard pipeline",
     })
     # Provenance: which source this file was built from. The gate refuses a file whose stamp is not its own truth.
