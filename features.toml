@@ -29,6 +29,10 @@ profiles = ["web", "print", "archive"]
 stage = 5
 profiles = ["web", "print", "archive"]
 
+[features.link-tagging]
+stage = 5
+profiles = ["web", "print", "archive"]
+
 [features.acroform]
 stage = 5
 profiles = ["web", "print", "archive"]

@@ -176,7 +176,50 @@ def feature_acroform(pdf, spec) -> None:
         DA=da)
 
 
+def feature_link_tagging(pdf, spec) -> None:
+    """Every Link annotation gets a /Link structure element, an OBJR and an Arabic /Contents.
+
+    A screen reader announces the label; without it the link is silent. Geometry comes from nav_spec.
+    """
+    import nav_spec as NS
+    st = pdf.Root.StructTreeRoot
+    n = int(st.get("/ParentTreeNextKey", 0))
+    pt = st["/ParentTree"]
+    nums = pt.get("/Nums", pdf.make_indirect(pikepdf.Array()))
+    for pi, page in enumerate(pdf.pages):
+        h = float(page.obj["/MediaBox"][3])
+        for annot in page.obj.get("/Annots", []):
+            if annot.get("/Subtype") != pikepdf.Name.Link:
+                continue
+            r = [float(v) for v in annot["/Rect"]]
+            if r[3] > h - 70:                                   # nav strip (top of page in PDF space)
+                role = min(NS.SLOTS, key=lambda k: abs(NS.SLOTS[k] - r[0]))
+                label = NS.LINK_LABELS[role]
+            elif pi == NS.CONTENTS:
+                label = "قسم من جدول المحتويات"
+            elif pi == NS.REF_PAGE:
+                label = "مرجع خارجي"
+            else:
+                label = "رابط"
+            annot["/Contents"] = pikepdf.String(label)
+            elem = pdf.make_indirect(pikepdf.Dictionary(
+                Type=pikepdf.Name.StructElem, S=pikepdf.Name.Link, P=st, Pg=page.obj,
+                K=pikepdf.Dictionary(Type=pikepdf.Name.OBJR, Obj=annot, Pg=page.obj)))
+            nums.append(n); nums.append(elem)
+            annot["/StructParent"] = n; n += 1
+            k = st.get("/K")
+            if isinstance(k, pikepdf.Array):
+                k.append(elem)
+            elif k is None:
+                st["/K"] = pikepdf.Array([elem])
+            else:
+                st["/K"] = pikepdf.Array([k, elem])
+    pt["/Nums"] = nums
+    st["/ParentTreeNextKey"] = n
+
+
 STAGE5 = {
+    "link-tagging": feature_link_tagging,
     "acroform": feature_acroform,
     "page-labels": feature_page_labels,
     "named-destinations": feature_named_destinations,
