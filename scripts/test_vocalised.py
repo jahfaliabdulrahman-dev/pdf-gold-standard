@@ -71,6 +71,10 @@ if __name__ == "__main__":
             ok = not extra and len(lines) == 8
             print(f"{'PASS' if ok else 'FAIL'} clean-paste/{engine} - {len(lines)} text lines (8 printed), foreign characters: {extra or 'none'}")
             if not ok: failed.append(f"clean-paste/{engine}")
+        # a drawn glyph keeps the width of the font program (PDF/A 6.2.11.5, PDF/UA 7.21.5); hidden copies are exempt
+        bad = fix_text_layer.drawn_width_mismatches(fixed)
+        print(f"{'PASS' if not bad else 'FAIL'} drawn-widths - {len(bad)} drawn glyph(s) whose /W differs from the font program {bad[:3] if bad else ''}")
+        if bad: failed.append("drawn-widths")
         a, b = pymupdf.open(RAW), pymupdf.open(fixed)
         diff = sum(a[i].get_pixmap(dpi=150).samples != b[i].get_pixmap(dpi=150).samples for i in range(len(a)))
         print(f"{'PASS' if not diff else 'FAIL'} pixels - {diff} page(s) differ at 150 dpi")

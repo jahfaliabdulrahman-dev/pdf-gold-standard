@@ -1,7 +1,7 @@
 ---
 name: arabic-rtl-pdf
 description: "Use when producing an Arabic/RTL PDF report or fixing broken Arabic in a PDF (عربي — تقرير PDF عربي): Chrome print, PyMuPDF bookmarks and nav buttons, and a delivery gate proven able to fail. House gold standard."
-version: 1.3.9
+version: 1.3.10
 metadata:
   hermes:
     tags: [pdf, arabic, rtl, report, chrome, weasyprint, pymupdf, interactive, bookmarks, gold-standard]
@@ -311,6 +311,19 @@ point (Presentation Forms folded to base letters); a ligature keeps its glyph fo
 copy (`3 Tr`) of the same outline for each remaining letter; kerning gaps inside a word get an alias width. Drawing is
 untouched (0 differing pixels at 300 dpi). After: Preview 98% (0.982 with PDFKit, gate metric), PDFium 95%, poppler 95% words in order. The gate checks
 it twice: `text-layer` (no Presentation Forms, no multi-letter glyph) and `copy-fidelity` (PDFium vs the source words).
+Glyph widths (PDF/A 6.2.11.5, PDF/UA 7.21.5: a DRAWN glyph's /W must equal the embedded font program; hidden
+`3 Tr` glyphs are exempt). veraPDF 1.28.2 on the guide: Chrome's own output 0 failures of this rule, the first
+text-layer rebuild 22, now 1 (default) or 0 (`fix_text_layer.py --strict-widths`). What it took: (a) the drawn
+ligature glyph keeps its full width and carries the second-to-last letter; earlier letters are hidden 0.02 em
+copies just left of it, the last letter a hidden copy 0.12 em short of its right edge (closer, MuPDF drops it as
+fake bold when the next glyph is the same letter — سس، لل); the jump back from the glyph's end to that copy must
+stay under 0.2 em or pdf.js starts a new item (0.32 em cut the line at «لله»); (b) the space redrawn in the word's
+font is a hidden glyph; (c) a kerning gap after a DRAWN glyph is the one case left: widening it (default) keeps
+every reader's text identical; `--strict-widths` fills the gap with a hidden blank glyph mapped to U+200B instead
+and costs Preview and pdf.js a space inside 3–4 words of the guide (both drop the character and see the gap).
+Text in PDFium, MuPDF, poppler, pdf.js and Preview: identical to the previous build, 0 pixels changed.
+`fix_text_layer.drawn_width_mismatches()` counts the offending (font, cid) pairs without Java: 60 → 5 → 0.
+
 Line order for stream-order readers: Skia paints one `BT..ET` per word and per space, the space in a Latin subset
 font. MuPDF resets the text direction at every `BT` (each word reversed alone → words of the line come out
 backwards) and pdf.js starts a new item at every `Tf` and marked-content boundary. The same script merges a line's
