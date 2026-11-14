@@ -77,7 +77,6 @@ def feature_xmp(pdf, spec) -> None:
         m["xmp:CreatorTool"] = "Hermes PDF Gold Standard pipeline"
         m["pdf:Producer"] = str(pdf.docinfo.get("/Producer", "PyMuPDF + pikepdf"))
         m["xmpMM:DocumentID"] = f"sha256:{sha}" if sha else "urn:pdf-gold-standard"
-        m["dc:source"] = NS.SOURCE_HTML
 
 
 def feature_output_intent(pdf, spec) -> None:
@@ -168,15 +167,21 @@ SUPPORTED_PROFILES = {"web", "print", "archive"}
 
 
 def normalise(pdf) -> None:
-    """PDF/A hygiene that belongs to the file, not to a feature: print flags on annotations and a
-    named optional-content configuration. Both were measured as NEW failures caused by this branch."""
-    for page in pdf.pages:
-        for a in page.obj.get("/Annots", []):
-            if a.get("/Subtype") in (pikepdf.Name.Link, pikepdf.Name.Widget):
-                a["/F"] = 4                       # Print
+    """PDF/A hygiene owned by the file, not by a feature. Measured causes, not guesses:
+    - 6.9: the OC configuration dictionary must carry /Name and must NOT carry /AS (PDF/A forbids it).
+    - 6.6.4/6.7.3: Info must not carry keys XMP cannot mirror (SourceFile/SourceSHA256)."""
     oc = pdf.Root.get("/OCProperties")
-    if oc is not None and oc.get("/D") is not None:
-        oc["/D"]["/Name"] = pikepdf.String("الطبقات")
+    if oc is not None:
+        ocgs = pikepdf.Array(list(oc.get("/OCGs", [])))
+        pdf.Root["/OCProperties"] = pikepdf.Dictionary(
+            OCGs=ocgs,
+            D=pikepdf.Dictionary(Name=pikepdf.String("الطبقات"),
+                                 BaseState=pikepdf.Name.On,
+                                 Order=pikepdf.Array(list(ocgs))))
+    for k in ("/SourceFile", "/SourceSHA256"):
+        if k in pdf.docinfo:
+            del pdf.docinfo[k]
+    assert "/SourceFile" not in pdf.docinfo and "/SourceSHA256" not in pdf.docinfo
 
 
 def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -> list[str]:
@@ -196,6 +201,7 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -
         for k in ("/SourceFile", "/SourceSHA256"):
             if k in pdf.docinfo:
                 del pdf.docinfo[k]
+        assert "/SourceFile" not in pdf.docinfo and "/SourceSHA256" not in pdf.docinfo
         normalise(pdf)
         pdf.save(dst)
     return applied
