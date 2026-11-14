@@ -1,17 +1,22 @@
 # Declared feature list — order, profile and stage. The build reads this; the gate verifies against it.
 # stage 3 = interactivity, 5 = metadata/structure (no drawing), 9 = encryption, 10 = signature.
-# A feature that is declared must have an implementation in postprocess.py or build.py, and a gate check.
+#
+# DEVIATION FROM THE FEATURE SPEC (declared, not hidden): the spec assigns attachments to `archive` and
+# OutputIntent to `print`. All three profiles this build can produce (web/print/archive) carry the same five
+# stage-5 features, because the gate is not yet profile-aware and a file that silently omits a declared
+# feature would fail a correct build. `secure` and `signed` are NOT implemented and are refused by name in
+# postprocess.py. Closing condition: stamp the profile in Info, make the gate read it, then split per profile.
 [features.page-labels]
 stage = 5
-profiles = ["web", "print", "archive", "secure"]
+profiles = ["web", "print", "archive"]
 
 [features.named-destinations]
 stage = 5
-profiles = ["web", "print", "archive", "secure"]
+profiles = ["web", "print", "archive"]
 
 [features.xmp]
 stage = 5
-profiles = ["web", "print", "archive", "secure"]
+profiles = ["web", "print", "archive"]
 
 [features.output-intent]
 stage = 5

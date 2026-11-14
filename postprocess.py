@@ -129,9 +129,15 @@ STAGE5 = {
     "attachments": feature_attachments,
 }
 
+# Profiles this build can actually produce. secure/signed are NOT implemented: refusing them by name is
+# better than producing a file that omits declared features while the gate still demands them.
+SUPPORTED_PROFILES = {"web", "print", "archive"}
+
 
 def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -> list[str]:
     """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order."""
+    if profile not in SUPPORTED_PROFILES:
+        raise SystemExit(f"postprocess: profile {profile!r} is not implemented (supported: {sorted(SUPPORTED_PROFILES)})")
     spec = tomllib.load(open(features_path or os.path.join(PROJ, "features.toml"), "rb"))
     applied = []
     with pikepdf.open(src) as pdf:
