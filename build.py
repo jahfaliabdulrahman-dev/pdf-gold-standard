@@ -171,6 +171,12 @@ if __name__ == "__main__":
     fixed = PARTIAL[:-4] + ".textfix.pdf"
     print("[4b] text layer rebuilt:", fix_text_layer(PARTIAL, fixed))
     os.replace(fixed, PARTIAL)
+    # stage 5: metadata/structure declared in features.toml — applied after the text layer, before the gate
+    from postprocess import apply as postprocess
+    prof = os.environ.get("PDF_PROFILE", "web")
+    post = PARTIAL[:-4] + ".post.pdf"
+    print("[4c] postprocess:", ", ".join(postprocess(PARTIAL, post, prof)) or "none")
+    os.replace(post, PARTIAL)
     gate = subprocess.run([sys.executable, os.path.join(PROJ, "scripts", "verify_pdf.py"), PARTIAL])
     if gate.returncode != 0:
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")

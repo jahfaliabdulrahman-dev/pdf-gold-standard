@@ -1,0 +1,22 @@
+# Declared feature list — order, profile and stage. The build reads this; the gate verifies against it.
+# stage 3 = interactivity, 5 = metadata/structure (no drawing), 9 = encryption, 10 = signature.
+# A feature that is declared must have an implementation in postprocess.py or build.py, and a gate check.
+[features.page-labels]
+stage = 5
+profiles = ["web", "print", "archive", "secure"]
+
+[features.named-destinations]
+stage = 5
+profiles = ["web", "print", "archive", "secure"]
+
+[features.xmp]
+stage = 5
+profiles = ["web", "print", "archive", "secure"]
+
+[features.output-intent]
+stage = 5
+profiles = ["web", "print", "archive"]
+
+[features.attachments]
+stage = 5
+profiles = ["web", "print", "archive"]
