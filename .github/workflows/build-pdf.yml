@@ -46,6 +46,9 @@ jobs:
           brew install verapdf
           python3 scripts/verapdf_gate.py guide-v2-ar.pdf 3b ua1 4
 
+      - name: Claim probe — what remains if the file DECLARED conformance
+        run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check
+
       - name: Vocalised paragraphs — raw Chrome output must fail, the rebuilt text layer must copy exactly
         run: python3 scripts/test_vocalised.py
 
