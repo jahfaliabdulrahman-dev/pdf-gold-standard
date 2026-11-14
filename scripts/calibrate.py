@@ -32,7 +32,19 @@ def measure(pdf_path: str) -> dict:
     doc = G.open_for_gate(pdf_path)
     if doc.page_count != NS.PAGES:
         raise SystemExit(f"refusing to calibrate: {doc.page_count} pages, spec says {NS.PAGES}")
-    texts = G.pdfium_texts(doc) or []
+    # The numbers are the truth the gate will hold the NEXT build to, so they may only be taken from a
+    # build the CURRENT gate accepts: otherwise calibrating a broken file blesses the defect.
+    # The numbers are the truth the NEXT build is held to, so they may only come from a build whose
+    # STRUCTURE the gate already accepts. Calibration-dependent checks are the ones this tool exists to
+    # fill; any other failure means the build is broken and measuring it would bless the defect.
+    CALIBRATION_ONLY = {"page-ink", "page-words", "page-images", "footer-numbers"}
+    fails = G.gate(doc)
+    blocking = [f for f in fails if f not in CALIBRATION_ONLY]
+    if blocking:
+        raise SystemExit(f"refusing to calibrate: the build fails {', '.join(blocking)}")
+    texts = G.pdfium_texts(doc)
+    if texts is None:
+        raise SystemExit("refusing to calibrate: PDFium cannot read the text, so word counts would be zero")
     ink, words, images, footer = {}, {}, {}, {}
     for i, page in enumerate(doc):
         frac, cells = G.page_ink(page)
@@ -63,9 +75,6 @@ def main() -> None:
     footer_src = "{" + ", ".join(f"{k}: {v}" for k, v in m["footer"].items()) + "}"
     new = {
         "PAGE_INK": ink_src, "PAGE_WORDS": words_src, "IMAGE_PAGES": images_src, "FOOTER": footer_src,
-        "EXPECTED": f'{{"pages": {m["pages"]}, "nav_pages": {len(NS.NAV_PAGES)}, "source_strips": {len(NS.NAV_PAGES)}, '
-                    f'"slots_per_strip": {len(NS.SLOTS)}, "source_icons": {len(NS.NAV_PAGES) * len(NS.SLOTS)}, '
-                    f'"ref_links": {len(NS.REF_URLS)}, "toc_rows": {len(NS.TOC_ROWS)}}}',
         "EXPECTED_LINKS": str(m["links"]),
     }
     print(f"pages={m['pages']} links={m['links']}")
@@ -81,6 +90,10 @@ def main() -> None:
             raise SystemExit(f"{name}: no marked block in {spec_file}")
         src = pat.sub(lambda _m: block(name, val), src)
     open(spec_file, "w", encoding="utf-8").write(src)
+    old_links = re.search(r"^EXPECTED_LINKS = (\d+)", src, re.M)
+    if old_links and int(old_links.group(1)) > m["links"] and "--force" not in sys.argv:
+        raise SystemExit(f"refusing to lower EXPECTED_LINKS {old_links.group(1)} -> {m['links']}: "
+                         "a lost link is a defect, not a new baseline (pass --force only if the design changed)")
     print("written:", spec_file)
 
 

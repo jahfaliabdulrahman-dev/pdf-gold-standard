@@ -12,6 +12,11 @@ MM = 2.83465  # 1 mm in pt
 PAGE_H_MM = 296.8
 
 GUIDE_VERSION = "1.0"
+# Metadata is part of the document, not of the pipeline (build.py reads these).
+DOC_TITLE = "الحرف المقلوب — تقرير إثبات عن طبقة النص العربية في PDF"
+DOC_AUTHOR = "م. عبدالرحمن جحفلي"
+DOC_SUBJECT = "تشخيص وإصلاح وإثبات لطبقة النص العربية في PDF"
+DOC_KEYWORDS = "PDF, Arabic, RTL, PDF/A-3b, طبقة النص, إثبات"
 GUIDE_VERSION_AR = GUIDE_VERSION.translate(str.maketrans("0123456789.", "٠١٢٣٤٥٦٧٨٩٫"))
 
 PAGES = 17
@@ -100,9 +105,9 @@ VOCALISED = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِ
 # P-1 · What MUST exist. Measured on the approved build; `scripts/calibrate.py --write` rewrites the blocks
 # marked CALIBRATED. Never edit one to make a failing build pass.
 # --------------------------------------------------------------------------------------------------------------
-# >>> CALIBRATED EXPECTED
+# >>> DECLARED EXPECTED  (counts of structures the spec declares, not a measurement)
 EXPECTED = {"pages": 17, "nav_pages": 13, "source_strips": 13, "slots_per_strip": 4, "source_icons": 52, "ref_links": 4, "toc_rows": 7}
-# <<< CALIBRATED EXPECTED
+# <<< DECLARED EXPECTED
 
 SLOT_INK_CONTRAST, SLOT_INK_MIN, SLOT_INK_MAX = 60, 0.05, 0.60
 SLOT_SHAPE = {"next": (0.168, -0.069, -0.013, 0.180, 0.170), "prev": (0.169, 0.050, -0.016, 0.179, 0.171),
@@ -162,6 +167,7 @@ ART_FILES = [
     ("{{ART_BACK}}", "embed-back.jpg"),
 ]
 
+PRINTS_LINK_COUNT = True     # page 12 prints «٦٣ رابطا»; the gate parses and compares it
 GATE_CHECKS = 34
 GATE_MUTATIONS = 48
 

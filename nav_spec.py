@@ -10,6 +10,11 @@ MM = 2.83465  # 1 mm in pt
 # The version printed on the cover, the back cover and in the PDF title. A release tag vX.Y.Z must start with it
 # (CI checks the tag, the gate checks the title and the cover).
 GUIDE_VERSION = "2.3"
+# Metadata is part of the document, not of the pipeline (build.py reads these).
+DOC_TITLE = "معيار إنتاج ملفات PDF — دليل المعيار"
+DOC_AUTHOR = "م. عبدالرحمن جحفلي"
+DOC_SUBJECT = "معيار جودة إنتاج ملفات PDF التفاعلية العربية"
+DOC_KEYWORDS = "PDF, Arabic, RTL, تفاعلي, معيار, Gold Standard"
 GUIDE_VERSION_AR = GUIDE_VERSION.translate(str.maketrans("0123456789.", "٠١٢٣٤٥٦٧٨٩٫"))
 
 PAGES = 12

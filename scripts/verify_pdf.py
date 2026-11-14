@@ -163,7 +163,7 @@ def printed_counts(page) -> dict:
         for line in b.get("lines", []):
             chars = [c for s in line["spans"] for c in s["chars"]]
             text = "".join(c["c"] for c in chars)
-            for key, marker in (("checks", "فحصا"), ("mutations", "عطلا")):
+            for key, marker in (("checks", "فحصا"), ("mutations", "عطلا"), ("links", "رابطا")):
                 if key in out or marker not in text:
                     continue
                 # the marker may be split across spans (Chrome re-shapes Arabic), so locate it in the LINE text
@@ -282,7 +282,9 @@ def output_intent_problems(pdf) -> list[str]:
 
 def attachment_problems(pdf) -> list[str]:
     bad, got = [], {}
-    want = getattr(NS, "ATTACHMENTS", None) or [f[0] for f in getattr(NS, "ATTACHMENT_FILES", [])]
+    want = (getattr(NS, "ATTACHMENTS", None)
+            or [f[0] for f in getattr(NS, "ATTACHMENT_FILES", [])]
+            or ["source.html", "manifest.json"])
     for name, spec in pdf.attachments.items():
         try:
             data = spec.get_file().read_bytes()
@@ -368,11 +370,21 @@ def art_dpi_problems(doc) -> list[str]:
     return bad
 
 
+def conformance_flavour(declared: dict) -> str | None:
+    """veraPDF flavour of a declared identifier: PDF/A part+conformance -> "3b", PDF/UA-1 -> "ua1"."""
+    if declared.get("pdfaid:part"):
+        conformance = str(declared.get("pdfaid:conformance", "")).strip().lower()
+        return f"{declared['pdfaid:part']}{conformance}" if conformance else None
+    if str(declared.get("pdfuaid:part", "")) == "1":
+        return "ua1"
+    return None
+
+
 def pdfua_problems(pdf) -> list[str]:
     """Structure floor, plus the claim rule: an identifier is allowed only when the declared baseline is empty.
 
     A conformance identifier is a CLAIM, not a decoration. The document may declare PDF/A-3b only if
-    `verapdf-baseline.toml` records ZERO failing rules for that flavour; the gate reads the claim from XMP and
+    the document's `VERAPDF_BASELINE` records ZERO failing rules for that flavour; the gate reads the claim from XMP and
     the evidence from the baseline, so a claim can never outlive the failures it was allowed to drop.
     """
     import tomllib
@@ -383,17 +395,24 @@ def pdfua_problems(pdf) -> list[str]:
         if claim:
             if declared != claim:
                 bad.append(f"conformance claim {declared or 'absent'} != spec {claim}")
-            baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
-            try:
-                base = tomllib.load(open(baseline_path, "rb"))
-            except (OSError, tomllib.TOMLDecodeError) as e:
-                bad.append(f"cannot read the 3b baseline: {type(e).__name__}")
+            flavour = conformance_flavour(declared)
+            if flavour is None:
+                bad.append(f"cannot map the claim {declared} to a veraPDF flavour: it cannot be checked")
             else:
-                # fail closed: a missing section is NOT "no failures" — it is evidence that is absent
-                if "3b" not in base or "failing" not in base["3b"]:
-                    bad.append(f"the baseline has no [3b].failing list: the claim cannot be checked")
-                elif base["3b"]["failing"]:
-                    bad.append(f"3b claimed while the baseline still lists {base['3b']['failing']}")
+                baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
+                try:
+                    base = tomllib.load(open(baseline_path, "rb"))
+                except (OSError, tomllib.TOMLDecodeError) as e:
+                    bad.append(f"cannot read the {flavour} baseline: {type(e).__name__}")
+                else:
+                    # fail closed: the flavour must be measured, present, and empty. A claim is never
+                    # checked against another flavour's evidence (a PDF/UA claim needs ua1 to be zero).
+                    if flavour not in base.get("flavours", []):
+                        bad.append(f"{flavour} is not a measured flavour in {os.path.basename(baseline_path)}")
+                    if flavour not in base or "failing" not in base[flavour]:
+                        bad.append(f"the baseline has no [{flavour}].failing list: the claim cannot be checked")
+                    elif base[flavour]["failing"]:
+                        bad.append(f"{flavour} claimed while the baseline still lists {base[flavour]['failing']}")
         elif declared:
             bad.append(f"{declared} claimed without conformance")
     cat = pdf.Root
@@ -412,6 +431,12 @@ def pdfua_problems(pdf) -> list[str]:
 
 
 def acroform_problems(pdf) -> list[str]:
+    """Every declared field must exist, on its page, at its rect, named as the spec says, and be ANNOUNCED.
+
+    A field that is drawn but not reachable from the structure tree (no /StructParent -> /Form element ->
+    OBJR pointing at THIS widget) is invisible to a screen reader; the check resolves the OBJR, not the
+    element's type name alone.
+    """
     bad = []
     if "/AcroForm" not in pdf.Root:
         return ["no /AcroForm"]
@@ -421,29 +446,51 @@ def acroform_problems(pdf) -> list[str]:
     want = getattr(NS, "ACROFORM_FIELDS", None)
     if want and len(fields) != len(want):
         bad.append(f"{len(fields)} fields, expected {len(want)}")
-    # every widget must be reachable from its page's structure: /StructParent -> a /Form element with an OBJR
-    tree = {}
     try:
         nums = list(pdf.Root.StructTreeRoot["/ParentTree"]["/Nums"])
         tree = {int(str(nums[i])): nums[i + 1] for i in range(0, len(nums), 2)}
     except (AttributeError, KeyError):
-        bad.append("no ParentTree: widgets cannot be announced")
-    widgets = 0
+        return bad + ["no ParentTree: widgets cannot be announced"]
+
+    def objs(val):
+        return list(val) if isinstance(val, pikepdf.Array) else ([val] if val is not None else [])
+
+    widgets = {}                                    # /T -> (page index, annotation)
     for pi, page in enumerate(pdf.pages):
-        for a in page.obj.get("/Annots", []):
-            if str(a.get("/Subtype")) != "/Widget":
-                continue
-            widgets += 1
+        page_widgets = [a for a in page.obj.get("/Annots", []) if str(a.get("/Subtype")) == "/Widget"]
+        if page_widgets and str(page.obj.get("/Tabs", "")) != "/S":
+            bad.append(f"p{pi+1} has widgets but no /Tabs /S: the tab order is not the structure order")
+        for a in page_widgets:
+            widgets[str(a.get("/T", ""))] = (pi, a)
             sp = a.get("/StructParent")
             if sp is None:
                 bad.append(f"p{pi+1} widget without /StructParent")
                 continue
-            val = tree.get(int(sp))
-            arr = list(val) if isinstance(val, pikepdf.Array) else [val]
-            if not any(getattr(v, "get", lambda k, d=None: None)("/S") == pikepdf.Name.Form for v in arr if v is not None):
+            forms = [v for v in objs(tree.get(int(sp))) if getattr(v, "get", lambda k, d=None: None)("/S") == pikepdf.Name.Form]
+            if not forms:
                 bad.append(f"p{pi+1} widget /StructParent {sp} does not resolve to a /Form element")
-    if want and widgets != len(want):
-        bad.append(f"{widgets} widgets, expected {len(want)}")
+                continue
+            objr = forms[0].get("/K")
+            obj = objr.get("/Obj") if hasattr(objr, "get") else None
+            if obj is None or obj.objgen != a.objgen:
+                bad.append(f"p{pi+1} {str(a.get('/T',''))}: the /Form element's OBJR does not point at this widget")
+
+    for f in (want or []):
+        got = widgets.get(f["name"])
+        if got is None:
+            bad.append(f"field {f['name']!r} missing (has {sorted(widgets)})")
+            continue
+        pi, a = got
+        if pi != f["page"]:
+            bad.append(f"field {f['name']!r} on p{pi+1}, expected p{f['page']+1}")
+        rect = [float(v) for v in a["/Rect"]]
+        if any(abs(x - y) > 1.5 for x, y in zip(rect, f["rect"])):
+            bad.append(f"field {f['name']!r} rect {[round(v) for v in rect]} != spec {[round(v) for v in f['rect']]}")
+    if want:
+        extra = sorted(set(widgets) - {f["name"] for f in want})
+        if extra:
+            bad.append(f"undeclared fields {extra}")
+
     for f in fields:
         tu = str(f.get("/TU", ""))
         if not tu or not any("\u0600" <= ch <= "\u06ff" for ch in tu):
@@ -458,6 +505,11 @@ def acroform_problems(pdf) -> list[str]:
 
 def link_tagging_problems(pdf) -> list[str]:
     bad, count = [], 0
+    try:
+        nums = list(pdf.Root.StructTreeRoot["/ParentTree"]["/Nums"])
+        tree = {int(str(nums[i])): nums[i + 1] for i in range(0, len(nums), 2)}
+    except (AttributeError, KeyError):
+        tree = {}
     for i, page in enumerate(pdf.pages):
         for a in page.obj.get("/Annots", []):
             if str(a.get("/Subtype")) != "/Link":
@@ -466,8 +518,22 @@ def link_tagging_problems(pdf) -> list[str]:
             c = str(a.get("/Contents", ""))
             if not c or not any("\u0600" <= ch <= "\u06ff" for ch in c):
                 bad.append(f"p{i+1} link without an Arabic /Contents")
-            if a.get("/StructParent") is None:
+            sp = a.get("/StructParent")
+            if sp is None:
                 bad.append(f"p{i+1} link without /StructParent")
+                continue
+            val = tree.get(int(sp))
+            elems = list(val) if isinstance(val, pikepdf.Array) else ([val] if val is not None else [])
+            ok = False
+            for e in elems:
+                if getattr(e, "get", lambda k, d=None: None)("/S") != pikepdf.Name.Link:
+                    continue
+                objr = e.get("/K")
+                obj = objr.get("/Obj") if hasattr(objr, "get") else None
+                if obj is not None and obj.objgen == a.objgen:
+                    ok = True
+            if not ok:
+                bad.append(f"p{i+1} link /StructParent {sp} does not resolve to a /Link element holding this annot")
     if count != NS.EXPECTED_LINKS:
         bad.append(f"{count} links, expected {NS.EXPECTED_LINKS}")
     # A generic name on every row is a label in name only: the destination must be announced per row.
@@ -742,10 +808,12 @@ def gate(doc) -> list[str]:
     texts = pdfium_texts(doc)
     title = (doc.metadata or {}).get("title", "")
     ver = f"الإصدار {NS.GUIDE_VERSION_AR}"
+    want_title = f"{getattr(NS, 'DOC_TITLE', 'معيار إنتاج ملفات PDF — دليل المعيار')} · {ver}"
     cover = " ".join(texts[NS.COVER].split()) if texts else ""
     on_cover = ver in cover
-    check("title", ver in title and on_cover,
-          title[:70] + ("" if ver in title else f" - missing «{ver}»") + ("" if on_cover else f" - cover does not print «{ver}»"))
+    check("title", title.strip() == want_title and on_cover,
+          title[:70] + ("" if title.strip() == want_title else f" - != «{want_title}»")
+          + ("" if on_cover else f" - cover does not print «{ver}»"))
 
     # 8b. version consistency: EVERY place the version is printed carries the same value (H7). The cover was
     # guarded; the back cover was not, so a stale back cover could ship next to a current cover.
@@ -834,9 +902,13 @@ def gate(doc) -> list[str]:
     # 15. the document's own claim about this gate (H9): the printed counts must equal the live ones.
     claims = printed_counts(doc[NS.PRINTED_COUNTS_PAGE])
     want_claims = {"checks": NS.GATE_CHECKS, "mutations": NS.GATE_MUTATIONS}
+    if getattr(NS, "PRINTS_LINK_COUNT", False):      # only where the document actually prints the number
+        want_claims["links"] = NS.EXPECTED_LINKS
     claim_bad = [f"{k}: printed {claims.get(k, 'not found')} vs actual {v}" for k, v in want_claims.items() if claims.get(k) != v]
-    check("gate-claims", not claim_bad, "; ".join(claim_bad) or
-          f"printed {claims['checks']} checks / {claims['mutations']} mutations = actual")
+    detail = f"printed {claims.get('checks')} checks / {claims.get('mutations')} mutations"
+    if "links" in want_claims:
+        detail += f" / {claims.get('links')} links"
+    check("gate-claims", not claim_bad, "; ".join(claim_bad) or detail + " = actual")
 
     final_count()
     return fails

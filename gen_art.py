@@ -88,7 +88,7 @@ def load_key() -> str:
 
 def main() -> None:
     if len(sys.argv) < 2 or sys.argv[1] not in PROMPTS:
-        raise SystemExit("usage: gen_art.py <cover|divider|back> [1K|2K|4K]")
+        raise SystemExit("usage: gen_art.py <cover|divider|back|report-cover|report-divider-a|report-divider-b> [1K|2K|4K]")
     mode = sys.argv[1]
     res = sys.argv[2] if len(sys.argv) > 2 else "2K"
     body = {
@@ -98,9 +98,9 @@ def main() -> None:
         "aspect_ratio": "3:4",
         "provider": {"only": ["google-ai-studio"], "allow_fallbacks": False},
     }
-    ref = style_ref()
+    if (mode in ("divider", "back") or mode.startswith("report-")) and not ref:
+        raise SystemExit("this mode needs a style reference: art/embed-cover.jpg (or final-cover-4K.png)")
     if mode in ("divider", "back") or mode.startswith("report-"):
-        ref = style_ref()
         b64 = base64.b64encode(open(ref, "rb").read()).decode()
         body["input_references"] = [
             {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + b64}}
