@@ -13,3 +13,6 @@ art/*
 # python
 __pycache__/
 *.pyc
+
+# local virtualenv
+.venv/
