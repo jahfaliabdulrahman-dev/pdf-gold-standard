@@ -48,8 +48,8 @@ def probe(pdf_path, flavour, keys):
 # What remains when the file DOES declare conformance. Measured on 47b479a; a rule that stays,
 # appears or disappears outside this table fails the gate — the identification claim is now guarded.
 EXPECTED = {
-    "3b": {"6.2.11.5-1"},
-    "ua1": {"7.1-3", "7.18.1-2", "7.18.5-1", "7.18.5-2", "7.21.5-1", "7.4.2-1"},
+    "3b": set(),                                   # strict widths: 0 rules (measured)
+    "ua1": {"7.1-3", "7.18.1-2", "7.18.5-1", "7.18.5-2", "7.4.2-1"},
 }
 CLAIMS = {"3b": {"pdfaid:part": "3", "pdfaid:conformance": "B"},
           "ua1": {"pdfuaid:part": "1"}}
