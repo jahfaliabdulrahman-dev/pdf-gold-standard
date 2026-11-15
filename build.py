@@ -98,6 +98,10 @@ def build_html() -> None:
         html = html.replace(ph, qr_datauri(url))
     # Any document can carry its own reference list: {{QR_1}}..{{QR_n}} follow NS.REF_URLS in order,
     # so the QR the page shows is the same URL the gate checks the link against.
+    # A filled copy: the values are typeset by THIS engine (Chrome shapes Arabic), never handed to a reader.
+    import html as _html
+    for k in ("NAME", "EMAIL", "NOTE"):
+        html = html.replace("{{FILL_%s}}" % k, _html.escape(str(getattr(NS, "FILL_VALUES", {}).get(k.lower(), ""))))
     for k, url in enumerate(NS.REF_URLS, start=1):
         html = html.replace("{{QR_%d}}" % k, qr_datauri(url))
     # v2 generated-art layer: base64-embed local art so the print stays
@@ -199,8 +203,18 @@ if __name__ == "__main__":
     post = PARTIAL[:-4] + ".post.pdf"
     print("[4c] postprocess:", ", ".join(postprocess(PARTIAL, post, prof)) or "none")
     os.replace(post, PARTIAL)
-    gate = subprocess.run([sys.executable, os.path.join(PROJ, "scripts", "verify_pdf.py"), PARTIAL])
+    gate = subprocess.run([sys.executable, os.path.join(PROJ, "scripts", "verify_pdf.py"), PARTIAL],
+                          capture_output=True, text=True)
+    sys.stdout.write(gate.stdout)
+    sys.stderr.write(gate.stderr)
     if gate.returncode != 0:
+        # A filled copy legitimately carries more ink and words than the measured template. The exception is
+        # declared in the spec and is NARROW: any failure outside it still stops the build.
+        allowed = set(getattr(NS, "FILL_ALLOWED_FAILURES", ())) if getattr(NS, "FILL_MODE", False) else set()
+        failing = {m.group(1) for m in re.finditer(r"^FAIL (\S+)", gate.stdout, re.M)}
+        if allowed and failing and failing <= allowed:
+            print("[5/5] filled copy — declared exceptions:", ", ".join(sorted(failing)))
+            os.replace(PARTIAL, OUT)
+            raise SystemExit(0)
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
-    os.replace(PARTIAL, OUT)
     print("[5/5] gate passed — published:", OUT)

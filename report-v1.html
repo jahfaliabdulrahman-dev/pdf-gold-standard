@@ -135,6 +135,11 @@
   .flabel{ font-size:9.5pt; font-weight:600; color:var(--c-muted); margin-bottom:1.5mm; }
   .fline{ border-bottom:0.35mm solid #b9a6f2; height:12mm; margin-bottom:8mm; }
   .fbox{ border:0.35mm solid #b9a6f2; border-radius:2mm; height:45mm; }
+  /* A filled copy prints the value as page text: the build engine shapes it once, and every reader sees
+     the same connected Arabic. Empty in the template, so the template's ink is unchanged. */
+  .fval{ position:absolute; right:23.5mm; left:23.5mm; font-size:11pt; line-height:1.5; color:#1b1630;
+    white-space:pre-wrap; overflow:hidden; }
+  .fval.oneline{ height:10mm; display:flex; align-items:flex-end; }
   /* references */
   .ref-row{ position:absolute; right:20.46mm; width:158mm; height:22mm; background:#fff; border:0.35mm solid var(--c-line);
     border-radius:3mm; display:flex; align-items:center; gap:5mm; padding:0 5mm; }
@@ -473,6 +478,9 @@ for glyph in drawn_glyphs(page):
     <div class="fline" style="position:absolute;top:106mm;right:20.46mm;left:20.46mm;"></div>
     <div class="flabel" style="position:absolute;top:138mm;right:20.46mm;">ملاحظة عن الملف</div>
     <div class="fbox" style="position:absolute;top:144mm;right:20.46mm;left:20.46mm;"></div>
+    <div class="fval oneline" style="top:74mm;">{{FILL_NAME}}</div>
+    <div class="fval oneline" style="top:108mm;">{{FILL_EMAIL}}</div>
+    <div class="fval" style="top:147mm;height:39mm;">{{FILL_NOTE}}</div>
   </div>
   <div class="band" style="position:absolute;top:206mm;right:20.46mm;left:20.46mm;"><b>لماذا نموذج في تقرير؟</b> لأنه أقصى اختبار للبنية: الحقل كائن تفاعلي داخل شجرة وسوم، وله اسم وصول عربي، وخط مدمج، وترتيب تبويب. والمعيار الذي لا يستوعب نموذجًا عربيًا لا يستوعب تقريرًا.</div>
   <div class="tail"><i></i><i class="c"></i><i></i></div>

@@ -438,6 +438,10 @@ def acroform_problems(pdf) -> list[str]:
     element's type name alone.
     """
     bad = []
+    declared = getattr(NS, "ACROFORM_FIELDS", None)
+    if isinstance(declared, (list, tuple)) and not declared:
+        return [] if "/AcroForm" not in pdf.Root else \
+               ["/AcroForm present although the spec declares no fields (a filled copy must not leave widgets)"]
     if "/AcroForm" not in pdf.Root:
         return ["no /AcroForm"]
     fields = pdf.Root.AcroForm.get("/Fields", [])
