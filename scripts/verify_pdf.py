@@ -616,47 +616,63 @@ def gate(doc) -> list[str]:
     # 3b. render: every nav slot must show ink ON THE PAGE, and the icon the source draws there.
     # A missing source icon is a FAILURE, never a silent pass: a check that lost its input would otherwise
     # print "shape IoU 0.00-0.00" inside a PASS (H2).
-    dead, seen, ious = [], [], []
-    order = sorted(NS.SLOTS, key=NS.SLOTS.get)  # the HTML lists a strip's icons left to right
-    try:
-        icons = source_icons()
-    except Exception as e:                      # a check that cannot read what it needs fails
-        icons = []; dead.append(f"cannot render the source icons: {e}")
-    want_strips, want_slots = NS.EXPECTED["source_strips"], NS.EXPECTED["slots_per_strip"]
-    if not icons:
-        dead.append(f"source icons not found in {NS.SOURCE_HTML}: the gate cannot verify the button shapes")
-    elif (len(icons), {len(r) for r in icons}) != (want_strips, {want_slots}):
-        dead.append(f"source HTML has {[len(r) for r in icons]} icons per strip, expected {want_strips} x {want_slots}")
-        icons = []
-    for n, i in enumerate(NS.NAV_PAGES):
-        for role, x in NS.SLOTS.items():
-            clip = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
-            pm = doc[i].get_pixmap(dpi=300, clip=clip, colorspace=fitz.csGRAY)
-            px = pm.samples
-            bg = statistics.median(px)
-            on = [k for k, v in enumerate(px) if abs(v - bg) > NS.SLOT_INK_CONTRAST]
-            ink = len(on) / len(px)
-            seen.append(ink)
-            if not NS.SLOT_INK_MIN <= ink <= NS.SLOT_INK_MAX:
-                dead.append(f"p{i+1} {role}: ink {ink:.2f}")
-                continue
-            # the right icon, not just some ink: ink share, centre of mass and spread against the icon's signature
-            xs = [k % pm.stride for k in on]; ys = [k // pm.stride for k in on]
-            sig = (ink, statistics.fmean(xs) / pm.width - 0.5, statistics.fmean(ys) / pm.height - 0.5,
-                   statistics.pstdev(xs) / pm.width, statistics.pstdev(ys) / pm.height)
-            if any(abs(a - b) > NS.SLOT_SHAPE_TOL for a, b in zip(sig, NS.SLOT_SHAPE[role])):
-                dead.append(f"p{i+1} {role}: not its icon - " + " ".join(f"{a:+.2f}" for a in sig) +
-                            " vs " + " ".join(f"{b:+.2f}" for b in NS.SLOT_SHAPE[role]))
-                continue
-            # the same shape as the icon the source draws there (the signature alone is five numbers: a striped
-            # rectangle can match them all). With no source icons the check has already failed above: never
-            # compare against nothing, and never let that path reach a PASS.
-            if icons:
-                iou = icon_iou(pm, icons[n][order.index(role)]); ious.append(iou)
-                if iou < NS.SLOT_ICON_MIN_IOU:
-                    dead.append(f"p{i+1} {role}: shape differs from the source icon (IoU {iou:.2f}, min {NS.SLOT_ICON_MIN_IOU})")
-    check("render", not dead, "; ".join(dead[:6]) or
-          f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots: each icon drawn in its own slot (ink {min(seen):.2f}-{max(seen):.2f}, shape IoU {min(ious):.2f}-{max(ious):.2f})")
+    if not getattr(NS, "NAV_VISIBLE", True):
+        # A print copy is proven by its SOURCE, not by ink: the cover and the dividers are full-bleed art, so
+        # "the band is blank" is false there for a reason that has nothing to do with buttons. The link check
+        # above already proves no page carries a strip target; this proves no icon was drawn at all.
+        rendered = os.path.splitext(str(getattr(doc, "name", "")))[0] + ".source.html"
+        try:
+            markup = open(rendered, encoding="utf-8").read()
+            stripped = 'class="nav"' not in markup
+            ok = stripped
+            detail = ("print copy: the markup Chrome printed carries no nav strip" if stripped
+                      else f"print copy: {markup.count('class=\"nav\"')} nav strip(s) were still drawn")
+        except OSError as exc:
+            ok, detail = False, f"cannot read what was printed ({exc})"
+        check("render", ok, detail)
+    else:
+        dead, seen, ious = [], [], []
+        order = sorted(NS.SLOTS, key=NS.SLOTS.get)  # the HTML lists a strip's icons left to right
+        try:
+            icons = source_icons()
+        except Exception as e:                      # a check that cannot read what it needs fails
+            icons = []; dead.append(f"cannot render the source icons: {e}")
+        want_strips, want_slots = NS.EXPECTED["source_strips"], NS.EXPECTED["slots_per_strip"]
+        if not icons:
+            dead.append(f"source icons not found in {NS.SOURCE_HTML}: the gate cannot verify the button shapes")
+        elif (len(icons), {len(r) for r in icons}) != (want_strips, {want_slots}):
+            dead.append(f"source HTML has {[len(r) for r in icons]} icons per strip, expected {want_strips} x {want_slots}")
+            icons = []
+        for n, i in enumerate(NS.NAV_PAGES):
+            for role, x in NS.SLOTS.items():
+                clip = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
+                pm = doc[i].get_pixmap(dpi=300, clip=clip, colorspace=fitz.csGRAY)
+                px = pm.samples
+                bg = statistics.median(px)
+                on = [k for k, v in enumerate(px) if abs(v - bg) > NS.SLOT_INK_CONTRAST]
+                ink = len(on) / len(px)
+                seen.append(ink)
+                if not NS.SLOT_INK_MIN <= ink <= NS.SLOT_INK_MAX:
+                    dead.append(f"p{i+1} {role}: ink {ink:.2f}")
+                    continue
+                # the right icon, not just some ink: ink share, centre of mass and spread against the icon's signature
+                xs = [k % pm.stride for k in on]; ys = [k // pm.stride for k in on]
+                sig = (ink, statistics.fmean(xs) / pm.width - 0.5, statistics.fmean(ys) / pm.height - 0.5,
+                       statistics.pstdev(xs) / pm.width, statistics.pstdev(ys) / pm.height)
+                if any(abs(a - b) > NS.SLOT_SHAPE_TOL for a, b in zip(sig, NS.SLOT_SHAPE[role])):
+                    dead.append(f"p{i+1} {role}: not its icon - " + " ".join(f"{a:+.2f}" for a in sig) +
+                                " vs " + " ".join(f"{b:+.2f}" for b in NS.SLOT_SHAPE[role]))
+                    continue
+                # the same shape as the icon the source draws there (the signature alone is five numbers: a striped
+                # rectangle can match them all). With no source icons the check has already failed above: never
+                # compare against nothing, and never let that path reach a PASS.
+                if icons:
+                    iou = icon_iou(pm, icons[n][order.index(role)]); ious.append(iou)
+                    if iou < NS.SLOT_ICON_MIN_IOU:
+                        dead.append(f"p{i+1} {role}: shape differs from the source icon (IoU {iou:.2f}, min {NS.SLOT_ICON_MIN_IOU})")
+        check("render", not dead, "; ".join(dead[:6]) or
+              f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots: each icon drawn in its own slot (ink {min(seen):.2f}-{max(seen):.2f}, shape IoU {min(ious):.2f}-{max(ious):.2f})")
+
 
     # 3c. images: the page must carry the images it is supposed to carry (H3). A divider whose art vanished
     # while its text survived passes every text check — only an inventory of the page can see it.

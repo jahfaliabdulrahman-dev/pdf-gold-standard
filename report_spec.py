@@ -11,7 +11,7 @@ and the reader it was measured on. This file carries no claim of its own.
 MM = 2.83465  # 1 mm in pt
 PAGE_H_MM = 296.8
 
-GUIDE_VERSION = "1.3"
+GUIDE_VERSION = "1.4"
 # Metadata is part of the document, not of the pipeline (build.py reads these).
 DOC_TITLE = "الحرف المقلوب — تقرير إثبات عن طبقة النص العربية في PDF"
 DOC_AUTHOR = "م. عبدالرحمن جحفلي"
@@ -168,6 +168,7 @@ ART_FILES = [
 ]
 
 PRINTS_LINK_COUNT = True     # page 12 prints «٦٣ رابطا»; the gate parses and compares it
+LINKS_CLAIM = "و٦٣ رابطا حيا"   # injected into {{LINKS_CLAIM}}; the print variant states its own truth
 GATE_CHECKS = 34
 GATE_MUTATIONS = 48
 

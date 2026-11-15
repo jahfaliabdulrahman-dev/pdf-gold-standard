@@ -83,12 +83,23 @@ def build_html() -> None:
     if os.path.isdir(fdir):
         fcss = open(os.path.join(fdir, "fonts.css"), encoding="utf-8").read()
 
+        def _mime(fp):
+            return {".woff2": "font/woff2", ".ttf": "font/ttf", ".otf": "font/otf"}.get(os.path.splitext(fp)[1], "font/ttf")
+
         def _embed(m):
             fp = os.path.join(fdir, m.group(1))
-            return "url(data:font/woff2;base64," + base64.b64encode(open(fp, "rb").read()).decode() + ")"
+            return "url(data:" + _mime(fp) + ";base64," + base64.b64encode(open(fp, "rb").read()).decode() + ")"
 
         fcss = re.sub(r"url\('([^']+)'\)", _embed, fcss)
         html = html.replace("/*__FONTS__*/", fcss)
+    ndir = os.path.join(PROJ, "najd")
+    if "/*__FONTS_NAJD__*/" in html and os.path.isdir(ndir):
+        ncss = open(os.path.join(ndir, "fonts.css"), encoding="utf-8").read()
+        ncss = re.sub(r"url\('([^']+)'\)",
+                      lambda m: "url(data:" + _mime(os.path.join(ndir, m.group(1))) + ";base64,"
+                                + base64.b64encode(open(os.path.join(ndir, m.group(1)), "rb").read()).decode() + ")",
+                      ncss)
+        html = html.replace("/*__FONTS_NAJD__*/", ncss)
     html = re.sub(r"<link[^>]*fonts\.(?:googleapis|gstatic)\.com[^>]*>\s*", "", html)
     for ph, url in [
         ("{{QR_IBM}}", "https://github.com/IBM/plex"),
@@ -100,8 +111,13 @@ def build_html() -> None:
     # Any document can carry its own reference list: {{QR_1}}..{{QR_n}} follow NS.REF_URLS in order,
     # so the QR the page shows is the same URL the gate checks the link against.
     # A filled copy: the values are typeset by THIS engine (Chrome shapes Arabic), never handed to a reader.
+    html = html.replace("{{LINKS_CLAIM}}", getattr(NS, "LINKS_CLAIM", "و٦٣ رابطا حيا"))
     for k in ("NAME", "EMAIL", "NOTE"):
         html = html.replace("{{FILL_%s}}" % k, _html.escape(str(getattr(NS, "FILL_VALUES", {}).get(k.lower(), ""))))
+    if not getattr(NS, "NAV_VISIBLE", True):
+        # A print copy carries no navigation chrome: the icons are ink on paper and take four click targets
+        # that can never be clicked. Stripping the markup (not hiding it with CSS) removes both.
+        html = re.sub(r'\s*<div class="nav">.*?</div>', "", html, flags=re.S)
     if not getattr(NS, "FILL_VALUES", {}):
         # the published template has no values, so it must not ship three empty value slots
         html = re.sub(r'\s*<div class="fval[^"]*"[^>]*></div>', "", html)
@@ -121,6 +137,9 @@ def build_html() -> None:
             payload = base64.b64encode(art_for_print(fp)).decode()
             html = html.replace(ph, "data:image/jpeg;base64," + payload)
     open(TMP_HTML, "w", encoding="utf-8").write(html)
+    # Keep the exact markup that Chrome printed: the gate proves variant claims (e.g. "no nav strip")
+    # against what was actually rendered, not against the template it came from.
+    shutil.copyfile(TMP_HTML, os.path.splitext(PARTIAL)[0] + ".source.html")
     print("[1/4] html ready (QR embedded)")
 
 
