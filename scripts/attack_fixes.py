@@ -84,7 +84,14 @@ def claim_ua(pdf):
         m["pdfuaid:part"] = "1"
 
 
-CASES = [("acroform/OBJR removed", drop_widget_k), ("acroform/field renamed", rename_field),
+def subset_font_in_dr(pdf):
+    """The old bug: the field borrows a page font, which is a subset of that page's words."""
+    page_fonts = pdf.pages[0].obj["/Resources"]["/Font"]
+    dr = pdf.Root.AcroForm["/DR"]["/Font"]
+    dr[next(iter(dr.keys()))] = page_fonts[next(iter(page_fonts.keys()))]
+
+
+CASES = [("acroform/OBJR removed", drop_widget_k), ("acroform/subset font in /DR", subset_font_in_dr), ("acroform/field renamed", rename_field),
          ("acroform/no /Tabs", drop_tabs), ("link/StructParent dangling", break_link_structparent),
          ("metadata/wrong title", retitle)]
 

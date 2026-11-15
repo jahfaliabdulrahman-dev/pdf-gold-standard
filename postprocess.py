@@ -145,8 +145,68 @@ def feature_attachments(pdf, spec) -> None:
     pdf.Root.AF = pikepdf.Array([pdf.attachments[name].obj for name, *_ in payloads])
 
 
+FORM_FONT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts", "IBMPlexSansArabic-Regular.ttf")
+FORM_FONT_KEY = "/PlexForm"
+
+
+def form_font(pdf):
+    """A COMPLETE Arabic font for form fields — never a page subset.
+
+    Chrome writes each page font as a subset with no ToUnicode: the glyphs of the words on that page and
+    nothing else. A field that borrows one can only ever display those glyphs, so typing «ملاحظات» gives
+    empty boxes. This embeds the full IBM Plex Sans Arabic (OFL) as Type0/Identity-H, CIDToGIDMap
+    /Identity, with a ToUnicode CMap so the value can also be copied out.
+    """
+    from fontTools.ttLib import TTFont
+    ttf = TTFont(FORM_FONT_PATH)
+    upem = ttf["head"].unitsPerEm
+    order = ttf.getGlyphOrder()
+    hmtx, head, hhea = ttf["hmtx"], ttf["head"], ttf["hhea"]
+    scale = lambda v: round(v * 1000 / upem)
+    widths = [scale(hmtx[g][0]) for g in order]
+    data = open(FORM_FONT_PATH, "rb").read()
+
+    ff = pdf.make_stream(data)
+    ff["/Length1"] = len(data)
+    descriptor = pdf.make_indirect(pikepdf.Dictionary(
+        Type=pikepdf.Name.FontDescriptor, FontName=pikepdf.Name("/IBMPlexSansArabic-Regular"),
+        Flags=4, FontBBox=pikepdf.Array([scale(v) for v in (head.xMin, head.yMin, head.xMax, head.yMax)]),
+        ItalicAngle=0, Ascent=scale(hhea.ascent), Descent=scale(hhea.descent),
+        CapHeight=scale(getattr(ttf["OS/2"], "sCapHeight", hhea.ascent)), StemV=80, FontFile2=ff))
+    cid = pdf.make_indirect(pikepdf.Dictionary(
+        Type=pikepdf.Name.Font, Subtype=pikepdf.Name.CIDFontType2,
+        BaseFont=pikepdf.Name("/IBMPlexSansArabic-Regular"),
+        CIDSystemInfo=pikepdf.Dictionary(Registry=pikepdf.String("Adobe"),
+                                         Ordering=pikepdf.String("Identity"), Supplement=0),
+        FontDescriptor=descriptor, DW=600, W=pikepdf.Array([0, pikepdf.Array(widths)]),
+        CIDToGIDMap=pikepdf.Name.Identity))
+
+    # ToUnicode: one entry per glyph that has a character — without it the value cannot be copied or read.
+    reverse = {}
+    for cp, name in ttf.getBestCmap().items():
+        reverse.setdefault(ttf.getGlyphID(name), cp)
+    lines = ["/CIDInit /ProcSet findresource begin", "12 dict begin", "begincmap",
+             "/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def",
+             "/CMapName /Adobe-Identity-UCS def", "/CMapType 2 def", "1 begincodespacerange",
+             "<0000> <FFFF>", "endcodespacerange"]
+    pairs = sorted((gid, cp) for gid, cp in reverse.items() if cp <= 0xFFFF)
+    for i in range(0, len(pairs), 100):
+        chunk = pairs[i:i + 100]
+        lines.append(f"{len(chunk)} beginbfchar")
+        lines += [f"<{gid:04X}> <{cp:04X}>" for gid, cp in chunk]
+        lines.append("endbfchar")
+    lines += ["endcmap", "CMapName currentdict /CMap defineresource pop", "end", "end"]
+    tu = pdf.make_stream("\n".join(lines).encode("ascii"))
+
+    font = pdf.make_indirect(pikepdf.Dictionary(
+        Type=pikepdf.Name.Font, Subtype=pikepdf.Name.Type0,
+        BaseFont=pikepdf.Name("/IBMPlexSansArabic-Regular"), Encoding=pikepdf.Name("/Identity-H"),
+        DescendantFonts=pikepdf.Array([cid]), ToUnicode=tu))
+    return font, FORM_FONT_KEY
+
+
 def feature_acroform(pdf, spec) -> None:
-    """Real text fields with an Arabic /TU and an embedded house font in /DR.
+    """Real text fields with an Arabic /TU and the COMPLETE house font in /DR.
 
     The fields live in the spec (`ACROFORM_FIELDS`: name, /TU, page, rect in PDF points, optional multiline),
     so the report can carry three and the guide one. Each widget is borderless (/BS W 0) and moves no pixel;
@@ -158,9 +218,8 @@ def feature_acroform(pdf, spec) -> None:
         {"name": "applicant_name", "tu": "الاسم الكامل لمقدم الطلب", "page": NS.PAGES - 1,
          "rect": [60, 80, 360, 112]},
     ]
-    fonts = pdf.pages[0].obj["/Resources"]["/Font"]
-    key = next(iter(fonts.keys()))
-    da = pikepdf.String(f"{key} 10 Tf 0 g")
+    font, key = form_font(pdf)
+    da = pikepdf.String(f"{key} 11 Tf 0 g")
     st = pdf.Root.StructTreeRoot
     pt = st["/ParentTree"]
     nums = pt.get("/Nums", pdf.make_indirect(pikepdf.Array()))
@@ -181,7 +240,7 @@ def feature_acroform(pdf, spec) -> None:
         ap["/Type"] = pikepdf.Name.XObject
         ap["/Subtype"] = pikepdf.Name.Form
         ap["/BBox"] = pikepdf.Array([0, 0, rect[2] - rect[0], rect[3] - rect[1]])
-        ap["/Resources"] = pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]}))
+        ap["/Resources"] = pikepdf.Dictionary(Font=pikepdf.Dictionary({key: font}))
         widget["/AP"] = pikepdf.Dictionary(N=pdf.make_indirect(ap))
         ann = page.obj.get("/Annots", pikepdf.Array())
         ann.append(widget)
@@ -208,7 +267,7 @@ def feature_acroform(pdf, spec) -> None:
 
     pdf.Root.AcroForm = pikepdf.Dictionary(
         Fields=pikepdf.Array(widgets),
-        DR=pikepdf.Dictionary(Font=pikepdf.Dictionary({key: fonts[key]})),
+        DR=pikepdf.Dictionary(Font=pikepdf.Dictionary({key: font})),
         DA=da)
 
 
