@@ -8,6 +8,7 @@ Defaults: guide-v2.html -> ./out.pdf
 import atexit
 import base64
 import hashlib
+import html as _html
 import io
 import os
 import re
@@ -99,9 +100,11 @@ def build_html() -> None:
     # Any document can carry its own reference list: {{QR_1}}..{{QR_n}} follow NS.REF_URLS in order,
     # so the QR the page shows is the same URL the gate checks the link against.
     # A filled copy: the values are typeset by THIS engine (Chrome shapes Arabic), never handed to a reader.
-    import html as _html
     for k in ("NAME", "EMAIL", "NOTE"):
         html = html.replace("{{FILL_%s}}" % k, _html.escape(str(getattr(NS, "FILL_VALUES", {}).get(k.lower(), ""))))
+    if not getattr(NS, "FILL_VALUES", {}):
+        # the published template has no values, so it must not ship three empty value slots
+        html = re.sub(r'\s*<div class="fval[^"]*"[^>]*></div>', "", html)
     for k, url in enumerate(NS.REF_URLS, start=1):
         html = html.replace("{{QR_%d}}" % k, qr_datauri(url))
     # v2 generated-art layer: base64-embed local art so the print stays
@@ -203,18 +206,24 @@ if __name__ == "__main__":
     post = PARTIAL[:-4] + ".post.pdf"
     print("[4c] postprocess:", ", ".join(postprocess(PARTIAL, post, prof)) or "none")
     os.replace(post, PARTIAL)
-    gate = subprocess.run([sys.executable, os.path.join(PROJ, "scripts", "verify_pdf.py"), PARTIAL],
-                          capture_output=True, text=True)
-    sys.stdout.write(gate.stdout)
-    sys.stderr.write(gate.stderr)
-    if gate.returncode != 0:
+    # The gate is imported, not shelled out: it already returns the failing names, so no output format is
+    # being parsed (a regex over stdout was one edit away from silently matching nothing).
+    sys.path.insert(0, os.path.join(PROJ, "scripts"))
+    import verify_pdf
+    try:
+        gate_doc = verify_pdf.open_for_gate(PARTIAL)
+    except verify_pdf.GateInput as exc:
+        print(f"FAIL input - {exc}")
+        raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
+    failing = set(verify_pdf.gate(gate_doc))
+    if failing:
         # A filled copy legitimately carries more ink and words than the measured template. The exception is
         # declared in the spec and is NARROW: any failure outside it still stops the build.
         allowed = set(getattr(NS, "FILL_ALLOWED_FAILURES", ())) if getattr(NS, "FILL_MODE", False) else set()
-        failing = {m.group(1) for m in re.finditer(r"^FAIL (\S+)", gate.stdout, re.M)}
-        if allowed and failing and failing <= allowed:
+        if allowed and failing <= allowed:
             print("[5/5] filled copy — declared exceptions:", ", ".join(sorted(failing)))
             os.replace(PARTIAL, OUT)
             raise SystemExit(0)
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
+    os.replace(PARTIAL, OUT)
     print("[5/5] gate passed — published:", OUT)

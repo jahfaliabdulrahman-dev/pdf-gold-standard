@@ -15,7 +15,11 @@ import report_spec
 from report_spec import *          # noqa: F401,F403 — one document, one set of numbers
 
 _name = os.environ.get("FILL_JSON", "")
-FILL_VALUES = json.load(open(_name, encoding="utf-8")) if _name else {}
+if _name:
+    with open(_name, encoding="utf-8") as _fh:
+        FILL_VALUES = json.load(_fh)
+else:
+    FILL_VALUES = {}
 ACROFORM_FIELDS = []               # nothing is left for the reader's text engine to lay out
 FILL_MODE = True
 FILL_ALLOWED_FAILURES = {"page-ink", "page-words"}
