@@ -500,6 +500,16 @@ def acroform_problems(pdf) -> list[str]:
     dr = pdf.Root.AcroForm.get("/DR", {})
     if not dr.get("/Font", {}):
         bad.append("AcroForm /DR has no embedded font")
+    for _, f in (dr.get("/Font", {}) or {}).items():
+        base = str(f.get("/BaseFont", ""))
+        # A page font is a subset of the words printed on that page and carries no ToUnicode: a field that
+        # borrows one cannot display a letter the page never used (the reader types «ملاحظات» and sees boxes).
+        if "+" in base:
+            bad.append(f"/DR font {base} is a subset: typed letters may be missing")
+        if "/ToUnicode" not in f:
+            bad.append(f"/DR font {base} has no ToUnicode: the value cannot be copied")
+        if not f.get("/DescendantFonts"):
+            bad.append(f"/DR font {base} is not a Type0/CID font")
     return bad
 
 

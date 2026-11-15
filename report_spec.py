@@ -11,7 +11,7 @@ and the reader it was measured on. This file carries no claim of its own.
 MM = 2.83465  # 1 mm in pt
 PAGE_H_MM = 296.8
 
-GUIDE_VERSION = "1.0"
+GUIDE_VERSION = "1.1"
 # Metadata is part of the document, not of the pipeline (build.py reads these).
 DOC_TITLE = "الحرف المقلوب — تقرير إثبات عن طبقة النص العربية في PDF"
 DOC_AUTHOR = "م. عبدالرحمن جحفلي"
@@ -178,7 +178,7 @@ DEST_NAMES = [("cover", COVER), ("basmala", BASMALA), ("contents", CONTENTS), ("
               ("section-2", 6), ("form", 14), ("references", REF_PAGE), ("back", PAGES - 1)]
 PAGE_LABELS = [(0, None, "غ"), (1, "D", 1)]
 XMP_LANGUAGE = "ar"
-XMP_TITLE = "الحرف المقلوب — تقرير إثبات عن طبقة النص العربية في PDF · الإصدار ١٫٠"
+XMP_TITLE = f"{DOC_TITLE} · الإصدار {GUIDE_VERSION_AR}"   # one source of truth for the title string
 XMP_DESCRIPTION = "تشخيص وإصلاح وإثبات لطبقة النص العربية في PDF، بأرقام مقاسة على خمسة قرّاء"
 # Declared only when veraPDF reports ZERO failures for it — the gate reads the baseline and refuses otherwise.
 CONFORMANCE = {"pdfaid:part": "3", "pdfaid:conformance": "B"}
