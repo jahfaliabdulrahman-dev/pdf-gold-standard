@@ -214,7 +214,10 @@ def feature_acroform(pdf, spec) -> None:
     """
     import spec_loader
     NS = spec_loader.load()
-    fields = getattr(NS, "ACROFORM_FIELDS", None) or [
+    declared = getattr(NS, "ACROFORM_FIELDS", None)
+    if isinstance(declared, (list, tuple)) and not declared:
+        return                       # a filled copy typesets the values; nothing is left to type
+    fields = declared or [
         {"name": "applicant_name", "tu": "الاسم الكامل لمقدم الطلب", "page": NS.PAGES - 1,
          "rect": [60, 80, 360, 112]},
     ]
