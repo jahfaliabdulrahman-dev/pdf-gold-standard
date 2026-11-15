@@ -11,6 +11,9 @@ sustainable fix is not a trick in the file: it is to stop asking the reader to l
 The browser form collects the values, this server runs the SAME pipeline with `report_fill_spec`
 (values become page text), and returns a PDF whose Arabic was shaped once, at build time, by Chrome.
 Works the same on a phone, on Windows, in any reader, and in print.
+
+Binds 127.0.0.1 on purpose: this is a single-user local surface, not a service. Do not put it on a
+network interface without adding authentication and a CSRF token to the form.
 """
 import html
 import json
@@ -24,7 +27,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 PROJ = os.path.dirname(os.path.abspath(__file__))
 FILL_PAGE = os.path.join(PROJ, "fill.html")
 MAX_BODY = 8 * 1024           # a name, an address and a note; nothing here needs more
-LIMITS = {"name": 60, "email": 80, "note": 600}
+LIMITS = {"name": 60, "email": 80, "note": 480}      # 480 fills the 39 mm box; more would clip silently
 
 
 def clean(values: dict) -> dict:
@@ -85,7 +88,9 @@ class Handler(BaseHTTPRequestHandler):
             values = clean({k: v[0] for k, v in form.items() if v})
             pdf = build(values)
         except Exception as exc:              # the browser shows this text; never a stack trace
-            msg = html.escape(str(exc))[:1200].encode("utf-8")
+            # mask the home directory: the browser needs the reason, not the machine's layout
+            text = html.escape(str(exc)).replace(os.path.expanduser("~"), "~")
+            msg = text[:1200].encode("utf-8")
             self.send_response(400)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.send_header("Content-Length", str(len(msg)))

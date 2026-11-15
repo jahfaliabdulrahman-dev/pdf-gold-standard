@@ -26,8 +26,8 @@ import fill_server                # noqa: E402
 VALUES = {
     "name": "عبدالرحمن جحفلي",
     "email": "almohalhel1408@gmail.com",
-    "note": "نصٌّ عربيٌّ كتبه المالك في نموذج الويب، ثم شكّله محرّك البناء: لاحظ اتصال الحروف، "
-            "واتجاهها من اليمين إلى اليسار، والتفاف السطر الطويل بلا انقطاع.",
+    "note": ("نصٌّ عربيٌّ كتبه المالك في نموذج الويب، ثم شكّله محرّك البناء: لاحظ اتصال الحروف، "
+             "واتجاهها من اليمين إلى اليسار، والتفاف السطر الطويل بلا انقطاع. ") * 3,
 }
 
 
@@ -39,7 +39,8 @@ def main() -> None:
     try:
         body = urllib.parse.urlencode(VALUES).encode()
         req = urllib.request.Request(f"http://127.0.0.1:{port}/api/build", data=body, method="POST")
-        with urllib.request.urlopen(req, timeout=600) as r:
+        # ~1 min build; 3x is a regression signal
+        with urllib.request.urlopen(req, timeout=180) as r:
             pdf = r.read()
             status = r.status
             ctype = r.headers.get("Content-Type")
@@ -52,7 +53,7 @@ def main() -> None:
 
     doc = fitz.open(out)
     # the rebuilt text layer separates words with tabs/zero-width marks; compare on normalised text
-    text = " ".join(doc[14].get_text().split())
+    text = " ".join(doc[14].get_text().split())      # 0-indexed: page 15 is the form page
     with pikepdf.open(out) as p:
         has_form = "/AcroForm" in p.Root
     print("pages:", doc.page_count, "| widgets left:", has_form)

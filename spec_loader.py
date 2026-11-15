@@ -20,3 +20,9 @@ def load(name: str | None = None):
     if ROOT not in sys.path:
         sys.path.insert(0, ROOT)
     return importlib.import_module(module)
+
+
+def declares_no_acroform(spec) -> bool:
+    """True when the document deliberately carries no form fields (a filled copy typesets its values)."""
+    declared = getattr(spec, "ACROFORM_FIELDS", None)
+    return isinstance(declared, (list, tuple)) and not declared
