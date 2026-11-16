@@ -41,16 +41,21 @@ h1.page-t{ font-size:21pt; font-weight:700; color:var(--primary); margin:0 0 4mm
 .toc-row .p{ font-size:11pt; font-weight:700; color:var(--primary); background:rgba(168,95,46,.08); border-radius:1.6mm; padding:0.6mm 2.8mm 1.2mm; }
 .cards3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6mm; margin:3mm 0 9mm; }
 .cards2{ display:grid; grid-template-columns:1fr 1fr; gap:6mm; margin:3mm 0 7mm; }
-.card{ background:var(--card); border:0.35mm solid var(--line); border-radius:3mm; padding:6mm 5.5mm; }
+.card{ background:var(--card); border:0.35mm solid var(--line); border-radius:3mm; padding:7mm 5.5mm; }
 .card .ttl{ font-size:12pt; font-weight:700; color:var(--primary); margin-bottom:2mm; }
 .card .tx{ font-size:10.5pt; line-height:1.85; color:var(--ink); }
-.card .big{ font-size:26pt; font-weight:900; color:var(--primary); line-height:1; }
+.dot{ height:9mm; display:flex; align-items:center; }
+.dot i{ display:block; width:4.6mm; height:4.6mm; background:var(--primary); transform:rotate(45deg); border-radius:.6mm; }
+.card .big{ font-size:26pt; font-weight:900; color:var(--primary); line-height:1.45; padding-top:1.5mm; }
 .card .cap{ font-size:10pt; color:var(--muted); margin-top:2.5mm; line-height:1.7; }
 .spec{ margin:0 0 6mm; }
 .spec .w{ font-size:9.5pt; font-weight:500; color:var(--muted); margin-bottom:0.5mm; }
 .spec .s{ font-size:34pt; line-height:1.35; color:var(--ink); }
 .spec .s.l300{ font-weight:300; } .spec .s.l400{ font-weight:400; } .spec .s.l500{ font-weight:500; }
 .spec .s.l700{ font-weight:700; } .spec .s.l900{ font-weight:900; }
+.alpha{ display:flex; flex-wrap:wrap; gap:1.6mm 1.6mm; direction:rtl; font-size:19pt; color:var(--ink); }
+.alpha .lt{ display:inline-flex; align-items:center; justify-content:center; min-width:8.2mm; height:11mm;
+  border:0.25mm solid var(--line); border-radius:1.6mm; background:var(--card); }
 .swatches{ display:grid; grid-template-columns:repeat(4,1fr); gap:4.5mm; margin:3mm 0 8mm; }
 .sw{ border-radius:2.5mm; border:0.3mm solid var(--line); overflow:hidden; }
 .sw .c{ height:22mm; }
@@ -60,6 +65,10 @@ h1.page-t{ font-size:21pt; font-weight:700; color:var(--primary); margin:0 0 4mm
 .chip{ font-size:10pt; font-weight:500; color:var(--primary); background:rgba(168,95,46,.07);
   border:0.3mm solid rgba(168,95,46,.22); border-radius:2mm; padding:1.6mm 3.4mm; }
 .chip.on{ background:var(--primary); color:#fff; border-color:var(--primary); }
+.triple{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6mm; margin:6mm 0 6mm; }
+.tri{ background:var(--card); border:0.3mm solid var(--line); border-radius:3mm; padding:5mm 5mm 6mm; text-align:center; }
+.tri .w{ font-size:9pt; color:var(--muted); margin-bottom:3mm; }
+.tri .t{ font-size:30pt; font-weight:500; color:var(--ink); line-height:1.4; }
 .band{ margin-top:3mm; background:linear-gradient(135deg, rgba(168,95,46,.10), rgba(211,141,95,.12));
   border:0.35mm solid rgba(168,95,46,.26); border-radius:3mm; padding:6mm 6mm; font-size:11pt; line-height:1.95; }
 .band b{ color:var(--primary); }
@@ -69,10 +78,10 @@ h1.page-t{ font-size:21pt; font-weight:700; color:var(--primary); margin:0 0 4mm
 .ref-row .u{ font-size:9pt; color:var(--muted); direction:ltr; text-align:left; margin-top:1mm; }
 /* Cover — sky over the wall, as in the typeface's own poster */
 .cv{ position:absolute; inset:0; overflow:hidden;
-  background:linear-gradient(180deg,#b27860 0%,#c98a6d 18%,#dda079 38%,#eeb083 55%,#f8b57b 66%); }
-.cv .wall{ position:absolute; right:0; left:0; bottom:0; height:40%;
+  background:linear-gradient(180deg,#b27860 0%,#c98a6d 18%,#dda079 38%,#eeb083 50%,#f7bd95 53%,#fbf1e2 56%); }
+.cv .wall{ position:absolute; right:0; left:0; bottom:0; height:44%;
   background-image:url("{{ART_NAJD_COVER}}"); background-size:cover; background-position:center top; }
-.cv .veil{ position:absolute; right:0; left:0; bottom:0; height:40%;
+.cv .veil{ position:absolute; right:0; left:0; bottom:0; height:44%;
   background:linear-gradient(180deg, rgba(248,181,123,.75) 0%, rgba(248,181,123,.0) 14%); }
 .cv .brand{ position:absolute; top:15mm; left:18mm; font-size:9pt; letter-spacing:.34em; color:#3a2412;
   font-weight:500; direction:ltr; }
@@ -156,11 +165,11 @@ h1.page-t{ font-size:21pt; font-weight:700; color:var(--primary); margin:0 0 4mm
     <div class="eyebrow">القسم الثاني</div>
     <h1 class="page-t">الحروف والبدائل</h1>
     <p class="lead">الخط يحمل أشكال العربية الأربعة، ولام ألف بأنواعها، وخمس مجموعات بدائل. الأسطر التالية تُظهر الفرق بين الحرف المجرّد والميزة المفعّلة.</p>
-    <div class="spec"><div class="w">الأبجدية</div><div class="s l400" style="font-size:20pt">ابتثجحخدذرزسشصضطظعغفقكلمنهويءةلا ٠١٢٣٤٥٦٧٨٩ </div></div>
+    <div class="spec"><div class="w">أشكال الحروف منفردة، والأرقام</div><div class="alpha l400"><span class="lt">ا</span><span class="lt">ب</span><span class="lt">ت</span><span class="lt">ث</span><span class="lt">ج</span><span class="lt">ح</span><span class="lt">خ</span><span class="lt">د</span><span class="lt">ذ</span><span class="lt">ر</span><span class="lt">ز</span><span class="lt">س</span><span class="lt">ش</span><span class="lt">ص</span><span class="lt">ض</span><span class="lt">ط</span><span class="lt">ظ</span><span class="lt">ع</span><span class="lt">غ</span><span class="lt">ف</span><span class="lt">ق</span><span class="lt">ك</span><span class="lt">ل</span><span class="lt">م</span><span class="lt">ن</span><span class="lt">ه</span><span class="lt">و</span><span class="lt">ي</span><span class="lt">ء</span><span class="lt">ة</span><span class="lt">لا</span></div><div class="alpha l400" style="margin-top:2mm"><span class="lt">٠</span><span class="lt">١</span><span class="lt">٢</span><span class="lt">٣</span><span class="lt">٤</span><span class="lt">٥</span><span class="lt">٦</span><span class="lt">٧</span><span class="lt">٨</span><span class="lt">٩</span></div></div>
     <div class="spec"><div class="w">الكاف — الشكل الأصل</div><div class="s l500" style="font-size:30pt">كتاب</div></div>
     <div class="spec"><div class="w">الكاف الممدودة — <span style="direction:ltr;display:inline-block">ss02</span></div><div class="s l500" style="font-size:30pt;font-feature-settings:'ss02' 1">كتاب</div></div>
     <div class="spec"><div class="w">طين ناعم — <span style="direction:ltr;display:inline-block">ss03</span></div><div class="s l500" style="font-size:30pt;font-feature-settings:'ss03' 1">كتاب</div></div>
-    <div class="spec"><div class="w">التشكيل الكامل</div><div class="s l400" style="font-size:24pt">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div></div>
+    
     <div class="band">الكاف الذكية: إذا كتبت <b>كشيدة</b> بعد الكاف امتدّ ذراعها على السطر. هذه ميزة تشكيل داخل الخط، لا صورة ولا حيلة تنسيق.</div>
     <div class="foot"><span>نجد · الحروف</span><span class="num">٤</span></div>
   </div>
@@ -195,11 +204,17 @@ h1.page-t{ font-size:21pt; font-weight:700; color:var(--primary); margin:0 0 4mm
     <h1 class="page-t">من الطين إلى الحرف</h1>
     <p class="lead">ثلاث روح في خط واحد، كما يصفها ملف الخط نفسه.</p>
     <div class="cards3">
-      <div class="card"><div class="big">١</div><div class="ttl" style="margin-top:4mm">الأصل</div><div class="tx">رؤوس الحروف القائمة مدبّبة مثل شرفات بيوت الطين، وباقي النهايات مشطوفة مثل حافة الطوب، والفتحات مربّعة مثل النوافذ النجدية.</div></div>
-      <div class="card"><div class="big">٢</div><div class="ttl" style="margin-top:4mm">كاف ممدودة</div><div class="tx">ذراع الكاف أطول على السطر، ومع الكشيدة يمتدّ على طولها. بديل واحد يغيّر إيقاع السطر كله.</div></div>
-      <div class="card"><div class="big">٣</div><div class="ttl" style="margin-top:4mm">طين ناعم</div><div class="tx">نهايات وزوايا ونقاط مدوّرة، وفتحات دائرية: الروح المقابلة للأصل، تُختار واحدة منهما لا الاثنتان.</div></div>
+      <div class="card"><div class="dot"><i></i></div><div class="ttl" style="margin-top:4mm">الأصل</div><div class="tx">رؤوس الحروف القائمة مدبّبة مثل شرفات بيوت الطين، وباقي النهايات مشطوفة مثل حافة الطوب، والفتحات مربّعة مثل النوافذ النجدية.</div></div>
+      <div class="card"><div class="dot"><i></i></div><div class="ttl" style="margin-top:4mm">كاف ممدودة</div><div class="tx">ذراع الكاف أطول على السطر، ومع الكشيدة يمتدّ على طولها. بديل واحد يغيّر إيقاع السطر كله.</div></div>
+      <div class="card"><div class="dot"><i></i></div><div class="ttl" style="margin-top:4mm">طين ناعم</div><div class="tx">نهايات وزوايا ونقاط مدوّرة، وفتحات دائرية: الروح المقابلة للأصل، تُختار واحدة منهما لا الاثنتان.</div></div>
     </div>
-    <div class="band">الخط ليس زخرفة فوق النص؛ قرارات البناء — الوزن، والبديل، وحجم الكاف — هي التي تصنع الصفحة. هذا المستند يستخدم <b>الأصل</b> في المتن و<b>الكاف الممدودة</b> في العرض.</div>
+    <div class="triple">
+      <div class="tri"><div class="w">الأصل</div><div class="t">كتاب</div></div>
+      <div class="tri"><div class="w">كاف ممدودة — <span dir="ltr" style="unicode-bidi:isolate">ss02</span></div><div class="t" style="font-feature-settings:'ss02' 1">كتاب</div></div>
+      <div class="tri"><div class="w">طين ناعم — <span dir="ltr" style="unicode-bidi:isolate">ss03</span></div><div class="t" style="font-feature-settings:'ss03' 1">كتاب</div></div>
+    </div>
+    <p class="lead" style="margin:6mm 0 5mm">البدائل لا تُغيّر الحرف نفسه، بل إيقاع السطر: ذراع أطول على السطر، ونهاية مستديرة تُهدّئ الزاوية، وعرضٌ يكفي لملء السطر بلا كشيدة مصطنعة. المستند يستخدم الأصل في المتن، والكاف الممدودة في العناوين.</p>
+    <div class="band">الخط ليس زخرفة فوق النص؛ قرارات البناء — الوزن، والبديل، وحجم الكاف — هي التي تصنع الصفحة. ولهذا يحمل هذا المستند قرارًا واحدًا صريحًا بدل خلط البدائل في صفحة واحدة.</div>
     <div class="foot"><span>نجد · الروح</span><span class="num">٦</span></div>
   </div>
 </div>
