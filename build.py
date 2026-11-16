@@ -154,6 +154,9 @@ def print_pdf() -> None:
         capture_output=True, text=True, timeout=240,
     )
     assert os.path.exists(TMP_PDF), f"chrome failed: {r.stderr[-400:]}"
+    # Keep what Chrome actually produced: the only way to tell a Chrome text-layer defect from a
+    # post-processing one is to measure the raw file before anything else touches it.
+    shutil.copyfile(TMP_PDF, os.path.join(TMPDIR, "raw.kept.pdf"))
     print("[2/4] chrome printed:", TMP_PDF)
 
 

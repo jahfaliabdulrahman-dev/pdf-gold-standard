@@ -204,6 +204,33 @@ def form_font(pdf):
         DescendantFonts=pikepdf.Array([cid]), ToUnicode=tu))
     return font, FORM_FONT_KEY
 
+def feature_bidi_space(pdf) -> None:
+    """Repair the space glyph's Unicode mapping — a producer defect, fixed where it occurs.
+
+    Chrome maps the glyph it uses for a space to U+200F (RLM) when the face also maps a bidi control to
+    that glyph. Readers that trust /ToUnicode (MuPDF, and the RAG extractors built on it) then read every
+    word boundary as a control character, so a page copies as «سبعة‌مداخل» instead of «سبعة مداخل».
+    Measured on Najd: repairing two fonts moved one page's word order from 0.14 to 0.83.
+
+    This is a mapping correction, not a text edit: no glyph, position or word changes — only what the glyph
+    is called. A bidi control a reader cannot see has no business owning a visible space's width.
+    """
+    import re as _re
+    seen, repaired = set(), 0
+    for page in pdf.pages:
+        for _key, font in (page.obj.get("/Resources", {}).get("/Font", {}) or {}).items():
+            tu = font.get("/ToUnicode")
+            if tu is None or font.objgen in seen:
+                continue
+            seen.add(font.objgen)
+            src = tu.read_bytes().decode("latin-1")
+            dst = _re.sub(r"(<[0-9A-Fa-f]{4}>\s*)<200[EF]>", r"\1<0020>", src)
+            if dst != src:
+                font["/ToUnicode"] = pdf.make_stream(dst.encode("latin-1"))
+                repaired += 1
+    if repaired:
+        print(f"      bidi-space: repaired the space mapping in {repaired} font(s)")
+
 
 def feature_acroform(pdf, spec) -> None:
     """Real text fields with an Arabic /TU and the COMPLETE house font in /DR.
@@ -379,6 +406,7 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -
                 del pdf.docinfo[k]
         assert "/SourceFile" not in pdf.docinfo and "/SourceSHA256" not in pdf.docinfo
         normalise(pdf)
+        feature_bidi_space(pdf)
         pdf.save(dst)
     return applied
 
