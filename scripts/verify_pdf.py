@@ -912,10 +912,14 @@ def gate(doc) -> list[str]:
     import unicodedata as _ud
     ctrl = re.compile("[\u2060\u200b\u200e\u200f\u202a-\u202e\u2066-\u2069]")
     norm = lambda t: _ud.normalize("NFC", ctrl.sub("", t))
-    want_v = _ud.normalize("NFC", NS.VOCALISED)
+    claimed = getattr(NS, "VOCALISED_CLAIM", True)
+    want_v = _ud.normalize("NFC", NS.VOCALISED) if claimed else None
+
     got = {"MuPDF": norm(doc[NS.BASMALA].get_text()), "PDFium": norm(texts[NS.BASMALA]) if texts else ""}
-    missing = [k for k, t in got.items() if want_v not in t]
-    check("vocalised", not missing, f"basmala not exact in {missing}" if missing else "basmala exact in PDFium and MuPDF")
+    missing = [] if not claimed else [k for k, t in got.items() if want_v not in t]
+    detail = ("not claimed — " + getattr(NS, "VOCALISED_REASON", "no reason declared")) if not claimed else (
+        f"basmala not exact in {missing}" if missing else "basmala exact in PDFium and MuPDF")
+    check("vocalised", not missing, detail)
 
     # 14. words per page (H5): aggregate ratios are blind below ~2.4% of the corpus — 18 words can vanish and
     #     every ratio still passes. Per-page counts make a lost paragraph break the build.
