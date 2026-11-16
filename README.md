@@ -68,6 +68,16 @@ skills:
     - ~/Projects/pdf-gold-standard/skill
 ```
 
+## نسختان ومستند ثانٍ
+
+```bash
+PDF_SPEC=report_spec       python build.py report-v1.html report.pdf        # نسخة الشاشة (٦٣ رابطًا)
+PDF_SPEC=report_print_spec python build.py report-v1.html report-print.pdf  # نسخة الطباعة (١١ رابطًا، بلا أزرار)
+PDF_SPEC=najd_spec         python build.py najd.html najd.pdf               # عيّنة خط نجد (لا حقول كتابة)
+```
+
+ملفّات خط نجد لا تُرفَق بالمستودع (ترخيصها «كل الحقوق محفوظة»)؛ ضعها في `najd/` محليًا لبناء المستند.
+
 ## خارطة الطريق
 
 [ROADMAP.md](ROADMAP.md) — حدود معروفة مقاسة · طبقة نص عربية صحيحة · ثيمات (١٧ متغيراً + فحص تباين).

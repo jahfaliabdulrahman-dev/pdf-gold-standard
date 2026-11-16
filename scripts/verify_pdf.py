@@ -915,7 +915,8 @@ def gate(doc) -> list[str]:
     claimed = getattr(NS, "VOCALISED_CLAIM", True)
     want_v = _ud.normalize("NFC", NS.VOCALISED) if claimed else None
 
-    got = {"MuPDF": norm(doc[NS.BASMALA].get_text()), "PDFium": norm(texts[NS.BASMALA]) if texts else ""}
+    got = {} if not claimed else {"MuPDF": norm(doc[NS.BASMALA].get_text()),
+                                  "PDFium": norm(texts[NS.BASMALA]) if texts else ""}
     missing = [] if not claimed else [k for k, t in got.items() if want_v not in t]
     detail = ("not claimed — " + getattr(NS, "VOCALISED_REASON", "no reason declared")) if not claimed else (
         f"basmala not exact in {missing}" if missing else "basmala exact in PDFium and MuPDF")

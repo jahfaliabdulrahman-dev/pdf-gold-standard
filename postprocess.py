@@ -204,6 +204,51 @@ def form_font(pdf):
         DescendantFonts=pikepdf.Array([cid]), ToUnicode=tu))
     return font, FORM_FONT_KEY
 
+def _space_gid(font):
+    """The glyph id the embedded font maps U+0020 to, or None when it cannot be read.
+
+    Conservative on purpose: the rewrite is only safe when the glyph really is the font's space. A face
+    that maps U+0020 elsewhere, or a subset whose cmap is unreadable, keeps its original mapping.
+    """
+    try:
+        from fontTools.ttLib import TTFont
+        import io as _io
+        desc = font["/DescendantFonts"][0]["/FontDescriptor"]
+        stream = desc.get("/FontFile2") or desc.get("/FontFile3")
+        if stream is None:
+            return None
+        font = TTFont(_io.BytesIO(stream.read_bytes()))
+        name = (font.getBestCmap() or {}).get(0x20)
+        # getBestCmap returns a GLYPH NAME; the /W array and the ToUnicode map are keyed by glyph ID
+        return font.getGlyphID(name) if name else None
+    except Exception:
+        return None
+
+
+def _cid_widths(font) -> dict:
+    """CID -> width (1000-unit em) from a Type0 font's /W array; {} when the array is absent."""
+    try:
+        desc = font["/DescendantFonts"][0]
+        arr = desc.get("/W")
+        if arr is None:
+            return {}
+        out, items, i = {}, list(arr), 0
+        while i < len(items):
+            first = int(items[i])
+            if i + 1 < len(items) and isinstance(items[i + 1], pikepdf.Array):
+                for k, w in enumerate(items[i + 1]):
+                    out[first + k] = float(w)
+                i += 2
+            else:
+                last, w = int(items[i + 1]), float(items[i + 2])
+                for cid in range(first, last + 1):
+                    out[cid] = w
+                i += 3
+        return out
+    except Exception:
+        return {}
+
+
 def feature_bidi_space(pdf) -> None:
     """Repair the space glyph's Unicode mapping — a producer defect, fixed where it occurs.
 
@@ -224,10 +269,30 @@ def feature_bidi_space(pdf) -> None:
                 continue
             seen.add(font.objgen)
             src = tu.read_bytes().decode("latin-1")
-            dst = _re.sub(r"(<[0-9A-Fa-f]{4}>\s*)<200[EF]>", r"\1<0020>", src)
+            widths = _cid_widths(font)
+            space_gid = _space_gid(font)   # the glyph the font ITSELF calls U+0020; None = cannot tell
+
+            def _remap(m):
+                cid = int(m.group(2), 16)
+                # only a glyph that actually occupies width is a space; a true bidi control has width 0 and
+                # must keep its own name, or a document that inserts RLM deliberately gains a phantom space
+                if space_gid is not None:              # the font itself names its space glyph
+                    is_space = cid == space_gid
+                elif widths:                            # no cmap in the subset: fall back to the advance
+                    is_space = widths.get(cid, 0) > 0
+                else:                                   # neither readable: the repair applies as before,
+                    is_space = True                     # and the gate's line-order check still has to pass
+                return m.group(1) + ("<0020>" if is_space else m.group(3))
+
+            dst = _re.sub(r"(<([0-9A-Fa-f]{4})>\s*)(<200[EF]>)", _remap, src)
             if dst != src:
-                font["/ToUnicode"] = pdf.make_stream(dst.encode("latin-1"))
-                repaired += 1
+                # never install something that stopped being a CMap: a silent break here would pass every
+                # structural gate and only fail in the reader
+                if ("beginbfchar" in dst and "endbfchar" in dst and "endcmap" in dst
+                        and len(_re.findall(r"<[0-9A-Fa-f]{4}>\s*<0020>", dst)) >
+                        len(_re.findall(r"<[0-9A-Fa-f]{4}>\s*<0020>", src))):
+                    font["/ToUnicode"] = pdf.make_stream(dst.encode("latin-1"))
+                    repaired += 1
     if repaired:
         print(f"      bidi-space: repaired the space mapping in {repaired} font(s)")
 
