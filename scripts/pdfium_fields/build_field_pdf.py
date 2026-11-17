@@ -42,6 +42,10 @@ FIELDS = [
     ("ltr_mixed", "/F0 24 Tf 0 0 0 rg", "abc الصفحة def", 0, 560, 370, 420),
     ("q0", "/F0 24 Tf 0 0 0 rg", "الصفحة", 0, 560, 290, 420),
     ("center", "/F0 24 Tf 0 0 0 rg", "الصفحة", 1, 560, 210, 420),
+    # A cluster of a base letter and the marks drawn over it: one cluster of
+    # several glyphs, the shape a per-glyph CMap would have to name. Measured,
+    # not gated -- docs/27 4 records what it does today.
+    ("vocalized", "/F0 24 Tf 0 0 0 rg", "مُحَمَّد", 2, 560, 130, 420),
 ]
 
 
