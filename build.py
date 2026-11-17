@@ -52,6 +52,19 @@ def chrome_bin() -> str:
 CHROME = chrome_bin()
 
 
+def art_for_print(path: str) -> bytes:
+    """The art as embedded: capped at ART_MAX_DPI for its printed size. Source files stay untouched."""
+    import io
+    from PIL import Image
+    target = (round(21.0 / 2.54 * 300), round(29.7 / 2.54 * 300))     # A4 at 300 dpi = 2480 x 3508
+    im = Image.open(path)
+    if im.width <= target[0] and im.height <= target[1]:
+        return open(path, "rb").read()
+    im = im.convert("RGB").resize(target, Image.LANCZOS)
+    buf = io.BytesIO(); im.save(buf, "JPEG", quality=85, dpi=(300, 300))
+    return buf.getvalue()
+
+
 def qr_datauri(url: str) -> str:
     q = segno.make(url, error="m")
     buf = io.BytesIO()
@@ -91,7 +104,7 @@ def build_html() -> None:
     ]:
         fp = os.path.join(adir, fn)
         if os.path.exists(fp):
-            payload = base64.b64encode(open(fp, "rb").read()).decode()
+            payload = base64.b64encode(art_for_print(fp)).decode()
             html = html.replace(ph, "data:image/jpeg;base64," + payload)
     open(TMP_HTML, "w", encoding="utf-8").write(html)
     print("[1/4] html ready (QR embedded)")
@@ -169,8 +182,14 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.join(PROJ, "scripts"))
     from fix_text_layer import process as fix_text_layer
     fixed = PARTIAL[:-4] + ".textfix.pdf"
-    print("[4b] text layer rebuilt:", fix_text_layer(PARTIAL, fixed))
+    print("[4b] text layer rebuilt:", fix_text_layer(PARTIAL, fixed, strict_widths=True))
     os.replace(fixed, PARTIAL)
+    # stage 5: metadata/structure declared in features.toml — applied after the text layer, before the gate
+    from postprocess import apply as postprocess
+    prof = os.environ.get("PDF_PROFILE", "web")
+    post = PARTIAL[:-4] + ".post.pdf"
+    print("[4c] postprocess:", ", ".join(postprocess(PARTIAL, post, prof)) or "none")
+    os.replace(post, PARTIAL)
     gate = subprocess.run([sys.executable, os.path.join(PROJ, "scripts", "verify_pdf.py"), PARTIAL])
     if gate.returncode != 0:
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
