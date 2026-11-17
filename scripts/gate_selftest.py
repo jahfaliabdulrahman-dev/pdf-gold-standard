@@ -4,19 +4,33 @@
 Usage: python3 scripts/gate_selftest.py built.pdf
 
 The built PDF must PASS. Then each mutation is applied to an in-memory copy, and the gate must
-exit non-zero AND name the expected check. Exit 0 only if every mutation is caught.
+exit non-zero AND name the expected check. A POSITIVE mutation is a valid variant of the document
+(an indirect MarkInfo) that must still PASS — it proves the gate rejects the defect, not the form.
+
+Exit 0 only if every mutation lands on the right side. The mutation count is declared in nav_spec
+(GATE_MUTATIONS) and checked here, so an unregistered mutation cannot hide.
 """
 import os
+import re
 import sys
+import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import pymupdf as fitz  # noqa: E402
+import pikepdf  # noqa: E402
 
 import nav_spec as NS  # noqa: E402
 import verify_pdf as G  # noqa: E402
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
+OLD_CHECKS, OLD_SOURCE = NS.GATE_CHECKS, NS.SOURCE_HTML
+_RESTORE = []
+
+
+def restore_all() -> None:
+    while _RESTORE:
+        _RESTORE.pop()()
 
 
 def fresh():
@@ -32,6 +46,45 @@ def strip_link(doc, i, role):
     return next(l for l in doc[i].get_links() if abs(l["from"].x0 - x) < 2 and abs(l["from"].y0 - NS.NAV_Y0) < 2)
 
 
+# ---------------------------------------------------------------- source-level variants
+def _source_variant(transform) -> None:
+    """Point the gate at a temporary variant of the source HTML (a real end-to-end mutation)."""
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", NS.SOURCE_HTML), encoding="utf-8").read()
+    fd, path = tempfile.mkstemp(suffix=".html"); os.close(fd)
+    open(path, "w", encoding="utf-8").write(transform(src))
+    NS.SOURCE_HTML = path
+
+    def undo():
+        NS.SOURCE_HTML = OLD_SOURCE
+        os.unlink(path)
+    _RESTORE.append(undo)
+
+
+def rename_nav_class(doc):
+    # a benign refactor (HTML + CSS renamed together, page unchanged) must not silence the strongest check
+    _source_variant(lambda s: s.replace('class="nav"', 'class="navbar"')
+                    .replace(".nav{", ".navbar{").replace(".nav ", ".navbar ").replace(".nav,", ".navbar,"))
+
+
+def stale_back_cover(doc):
+    # only the BACK cover still announces the previous version
+    _source_variant(lambda s: s.replace(f"الإصدار {NS.GUIDE_VERSION_AR} — نوفمبر", "الإصدار ٢٫٢ — نوفمبر"))
+
+
+def icon_input_lost(doc):
+    # the cheap form of H2: the gate's own input disappears
+    real = G.source_icons
+    G.source_icons = lambda: []
+    _RESTORE.append(lambda: setattr(G, "source_icons", real))
+
+
+def wrong_printed_count(doc):
+    # the document's printed count no longer matches the live number of checks
+    NS.GATE_CHECKS = OLD_CHECKS + 1
+    _RESTORE.append(lambda: setattr(NS, "GATE_CHECKS", OLD_CHECKS))
+
+
+# ---------------------------------------------------------------- document mutations
 def swap_next_prev(doc):
     i = NS.NAV_PAGES[2]
     a, b = strip_link(doc, i, "next"), strip_link(doc, i, "prev")
@@ -49,6 +102,38 @@ def whiteout_strip(doc):
     # every link still points where it should, but the buttons are no longer drawn on one page
     p = doc[NS.NAV_PAGES[0]]
     p.draw_rect(fitz.Rect(40, NS.NAV_Y0 - 10, 210, NS.NAV_Y1 + 14), color=None, fill=(1, 1, 1), overlay=True)
+
+
+def whiteout_body(doc):
+    # H1: the page body painted white; text stays extractable, so every text check still passes
+    p = doc[6]
+    p.draw_rect(fitz.Rect(0, NS.NAV_Y1 + 8, p.rect.width, p.rect.height - 60), color=None, fill=(1, 1, 1), overlay=True)
+
+
+def whiteout_sparse_page(doc):
+    # the page with the least ink (0.8%): an absolute +-0.02 tolerance alone could not see this
+    p = doc[1]
+    p.draw_rect(fitz.Rect(0, NS.NAV_Y1 + 8, p.rect.width, p.rect.height - 60), color=None, fill=(1, 1, 1), overlay=True)
+
+
+def _drop_images(doc, page_idx):
+    p = doc[page_idx]
+    for im in p.get_images():
+        p.delete_image(im[0])
+
+
+def drop_cover_art(doc):
+    _drop_images(doc, NS.COVER)
+
+
+def drop_divider_art(doc):
+    _drop_images(doc, 3)          # the first divider page
+
+
+def drop_image_object(doc):
+    # one of the four QR codes on the references page disappears; its text link is untouched
+    p = doc[NS.REF_PAGE]
+    p.delete_image(p.get_images()[0][0])
 
 
 def swap_icons(doc):
@@ -100,9 +185,11 @@ def extra_printed_number(doc):
 
 
 def wrong_source_stamp(doc):
-    # a file built from another source: copy fidelity would be measured against the wrong truth
-    info = int(doc.xref_get_key(-1, "Info")[1].split()[0])
-    doc.xref_set_key(info, "SourceSHA256", fitz.get_pdf_str("0" * 64))
+    # a file built from another source: provenance is a claim, wherever it is written
+    def fn(p):
+        with p.open_metadata() as m:
+            m["xmpMM:DocumentID"] = "sha256:" + "0" * 64
+    return _pikemutate(doc, fn)
 
 
 def stale_version(doc):
@@ -125,6 +212,17 @@ def bfrange_two_letters(doc):
 def drop_tagging(doc):
     doc.xref_set_key(doc.pdf_catalog(), "Lang", "null")
     doc.xref_set_key(doc.pdf_catalog(), "MarkInfo", "null")
+
+
+def markinfo_indirect(doc):
+    # a VALID PDF: MarkInfo as an indirect object instead of a direct dictionary. Must still PASS (H4).
+    cat = doc.pdf_catalog()
+    kind, val = doc.xref_get_key(cat, "MarkInfo")
+    if kind == "xref":
+        raise SystemExit("selftest: MarkInfo is already indirect - the positive mutation is vacuous")
+    x = doc.get_new_xref()
+    doc.update_object(x, "<< " + val.strip().strip("<<").strip().rstrip(">>").strip() + " >>")
+    doc.xref_set_key(cat, "MarkInfo", f"{x} 0 R")
 
 
 def ltr(doc):
@@ -158,6 +256,64 @@ def blank_page(doc):
     p.add_redact_annot(fitz.Rect(0, NS.NAV_Y1 + 10, p.rect.width, p.rect.height - 60))
     p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
     return i
+
+
+def delete_paragraph(doc):
+    # H5: ~18 words vanish from a body page (one paragraph); every AGGREGATE ratio still passes
+    p = doc[NS.NAV_PAGES[2]]
+    lines = []
+    for b in p.get_text("rawdict")["blocks"]:
+        for line in b.get("lines", []):
+            txt = "".join(c["c"] for s in line["spans"] for c in s["chars"])
+            n = len(G.source_words(txt))
+            if n and line["bbox"][1] > NS.NAV_Y1 + 10 and line["bbox"][3] < p.rect.height - 60:
+                lines.append((line["bbox"], n))
+    lines.sort(key=lambda l: -l[0][1])
+    removed = 0
+    for bbox, n in lines:
+        if removed >= 18:
+            break
+        p.add_redact_annot(fitz.Rect(bbox)); removed += n
+    p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
+    if removed < 18:
+        raise SystemExit(f"selftest: delete_paragraph removed only {removed} words - adjust it")
+
+
+def _footer_span(doc, i):
+    for b in doc[i].get_text("dict")["blocks"]:
+        for line in b.get("lines", []):
+            for s in line["spans"]:
+                t = s["text"].strip()
+                if t and all(ch.isdigit() and ord(ch) < 128 for ch in t) and NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
+                    return s["bbox"]
+    raise SystemExit(f"selftest: no footer span on p{i+1} - adjust _footer_span()")
+
+
+def drop_footer_number(doc):
+    for i in (4, 5, 8):
+        p = doc[i]
+        p.add_redact_annot(fitz.Rect(_footer_span(doc, i)))
+        p.apply_redactions()
+
+
+def swap_footer_numbers(doc):
+    p = doc[4]
+    r = fitz.Rect(_footer_span(doc, 4))
+    p.add_redact_annot(r); p.apply_redactions()
+    p.insert_text((r.x0, r.y1 - 2), "9", fontname="helv", fontsize=8)
+
+
+def move_footer_up(doc):
+    p = doc[4]
+    r = fitz.Rect(_footer_span(doc, 4))
+    p.add_redact_annot(r); p.apply_redactions()
+    p.insert_text((r.x0, 500), "5", fontname="helv", fontsize=8)
+
+
+def break_ref_link(doc):
+    links = sorted([l for l in doc[NS.REF_PAGE].get_links() if l.get("kind") == fitz.LINK_URI], key=lambda l: l["from"].y0)
+    links[0]["uri"] = "https://example.invalid/broken"
+    doc[NS.REF_PAGE].update_link(links[0])
 
 
 def _tounicode_xref(doc, page=4):
@@ -203,40 +359,158 @@ def drop_page(doc):
     doc.delete_page(7)
 
 
+def _pikemutate(doc, fn):
+    """Round-trip through pikepdf (the library that wrote the feature) and return a new fitz doc."""
+    import io
+    import pikepdf
+    with pikepdf.open(io.BytesIO(doc.tobytes())) as pdf:
+        fn(pdf)
+        buf = io.BytesIO()
+        pdf.save(buf)
+    return fitz.open("pdf", buf.getvalue())
+
+
+def drop_page_labels(doc):
+    return _pikemutate(doc, lambda p: p.Root.__delitem__("/PageLabels"))
+
+
+def rename_destination(doc):
+    def fn(p):
+        p.Root.Names.Dests.Names[0] = pikepdf.String("cover-renamed")
+    return _pikemutate(doc, fn)
+
+
+def drop_xmp_title(doc):
+    def fn(p):
+        with p.open_metadata() as m:
+            del m["dc:title"]
+    return _pikemutate(doc, fn)
+
+
+def strip_output_intent(doc):
+    return _pikemutate(doc, lambda p: p.Root.__delitem__("/OutputIntents"))
+
+
+def break_box_order(doc):
+    def fn(p):
+        p.pages[0].obj["/TrimBox"] = pikepdf.Array([50, 50, 500, 800])
+        p.pages[0].obj["/BleedBox"] = pikepdf.Array([100, 100, 400, 700])   # Bleed inside Trim: invalid
+    return _pikemutate(doc, fn)
+
+
+def drop_attachment(doc):
+    def fn(p):
+        del p.attachments["source.html"]
+        p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
+    return _pikemutate(doc, fn)
+
+
+
+def art_over_dpi(doc):
+    # an image above the ceiling: a 600-dpi raster placed over the cover art
+    from PIL import Image
+    import io
+    buf = io.BytesIO()
+    # 530x780 pt = 7.36x10.83 in; at 600 dpi that is 4417x6500 px -> page art above the 300 cap
+    Image.new("RGB", (4417, 6500), "white").save(buf, "JPEG")
+    pix = fitz.Pixmap(buf.getvalue())
+    doc[0].insert_image(fitz.Rect(30, 30, 560, 810), pixmap=pix, overlay=True)
+
+
+def drop_parent_tree(doc):
+    def fn(p):
+        del p.Root.StructTreeRoot["/ParentTree"]
+    return _pikemutate(doc, fn)
+
+
+def field_without_tu(doc):
+    def fn(p):
+        del p.Root.AcroForm.Fields[0]["/TU"]
+    return _pikemutate(doc, fn)
+
+
+def link_without_contents(doc):
+    def fn(p):
+        for page in p.pages:
+            for a in page.obj.get("/Annots", []):
+                if a.get("/Subtype") == pikepdf.Name.Link:
+                    del a["/Contents"]
+                    return
+    return _pikemutate(doc, fn)
+
+
+# (mutation, expected check, must_stay_green)
 MUTATIONS = [
-    (swap_next_prev, "nav-buttons"),
-    (self_link, "nav-buttons"),
-    (whiteout_strip, "render"),
-    (swap_icons, "render"),
-    (foreign_icon, "render"),
-    (moment_matched_icon, "render"),
-    (ltr, "rtl-direction"),
-    (two_page_layout, "single-page"),
-    (drop_outline_entry, "outline"),
-    (swap_contents_rows, "contents-links"),
-    (extra_printed_number, "contents-numbers"),
-    (foreign_font, "fonts"),
-    (blank_page, "no-blank-pages"),
-    (blank_text_page_with_decor, "no-blank-pages"),
-    (drop_tagging, "tagged"),
-    (wrong_source_stamp, "provenance"),
-    (stale_version, "title"),
-    (presentation_form, "text-layer"),
-    (bfrange_two_letters, "text-layer"),
-    (swapped_letters, "copy-fidelity"),
-    (split_text_objects, "line-order"),
-    (wrong_mark, "vocalised"),
-    (drop_page, "pages"),
+    (swap_next_prev, "nav-buttons", False),
+    (self_link, "nav-buttons", False),
+    (whiteout_strip, "render", False),
+    (swap_icons, "render", False),
+    (foreign_icon, "render", False),
+    (moment_matched_icon, "render", False),
+    (icon_input_lost, "render", False),
+    (rename_nav_class, "render", False),
+    (whiteout_body, "page-ink", False),
+    (whiteout_sparse_page, "page-ink", False),
+    (drop_cover_art, "page-ink", False),
+    (drop_divider_art, "page-ink", False),
+    (drop_image_object, "page-images", False),
+    (ltr, "rtl-direction", False),
+    (two_page_layout, "single-page", False),
+    (drop_outline_entry, "outline", False),
+    (swap_contents_rows, "contents-links", False),
+    (extra_printed_number, "contents-numbers", False),
+    (drop_footer_number, "footer-numbers", False),
+    (swap_footer_numbers, "footer-numbers", False),
+    (move_footer_up, "footer-numbers", False),
+    (break_ref_link, "ref-links", False),
+    (foreign_font, "fonts", False),
+    (stale_back_cover, "version-consistency", False),
+    (blank_page, "no-blank-pages", False),
+    (blank_text_page_with_decor, "no-blank-pages", False),
+    (delete_paragraph, "page-words", False),
+    (drop_tagging, "tagged", False),
+    (markinfo_indirect, "tagged", True),          # positive: a valid indirect reference must stay green
+    (wrong_source_stamp, "provenance", False),
+    (stale_version, "title", False),
+    (presentation_form, "text-layer", False),
+    (bfrange_two_letters, "text-layer", False),
+    (swapped_letters, "copy-fidelity", False),
+    (split_text_objects, "line-order", False),
+    (wrong_mark, "vocalised", False),
+    (wrong_printed_count, "gate-claims", False),
+    (drop_page_labels, "page-labels", False),
+    (rename_destination, "named-destinations", False),
+    (drop_xmp_title, "xmp", False),
+    (strip_output_intent, "output-intent", False),
+    (break_box_order, "output-intent", False),
+    (drop_attachment, "attachments", False),
+    (art_over_dpi, "art-dpi", False),
+    (drop_parent_tree, "pdfua", False),
+    (field_without_tu, "acroform", False),
+    (link_without_contents, "link-tagging", False),
+    (drop_page, "pages", False),
 ]
 
 if __name__ == "__main__":
     base = G.gate(fresh())
-    print(f"baseline: {'PASS' if not base else 'FAIL ' + str(base)}\n")
+    print(f"\nbaseline: {'PASS' if not base else 'FAIL ' + str(base)}")
     missed = ["baseline"] if base else []
-    for mutate, expect in MUTATIONS:
-        d = fresh(); mutate(d); failed = G.gate(reread(d))
-        ok = expect in failed
-        print(f"\n>>> {mutate.__name__:20s} expect FAIL {expect:16s} -> {'CAUGHT' if ok else 'MISSED'} {failed}\n")
+    if len(MUTATIONS) != NS.GATE_MUTATIONS:
+        print(f"SELFTEST FAILED — {len(MUTATIONS)} mutations registered, nav_spec declares {NS.GATE_MUTATIONS}")
+        raise SystemExit(1)
+    for mutate, expect, green in MUTATIONS:
+        d = fresh()
+        try:
+            out = mutate(d)          # a mutation may return a re-serialised document (pikepdf round-trip)
+            if out is not None and hasattr(out, "page_count"):
+                d = out
+            failed = G.gate(reread(d))
+        finally:
+            restore_all()
+            NS.SOURCE_HTML, NS.GATE_CHECKS = OLD_SOURCE, OLD_CHECKS
+        ok = (not failed) if green else (expect in failed)
+        print(f"\n>>> {mutate.__name__:24s} expect {'PASS' if green else 'FAIL ' + expect:20s} -> "
+              f"{'CAUGHT' if ok else 'MISSED'} {failed}\n")
         if not ok:
             missed.append(mutate.__name__)
     # The blank-page rule does not depend on the document's size (copy-fidelity does: one lost page of 50 is 2% of the
@@ -251,7 +525,26 @@ if __name__ == "__main__":
     print(f">>> 50-page document, page 31 emptied + 32pt image -> {'CAUGHT' if ok else 'MISSED'} {blank}\n")
     if not ok:
         missed.append("blank_page_in_50")
+    # Malformed inputs: the CLI must refuse BY NAME (non-zero, no traceback), not crash inside a check.
+    import subprocess, tempfile
+    data = open(SRC, "rb").read()
+    with tempfile.TemporaryDirectory() as tmp:
+        trunc = os.path.join(tmp, "truncated.pdf")
+        open(trunc, "wb").write(data[: len(data) // 2])
+        enc = os.path.join(tmp, "encrypted.pdf")
+        import pikepdf
+        with pikepdf.open(SRC) as pdf:
+            pdf.save(enc, encryption=pikepdf.Encryption(owner="selftest-owner", user="selftest-user", R=6))
+        for path, want in ((trunc, "truncated"), (enc, "encrypted")):
+            r = subprocess.run([sys.executable, G.__file__, path], capture_output=True, text=True)
+            out = r.stdout + r.stderr
+            ok = r.returncode != 0 and want in r.stdout and "Traceback" not in out
+            print(f">>> {os.path.basename(path):14s} -> {'CAUGHT' if ok else 'MISSED'} "
+                  f"exit {r.returncode}: {r.stdout.strip()[:110]}\n")
+            if not ok:
+                missed.append(f"input:{want}")
     if missed:
         print(f"SELFTEST FAILED — not caught: {missed}")
         raise SystemExit(1)
-    print(f"SELFTEST PASSED — baseline clean, {len(MUTATIONS)}/{len(MUTATIONS)} mutations caught")
+    print(f"SELFTEST PASSED — baseline clean, {len(MUTATIONS)}/{len(MUTATIONS)} mutations on the right side "
+          f"({sum(1 for m in MUTATIONS if m[2])} positive)")
