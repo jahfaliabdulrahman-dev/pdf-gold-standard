@@ -65,7 +65,7 @@ GATE_CHECKS = 34
 GATE_MUTATIONS = 48
 # The cover carries the wall the typeface was drawn from; embedded at build time so the print stays
 # deterministic (Chrome renders from a temp dir, where relative paths do not resolve).
-ART_FILES = [("{{ART_NAJD_COVER}}", "najd-cover.jpg")]
+ART_FILES = [("{{ART_NAJD_COVER}}", "embed-najd-cover.jpg")]
 ART_MAX_DPI = 300
 ART_DPI_DECLARED = {}
 ART_PAGE_SHARE = 0.0
