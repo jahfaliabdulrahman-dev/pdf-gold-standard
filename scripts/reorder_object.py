@@ -32,8 +32,8 @@ TOKEN = re.compile(
 )
 
 
-def rewrite_block(block: str, reverse: bool,
-                  state: dict | None = None) -> tuple[str, int]:
+def rewrite_block(block: str, reverse: bool, state: dict | None = None,
+                  width_of=None) -> tuple[str, int]:
     """Return the block rewritten with one absolute Tm per glyph, glyphs in the requested order.
 
     Text state (font, size, render mode) is inherited across `BT`/`ET` in PDF — it is part of the graphics
@@ -41,17 +41,22 @@ def rewrite_block(block: str, reverse: bool,
     is exactly the ink that differed.
     """
     state = state if state is not None else {"font": None, "size": None, "tr": 0}
-    matrix = (Decimal(1), Decimal(0), Decimal(0), Decimal(1), Decimal(0), Decimal(0))
+    # Two matrices, as the spec defines them: the line matrix moves only with `Tm`/`Td`, while the text
+    # matrix additionally advances by each glyph's displacement. Confusing the two moved 16 glyphs.
+    line = (Decimal(1), Decimal(0), Decimal(0), Decimal(1), Decimal(0), Decimal(0))
+    text = line
     font, size, tr = state["font"], state["size"], state["tr"]
     events: list[tuple[float, float, str, str, float, int, tuple[float, ...]]] = []
     for m in TOKEN.finditer(block):
         if m.group("tm"):
             names = ("tm", "tm2", "tm3", "tm4", "tm5", "tm6")
-            matrix = tuple(Decimal(m.group(n)) for n in names)   # type: ignore[assignment]
+            line = tuple(Decimal(m.group(n)) for n in names)   # type: ignore[assignment]
+            text = line
         elif m.group("tdx"):
             dx, dy = Decimal(m.group("tdx")), Decimal(m.group("tdy"))
-            a, b, c, d, e, f = matrix
-            matrix = (a, b, c, d, e + dx * a + dy * c, f + dx * b + dy * d)
+            a, b, c, d, e, f = line
+            line = (a, b, c, d, e + dx * a + dy * c, f + dx * b + dy * d)
+            text = line
         elif m.group("tf"):
             font, size = m.group("tf"), float(m.group("size"))
         elif m.group("tr"):
@@ -59,7 +64,13 @@ def rewrite_block(block: str, reverse: bool,
         elif m.group("gid"):
             if font is None or size is None:
                 continue
-            events.append((matrix[4], matrix[5], font, m.group("gid"), size, tr, matrix))
+            gid = int(m.group("gid")[1:-1], 16)
+            events.append((text[4], text[5], font, m.group("gid"), size, tr, text))
+            # `Tj` advances the text matrix by the glyph displacement; the next glyph inherits that advance
+            # when no `Td` intervenes. Sixteen glyphs on this page rely on it, which is the whole pixel diff.
+            adv = width_of(font, gid, size) if width_of else Decimal(0)
+            a, b, c, d, e, f = text
+            text = (a, b, c, d, e + adv * a, f + adv * b)
     state.update({"font": font, "size": size, "tr": tr})
     if len(events) < 5:
         return block, 0
@@ -79,6 +90,20 @@ def process(path: str, page_no: int, out_path: str, reverse: bool) -> int:
     pdf = pikepdf.open(path)
     page = pdf.pages[page_no - 1]
     streams = page.Contents if isinstance(page.Contents, pikepdf.Array) else [page.Contents]
+    # glyph widths: the only way to know where the next glyph lands when no `Td` follows a `Tj`
+    from fix_text_layer import FontState, parse_w
+    states = {}
+    for name, obj in page.Resources.get("/Font", {}).items():
+        if obj.get("/Subtype") == "/Type0":
+            states[str(name).lstrip("/")] = FontState(obj)
+
+    def width_of(font: str, gid: int, size: Decimal) -> Decimal:
+        st = states.get(font.lstrip("/"))
+        if st is None:
+            return Decimal(0)
+        w = st.neww.get(gid) or st.width.get(gid) or st.dw
+        return Decimal(str(w)) / Decimal(1000) * Decimal(str(size))
+
     total = 0
     state = {"font": None, "size": None, "tr": 0}
     for stream in streams:
@@ -87,7 +112,7 @@ def process(path: str, page_no: int, out_path: str, reverse: bool) -> int:
 
         def repl(m: re.Match) -> str:
             nonlocal total
-            new, n = rewrite_block(m.group(0), reverse, state)
+            new, n = rewrite_block(m.group(0), reverse, state, width_of)
             total += n
             return new
 
