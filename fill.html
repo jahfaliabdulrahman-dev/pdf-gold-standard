@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تعبئة «الحرف المقلوب»</title>
+<style>
+  :root{ --ink:#12101c; --muted:#6b6580; --line:#d9d3ea; --accent:#6d3ff0; --paper:#faf9ff; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; min-height:100vh; background:linear-gradient(160deg,#0b0718,#1a1235 60%,#2a1c52);
+        color:var(--ink); font:16px/1.7 -apple-system,"SF Arabic","Geeza Pro","Segoe UI",system-ui,sans-serif;
+        display:grid; place-items:center; padding:28px; }
+  main{ width:min(680px,100%); background:var(--paper); border-radius:18px; padding:34px 34px 28px;
+        box-shadow:0 30px 80px rgba(0,0,0,.45); }
+  h1{ margin:0 0 6px; font-size:26px; letter-spacing:-.2px; }
+  p.lead{ margin:0 0 24px; color:var(--muted); font-size:15px; }
+  label{ display:block; font-size:13px; font-weight:700; color:var(--muted); margin:18px 0 6px; }
+  input,textarea{ width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:10px;
+        font:inherit; font-size:16px; background:#fff; color:var(--ink); }
+  input:focus,textarea:focus{ outline:2px solid color-mix(in srgb,var(--accent) 35%,transparent); border-color:var(--accent); }
+  textarea{ min-height:110px; resize:vertical; }
+  button{ margin-top:24px; width:100%; padding:14px 18px; border:0; border-radius:12px; background:var(--accent);
+        color:#fff; font:700 16px/1 -apple-system,system-ui,sans-serif; cursor:pointer; }
+  button:disabled{ opacity:.6; cursor:progress; }
+  .note{ margin-top:14px; font-size:13px; color:var(--muted); }
+  .bar{ height:3px; border-radius:2px; background:var(--line); overflow:hidden; margin-top:18px; display:none; }
+  .bar i{ display:block; height:100%; width:38%; background:var(--accent); animation:run 1.15s ease-in-out infinite; }
+  @keyframes run{ 0%{ transform:translateX(100%);} 100%{ transform:translateX(-260%);} }
+  .err{ margin-top:14px; padding:12px 14px; border-radius:10px; background:#fdecec; color:#8a1c1c; font-size:14px; display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>تعبئة «الحرف المقلوب»</h1>
+  <p class="lead">اكتب القيم هنا، فيولّد الخادم نسخةً مُعبّأة بالعربية <b>متصلة</b> — لأن التشكيل يحدث في محرّك البناء، لا في قارئ الملف.</p>
+  <form id="f">
+    <label for="name">اسم القارئ</label>
+    <input id="name" name="name" required maxlength="60" placeholder="عبدالرحمن جحفلي">
+    <label for="email">البريد الإلكتروني</label>
+    <input id="email" name="email" type="email" required maxlength="80" placeholder="name@example.com" dir="ltr">
+    <label for="note">ملاحظة عن الملف</label>
+    <textarea id="note" name="note" maxlength="480" placeholder="اكتب ملاحظتك… (حتى ٤٨٠ حرفًا)"></textarea>
+    <button id="go" type="submit">أنشئ النسخة المُعبّأة</button>
+    <div class="bar" id="bar"><i></i></div>
+    <div class="note">البناء يستغرق نحو دقيقة (Chrome يطبع، ثم تُعاد طبقة النص، ثم تجتاز البوابة).</div>
+    <div class="err" id="err"></div>
+  </form>
+</main>
+<script>
+const f = document.getElementById('f'), go = document.getElementById('go'), bar = document.getElementById('bar'), err = document.getElementById('err');
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  go.disabled = true; bar.style.display = 'block'; err.style.display = 'none';
+  const body = new URLSearchParams(new FormData(f));
+  try {
+    const r = await fetch('/api/build', { method: 'POST', body });
+    if (!r.ok) throw new Error((await r.text()) || ('HTTP ' + r.status));
+    const blob = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = r.headers.get('X-Filename') || 'filled.pdf';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch (ex) {
+    err.textContent = 'فشل البناء: ' + ex.message; err.style.display = 'block';
+  } finally {
+    go.disabled = false; bar.style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>

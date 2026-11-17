@@ -1,0 +1,29 @@
+executable("hb_probe") {
+  sources = [ "probe.cc" ]
+  deps = [
+    "//:pdfium",
+    "//third_party/harfbuzz",
+  ]
+}
+
+# The shaping module: HarfBuzz only. Kept separate from hb_probe so a failure names the right layer.
+executable("shaping_probe") {
+  sources = [
+    "shaping.cc",
+    "shaping_main.cc",
+  ]
+  deps = [ "//third_party/harfbuzz" ]
+  include_dirs = [ "." ]
+  # Chromium turns the libc buffer-safety warnings into errors; this probe prints with std::printf on purpose.
+  cflags = [
+    "-Wno-unsafe-buffer-usage",
+    "-Wno-unsafe-buffer-usage-in-libc-call",
+  ]
+}
+
+group("probe_all") {
+  deps = [
+    ":hb_probe",
+    ":shaping_probe",
+  ]
+}

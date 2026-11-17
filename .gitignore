@@ -16,3 +16,30 @@ __pycache__/
 
 # local virtualenv
 .venv/
+
+# second document outputs and local backups
+report.pdf
+baseline*.pdf
+*.raw.pdf
+
+# Najd font files: licence is «All rights reserved» — the PDF embeds a subset, the repo does not ship the font
+/najd/
+
+# build artefacts (the exact markup Chrome printed, kept for the gate, not for shipping)
+*.source.html
+report-print.pdf
+najd.pdf
+
+# the Najd fixtures whose embedded subset carries the foundry's «All rights reserved» notice
+# (tests/vocalised_raw.pdf deliberately stays: it is Chrome's own output with a system GeezaPro subset,
+#  the only capture the vocalised regression test has — named here so the rule is not read as universal)
+artifacts/*.pdf
+
+# local secrets
+.env
+
+# generated review output (the release is the artifact, not the repo)
+guide-check.pdf
+
+# the guide build output (a release artifact, not a source)
+guide-v2-ar.pdf

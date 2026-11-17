@@ -8,6 +8,7 @@ Defaults: guide-v2.html -> ./out.pdf
 import atexit
 import base64
 import hashlib
+import html as _html
 import io
 import os
 import re
@@ -19,10 +20,12 @@ import tempfile
 import fitz  # PyMuPDF
 import segno
 
-import nav_spec as NS
+import spec_loader
+
+NS = spec_loader.load()
 
 PROJ = os.path.dirname(os.path.abspath(__file__))
-SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(PROJ, "guide-v2.html")
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(PROJ, NS.SOURCE_HTML)
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.getcwd(), "out.pdf")
 # Build into a sibling .partial.pdf; only a gate PASS replaces OUT (a failed run never clobbers the last good file).
 PARTIAL = OUT[:-4] + ".partial.pdf" if OUT.endswith(".pdf") else OUT + ".partial"
@@ -80,12 +83,23 @@ def build_html() -> None:
     if os.path.isdir(fdir):
         fcss = open(os.path.join(fdir, "fonts.css"), encoding="utf-8").read()
 
+        def _mime(fp):
+            return {".woff2": "font/woff2", ".ttf": "font/ttf", ".otf": "font/otf"}.get(os.path.splitext(fp)[1], "font/ttf")
+
         def _embed(m):
             fp = os.path.join(fdir, m.group(1))
-            return "url(data:font/woff2;base64," + base64.b64encode(open(fp, "rb").read()).decode() + ")"
+            return "url(data:" + _mime(fp) + ";base64," + base64.b64encode(open(fp, "rb").read()).decode() + ")"
 
         fcss = re.sub(r"url\('([^']+)'\)", _embed, fcss)
         html = html.replace("/*__FONTS__*/", fcss)
+    ndir = os.path.join(PROJ, "najd")
+    if "/*__FONTS_NAJD__*/" in html and os.path.isdir(ndir):
+        ncss = open(os.path.join(ndir, "fonts.css"), encoding="utf-8").read()
+        ncss = re.sub(r"url\('([^']+)'\)",
+                      lambda m: "url(data:" + _mime(os.path.join(ndir, m.group(1))) + ";base64,"
+                                + base64.b64encode(open(os.path.join(ndir, m.group(1)), "rb").read()).decode() + ")",
+                      ncss)
+        html = html.replace("/*__FONTS_NAJD__*/", ncss)
     html = re.sub(r"<link[^>]*fonts\.(?:googleapis|gstatic)\.com[^>]*>\s*", "", html)
     for ph, url in [
         ("{{QR_IBM}}", "https://github.com/IBM/plex"),
@@ -94,19 +108,43 @@ def build_html() -> None:
         ("{{QR_CHROME}}", "https://developer.chrome.com/docs/chromium/headless"),
     ]:
         html = html.replace(ph, qr_datauri(url))
+    # Any document can carry its own reference list: {{QR_1}}..{{QR_n}} follow NS.REF_URLS in order,
+    # so the QR the page shows is the same URL the gate checks the link against.
+    # A filled copy: the values are typeset by THIS engine (Chrome shapes Arabic), never handed to a reader.
+    html = html.replace("{{LINKS_CLAIM}}", getattr(NS, "LINKS_CLAIM", "و٦٣ رابطا حيا"))
+    for k in ("NAME", "EMAIL", "NOTE"):
+        html = html.replace("{{FILL_%s}}" % k, _html.escape(str(getattr(NS, "FILL_VALUES", {}).get(k.lower(), ""))))
+    if not getattr(NS, "NAV_VISIBLE", True):
+        # A print copy carries no navigation chrome: the icons are ink on paper and take four click targets
+        # that can never be clicked. Stripping the markup (not hiding it with CSS) removes both.
+        html = re.sub(r'\s*<div class="nav">.*?</div>', "", html, flags=re.S)
+    if not getattr(NS, "FILL_VALUES", {}):
+        # the published template has no values, so it must not ship three empty value slots
+        html = re.sub(r'\s*<div class="fval[^"]*"[^>]*></div>', "", html)
+    for k, url in enumerate(NS.REF_URLS, start=1):
+        html = html.replace("{{QR_%d}}" % k, qr_datauri(url))
     # v2 generated-art layer: base64-embed local art so the print stays
     # deterministic (Chrome renders from /tmp; relative paths would break).
     adir = os.path.join(PROJ, "art")
-    for ph, fn in [
-        ("{{ART_COVER}}", "embed-cover.jpg"),
-        ("{{ART_DIVIDER}}", "embed-divider.jpg"),
-        ("{{ART_BACK}}", "embed-back.jpg"),
-    ]:
-        fp = os.path.join(adir, fn)
-        if os.path.exists(fp):
-            payload = base64.b64encode(art_for_print(fp)).decode()
-            html = html.replace(ph, "data:image/jpeg;base64," + payload)
+    art = getattr(NS, "ART_FILES", None)
+    if not art:
+        raise SystemExit("ART FILES: the spec declares none — every document names its own plates")
+    for ph, fn in art:
+        fp = fn if os.path.isabs(fn) else os.path.join(adir, fn)
+        # A declared plate that is absent used to be skipped in silence, leaving the placeholder in the
+        # markup and failing much later as a blank page. The declaration is a contract: break it loudly.
+        if not os.path.exists(fp):
+            raise SystemExit(f"ART FILES: {fn} is declared by the spec but missing at {fp}")
+        if ph not in html:
+            raise SystemExit(f"ART FILES: placeholder {ph} for {fn} is not in the source HTML")
+        payload = base64.b64encode(art_for_print(fp)).decode()
+        html = html.replace(ph, "data:image/jpeg;base64," + payload)
+    if "{{ART_" in html:
+        raise SystemExit("ART FILES: an ART placeholder survived the substitution")
     open(TMP_HTML, "w", encoding="utf-8").write(html)
+    # Keep the exact markup that Chrome printed: the gate proves variant claims (e.g. "no nav strip")
+    # against what was actually rendered, not against the template it came from.
+    shutil.copyfile(TMP_HTML, os.path.splitext(PARTIAL)[0] + ".source.html")
     print("[1/4] html ready (QR embedded)")
 
 
@@ -121,6 +159,14 @@ def print_pdf() -> None:
         capture_output=True, text=True, timeout=240,
     )
     assert os.path.exists(TMP_PDF), f"chrome failed: {r.stderr[-400:]}"
+    # Keep what Chrome actually produced: the only way to tell a Chrome text-layer defect from a
+    # post-processing one is to measure the raw file before anything else touches it.
+    try:
+        # Keep Chrome's own output BESIDE the build, not in the run directory that atexit removes, so a
+        # disputed text layer can be re-measured from the file that produced it.
+        shutil.copyfile(TMP_PDF, os.path.splitext(OUT)[0] + ".raw.pdf")
+    except OSError as exc:                      # keep building; only the diagnostic copy is lost
+        print(f"[!] could not keep the raw Chrome PDF: {exc}")
     print("[2/4] chrome printed:", TMP_PDF)
 
 
@@ -150,11 +196,13 @@ def interactivize() -> None:
         rect = fitz.Rect(31.54 * MM, top, 189.54 * MM, top + 22 * MM)
         doc[NS.REF_PAGE].insert_link({"kind": fitz.LINK_URI, "from": rect, "uri": url})
 
+    # Title/author/subject/keywords belong to the DOCUMENT (its spec), not to the pipeline: a second
+    # document must not inherit the first one's identity.
     doc.set_metadata({
-        "title": f"معيار إنتاج ملفات PDF — دليل المعيار · الإصدار {NS.GUIDE_VERSION_AR}",
-        "author": "م. عبدالرحمن جحفلي",
-        "subject": "معيار جودة إنتاج ملفات PDF التفاعلية العربية",
-        "keywords": "PDF, Arabic, RTL, تفاعلي, معيار, Gold Standard",
+        "title": f"{getattr(NS, 'DOC_TITLE', 'معيار إنتاج ملفات PDF — دليل المعيار')} · الإصدار {NS.GUIDE_VERSION_AR}",
+        "author": getattr(NS, "DOC_AUTHOR", "م. عبدالرحمن جحفلي"),
+        "subject": getattr(NS, "DOC_SUBJECT", "معيار جودة إنتاج ملفات PDF التفاعلية العربية"),
+        "keywords": getattr(NS, "DOC_KEYWORDS", "PDF, Arabic, RTL"),
         "creator": "Hermes PDF Gold Standard pipeline",
     })
     # Provenance: which source this file was built from. The gate refuses a file whose stamp is not its own truth.
@@ -190,8 +238,30 @@ if __name__ == "__main__":
     post = PARTIAL[:-4] + ".post.pdf"
     print("[4c] postprocess:", ", ".join(postprocess(PARTIAL, post, prof)) or "none")
     os.replace(post, PARTIAL)
-    gate = subprocess.run([sys.executable, os.path.join(PROJ, "scripts", "verify_pdf.py"), PARTIAL])
-    if gate.returncode != 0:
+    # The gate is imported, not shelled out: it already returns the failing names, so no output format is
+    # being parsed (a regex over stdout was one edit away from silently matching nothing).
+    sys.path.insert(0, os.path.join(PROJ, "scripts"))
+    import verify_pdf
+    try:
+        gate_doc = verify_pdf.open_for_gate(PARTIAL)
+    except verify_pdf.GateInput as exc:
+        print(f"FAIL input - {exc}")
+        raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
+    failing = set(verify_pdf.gate(gate_doc))
+    if failing:
+        # A filled copy legitimately carries more ink and words than the measured template. The exception is
+        # declared in the spec and is NARROW: any failure outside it still stops the build.
+        allowed = set(getattr(NS, "FILL_ALLOWED_FAILURES", ())) if getattr(NS, "FILL_MODE", False) else set()
+        if allowed and failing <= allowed:
+            print("[5/5] filled copy — declared exceptions:", ", ".join(sorted(failing)))
+            os.replace(PARTIAL, OUT)
+            raise SystemExit(0)
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
     os.replace(PARTIAL, OUT)
+    # The print variant is judged against the markup Chrome actually printed. Keep that copy beside the
+    # published file (it is ignored by git), so the delivered PDF can be re-judged months later without
+    # guessing which source produced it.
+    rendered = os.path.splitext(PARTIAL)[0] + ".source.html"
+    if os.path.exists(rendered):
+        shutil.copyfile(rendered, os.path.splitext(OUT)[0] + ".source.html")
     print("[5/5] gate passed — published:", OUT)
