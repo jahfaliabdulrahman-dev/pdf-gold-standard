@@ -67,12 +67,7 @@ def feature_named_destinations(pdf, spec) -> None:
     pdf.Root.Names = pikepdf.Dictionary(Dests=pikepdf.Dictionary(Names=names))
 
 
-PAINT_OPS = {
-    "m", "l", "c", "v", "y", "h", "re",                 # path construction
-    "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "n",  # path painting
-    "Do", "sh",                                          # XObject / shading
-    "Tj", "TJ", "'", '"',                                 # text showing
-}
+from pdfops import PAINT_OPS  # noqa: E402  (single definition, shared with the gate)
 
 
 def _wrap_untagged(instructions):
@@ -82,7 +77,7 @@ def _wrap_untagged(instructions):
     and text state — closes the block first, so an artifact can never hold a tagged sequence (7.1-2) and
     can never straddle a state container.
     """
-    out, dos = [], []
+    out = []
     mc = 0
     artifact_open = False
     added = 0
@@ -104,8 +99,6 @@ def _wrap_untagged(instructions):
             mc = max(0, mc - 1)
             out.append(ins)
         elif op == "Do":
-            if mc == 0:
-                dos.append(ins.operands[0])
             if mc == 0 and not artifact_open:
                 out.append(pikepdf.ContentStreamInstruction(
                     [pikepdf.Name("/Artifact")], pikepdf.Operator("BMC")))
@@ -125,7 +118,7 @@ def _wrap_untagged(instructions):
         else:
             out.append(ins)
     close()
-    return out, added, dos
+    return out, added
 
 
 def _tag_orphan_runs(pdf, page, instructions):
@@ -175,7 +168,10 @@ def _tag_orphan_runs(pdf, page, instructions):
                 kids = document.get("/K")
                 if isinstance(kids, pikepdf.Array):
                     kids.append(elem)
-                document["/K"] = pikepdf.Array([elem])
+                elif kids is None:
+                    document["/K"] = pikepdf.Array([elem])
+                else:                       # a single child: make room without losing it
+                    document["/K"] = pikepdf.Array([kids, elem])
                 out.append(pikepdf.ContentStreamInstruction(
                     [ins.operands[0], pikepdf.Dictionary(MCID=mcid)], pikepdf.Operator("BDC")))
                 depth += 1
@@ -206,7 +202,8 @@ def feature_pdfua(pdf, spec=None) -> None:
     import spec_loader
     # `spec` is the feature's entry from features.toml, not the document spec: only a module that carries
     # the document's own constants may override the loaded spec.
-    NS = spec if spec is not None and hasattr(spec, "PAGES") else spec_loader.load()
+    import types
+    NS = spec if isinstance(spec, types.ModuleType) else spec_loader.load()
     if not getattr(NS, "PDFUA", False):
         return
 
@@ -216,12 +213,13 @@ def feature_pdfua(pdf, spec=None) -> None:
         return container.get("/Resources", {}) if hasattr(container, "get") else {}
 
     # pass 1: which forms exist, and in which context each one is invoked
+    import collections
     forms: dict = {}
-    queue = []
+    queue = collections.deque()
     for page in pdf.pages:
         queue.append((page.obj, page.obj, list(pikepdf.parse_content_stream(page))))
     while queue:
-        _owner, container, instrs = queue.pop(0)
+        _owner, container, instrs = queue.popleft()
         mc = 0
         for ins in instrs:
             op = str(ins.operator)
@@ -249,7 +247,7 @@ def feature_pdfua(pdf, spec=None) -> None:
     skipped = 0
     for rec in forms.values():
         if rec["artifact"] and not rec["tagged"]:
-            out, added, _dos = _wrap_untagged(pikepdf.parse_content_stream(rec["obj"]))
+            out, added = _wrap_untagged(pikepdf.parse_content_stream(rec["obj"]))
             if added:
                 rec["obj"].write(pikepdf.unparse_content_stream(out))
                 marks += added
@@ -258,7 +256,7 @@ def feature_pdfua(pdf, spec=None) -> None:
 
     # pass 3: the pages themselves — wrap the untagged painting, then give the leftover runs an owner
     for page in pdf.pages:
-        out, added, _dos = _wrap_untagged(pikepdf.parse_content_stream(page))
+        out, added = _wrap_untagged(pikepdf.parse_content_stream(page))
         out = _tag_orphan_runs(pdf, page, out)
         if added or out:
             page.Contents = pdf.make_stream(pikepdf.unparse_content_stream(out))
@@ -270,7 +268,30 @@ def feature_pdfua(pdf, spec=None) -> None:
         print(f"      pdfua: {skipped} form(s) used in both contexts were left alone")
 
 
-PDFUA_XMP_SCHEMA = """<pdfaExtension:schemas xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/" xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#" xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#"><rdf:Bag><rdf:li rdf:parseType="Resource"><pdfaSchema:schema>PDF/UA identification schema</pdfaSchema:schema><pdfaSchema:namespaceURI>http://www.aiim.org/pdfua/ns/id/</pdfaSchema:namespaceURI><pdfaSchema:prefix>pdfuaid</pdfaSchema:prefix><pdfaSchema:property><rdf:Seq><rdf:li rdf:parseType="Resource"><pdfaProperty:name>part</pdfaProperty:name><pdfaProperty:valueType>Integer</pdfaProperty:valueType><pdfaProperty:category>external</pdfaProperty:category><pdfaProperty:description>Part of ISO 14289 standard</pdfaProperty:description></rdf:li></rdf:Seq></pdfaSchema:property></rdf:li></rdf:Bag></pdfaExtension:schemas>"""
+_PDFUA_NS = (
+    ("pdfaExtension", "http://www.aiim.org/pdfa/ns/extension/"),
+    ("pdfaSchema", "http://www.aiim.org/pdfa/ns/schema#"),
+    ("pdfaProperty", "http://www.aiim.org/pdfa/ns/property#"),
+)
+
+PDFUA_XMP_SCHEMA = (
+    "<pdfaExtension:schemas><rdf:Bag><rdf:li rdf:parseType=\"Resource\">"
+    "<pdfaSchema:schema>PDF/UA identification schema</pdfaSchema:schema>"
+    "<pdfaSchema:namespaceURI>http://www.aiim.org/pdfua/ns/id/</pdfaSchema:namespaceURI>"
+    "<pdfaSchema:prefix>pdfuaid</pdfaSchema:prefix>"
+    "<pdfaSchema:property><rdf:Seq><rdf:li rdf:parseType=\"Resource\">"
+    "<pdfaProperty:name>part</pdfaProperty:name>"
+    "<pdfaProperty:valueType>Integer</pdfaProperty:valueType>"
+    "<pdfaProperty:category>external</pdfaProperty:category>"
+    "<pdfaProperty:description>Part of ISO 14289 standard</pdfaProperty:description>"
+    "</rdf:li></rdf:Seq></pdfaSchema:property></rdf:li></rdf:Bag></pdfaExtension:schemas>"
+)
+
+
+def _pdfua_description() -> str:
+    """A Description of its own: the schema's prefixes are declared here, not borrowed from a neighbour."""
+    ns = " ".join(f'xmlns:{prefix}="{uri}"' for prefix, uri in _PDFUA_NS)
+    return f'<rdf:Description rdf:about="" {ns}>{PDFUA_XMP_SCHEMA}</rdf:Description>'
 
 
 def feature_xmp(pdf, spec) -> None:
@@ -278,7 +299,8 @@ def feature_xmp(pdf, spec) -> None:
     import spec_loader
     # `spec` is the feature's entry from features.toml, not the document spec: only a module that carries
     # the document's own constants may override the loaded spec.
-    NS = spec if spec is not None and hasattr(spec, "PAGES") else spec_loader.load()
+    import types
+    NS = spec if isinstance(spec, types.ModuleType) else spec_loader.load()
     sha = pdf.docinfo.get("/SourceSHA256", "")
     title = getattr(NS, "XMP_TITLE", None) or f"معيار إنتاج ملفات PDF — دليل المعيار · الإصدار {NS.GUIDE_VERSION_AR}"
     description = getattr(NS, "XMP_DESCRIPTION", None) or "معيار جودة إنتاج ملفات PDF التفاعلية العربية"
@@ -303,8 +325,16 @@ def feature_xmp(pdf, spec) -> None:
     if any(k.startswith("pdfuaid:") for k in (getattr(NS, "CONFORMANCE", None) or {})):
         xmp = pdf.Root.Metadata.read_bytes().decode("utf-8")
         if "pdfaExtension:schemas" not in xmp:
-            xmp = xmp.replace("</rdf:Description>", PDFUA_XMP_SCHEMA + "</rdf:Description>", 1)
-            pdf.Root.Metadata.write(xmp.encode("utf-8"))
+            # a description of its own: the identifier's namespace is not declared on any existing element,
+            # so merging the schema into one of them would attach it to a foreign subject
+            patched = xmp.replace("</rdf:RDF>", _pdfua_description() + "</rdf:RDF>", 1)
+            if patched == xmp:
+                raise SystemExit("postprocess: XMP has no rdf:RDF to carry the pdfuaid schema, "
+                                 "so PDF/A 6.6.2.3.1 cannot pass")
+            pdf.Root.Metadata.write(patched.encode("utf-8"))
+            with pdf.open_metadata() as check:
+                if check.get("pdfuaid:part") in (None, ""):
+                    raise SystemExit("postprocess: the pdfuaid schema block did not survive the XMP write")
 
 
 def feature_output_intent(pdf, spec) -> None:

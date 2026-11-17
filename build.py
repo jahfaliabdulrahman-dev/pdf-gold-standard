@@ -251,4 +251,10 @@ if __name__ == "__main__":
             raise SystemExit(0)
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
     os.replace(PARTIAL, OUT)
+    # The print variant is judged against the markup Chrome actually printed. Keep that copy beside the
+    # published file (it is ignored by git), so the delivered PDF can be re-judged months later without
+    # guessing which source produced it.
+    rendered = os.path.splitext(PARTIAL)[0] + ".source.html"
+    if os.path.exists(rendered):
+        shutil.copyfile(rendered, os.path.splitext(OUT)[0] + ".source.html")
     print("[5/5] gate passed — published:", OUT)
