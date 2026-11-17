@@ -30,7 +30,9 @@ baseline*.pdf
 report-print.pdf
 najd.pdf
 
-# fixtures whose embedded font subset carries the foundry's copyright notice
+# the Najd fixtures whose embedded subset carries the foundry's «All rights reserved» notice
+# (tests/vocalised_raw.pdf deliberately stays: it is Chrome's own output with a system GeezaPro subset,
+#  the only capture the vocalised regression test has — named here so the rule is not read as universal)
 artifacts/*.pdf
 
 # local secrets

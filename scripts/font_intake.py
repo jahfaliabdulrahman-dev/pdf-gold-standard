@@ -63,13 +63,13 @@ def embedding_permission(fs: int | None) -> str:
     if fs is None:
         return "no OS/2 table: the licence text is the only source"
     level = fs & 0x000F
-    names = {0: "installable (fsType=0)", 2: "restricted licence", 4: "preview & print", 8: "editable"}
+    names = {0: "installable", 2: "restricted licence", 4: "preview & print", 8: "editable"}
     extra = []
     if fs & 0x0100:
         extra.append("no subsetting (0x0100)")
     if fs & 0x0200:
         extra.append("bitmap only (0x0200)")
-    return names.get(level, f"unknown level {level}") + ("; " + ", ".join(extra) if extra else "")
+    return f"fsType=0x{fs:04X}: " + names.get(level, f"unknown level {level}") + ("; " + ", ".join(extra) if extra else "")
 
 
 def check(path: str, corpora: list[str]) -> dict:
@@ -109,6 +109,15 @@ def check(path: str, corpora: list[str]) -> dict:
         problems.append(f"missing core Arabic characters: {len(missing_required)} — e.g. {missing_required[:6]}")
     for path_like, gap in corpus_missing.items():
         problems.append(f"{path_like}: missing {len(gap)} character(s) used by the document — {gap[:8]}")
+    # The embedding permission is a GATE, not a printout: a face whose OS/2 forbids what the pipeline
+    # does must be refused here, before it enters a document.
+    if fs_type is not None:
+        if (fs_type & 0x000F) == 2:
+            problems.append("OS/2.fsType=2 (restricted licence): the font does not permit embedding")
+        if fs_type & 0x0100:
+            problems.append("OS/2.fsType bit 0x0100 (no subsetting): the pipeline ships a subset of every page font")
+        if fs_type & 0x0200:
+            problems.append("OS/2.fsType bit 0x0200 (bitmap only): the pipeline embeds an outline font")
 
     return {
         "path": path,
@@ -148,7 +157,7 @@ def main(argv: list[str]) -> int:
         print(f"  licence: {report['licence']}")
         print(f"  embedding: {report['embedding']}")
         if report["redistribution_unclear"]:
-            print("  NOTE: no explicit redistribution grant — embedding in a document is fine, shipping the font is not.")
+            print("  NOTE: the name table grants no redistribution — the embedding field above says what OS/2 allows.")
         for p in report["problems"]:
             print(f"  FAIL {p}")
     return 0 if report["verdict"] == "ACCEPT" else 1

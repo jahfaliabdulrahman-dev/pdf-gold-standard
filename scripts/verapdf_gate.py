@@ -13,7 +13,20 @@ import sys
 import tomllib
 
 PROJ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASELINE = os.environ.get("VERAPDF_BASELINE") or os.path.join(PROJ, "verapdf-baseline.toml")
+
+
+def baseline_path() -> str:
+    """The document's own baseline (declared by its spec), unless the caller overrides it by name."""
+    env = os.environ.get("VERAPDF_BASELINE")
+    if env:
+        return env if os.path.isabs(env) else os.path.join(PROJ, env)
+    sys.path.insert(0, os.path.join(PROJ, "scripts"))
+    sys.path.insert(0, PROJ)
+    import spec_loader
+    return os.path.join(PROJ, getattr(spec_loader.load(), "VERAPDF_BASELINE", "verapdf-baseline.toml"))
+
+
+BASELINE = baseline_path()
 
 
 def failing_rules(path: str, flavour: str) -> set[str]:

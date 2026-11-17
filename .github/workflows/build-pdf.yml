@@ -51,8 +51,9 @@ jobs:
         run: |
           PDF_SPEC=report_spec python3 build.py report-v1.html report.pdf
           PDF_SPEC=report_spec python3 scripts/verify_pdf.py report.pdf
-          VERAPDF_BASELINE=verapdf-baseline-report.toml PDF_SPEC=report_spec \
-            python3 scripts/verapdf_gate.py report.pdf 3b ua1
+          PDF_SPEC=report_spec python3 scripts/gate_selftest.py report.pdf
+          # 4f is the binding flavour for a file with attachments, the same rule as the guide.
+          PDF_SPEC=report_spec python3 scripts/verapdf_gate.py report.pdf 3b ua1 4f
           PDF_SPEC=report_spec python3 scripts/claim_probe.py report.pdf --check
 
       - name: Claim probe — what remains if the file DECLARED conformance

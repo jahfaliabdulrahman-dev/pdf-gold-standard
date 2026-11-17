@@ -59,13 +59,23 @@ VOCALISED_PAGES = {3}
 VOCALISED = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
 
 VERSION_SPOTS = [("cover", COVER), ("back", PAGES - 1)]
-PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٤ فحصا» and «٣٩ عطلا»
+PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٤ فحصا» and «٤٠ عطلا»
 PRINTS_LINK_COUNT = False
 GATE_CHECKS = 34
-# Nine of the suite's 48 mutations describe objects this specimen does not have (form fields, QR refs,
-# footer numbers, divider art) or a defect it cannot exhibit (splitting its single-direction lines moves
-# MuPDF's order 0.929 -> 0.925). gate_selftest prints which ones and fails if the count drifts.
-GATE_MUTATIONS = 39
+# Eight of the suite's 48 mutations cannot be caught on this specimen; the reasons are measured, not
+# assumed, and gate_selftest fails if one of them stops being an exemption (stale) or if a mutation goes
+# n/a without being declared here. 48 − 8 = 40.
+GATE_MUTATIONS = 40
+GATE_NA = {
+    "drop_divider_art": "the divider page carries no art",
+    "drop_image_object": "the references page carries no QR image",
+    "drop_footer_number": "no page prints its own number",
+    "swap_footer_numbers": "no page prints its own number",
+    "move_footer_up": "no page prints its own number",
+    "field_without_tu": "the specimen has no AcroForm fields",
+    "wrong_mark": "VOCALISED_CLAIM is False — the marked-text check is off by declaration",
+    "split_text_objects": "measured: splitting its single-direction lines moves MuPDF order 0.929 → 0.925, above the 0.75 floor",
+}
 # Measured 2026-11-17 by scripts/claim_probe.py on this build: zero rules remain under either claim.
 CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
 # The cover carries the wall the typeface was drawn from; embedded at build time so the print stays
