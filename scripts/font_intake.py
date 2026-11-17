@@ -112,8 +112,8 @@ def check(path: str, corpora: list[str]) -> dict:
     # The embedding permission is a GATE, not a printout: a face whose OS/2 forbids what the pipeline
     # does must be refused here, before it enters a document.
     if fs_type is not None:
-        if (fs_type & 0x000F) == 2:
-            problems.append("OS/2.fsType=2 (restricted licence): the font does not permit embedding")
+        if fs_type & 0x0002:          # bit 1: restricted licence embedding (also set in 0x0003)
+            problems.append(f"OS/2.fsType=0x{fs_type:04X} (restricted licence bit): the font does not permit embedding")
         if fs_type & 0x0100:
             problems.append("OS/2.fsType bit 0x0100 (no subsetting): the pipeline ships a subset of every page font")
         if fs_type & 0x0200:

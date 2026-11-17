@@ -318,7 +318,7 @@ def _footer_span(doc, i):
         for line in b.get("lines", []):
             for s in line["spans"]:
                 t = s["text"].strip()
-                if t and all(ch.isdigit() and ord(ch) < 128 for ch in t) and NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
+                if t and all(ch.isdigit() for ch in t) and NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
                     return s["bbox"]
     return None
 
@@ -601,6 +601,11 @@ if __name__ == "__main__":
     print(f"\nbaseline: {'PASS' if not base else 'FAIL ' + str(base)}")
     missed = ["baseline"] if base else []
     declared_na = dict(getattr(NS, "GATE_NA", {}))
+    # The documents CI builds must exercise the whole suite: an exemption there would mean a mutation
+    # the pipeline never proves — and CI is the only place nobody is watching.
+    if getattr(NS, "__name__", "") in ("nav_spec", "report_spec") and declared_na:
+        print(f"SELFTEST FAILED — {NS.__name__} declares GATE_NA but is built by CI; fix the document, not the suite")
+        raise SystemExit(1)
     names = {m[0].__name__ for m in MUTATIONS}
     if len(MUTATIONS) != SUITE_SIZE:
         print(f"SELFTEST FAILED — the suite holds {len(MUTATIONS)} mutations, SUITE_SIZE says {SUITE_SIZE}")
@@ -633,13 +638,13 @@ if __name__ == "__main__":
             restore_all()
             NS.SOURCE_HTML, NS.GATE_CHECKS = OLD_SOURCE, OLD_CHECKS
         if declared:
-            # An exemption is a measurement too: if the gate now catches the defect, the exemption is
-            # stale and must be removed — otherwise a fixed hole keeps its licence to stay open.
+            # A declared exemption means «this document cannot exhibit the defect». If the mutation DID
+            # apply, the declaration is wrong: either the gate now catches it (stale) or it does not
+            # (a real miss). Both fail — an exemption may never licence a miss.
             stale = (not green) and expect in failed
-            print(f"\n>>> {name:24s} declared n/a, gate says {failed} — "
-                  f"{'STALE EXEMPTION' if stale else 'still uncaught, as declared'}\n")
-            if stale:
-                missed.append(name + " (stale exemption)")
+            print(f"\n>>> {name:24s} declared n/a, yet the mutation applied and the gate says {failed} — "
+                  f"{'STALE EXEMPTION' if stale else 'MISSED, not exempt'}\n")
+            missed.append(name + (" (stale exemption)" if stale else " (declared n/a but applied)"))
             continue
         applied += 1
         ok = (not failed) if green else (expect in failed)

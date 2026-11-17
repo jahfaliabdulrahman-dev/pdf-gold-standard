@@ -22,6 +22,11 @@
 | `scripts/test_vocalised.py` + `tests/` | **اختبار النص المشكول**: فقرتان مشكولتان من مخرج Chrome الخام يجب أن تُنسخا مطابقتين بعد `fix_text_layer.py` (والخام يجب أن يفشل) |
 | `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` |
 | `report-v1.html` + `report_spec.py` | **الوثيقة الثانية**: «الحرف المقلوب» — ١٧ صفحة، مواصفتها وحدها (`PDF_SPEC=report_spec`)، تُبنى بنفس البوابة والاختبار الذاتي |
+| `spec_loader.py` + `<name>_spec.py` | **المواصفة لكل مستند**: `PDF_SPEC` يختار الملف، والبناء والبوابة والاختبار الذاتي يقرؤون منه واحدًا (لا مواصفة مكرّرة في الكود) |
+| `postprocess.py` + `pdfops.py` | **المرحلة ٥**: تسميات الصفحات، المنافذ المسمّاة، XMP، OutputIntent، المرفقات، وسم الروابط — وعمليات الرسم المشتركة بين المنتِج والبوابة |
+| `fill.html` + `fill_server.py` | **سطح التعبئة المحلي**: صفحة تكتب قيمًا وتبني PDF حيًّا (`127.0.0.1:8765`) |
+| `features.toml` + `verapdf-baseline*.toml` | **الميزان**: كل ميزة معلنة يُفحص وجودها · وأساس veraPDF لكل مستند (‏`-report`، `-najd`) |
+| `pdfium-shaping/` + `artifacts/` | **أرشيف البحث**: لقطة `hb_probe` (ليست الترقيع) · وصور أدلة الاستخراج |
 | `gen_art.py` | توليد فن الأغلفة (OpenRouter Image API — `gemini-3-pro-image`) |
 | `fonts/` | IBM Plex Sans Arabic + Amiri (SIL OFL 1.1) — تُضمَّن base64 في البناء |
 | [آخر إصدار](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/releases/latest) | المخرج النهائي (12 صفحة · 42 رابطاً حياً · 2.5MB) — النسخة المنشورة الوحيدة، يبنيها CI عند كل وسم `v*`. لا نسخة PDF داخل المستودع: نسخة `main` تُبنى بـ`python3 build.py guide-v2.html out.pdf` |

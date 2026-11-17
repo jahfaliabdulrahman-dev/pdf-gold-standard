@@ -1,5 +1,9 @@
 """Read back the text a reader extracts from the generated appearance streams.
 
+REQUIRES the `text_probe` binary from the UNPUBLISHED PDFium branch `arabic-field-shaping@974afb6`
+(pass its directory with --pdfium-out), and the Najd face at `najd/Najd-Regular.ttf` — the font is
+not shipped. Neither dependency is installed by this repository.
+
 Each widget's /AP is turned into the only thing page 0 draws, and PDFium's own
 text page is asked for the characters. A shaped run writes glyph ids, which the
 document's /ToUnicode need not cover, so the stream draws the run with a copy of

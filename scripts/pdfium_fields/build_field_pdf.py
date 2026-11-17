@@ -1,5 +1,8 @@
 """Build the field fixtures that the appearance-stream measurement runs on.
 
+REQUIRES `najd/Najd-Regular.ttf` (not shipped: the licence forbids redistributing the font); the
+fixtures are what the unpublished PDFium branch `arabic-field-shaping@974afb6` is measured with.
+
 Four widgets on one page:
 
   ar            Type0/Identity-H subset, value «لا»        the ligature case

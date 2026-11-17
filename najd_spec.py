@@ -52,29 +52,26 @@ REF_LABELS = ["خط نجد", "المصمّم على X", "أداة veraPDF", "م�
 LANG = "ar"
 HOUSE_FONT_PREFIX = "Najd"          # every embedded face must start with this
 BASMALA_FACES = set()
-BASMALA = 3                         # the specimen page that prints the basmala
-VOCALISED_CLAIM = False             # marks do not round-trip for this face — measured, and stated on the page
-VOCALISED_REASON = "ترتيب العلامات لا يُنسخ حرفيًا في هذا الوجه (مقيس في MuPDF) — لا ندّعي ما لم يثبت"
-VOCALISED_PAGES = {3}
-VOCALISED = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
+BASMALA = 3                         # no basmala line in this specimen; the page index is kept for the
+                                    # mutations that still ask for it, and those report n/a (see GATE_NA)
+VOCALISED_CLAIM = False             # no vocalised sample at all — the page says so
+VOCALISED_REASON = "لا سطر مشكول في هذا الملف: الوجه لا يُنسخ تشكيله حرفيًا في MuPDF — فلا نعرض عيّنة ولا ندّعي"
+VOCALISED_PAGES = set()
 
 VERSION_SPOTS = [("cover", COVER), ("back", PAGES - 1)]
-PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٤ فحصا» and «٤٠ عطلا»
+PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٤ فحصا» and «٤٣ عطلا»
 PRINTS_LINK_COUNT = False
 GATE_CHECKS = 34
-# Eight of the suite's 48 mutations cannot be caught on this specimen; the reasons are measured, not
-# assumed, and gate_selftest fails if one of them stops being an exemption (stale) or if a mutation goes
-# n/a without being declared here. 48 − 8 = 40.
-GATE_MUTATIONS = 40
+# Five of the suite's 48 mutations cannot be caught on this specimen (no divider art, no QR refs,
+# no form fields, no basmala line, and a measured blind spot in line order); the reasons are measured,
+# not assumed, and gate_selftest fails if one of them applies after all. 48 − 5 = 43.
+GATE_MUTATIONS = 43
 GATE_NA = {
     "drop_divider_art": "the divider page carries no art",
     "drop_image_object": "the references page carries no QR image",
-    "drop_footer_number": "no page prints its own number",
-    "swap_footer_numbers": "no page prints its own number",
-    "move_footer_up": "no page prints its own number",
     "field_without_tu": "the specimen has no AcroForm fields",
-    "wrong_mark": "VOCALISED_CLAIM is False — the marked-text check is off by declaration",
-    "split_text_objects": "measured: splitting its single-direction lines moves MuPDF order 0.929 → 0.925, above the 0.75 floor",
+    "wrong_mark": "no basmala line in this document, and VOCALISED_CLAIM is False besides",
+    "split_text_objects": "measured blind spot: splitting its single-direction lines moves MuPDF order 0.929 → 0.925, above the 0.75 floor",
 }
 # Measured 2026-11-17 by scripts/claim_probe.py on this build: zero rules remain under either claim.
 CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
@@ -126,15 +123,15 @@ PAGE_INK = {
     4: (0.0956, (0.0582, 0.0839, 0.0891, 0.0342, 0.3128, 0.4589, 0.2041, 0.187, 0.0146, 0.0266, 0.0184, 0.0372, 0.0002, 0.0, 0.0, 0.0018)),
     5: (0.0252, (0.0062, 0.011, 0.0323, 0.0319, 0.0197, 0.0334, 0.0326, 0.0355, 0.0294, 0.0518, 0.0516, 0.0422, 0.0004, 0.0047, 0.0134, 0.0075)),
     6: (0.0176, (0.0108, 0.0186, 0.0261, 0.0298, 0.007, 0.0575, 0.0292, 0.0363, 0.006, 0.0258, 0.0141, 0.0185, 0.0003, 0.0, 0.0, 0.0015)),
-    7: (0.0224, (0.0148, 0.0258, 0.0541, 0.0787, 0.0113, 0.0247, 0.0499, 0.056, 0.0053, 0.0121, 0.0112, 0.0122, 0.0003, 0.0, 0.0, 0.0017)),
-    8: (0.0185, (0.0062, 0.0269, 0.0337, 0.032, 0.0185, 0.0545, 0.041, 0.0373, 0.0, 0.0, 0.022, 0.0225, 0.0003, 0.0, 0.0, 0.0015)),
+    7: (0.0224, (0.0148, 0.0258, 0.0541, 0.0787, 0.0113, 0.0247, 0.0491, 0.056, 0.0053, 0.0121, 0.0112, 0.0122, 0.0003, 0.0, 0.0, 0.0017)),
+    8: (0.0186, (0.0062, 0.0269, 0.0337, 0.032, 0.0183, 0.0552, 0.041, 0.0373, 0.0, 0.0, 0.022, 0.0225, 0.0003, 0.0, 0.0, 0.0015)),
     9: (0.0079, (0.0062, 0.0074, 0.0248, 0.0257, 0.0, 0.0, 0.0133, 0.0249, 0.0, 0.0012, 0.0092, 0.0115, 0.0002, 0.0, 0.0, 0.0017)),
     10: (0.0092, (0.0, 0.0, 0.0, 0.0, 0.0, 0.0639, 0.0682, 0.0, 0.0, 0.0082, 0.007, 0.0, 0.0, 0.0, 0.0, 0.0)),
 }
 # <<< CALIBRATED PAGE_INK
 
 # >>> CALIBRATED PAGE_WORDS
-PAGE_WORDS = {0: 33, 1: 43, 2: 74, 3: 105, 4: 92, 5: 143, 6: 120, 7: 106, 8: 127, 9: 58, 10: 21}
+PAGE_WORDS = {0: 33, 1: 43, 2: 74, 3: 105, 4: 92, 5: 143, 6: 120, 7: 106, 8: 130, 9: 58, 10: 21}
 # <<< CALIBRATED PAGE_WORDS
 
 # >>> CALIBRATED IMAGE_PAGES
@@ -142,7 +139,7 @@ IMAGE_PAGES = {0: (1, 0.4405)}
 # <<< CALIBRATED IMAGE_PAGES
 
 # >>> CALIBRATED FOOTER
-FOOTER = {}
+FOOTER = {2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8, 8: 9, 9: 10}
 # <<< CALIBRATED FOOTER
 
 # >>> CALIBRATED EXPECTED_LINKS

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Reproduce the Arabic field-shaping measurements end to end.
 #
+# REQUIRES: the probe binaries built from the UNPUBLISHED PDFium branch
+# `arabic-field-shaping@974afb6` (see docs/pdfium-arabic-fields/), and the Najd face at
+# `najd/Najd-Regular.ttf` — not shipped: the licence forbids redistributing the font.
+#
 #   scripts/pdfium_fields/run.sh --out /tmp/fields \
 #       [--baseline-probe /path/to/an-unpatched/field_probe]
 #
