@@ -67,10 +67,218 @@ def feature_named_destinations(pdf, spec) -> None:
     pdf.Root.Names = pikepdf.Dictionary(Dests=pikepdf.Dictionary(Names=names))
 
 
+PAINT_OPS = {
+    "m", "l", "c", "v", "y", "h", "re",                 # path construction
+    "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "n",  # path painting
+    "Do", "sh",                                          # XObject / shading
+    "Tj", "TJ", "'", '"',                                 # text showing
+}
+
+
+def _wrap_untagged(instructions):
+    """Wrap untagged painting runs in /Artifact BMC … EMC; return (new list, blocks added, forms invoked).
+
+    Only painting operators enter the block. Every container operator — BMC/BDC/EMC, q/Q, BT/ET, colour
+    and text state — closes the block first, so an artifact can never hold a tagged sequence (7.1-2) and
+    can never straddle a state container.
+    """
+    out, dos = [], []
+    mc = 0
+    artifact_open = False
+    added = 0
+
+    def close() -> None:
+        nonlocal artifact_open
+        if artifact_open:
+            out.append(pikepdf.ContentStreamInstruction([], pikepdf.Operator("EMC")))
+            artifact_open = False
+
+    for ins in instructions:
+        op = str(ins.operator)
+        if op in ("BMC", "BDC"):
+            close()
+            mc += 1
+            out.append(ins)
+        elif op == "EMC":
+            close()
+            mc = max(0, mc - 1)
+            out.append(ins)
+        elif op == "Do":
+            if mc == 0:
+                dos.append(ins.operands[0])
+            if mc == 0 and not artifact_open:
+                out.append(pikepdf.ContentStreamInstruction(
+                    [pikepdf.Name("/Artifact")], pikepdf.Operator("BMC")))
+                artifact_open = True
+                added += 1
+            out.append(ins)
+        elif mc == 0 and op in PAINT_OPS:
+            if not artifact_open:
+                out.append(pikepdf.ContentStreamInstruction(
+                    [pikepdf.Name("/Artifact")], pikepdf.Operator("BMC")))
+                artifact_open = True
+                added += 1
+            out.append(ins)
+        elif mc == 0:
+            close()
+            out.append(ins)
+        else:
+            out.append(ins)
+    close()
+    return out, added, dos
+
+
+def _tag_orphan_runs(pdf, page, instructions):
+    """Give an /MCID to every top-level marked-content run that Chrome left unlinked.
+
+    Chrome wraps reversed RTL text in a bare `BMC /ReversedChars … EMC` with no MCID, so the run paints
+    visible text that belongs to no structure element — veraPDF calls it «neither Artifact nor tagged»
+    (27 items per affected page). Marking it Artifact would hide real text from a screen reader, so the run
+    becomes real content instead: it gets the next free MCID for the page, a /P structure element carrying
+    that MCID, and an entry in the page's ParentTree array. The text stays where it is; only its ownership
+    changes.
+    """
+    st = pdf.Root.get("/StructTreeRoot")
+    if st is None or "/ParentTree" not in st:
+        return instructions
+    sp = page.obj.get("/StructParents")
+    if sp is None:
+        return instructions
+    nums = st.ParentTree.get("/Nums")
+    table = {}
+    if nums is not None:
+        for i in range(0, len(nums) - 1, 2):
+            table[int(nums[i])] = nums[i + 1]
+    arr = table.get(int(sp))
+    if arr is None:
+        return instructions
+    document = st.get("/K")
+    if isinstance(document, pikepdf.Array):
+        document = document[0] if len(document) else None
+    if document is None:
+        return instructions
+
+    out, depth, added = [], 0, 0
+    for ins in instructions:
+        op = str(ins.operator)
+        if op in ("BMC", "BDC"):
+            if depth == 0 and op == "BMC" and str(ins.operands[0]) != "/Artifact":
+                mcid = len(arr)
+                elem = pdf.make_indirect(pikepdf.Dictionary(
+                    Type=pikepdf.Name("/StructElem"),
+                    S=pikepdf.Name("/P"),
+                    Pg=page.obj,
+                    P=document,
+                    K=mcid,
+                ))
+                arr.append(elem)
+                kids = document.get("/K")
+                if isinstance(kids, pikepdf.Array):
+                    kids.append(elem)
+                document["/K"] = pikepdf.Array([elem])
+                out.append(pikepdf.ContentStreamInstruction(
+                    [ins.operands[0], pikepdf.Dictionary(MCID=mcid)], pikepdf.Operator("BDC")))
+                depth += 1
+                added += 1
+                continue
+            depth += 1
+            out.append(ins)
+        elif op == "EMC":
+            depth = max(0, depth - 1)
+            out.append(ins)
+        else:
+            out.append(ins)
+    return out
+
+
+def feature_pdfua(pdf, spec=None) -> None:
+    """Mark every untagged painting run as an Artifact, so the file reaches PDF/UA's 7.1 rule.
+
+    Chrome tags the text it draws (BDC … EMC with an /MCID) but leaves backgrounds, rules, icons and the
+    cover wall untagged; veraPDF reports each as «Content is neither marked as Artifact nor tagged as real
+    content» (256 on Najd, 612 on the report). The fix is a container, not a redraw.
+
+    Chrome also splits a page into Form XObjects, so the same treatment has to reach inside a form — but
+    only when the form is invoked OUTSIDE any tagged sequence. A form invoked inside a BDC holds real
+    content; marking its interior as an artifact there would violate 7.1-1. The usage map below decides,
+    and a form used in both contexts is left alone (and reported) rather than guessed at.
+    """
+    import spec_loader
+    # `spec` is the feature's entry from features.toml, not the document spec: only a module that carries
+    # the document's own constants may override the loaded spec.
+    NS = spec if spec is not None and hasattr(spec, "PAGES") else spec_loader.load()
+    if not getattr(NS, "PDFUA", False):
+        return
+
+    pdf.Root["/MarkInfo"] = pikepdf.Dictionary(Type=pikepdf.Name("/MarkInfo"), Marked=True, Suspects=False)
+
+    def resources(container):
+        return container.get("/Resources", {}) if hasattr(container, "get") else {}
+
+    # pass 1: which forms exist, and in which context each one is invoked
+    forms: dict = {}
+    queue = []
+    for page in pdf.pages:
+        queue.append((page.obj, page.obj, list(pikepdf.parse_content_stream(page))))
+    while queue:
+        _owner, container, instrs = queue.pop(0)
+        mc = 0
+        for ins in instrs:
+            op = str(ins.operator)
+            if op in ("BMC", "BDC"):
+                mc += 1
+            elif op == "EMC":
+                mc = max(0, mc - 1)
+            elif op == "Do" and ins.operands:
+                xo = resources(container).get("/XObject", {})
+                target = xo.get(str(ins.operands[0]))
+                if target is None or str(target.get("/Subtype")) != "/Form":
+                    continue
+                key = target.objgen
+                rec = forms.setdefault(key, {"obj": target, "tagged": False, "artifact": False, "seen": False})
+                rec["tagged" if mc > 0 else "artifact"] = True
+                if not rec["seen"]:
+                    rec["seen"] = True
+                    try:
+                        queue.append((target, target, list(pikepdf.parse_content_stream(target))))
+                    except Exception:
+                        pass
+
+    # pass 2: inside artifact-only forms, the same wrap; forms used in tagged context are left untouched
+    marks = 0
+    skipped = 0
+    for rec in forms.values():
+        if rec["artifact"] and not rec["tagged"]:
+            out, added, _dos = _wrap_untagged(pikepdf.parse_content_stream(rec["obj"]))
+            if added:
+                rec["obj"].write(pikepdf.unparse_content_stream(out))
+                marks += added
+        elif rec["tagged"] and rec["artifact"]:
+            skipped += 1
+
+    # pass 3: the pages themselves — wrap the untagged painting, then give the leftover runs an owner
+    for page in pdf.pages:
+        out, added, _dos = _wrap_untagged(pikepdf.parse_content_stream(page))
+        out = _tag_orphan_runs(pdf, page, out)
+        if added or out:
+            page.Contents = pdf.make_stream(pikepdf.unparse_content_stream(out))
+            marks += added
+
+    if marks:
+        print(f"      pdfua: wrapped {marks} untagged run(s) as artifacts")
+    if skipped:
+        print(f"      pdfua: {skipped} form(s) used in both contexts were left alone")
+
+
+PDFUA_XMP_SCHEMA = """<pdfaExtension:schemas xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/" xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#" xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#"><rdf:Bag><rdf:li rdf:parseType="Resource"><pdfaSchema:schema>PDF/UA identification schema</pdfaSchema:schema><pdfaSchema:namespaceURI>http://www.aiim.org/pdfua/ns/id/</pdfaSchema:namespaceURI><pdfaSchema:prefix>pdfuaid</pdfaSchema:prefix><pdfaSchema:property><rdf:Seq><rdf:li rdf:parseType="Resource"><pdfaProperty:name>part</pdfaProperty:name><pdfaProperty:valueType>Integer</pdfaProperty:valueType><pdfaProperty:category>external</pdfaProperty:category><pdfaProperty:description>Part of ISO 14289 standard</pdfaProperty:description></rdf:li></rdf:Seq></pdfaSchema:property></rdf:li></rdf:Bag></pdfaExtension:schemas>"""
+
+
 def feature_xmp(pdf, spec) -> None:
     """XMP is what archive/search tools read; Info alone is invisible to them."""
     import spec_loader
-    NS = spec_loader.load()
+    # `spec` is the feature's entry from features.toml, not the document spec: only a module that carries
+    # the document's own constants may override the loaded spec.
+    NS = spec if spec is not None and hasattr(spec, "PAGES") else spec_loader.load()
     sha = pdf.docinfo.get("/SourceSHA256", "")
     title = getattr(NS, "XMP_TITLE", None) or f"معيار إنتاج ملفات PDF — دليل المعيار · الإصدار {NS.GUIDE_VERSION_AR}"
     description = getattr(NS, "XMP_DESCRIPTION", None) or "معيار جودة إنتاج ملفات PDF التفاعلية العربية"
@@ -88,6 +296,15 @@ def feature_xmp(pdf, spec) -> None:
             m[key] = value
         if "dc:source" in m:
             del m["dc:source"]
+    # PDF/A and PDF/UA together need more than the identifier: PDF/A 6.6.2.3.1 accepts a foreign XMP
+    # property only if its schema is described in pdfaExtension. pikepdf merges nested dictionaries, so
+    # the description is written as XMP text, not through the mapping API (measured: merging produced a
+    # malformed schema and four 6.6.2.3.3 failures).
+    if any(k.startswith("pdfuaid:") for k in (getattr(NS, "CONFORMANCE", None) or {})):
+        xmp = pdf.Root.Metadata.read_bytes().decode("utf-8")
+        if "pdfaExtension:schemas" not in xmp:
+            xmp = xmp.replace("</rdf:Description>", PDFUA_XMP_SCHEMA + "</rdf:Description>", 1)
+            pdf.Root.Metadata.write(xmp.encode("utf-8"))
 
 
 def feature_output_intent(pdf, spec) -> None:
@@ -472,6 +689,7 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -
         assert "/SourceFile" not in pdf.docinfo and "/SourceSHA256" not in pdf.docinfo
         normalise(pdf)
         feature_bidi_space(pdf)
+        feature_pdfua(pdf)
         pdf.save(dst)
     return applied
 

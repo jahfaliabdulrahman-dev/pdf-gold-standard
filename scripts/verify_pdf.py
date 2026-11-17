@@ -395,18 +395,25 @@ def pdfua_problems(pdf) -> list[str]:
         if claim:
             if declared != claim:
                 bad.append(f"conformance claim {declared or 'absent'} != spec {claim}")
-            flavour = conformance_flavour(declared)
-            if flavour is None:
+            # every claimed identifier needs its OWN measured, EMPTY baseline: a PDF/UA claim is never
+            # checked against PDF/A's evidence
+            flavours = []
+            if declared.get("pdfaid:part"):
+                conf = str(declared.get("pdfaid:conformance", "")).strip().lower()
+                flavours.append(f"{declared['pdfaid:part']}{conf}" if conf else "")
+            if str(declared.get("pdfuaid:part", "")) == "1":
+                flavours.append("ua1")
+            flavours = [f for f in flavours if f]
+            if not flavours:
                 bad.append(f"cannot map the claim {declared} to a veraPDF flavour: it cannot be checked")
+            baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
+            try:
+                base = tomllib.load(open(baseline_path, "rb"))
+            except (OSError, tomllib.TOMLDecodeError) as e:
+                bad.append(f"cannot read the baseline: {type(e).__name__}")
             else:
-                baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
-                try:
-                    base = tomllib.load(open(baseline_path, "rb"))
-                except (OSError, tomllib.TOMLDecodeError) as e:
-                    bad.append(f"cannot read the {flavour} baseline: {type(e).__name__}")
-                else:
-                    # fail closed: the flavour must be measured, present, and empty. A claim is never
-                    # checked against another flavour's evidence (a PDF/UA claim needs ua1 to be zero).
+                # fail closed: each flavour must be measured, present, and empty
+                for flavour in flavours:
                     if flavour not in base.get("flavours", []):
                         bad.append(f"{flavour} is not a measured flavour in {os.path.basename(baseline_path)}")
                     if flavour not in base or "failing" not in base[flavour]:
@@ -427,6 +434,93 @@ def pdfua_problems(pdf) -> list[str]:
     vp = cat.get("/ViewerPreferences")
     if vp is None or not vp.get("/DisplayDocTitle"):
         bad.append("DisplayDocTitle")
+    # The UA floor applies to a file that CLAIMS PDF/UA (or a spec that opted in). A document that makes
+    # no accessibility claim is judged by PDF/A and by its own declared checks, not by a rule its producer
+    # never promised to meet.
+    if str(cat.get("/Lang", "")).strip("()") == NS.LANG and (
+            getattr(NS, "PDFUA", False) or str(declared.get("pdfuaid:part", "")) == "1"):
+        mark = cat.get("/MarkInfo")
+        if mark is not None and mark.get("/Suspects") is not False:
+            bad.append("MarkInfo /Suspects is not false: the file admits its own tagging is unreliable")
+        bad += untagged_runs(pdf)
+        bad += figure_alt_problems(pdf)
+    return bad
+
+
+def _parent_tree(pdf) -> dict:
+    try:
+        nums = list(pdf.Root.StructTreeRoot["/ParentTree"]["/Nums"])
+    except (AttributeError, KeyError, TypeError):
+        return {}
+    return {int(str(nums[i])): nums[i + 1] for i in range(0, len(nums) - 1, 2)}
+
+
+PAINT_OPS = {
+    "m", "l", "c", "v", "y", "h", "re",
+    "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "n",
+    "Do", "sh", "Tj", "TJ", "'", '"',
+}
+
+
+def untagged_runs(pdf) -> list[str]:
+    """The file's own 7.1 floor: every painted thing is an Artifact or carries an MCID that resolves.
+
+    veraPDF proves this from outside; this check proves it from inside, so a regression is caught by the
+    gate even on a machine without veraPDF installed. Fail closed: an unparsable stream is a failure.
+    """
+    bad = []
+    table = _parent_tree(pdf)
+    for pi, page in enumerate(pdf.pages):
+        sp = page.obj.get("/StructParents")
+        arr = table.get(int(sp)) if sp is not None else None
+        try:
+            instrs = list(pikepdf.parse_content_stream(page))
+        except Exception as e:                       # noqa: BLE001 — unreadable means unproven
+            bad.append(f"p{pi+1}: content stream unreadable ({type(e).__name__})")
+            continue
+        depth, loose = 0, 0
+        for ins in instrs:
+            op = str(ins.operator)
+            if op in ("BMC", "BDC"):
+                if depth == 0:
+                    props = {}
+                    if op == "BDC" and len(ins.operands) > 1 and isinstance(ins.operands[1], pikepdf.Dictionary):
+                        props = ins.operands[1]
+                    if str(ins.operands[0]) != "/Artifact":
+                        mcid = props.get("/MCID")
+                        if mcid is None:
+                            loose += 1
+                        elif arr is None or int(mcid) >= len(arr):
+                            loose += 1
+                depth += 1
+            elif op == "EMC":
+                depth = max(0, depth - 1)
+            elif depth == 0 and op in PAINT_OPS:
+                loose += 1
+        if loose:
+            bad.append(f"p{pi+1}: {loose} untagged run(s)")
+    return bad
+
+
+def figure_alt_problems(pdf) -> list[str]:
+    """A Figure without /Alt is an image a screen reader must skip or guess."""
+    bad = []
+
+    def walk(node):
+        if isinstance(node, pikepdf.Array):
+            for x in node:
+                walk(x)
+            return
+        if not isinstance(node, pikepdf.Dictionary):
+            return
+        if str(node.get("/S", "")) == "/Figure" and not str(node.get("/Alt", "")).strip():
+            bad.append(f"Figure {node.objgen} has no /Alt")
+        if "/K" in node:
+            walk(node["/K"])
+
+    st = pdf.Root.get("/StructTreeRoot")
+    if st is not None:
+        walk(st.get("/K"))
     return bad
 
 
@@ -984,12 +1078,24 @@ def text_layer_violations(doc) -> list[str]:
 
 
 def copy_fidelity(doc, engine="pdfium", text=None):
-    """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order."""
+    """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order.
+
+    The reference is the markup the producer ACTUALLY printed. For the print variant the navigation strip
+    is removed from the markup itself, so comparing against the original HTML counts words the PDF was
+    never asked to carry — the gate would be measuring a decision, not a defect. When Chrome's rendered
+    copy sits next to the file being judged, that copy is the source of truth.
+    """
     import collections
     import difflib
     import html
+    rendered = None
+    name = str(getattr(doc, "name", ""))
+    if name.endswith(".pdf"):
+        candidate = name[:-4] + ".source.html"
+        if os.path.exists(candidate):
+            rendered = candidate
     try:
-        src = source_text()
+        src = open(rendered, encoding="utf-8").read() if rendered else source_text()
     except OSError:
         return None, None
     truth = source_words(html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I))))

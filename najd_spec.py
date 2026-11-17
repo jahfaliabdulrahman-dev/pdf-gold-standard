@@ -76,7 +76,8 @@ PAGE_LABELS = [(0, None, "غ")]
 XMP_LANGUAGE = "ar"
 XMP_TITLE = f"{DOC_TITLE} · الإصدار {GUIDE_VERSION_AR}"
 XMP_DESCRIPTION = "عيّنة خط نجد: خمسة أوزان ثابتة، وألوان الموقع، وميزات خط الأنابيب كاملة بلا حقول كتابة"
-CONFORMANCE = {"pdfaid:part": "3", "pdfaid:conformance": "B"}
+PDFUA = True
+CONFORMANCE = {"pdfaid:part": "3", "pdfaid:conformance": "B", "pdfuaid:part": "1"}
 VERAPDF_BASELINE = "verapdf-baseline-najd.toml"
 
 ATTACHMENT_FILES = [

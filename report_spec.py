@@ -182,7 +182,8 @@ XMP_LANGUAGE = "ar"
 XMP_TITLE = f"{DOC_TITLE} · الإصدار {GUIDE_VERSION_AR}"   # one source of truth for the title string
 XMP_DESCRIPTION = "تشخيص وإصلاح وإثبات لطبقة النص العربية في PDF، بأرقام مقاسة على خمسة قرّاء"
 # Declared only when veraPDF reports ZERO failures for it — the gate reads the baseline and refuses otherwise.
-CONFORMANCE = {"pdfaid:part": "3", "pdfaid:conformance": "B"}
+PDFUA = True
+CONFORMANCE = {"pdfaid:part": "3", "pdfaid:conformance": "B", "pdfuaid:part": "1"}
 VERAPDF_BASELINE = "verapdf-baseline-report.toml"
 
 ATTACHMENT_FILES = [
