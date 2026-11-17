@@ -38,3 +38,6 @@ artifacts/*.pdf
 
 # generated review output (the release is the artifact, not the repo)
 guide-check.pdf
+
+# the guide build output (a release artifact, not a source)
+guide-v2-ar.pdf
