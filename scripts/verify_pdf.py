@@ -440,7 +440,7 @@ def pdfua_problems(pdf) -> list[str]:
     if str(cat.get("/Lang", "")).strip("()") == NS.LANG and (
             getattr(NS, "PDFUA", False) or str(declared.get("pdfuaid:part", "")) == "1"):
         mark = cat.get("/MarkInfo")
-        if mark is not None and mark.get("/Suspects") is not False:
+        if mark is not None and mark.get("/Suspects") is True:   # absent means false (Table 321)
             bad.append("MarkInfo /Suspects is not false: the file admits its own tagging is unreliable")
         bad += untagged_runs(pdf)
         bad += figure_alt_problems(pdf)
@@ -448,18 +448,27 @@ def pdfua_problems(pdf) -> list[str]:
 
 
 def _parent_tree(pdf) -> dict:
+    """Flatten /ParentTree, following /Kids: large files keep their numbers in intermediate nodes."""
+    table = {}
+
+    def walk(node):
+        if not isinstance(node, pikepdf.Dictionary):
+            return
+        nums = node.get("/Nums")
+        if nums is not None:
+            for i in range(0, len(nums) - 1, 2):
+                table[int(str(nums[i]))] = nums[i + 1]
+        for kid in node.get("/Kids", []):
+            walk(kid)
+
     try:
-        nums = list(pdf.Root.StructTreeRoot["/ParentTree"]["/Nums"])
+        walk(pdf.Root.StructTreeRoot["/ParentTree"])
     except (AttributeError, KeyError, TypeError):
         return {}
-    return {int(str(nums[i])): nums[i + 1] for i in range(0, len(nums) - 1, 2)}
+    return table
 
 
-PAINT_OPS = {
-    "m", "l", "c", "v", "y", "h", "re",
-    "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "n",
-    "Do", "sh", "Tj", "TJ", "'", '"',
-}
+from pdfops import PAINT_OPS  # noqa: E402  (the producer's own list: one definition, no drift)
 
 
 def untagged_runs(pdf) -> list[str]:
@@ -479,6 +488,9 @@ def untagged_runs(pdf) -> list[str]:
             bad.append(f"p{pi+1}: content stream unreadable ({type(e).__name__})")
             continue
         depth, loose = 0, 0
+        gs = bt = 0                 # q/Q and BT/ET nesting, tracked so an artifact cannot straddle them
+        art_open = False
+        art_marks = []              # (gs, bt) at the moment each top-level artifact opened
         for ins in instrs:
             op = str(ins.operator)
             if op in ("BMC", "BDC"):
@@ -486,7 +498,10 @@ def untagged_runs(pdf) -> list[str]:
                     props = {}
                     if op == "BDC" and len(ins.operands) > 1 and isinstance(ins.operands[1], pikepdf.Dictionary):
                         props = ins.operands[1]
-                    if str(ins.operands[0]) != "/Artifact":
+                    if str(ins.operands[0]) == "/Artifact":
+                        art_open = True
+                        art_marks.append((gs, bt))
+                    else:
                         mcid = props.get("/MCID")
                         if mcid is None:
                             loose += 1
@@ -495,6 +510,20 @@ def untagged_runs(pdf) -> list[str]:
                 depth += 1
             elif op == "EMC":
                 depth = max(0, depth - 1)
+                if depth == 0 and art_open:
+                    art_open = False
+                    opened_gs, opened_bt = art_marks.pop() if art_marks else (gs, bt)
+                    # the producer's rule, now enforced: an artifact may not wrap q/Q or BT/ET
+                    if (opened_gs, opened_bt) != (gs, bt):
+                        bad.append(f"p{pi+1}: an artifact spans a graphics/text state container")
+            elif op == "q":
+                gs += 1
+            elif op == "Q":
+                gs = max(0, gs - 1)
+            elif op == "BT":
+                bt += 1
+            elif op == "ET":
+                bt = max(0, bt - 1)
             elif depth == 0 and op in PAINT_OPS:
                 loose += 1
         if loose:
@@ -513,7 +542,8 @@ def figure_alt_problems(pdf) -> list[str]:
             return
         if not isinstance(node, pikepdf.Dictionary):
             return
-        if str(node.get("/S", "")) == "/Figure" and not str(node.get("/Alt", "")).strip():
+        alt = str(node.get("/Alt", "")).strip() or str(node.get("/ActualText", "")).strip()
+        if str(node.get("/S", "")) == "/Figure" and not alt:
             bad.append(f"Figure {node.objgen} has no /Alt")
         if "/K" in node:
             walk(node["/K"])
@@ -1094,6 +1124,10 @@ def copy_fidelity(doc, engine="pdfium", text=None):
         candidate = name[:-4] + ".source.html"
         if os.path.exists(candidate):
             rendered = candidate
+    if not getattr(NS, "NAV_VISIBLE", True) and rendered is None:
+        # the print variant printed markup we cannot find: fail closed instead of measuring the
+        # original HTML, which still carries the navigation strip the spec removed on purpose
+        return None, None
     try:
         src = open(rendered, encoding="utf-8").read() if rendered else source_text()
     except OSError:
