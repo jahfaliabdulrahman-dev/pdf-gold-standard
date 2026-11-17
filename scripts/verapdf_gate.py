@@ -46,7 +46,11 @@ if __name__ == "__main__":
     pdf = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
     base = tomllib.load(open(BASELINE, "rb"))
     flavours = sys.argv[2:] or base["flavours"]
-    ver = subprocess.run(["verapdf", "--version"], capture_output=True, text=True).stdout.splitlines()[0]
+    ver = subprocess.run(["verapdf", "--version"], capture_output=True, text=True).stdout.splitlines()
+    if not ver:
+        print("FAIL verapdf-version — `verapdf --version` printed nothing; the tool is not usable")
+        raise SystemExit(1)
+    ver = ver[0]
     if base["version"] not in ver:
         print(f"FAIL verapdf-version - installed «{ver}», baseline measured on {base['version']}")
         raise SystemExit(1)
