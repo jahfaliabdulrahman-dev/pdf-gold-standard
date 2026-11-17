@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>نجد — عيّنة خط بألوانه</title>
+<style>
+/*__FONTS_NAJD__*/
+:root{
+  /* Sampled from the typeface's own poster: dusk over a mud-brick wall. */
+  --paper:#fbf2e5; --ink:#2b1b0e; --card:#fffaf1; --line:#e3c9ab; --muted:#8a6b4f;
+  --primary:#a85f2e; --accent:#d38d5f; --sand:#e49f72; --sand2:#f8b57b; --rose:#b27860;
+  --deep:#26160a; --deep2:#3a2412; --deep3:#1e1208; --border:#5a3a20; --soft:#f3e2cb;
+}
+@page{ size:A4; margin:0; }
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{ font-family:'Najd',sans-serif; color:var(--ink); direction:rtl; text-align:right; -webkit-font-smoothing:antialiased; }
+.page{ width:210mm; height:296.8mm; position:relative; overflow:hidden; page-break-after:always; background:var(--paper); }
+.page:last-child{ page-break-after:auto; }
+.dark{ color:#fffaf1; }
+.deepbg{ background:radial-gradient(120% 80% at 50% 0%, #17104a 0%, var(--deep2) 42%, var(--deep) 100%); }
+.content{ padding:23mm 20.46mm 0; }
+.nav{ position:absolute; top:13.05mm; left:20.46mm; display:flex; gap:4.35mm; direction:ltr; z-index:9; }
+.nav i{ display:block; width:8.82mm; height:8.82mm; }
+.nav i svg{ display:block; width:100%; height:100%; }
+.eyebrow{ font-size:10.5pt; font-weight:500; color:var(--primary); letter-spacing:.01em; }
+h1.page-t{ font-size:21pt; font-weight:700; color:var(--primary); margin:0 0 4mm; line-height:1.3; }
+.lead{ font-size:12.5pt; font-weight:400; line-height:1.95; max-width:176mm; margin:0 0 8mm; color:var(--ink); }
+.lead b{ font-weight:700; color:var(--primary); }
+.foot{ position:absolute; bottom:11.5mm; left:20.46mm; right:20.46mm; display:flex; justify-content:space-between; font-size:8pt; font-weight:400; color:var(--muted); }
+.dark .foot{ color:var(--accent); }
+.foot .num{ font-variant-numeric:tabular-nums; font-weight:500; }
+.toc-h{ text-align:center; padding-top:34mm; }
+.toc-h h1{ font-size:23pt; font-weight:900; color:var(--primary); margin:0; }
+.toc-h p{ font-size:10.5pt; color:var(--muted); margin:3mm 0 0; }
+.toc-row{ position:absolute; right:20.46mm; width:158mm; height:13mm; border:0.35mm solid var(--line); border-radius:2.6mm;
+  background:#fff; display:flex; align-items:center; padding:0 5mm; }
+.toc-row .n{ width:8.5mm; height:8.5mm; border-radius:2mm; background:rgba(168,95,46,.10); border:0.3mm solid rgba(168,95,46,.30);
+  color:var(--primary); font-weight:700; font-size:11pt; display:flex; align-items:center; justify-content:center; margin-left:4.5mm; }
+.toc-row .t{ font-size:13.5pt; font-weight:500; color:var(--ink); flex:1; text-align:right; }
+.toc-row .p{ font-size:11pt; font-weight:700; color:var(--primary); background:rgba(168,95,46,.08); border-radius:1.6mm; padding:0.6mm 2.8mm 1.2mm; }
+.cards3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6mm; margin:3mm 0 9mm; }
+.cards2{ display:grid; grid-template-columns:1fr 1fr; gap:6mm; margin:3mm 0 7mm; }
+.card{ background:var(--card); border:0.35mm solid var(--line); border-radius:3mm; padding:7mm 5.5mm; }
+.card .ttl{ font-size:12pt; font-weight:700; color:var(--primary); margin-bottom:2mm; }
+.card .tx{ font-size:10.5pt; line-height:1.85; color:var(--ink); }
+.dot{ height:9mm; display:flex; align-items:center; }
+.dot i{ display:block; width:4.6mm; height:4.6mm; background:var(--primary); transform:rotate(45deg); border-radius:.6mm; }
+.card .big{ font-size:26pt; font-weight:900; color:var(--primary); line-height:1.45; padding-top:1.5mm; }
+.card .cap{ font-size:10pt; color:var(--muted); margin-top:2.5mm; line-height:1.7; }
+.spec{ margin:0 0 6mm; }
+.spec .w{ font-size:9.5pt; font-weight:500; color:var(--muted); margin-bottom:0.5mm; }
+.spec .s{ font-size:34pt; line-height:1.35; color:var(--ink); }
+.spec .s.l300{ font-weight:300; } .spec .s.l400{ font-weight:400; } .spec .s.l500{ font-weight:500; }
+.spec .s.l700{ font-weight:700; } .spec .s.l900{ font-weight:900; }
+.alpha{ display:flex; flex-wrap:wrap; gap:1.6mm 1.6mm; direction:rtl; font-size:19pt; color:var(--ink); }
+.alpha .lt{ display:inline-flex; align-items:center; justify-content:center; min-width:8.2mm; height:11mm;
+  border:0.25mm solid var(--line); border-radius:1.6mm; background:var(--card); }
+.swatches{ display:grid; grid-template-columns:repeat(4,1fr); gap:4.5mm; margin:3mm 0 8mm; }
+.sw{ border-radius:2.5mm; border:0.3mm solid var(--line); overflow:hidden; }
+.sw .c{ height:22mm; }
+.sw .m{ padding:2mm 3mm 2.5mm; font-size:8.5pt; color:var(--muted); }
+.sw .m b{ display:block; font-size:9.5pt; color:var(--ink); font-weight:700; }
+.chips{ display:flex; flex-wrap:wrap; gap:3mm; margin:3mm 0 8mm; }
+.chip{ font-size:10pt; font-weight:500; color:var(--primary); background:rgba(168,95,46,.07);
+  border:0.3mm solid rgba(168,95,46,.22); border-radius:2mm; padding:1.6mm 3.4mm; }
+.chip.on{ background:var(--primary); color:#fff; border-color:var(--primary); }
+.triple{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6mm; margin:6mm 0 6mm; }
+.tri{ background:var(--card); border:0.3mm solid var(--line); border-radius:3mm; padding:5mm 5mm 6mm; text-align:center; }
+.tri .w{ font-size:9pt; color:var(--muted); margin-bottom:3mm; }
+.tri .t{ font-size:30pt; font-weight:500; color:var(--ink); line-height:1.4; }
+.band{ margin-top:3mm; background:linear-gradient(135deg, rgba(168,95,46,.10), rgba(211,141,95,.12));
+  border:0.35mm solid rgba(168,95,46,.26); border-radius:3mm; padding:6mm 6mm; font-size:11pt; line-height:1.95; }
+.band b{ color:var(--primary); }
+.ref-row{ position:absolute; right:20.46mm; width:158mm; height:22mm; border:0.35mm solid var(--line);
+  border-radius:2.6mm; background:#fff; display:flex; align-items:center; padding:0 5mm; }
+.ref-row .t{ font-size:11.5pt; font-weight:700; color:var(--primary); }
+.ref-row .u{ font-size:9pt; color:var(--muted); direction:ltr; text-align:left; margin-top:1mm; }
+/* Cover — sky over the wall, as in the typeface's own poster */
+.cv{ position:absolute; inset:0; overflow:hidden;
+  background:linear-gradient(180deg,#b27860 0%,#c98a6d 18%,#dda079 38%,#eeb083 50%,#f7bd95 53%,#fbf1e2 56%); }
+.cv .wall{ position:absolute; right:0; left:0; bottom:0; height:44%;
+  background-image:url("{{ART_NAJD_COVER}}"); background-size:cover; background-position:center top; }
+.cv .veil{ position:absolute; right:0; left:0; bottom:0; height:44%;
+  background:linear-gradient(180deg, rgba(248,181,123,.75) 0%, rgba(248,181,123,.0) 14%); }
+.cv .brand{ position:absolute; top:15mm; left:18mm; font-size:9pt; letter-spacing:.34em; color:#3a2412;
+  font-weight:500; direction:ltr; }
+.cv .brand2{ position:absolute; top:15mm; right:18mm; font-size:12pt; color:#3a2412; font-weight:500; }
+.cv .rule{ position:absolute; top:22mm; right:18mm; left:18mm; height:0.25mm; background:rgba(58,36,18,.35); }
+.cv .br{ position:absolute; width:9mm; height:9mm; border:0.45mm solid rgba(58,36,18,.55); }
+.cv .br.tl{ top:11mm; left:11mm; border-right:0; border-bottom:0; }
+.cv .br.tr{ top:11mm; right:11mm; border-left:0; border-bottom:0; }
+.cv .br.bl{ bottom:11mm; left:11mm; border-right:0; border-top:0; }
+.cv .br.br2{ bottom:11mm; right:11mm; border-left:0; border-top:0; }
+.cv .mark{ position:absolute; top:52mm; right:0; left:0; text-align:center; font-size:128pt; font-weight:900;
+  line-height:.95; color:#2b1b0e; letter-spacing:-1.5mm; }
+.cv .dia{ position:absolute; right:0; left:0; text-align:center; color:#2b1b0e; font-size:0; }
+.cv .dia i{ display:inline-block; width:7mm; height:7mm; background:#2b1b0e; transform:rotate(45deg); }
+.cv .dia.top{ top:46mm; } .cv .dia.bot{ top:126mm; }
+.cv .sub{ position:absolute; top:139mm; right:0; left:0; text-align:center; font-size:16pt; font-weight:500;
+  color:#2b1b0e; }
+.cv .sub2{ position:absolute; top:149mm; right:0; left:0; text-align:center; font-size:10pt; color:#5a3a20;
+  direction:ltr; }
+.cv .scrim{ position:absolute; left:0; right:0; bottom:0; height:34mm;
+  background:linear-gradient(0deg, rgba(30,18,8,.62) 0%, rgba(30,18,8,.28) 55%, rgba(30,18,8,0) 100%); }
+.cv .meta{ position:absolute; bottom:17mm; right:18mm; font-size:8.5pt; color:#f7e6cf; z-index:2; }
+.cv .ver{ position:absolute; bottom:17mm; left:18mm; font-size:8.5pt; color:#f7e6cf; direction:rtl; z-index:2; }
+</style>
+</head>
+<body>
+
+<!-- ١ · الغلاف -->
+<div class="page">
+  <div class="cv">
+    <div class="wall"></div><div class="veil"></div><div class="scrim"></div>
+    <div class="brand">NAJD TYPEFACE</div>
+    <div class="brand2">خط نجد</div>
+    <div class="rule"></div>
+    <div class="br tl"></div><div class="br tr"></div><div class="br bl"></div><div class="br br2"></div>
+    <div class="mark">نجد</div>
+    <div class="sub">خطٌّ بروح العمارة النجدية</div>
+    <div class="sub2">Arabic + Latin — 5 Weights — 438 Glyphs</div>
+    <div class="meta">aziz4ai.com/najd-font · تصميم عبدالعزيز اليوسف · ٢٠٢٦</div>
+    <div class="ver">الإصدار ١٫٠</div>
+  </div>
+</div>
+
+<!-- ٢ · جدول المحتويات -->
+<div class="page">
+  <div class="toc-h"><h1>المحتويات</h1><p>سبعة مداخل إلى الخط ولونه</p></div>
+  <div class="toc-row" style="top:64mm"><span class="n">١</span><span class="t">الأوزان الخمسة</span><span class="p">٣</span></div>
+  <div class="toc-row" style="top:80.5mm"><span class="n">٢</span><span class="t">الحروف والبدائل</span><span class="p">٤</span></div>
+  <div class="toc-row" style="top:97mm"><span class="n">٣</span><span class="t">لوحة الألوان</span><span class="p">٥</span></div>
+  <div class="toc-row" style="top:113.5mm"><span class="n">٤</span><span class="t">من الطين إلى الحرف</span><span class="p">٦</span></div>
+  <div class="toc-row" style="top:130mm"><span class="n">٥</span><span class="t">ما يفعله هذا الملف</span><span class="p">٧</span></div>
+  <div class="toc-row" style="top:146.5mm"><span class="n">٦</span><span class="t">البوابة والأرقام</span><span class="p">٨</span></div>
+  <div class="toc-row" style="top:163mm"><span class="n">٧</span><span class="t">حدود الخط والملف</span><span class="p">٩</span></div>
+  <div class="foot"><span>نجد · عيّنة خط</span><span>المحتويات</span></div>
+</div>
+
+<!-- ٣ · الأوزان -->
+<div class="page">
+  <div class="nav">
+    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <div class="eyebrow">القسم الأول</div>
+    <h1 class="page-t">وزنٌ واحد لا يكفي</h1>
+    <p class="lead">خمسة أوزان ثابتة، كل واحد منها ملف مستقل داخل هذا المستند. الخط المتغيّر لا يُستخدم هنا لأنه كما قِسنا يُطبع كإجراءات رسوم لا كخط، فيفقد الملف برنامجه الخطّي وقابليته للبحث.</p>
+    <div class="spec"><div class="w">Light · ٣٠٠</div><div class="s l300">بيت الطين في قلب نجد</div></div>
+    <div class="spec"><div class="w">Regular · ٤٠٠</div><div class="s l400">بيت الطين في قلب نجد</div></div>
+    <div class="spec"><div class="w">Medium · ٥٠٠</div><div class="s l500">بيت الطين في قلب نجد</div></div>
+    <div class="spec"><div class="w">Bold · ٧٠٠</div><div class="s l700">بيت الطين في قلب نجد</div></div>
+    <div class="spec"><div class="w">Black · ٩٠٠</div><div class="s l900">بيت الطين في قلب نجد</div></div>
+    <div class="foot"><span>نجد · الأوزان</span><span class="num">٣</span></div>
+  </div>
+</div>
+
+<!-- ٤ · الحروف والبدائل -->
+<div class="page">
+  <div class="nav">
+    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <div class="eyebrow">القسم الثاني</div>
+    <h1 class="page-t">الحروف والبدائل</h1>
+    <p class="lead">الخط يحمل أشكال العربية الأربعة، ولام ألف بأنواعها، وخمس مجموعات بدائل. الأسطر التالية تُظهر الفرق بين الحرف المجرّد والميزة المفعّلة.</p>
+    <div class="spec"><div class="w">أشكال الحروف منفردة، والأرقام</div><div class="alpha l400"><span class="lt">ا</span><span class="lt">ب</span><span class="lt">ت</span><span class="lt">ث</span><span class="lt">ج</span><span class="lt">ح</span><span class="lt">خ</span><span class="lt">د</span><span class="lt">ذ</span><span class="lt">ر</span><span class="lt">ز</span><span class="lt">س</span><span class="lt">ش</span><span class="lt">ص</span><span class="lt">ض</span><span class="lt">ط</span><span class="lt">ظ</span><span class="lt">ع</span><span class="lt">غ</span><span class="lt">ف</span><span class="lt">ق</span><span class="lt">ك</span><span class="lt">ل</span><span class="lt">م</span><span class="lt">ن</span><span class="lt">ه</span><span class="lt">و</span><span class="lt">ي</span><span class="lt">ء</span><span class="lt">ة</span><span class="lt">لا</span></div><div class="alpha l400" style="margin-top:2mm"><span class="lt">٠</span><span class="lt">١</span><span class="lt">٢</span><span class="lt">٣</span><span class="lt">٤</span><span class="lt">٥</span><span class="lt">٦</span><span class="lt">٧</span><span class="lt">٨</span><span class="lt">٩</span></div></div>
+    <div class="spec"><div class="w">الكاف — الشكل الأصل</div><div class="s l500" style="font-size:30pt">كتاب</div></div>
+    <div class="spec"><div class="w">الكاف الممدودة — <span style="direction:ltr;display:inline-block">ss02</span></div><div class="s l500" style="font-size:30pt;font-feature-settings:'ss02' 1">كتاب</div></div>
+    <div class="spec"><div class="w">طين ناعم — <span style="direction:ltr;display:inline-block">ss03</span></div><div class="s l500" style="font-size:30pt;font-feature-settings:'ss03' 1">كتاب</div></div>
+    
+    <div class="band">الكاف الذكية: إذا كتبت <b>كشيدة</b> بعد الكاف امتدّ ذراعها على السطر. هذه ميزة تشكيل داخل الخط، لا صورة ولا حيلة تنسيق.</div>
+    <div class="foot"><span>نجد · الحروف</span><span class="num">٤</span></div>
+  </div>
+</div>
+
+<!-- ٥ · لوحة الألوان -->
+<div class="page">
+  <div class="nav">
+    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <div class="eyebrow">القسم الثالث</div>
+    <h1 class="page-t">اللون مأخوذ من مكانه</h1>
+    <p class="lead">كل لون في هذه الصفحة مأخوذ من بكسلات ملصق الخط ومن متغيّرات موقعه، لا مُقدَّرًا بالعين، ثم مستخدم كما هو.</p>
+    <div class="swatches"><div class="sw"><div class="c" style="background:#fbf2e5"></div><div class="m"><b>الورق</b><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#fbf2e5</span></div></div><div class="sw"><div class="c" style="background:#2b1b0e"></div><div class="m"><b>الحبر</b><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#2b1b0e</span></div></div><div class="sw"><div class="c" style="background:#a85f2e"></div><div class="m"><b>الطين</b><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#a85f2e</span></div></div><div class="sw"><div class="c" style="background:#d38d5f"></div><div class="m"><b>الرمل</b><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#d38d5f</span></div></div><div class="sw"><div class="c" style="background:#e49f72"></div><div class="m"><b>الغروب</b><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#e49f72</span></div></div><div class="sw"><div class="c" style="background:#f8b57b"></div><div class="m"><b>الضوء</b><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#f8b57b</span></div></div><div class="sw"><div class="c" style="background:#b27860"></div><div class="m"><b>الوردي الترابي</b><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#b27860</span></div></div><div class="sw"><div class="c" style="background:#26160a"></div><div class="m"><b>الظل</b><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#26160a</span></div></div></div>
+    </div>
+    <div class="cards2">
+      <div class="card"><div class="ttl">لماذا الظل لا الأسود</div><div class="tx">ملصق الخط يضع حرفه على غروب طيني وظلّ بنّي داكن، فالغلاف يحمل الظل نفسه. الصفحات الداخلية ورقٌ دافئ لتبقى القراءة والطباعة نظيفتين.</div></div>
+      <div class="card"><div class="ttl">لماذا الطين</div><div class="tx"><span dir="ltr" style="unicode-bidi:isolate;display:inline-block">#a85f2e</span> لون الطين المشويّ في الملصق. هنا يحمل العناوين والروابط، فلا يظهر لونٌ لا وجود له في الأصل.</div></div>
+    </div>
+    <div class="foot"><span>نجد · الألوان</span><span class="num">٥</span></div>
+  </div>
+</div>
+
+<!-- ٦ · من الطين إلى الحرف -->
+<div class="page">
+  <div class="nav">
+    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <div class="eyebrow">القسم الرابع</div>
+    <h1 class="page-t">من الطين إلى الحرف</h1>
+    <p class="lead">ثلاث روح في خط واحد، كما يصفها ملف الخط نفسه.</p>
+    <div class="cards3">
+      <div class="card"><div class="dot"><i></i></div><div class="ttl" style="margin-top:4mm">الأصل</div><div class="tx">رؤوس الحروف القائمة مدبّبة مثل شرفات بيوت الطين، وباقي النهايات مشطوفة مثل حافة الطوب، والفتحات مربّعة مثل النوافذ النجدية.</div></div>
+      <div class="card"><div class="dot"><i></i></div><div class="ttl" style="margin-top:4mm">كاف ممدودة</div><div class="tx">ذراع الكاف أطول على السطر، ومع الكشيدة يمتدّ على طولها. بديل واحد يغيّر إيقاع السطر كله.</div></div>
+      <div class="card"><div class="dot"><i></i></div><div class="ttl" style="margin-top:4mm">طين ناعم</div><div class="tx">نهايات وزوايا ونقاط مدوّرة، وفتحات دائرية: الروح المقابلة للأصل، تُختار واحدة منهما لا الاثنتان.</div></div>
+    </div>
+    <div class="triple">
+      <div class="tri"><div class="w">الأصل</div><div class="t">كتاب</div></div>
+      <div class="tri"><div class="w">كاف ممدودة — <span dir="ltr" style="unicode-bidi:isolate">ss02</span></div><div class="t" style="font-feature-settings:'ss02' 1">كتاب</div></div>
+      <div class="tri"><div class="w">طين ناعم — <span dir="ltr" style="unicode-bidi:isolate">ss03</span></div><div class="t" style="font-feature-settings:'ss03' 1">كتاب</div></div>
+    </div>
+    <p class="lead" style="margin:6mm 0 5mm">البدائل لا تُغيّر الحرف نفسه، بل إيقاع السطر: ذراع أطول على السطر، ونهاية مستديرة تُهدّئ الزاوية، وعرضٌ يكفي لملء السطر بلا كشيدة مصطنعة. المستند يستخدم الأصل في المتن، والكاف الممدودة في العناوين.</p>
+    <div class="band">الخط ليس زخرفة فوق النص؛ قرارات البناء — الوزن، والبديل، وحجم الكاف — هي التي تصنع الصفحة. ولهذا يحمل هذا المستند قرارًا واحدًا صريحًا بدل خلط البدائل في صفحة واحدة.</div>
+    <div class="foot"><span>نجد · الروح</span><span class="num">٦</span></div>
+  </div>
+</div>
+
+<!-- ٧ · ما يفعله الملف -->
+<div class="page">
+  <div class="nav">
+    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <div class="eyebrow">القسم الخامس</div>
+    <h1 class="page-t">ما يفعله هذا الملف</h1>
+    <p class="lead">كل ما بُني في خط الأنابيب — بلا حقل كتابة واحد. القيم كلها من نص الصفحة، والخط هو نجد بأوزانه.</p>
+    <div class="cards2">
+      <div class="card"><div class="ttl">فهرس وعناوين</div><div class="tx">سبعة مداخل في الفهرس، وعلامات مرجعية في شجرة المستند، وكل مدخل يشير إلى صفحته.</div></div>
+      <div class="card"><div class="ttl">روابط حقيقية</div><div class="tx">أزرار تنقّل مشتقة من موضعها، وروابط مراجع خارجية، ولا زر يشير إلى صفحته.</div></div>
+      <div class="card"><div class="ttl">مرفقات داخل الملف</div><div class="tx">المصدر، والبيان، وملف الميزات، وخط أساس المطابقة — مضمّنة في المستند نفسه.</div></div>
+      <div class="card"><div class="ttl">بيانات وصفية وXMP</div><div class="tx">العنوان والمؤلف واللغة والاتجاه، مكتوبة من مواصفة الوثيقة لا من اسم الملف.</div></div>
+      <div class="card"><div class="ttl">مطابقة PDF/A-3b</div><div class="tx">بصفر مخالفة عند <span style="direction:ltr;display:inline-block">veraPDF</span>، والبوابة ترفض الادعاء إن غاب خط الأساس.</div></div>
+      <div class="card"><div class="ttl">خط مضمّن كامل</div><div class="tx">لا اقتطاع في القيم، وخط الحقول الكامل جاهز إن أراد المستند حقولًا لاحقًا.</div></div>
+    </div>
+    <div class="foot"><span>نجد · الميزات</span><span class="num">٧</span></div>
+  </div>
+</div>
+
+<!-- ٨ · البوابة والأرقام -->
+<div class="page">
+  <div class="nav">
+    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <div class="eyebrow">القسم السادس</div>
+    <h1 class="page-t">البوابة: ٣٥ فحصا</h1>
+    <p class="lead">لا يُسلَّم ملف لأن «يبدو» سليمًا. كل ادعاء في هذه الصفحات يُفحص آليًا، والفحص الذي لا يستطيع قراءة مدخله <b>يفشل</b> ولا يمرّ.</p>
+    <div class="chips">
+      <span class="chip on">فهرس</span><span class="chip on">روابط</span><span class="chip on">أزرار</span>
+      <span class="chip">مرفقات</span><span class="chip">XMP</span><span class="chip">PDF/A-3b</span>
+      <span class="chip">خطوط</span><span class="chip">طبقة نص</span><span class="chip">تدرّج سطر</span>
+      <span class="chip">نسخ</span><span class="chip">تشكيل</span><span class="chip">صور</span>
+      <span class="chip">حبر</span><span class="chip">كلمات</span><span class="chip">تذييل</span>
+      <span class="chip">صفحات فارغة</span><span class="chip">ادعاءات</span>
+    </div>
+    <div class="cards3">
+      <div class="card"><div class="big">٣٥ فحصا</div><div class="cap">في البوابة، وكل فحص يطبع نتيجته بالسلب أو الإيجاب</div></div>
+      <div class="card"><div class="big">٤٥ عطلا</div><div class="cap">مُحقَنًا في نسخة من الملف، ويجب أن تُرفض كلها</div></div>
+      <div class="card"><div class="big">٠</div><div class="cap">مخالفة في PDF/A-3b عند veraPDF، لا ادعاء بلا قياس</div></div>
+    </div>
+    <div class="band">الحياد المطلوب: البوابة لا تعرف من كتب الملف. هي تقرأ الملف نفسه وتقارنه بمواصفته — فإن اختلفا، فشل البناء ولم يُنشر.</div>
+    <div class="foot"><span>نجد · البوابة</span><span class="num">٨</span></div>
+  </div>
+</div>
+
+<!-- ٩ · حدود الخط -->
+<div class="page">
+  <div class="nav">
+    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <div class="eyebrow">القسم السابع</div>
+    <h1 class="page-t">حدود الخط — وحدود الملف</h1>
+    <p class="lead">الاعتراف بالحدّ جزء من الإثبات. هذه أربعة أمور لا يفعلها هذا الملف، وسببها مكتوب.</p>
+    <div class="cards2">
+      <div class="card"><div class="ttl">لا حقول كتابة</div><div class="tx">لم يُطلب، ولذلك لا يحمل الملف <span style="direction:ltr;display:inline-block">AcroForm</span> ولا مربّعًا واحدًا. القيم كلها نص صفحة.</div></div>
+      <div class="card"><div class="ttl">لا خط متغيّر</div><div class="tx">قِسنا الأمر: المتغيّر يُطبع كإجراءات <span style="direction:ltr;display:inline-block">Type3</span> بلا برنامج خطّي. لذلك خمسة أوزان ثابتة بدل محور واحد.</div></div>
+      <div class="card"><div class="ttl">لا إعادة توزيع للخط</div><div class="tx">ترخيص نجد «كل الحقوق محفوظة». تضمين مجموعة فرعية داخل مستند استخدامٌ للمستند، أما إرفاق ملف الخط في المستودع فليس من حقّنا.</div></div>
+      <div class="card"><div class="ttl">لا سطر مشكول</div><div class="tx">لم نعرض عيّنة مشكولة: هذا الوجه لا يُنسخ ترتيب علاماته حرفيًا في MuPDF — قِسنا ذلك، فآثرنا ألّا نعرض ما لا يُثبت.</div></div>
+      <div class="card"><div class="ttl">لا دعم لعربية الحقول</div><div class="tx">الملف بلا حقول أصلًا. ولو أُضيفت، فالتشكيل داخل الحقول مسؤولية القارئ لا الملف — وقد وثّقناه في تقرير مستقل.</div></div>
+    </div>
+    <div class="foot"><span>نجد · الحدود</span><span class="num">٩</span></div>
+  </div>
+</div>
+
+<!-- ١٠ · المراجع -->
+<div class="page">
+  <div class="nav">
+    <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 13h9"/></svg></i><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#a85f2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6h-6v6H3z"/></svg></i>
+  </div>
+  <div class="content">
+    <div class="eyebrow">المراجع</div>
+    <h1 class="page-t">مصادر هذا الملف</h1>
+    <p class="lead">كل رابط منها حيّ وقابل للنقر، ومكتوب بخط نجد نفسه.</p>
+    <div class="ref-row" style="top:66mm"><div><div class="t">خط نجد — صفحة التحميل</div><div class="u">https://aziz4ai.com/najd-font</div></div></div>
+    <div class="ref-row" style="top:92mm"><div><div class="t">المصمّم على X</div><div class="u">https://x.com/aziz4ai</div></div></div>
+    <div class="ref-row" style="top:118mm"><div><div class="t">أداة veraPDF</div><div class="u">https://github.com/veraPDF/veraPDF-library</div></div></div>
+    <div class="ref-row" style="top:144mm"><div><div class="t">Chrome Headless</div><div class="u">https://developer.chrome.com/docs/chromium/headless</div></div></div>
+    <div class="band">الملف مرفق بمصدره: <b>source.html</b> و<b>manifest.json</b> و<b>features.toml</b> — تستطيع إعادة بنائه والتحقق منه.</div>
+    <div class="foot"><span>نجد · المراجع</span><span class="num">١٠</span></div>
+  </div>
+</div>
+
+<!-- ١١ · الغلاف الخلفي -->
+<div class="page dark deepbg">
+  <div class="cv">
+    <div class="halo" style="top:auto;bottom:-90mm;right:-40mm"></div>
+    <div class="mark" style="top:96mm;font-size:88pt">نجد</div>
+    <div class="rule" style="top:150mm"></div>
+    <div class="sub" style="top:156mm;font-size:11pt">حرفٌ يعرف مكانه</div>
+    <div class="sub2" style="top:168mm;font-size:9.5pt">نجد ٣٫٢ — خمسة أوزان ثابتة، وألوان الموقع نفسه، وصفحة تُثبت كل ادعاء فيها</div>
+    <div class="ver">الإصدار ١٫٠</div>
+  </div>
+</div>
+
+</body>
+</html>

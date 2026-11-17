@@ -20,12 +20,26 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import pymupdf as fitz  # noqa: E402
 import pikepdf  # noqa: E402
 
-import nav_spec as NS  # noqa: E402
+import spec_loader  # noqa: E402
+
+NS = spec_loader.load()  # noqa: E402
 import verify_pdf as G  # noqa: E402
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
 OLD_CHECKS, OLD_SOURCE = NS.GATE_CHECKS, NS.SOURCE_HTML
 _RESTORE = []
+# A mutation whose precondition this document does not meet — a page with no art, a document with no
+# form fields. It is neither a catch nor a miss: the suite reports how many actually applied, and the
+# spec must declare that number.
+NA = object()
+# The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
+# and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
+# a silent skip can hide behind a stable number.
+SUITE_SIZE = 50
+
+
+class _NotApplicable(Exception):
+    """Raised inside a pikepdf mutation callback when the document lacks the object to mutate."""
 
 
 def restore_all() -> None:
@@ -38,7 +52,10 @@ def fresh():
 
 
 def reread(doc):
-    return fitz.open("pdf", doc.tobytes())
+    out = fitz.open("pdf", doc.tobytes())
+    if getattr(doc, "_sidecar", None):        # a mutation may point the gate at a sidecar it planted
+        out._sidecar = doc._sidecar
+    return out
 
 
 def strip_link(doc, i, role):
@@ -47,11 +64,14 @@ def strip_link(doc, i, role):
 
 
 # ---------------------------------------------------------------- source-level variants
-def _source_variant(transform) -> None:
+def _source_variant(transform):
     """Point the gate at a temporary variant of the source HTML (a real end-to-end mutation)."""
     src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", NS.SOURCE_HTML), encoding="utf-8").read()
+    new = transform(src)
+    if new == src:                 # the source carries nothing of that kind: the mutation cannot apply
+        return NA
     fd, path = tempfile.mkstemp(suffix=".html"); os.close(fd)
-    open(path, "w", encoding="utf-8").write(transform(src))
+    open(path, "w", encoding="utf-8").write(new)
     NS.SOURCE_HTML = path
 
     def undo():
@@ -62,13 +82,20 @@ def _source_variant(transform) -> None:
 
 def rename_nav_class(doc):
     # a benign refactor (HTML + CSS renamed together, page unchanged) must not silence the strongest check
-    _source_variant(lambda s: s.replace('class="nav"', 'class="navbar"')
-                    .replace(".nav{", ".navbar{").replace(".nav ", ".navbar ").replace(".nav,", ".navbar,"))
+    return _source_variant(lambda s: s.replace('class="nav"', 'class="navbar"')
+                           .replace(".nav{", ".navbar{").replace(".nav ", ".navbar ").replace(".nav,", ".navbar,"))
 
 
 def stale_back_cover(doc):
-    # only the BACK cover still announces the previous version
-    _source_variant(lambda s: s.replace(f"الإصدار {NS.GUIDE_VERSION_AR} — نوفمبر", "الإصدار ٢٫٢ — نوفمبر"))
+    # only the BACK cover still announces the previous version — the last occurrence, whatever its date
+    # suffix: the guide prints «الإصدار … — نوفمبر» and najd prints «الإصدار ١٫٠» alone.
+    def fn(s):
+        needle = f"الإصدار {NS.GUIDE_VERSION_AR}"
+        k = s.rfind(needle)
+        if k < 0:
+            return s
+        return s[:k] + "الإصدار ٢٫٢" + s[k + len(needle):]
+    return _source_variant(fn)
 
 
 def icon_input_lost(doc):
@@ -118,22 +145,28 @@ def whiteout_sparse_page(doc):
 
 def _drop_images(doc, page_idx):
     p = doc[page_idx]
-    for im in p.get_images():
+    ims = p.get_images()
+    if not ims:
+        return NA                # a page with no art: «drop the art» describes nothing to do
+    for im in ims:
         p.delete_image(im[0])
 
 
 def drop_cover_art(doc):
-    _drop_images(doc, NS.COVER)
+    return _drop_images(doc, NS.COVER)
 
 
 def drop_divider_art(doc):
-    _drop_images(doc, 3)          # the first divider page
+    return _drop_images(doc, 3)          # the first divider page
 
 
 def drop_image_object(doc):
     # one of the four QR codes on the references page disappears; its text link is untouched
     p = doc[NS.REF_PAGE]
-    p.delete_image(p.get_images()[0][0])
+    ims = p.get_images()
+    if not ims:
+        return NA
+    p.delete_image(ims[0][0])
 
 
 def swap_icons(doc):
@@ -181,6 +214,8 @@ def extra_printed_number(doc):
     # one more page number printed in the contents column than there are rows
     p = doc[NS.CONTENTS]
     xs = [c["bbox"][0] for b in p.get_text("rawdict")["blocks"] for l in b.get("lines", []) for sp in l["spans"] for c in sp["chars"] if c["c"].isdigit()]
+    if not xs:
+        return NA
     p.insert_text((min(xs), p.rect.height - 120), "9", fontname="helv", fontsize=11)
 
 
@@ -200,6 +235,8 @@ def stale_version(doc):
 def blank_text_page_with_decor(doc):
     # the same overflow artifact, plus a small decorative image: "has an image" must not excuse an empty page
     i = blank_page(doc)
+    if i is NA:
+        return NA
     doc[i].insert_image(fitz.Rect(300, 400, 332, 432), pixmap=fitz.Pixmap(fitz.csRGB, fitz.IRect(0, 0, 32, 32), False))
 
 
@@ -251,7 +288,7 @@ def blank_page(doc):
     # the overflow artifact: a text page reduced to its footer — body text gone, nav strip and footer kept
     i = next((k for k in NS.NAV_PAGES if not doc[k].get_images()), None)
     if i is None:
-        raise SystemExit("selftest: no text-only page among NAV_PAGES to blank - adjust blank_page()")
+        return NA
     p = doc[i]
     p.add_redact_annot(fitz.Rect(0, NS.NAV_Y1 + 10, p.rect.width, p.rect.height - 60))
     p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
@@ -276,7 +313,7 @@ def delete_paragraph(doc):
         p.add_redact_annot(fitz.Rect(bbox)); removed += n
     p.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
     if removed < 18:
-        raise SystemExit(f"selftest: delete_paragraph removed only {removed} words - adjust it")
+        return NA
 
 
 def _footer_span(doc, i):
@@ -284,34 +321,45 @@ def _footer_span(doc, i):
         for line in b.get("lines", []):
             for s in line["spans"]:
                 t = s["text"].strip()
-                if t and all(ch.isdigit() and ord(ch) < 128 for ch in t) and NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
+                if t and all(ch.isdigit() for ch in t) and NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
                     return s["bbox"]
-    raise SystemExit(f"selftest: no footer span on p{i+1} - adjust _footer_span()")
+    return None
 
 
 def drop_footer_number(doc):
-    for i in (4, 5, 8):
+    spans = {i: _footer_span(doc, i) for i in (4, 5, 8)}
+    if any(r is None for r in spans.values()):
+        return NA
+    for i, r in spans.items():
         p = doc[i]
-        p.add_redact_annot(fitz.Rect(_footer_span(doc, i)))
+        p.add_redact_annot(fitz.Rect(r))
         p.apply_redactions()
 
 
 def swap_footer_numbers(doc):
     p = doc[4]
-    r = fitz.Rect(_footer_span(doc, 4))
+    r = _footer_span(doc, 4)
+    if r is None:
+        return NA
+    r = fitz.Rect(r)
     p.add_redact_annot(r); p.apply_redactions()
     p.insert_text((r.x0, r.y1 - 2), "9", fontname="helv", fontsize=8)
 
 
 def move_footer_up(doc):
     p = doc[4]
-    r = fitz.Rect(_footer_span(doc, 4))
+    r = _footer_span(doc, 4)
+    if r is None:
+        return NA
+    r = fitz.Rect(r)
     p.add_redact_annot(r); p.apply_redactions()
     p.insert_text((r.x0, 500), "5", fontname="helv", fontsize=8)
 
 
 def break_ref_link(doc):
     links = sorted([l for l in doc[NS.REF_PAGE].get_links() if l.get("kind") == fitz.LINK_URI], key=lambda l: l["from"].y0)
+    if not links:
+        return NA
     links[0]["uri"] = "https://example.invalid/broken"
     doc[NS.REF_PAGE].update_link(links[0])
 
@@ -324,38 +372,70 @@ def _tounicode_xref(doc, page=4):
         if kind == "xref":
             x = int(tu.split()[0]); n = doc.xref_stream(x).count(b"<")
             best = max(best or (0, x), (n, x))
-    return best[1]
+    return best[1] if best else None
 
 
 def presentation_form(doc):
     # Chrome's raw mapping: an Arabic glyph mapped to its Presentation Form (ﺎ U+FE8E) instead of ا
-    x = _tounicode_xref(doc); s = doc.xref_stream(x)
+    x = _tounicode_xref(doc)
+    if x is None:
+        return NA
+    s = doc.xref_stream(x)
+    if b"<0627>" not in s:
+        return NA
     doc.update_stream(x, s.replace(b"<0627>", b"<FE8E>", 1))
 
 
 def swapped_letters(doc):
     # copy produces the wrong letters while every glyph still has exactly one base code point
-    x = _tounicode_xref(doc); s = doc.xref_stream(x)
+    x = _tounicode_xref(doc)
+    if x is None:
+        return NA
+    s = doc.xref_stream(x)
+    if b"<0627>" not in s or b"<0644>" not in s:
+        return NA
     doc.update_stream(x, s.replace(b"<0627>", b"<TMP0>").replace(b"<0644>", b"<0627>").replace(b"<TMP0>", b"<0644>"))
 
 
 def split_text_objects(doc):
     # back to one text object per word: MuPDF forgets the direction at each BT and returns the words reversed
+    _, before = G.copy_fidelity(doc, engine="mupdf")
+    changed = False
     for page in doc:
         for x in page.get_contents():
-            doc.update_stream(x, doc.xref_stream(x).replace(b"/ReversedChars BMC", b"ET\nBT\n/ReversedChars BMC"))
+            s = doc.xref_stream(x)
+            if b"/ReversedChars BMC" not in s:
+                continue
+            doc.update_stream(x, s.replace(b"/ReversedChars BMC", b"ET\nBT\n/ReversedChars BMC"))
+            changed = True
+    if not changed:
+        return NA                # no direction-marked run in this document: nothing to split
+    _, after = G.copy_fidelity(doc, engine="mupdf")
+    # A document whose lines each carry one direction does not lose word order when the objects are split
+    # (measured: 0.929 -> 0.925). Counting it as «caught» would need a threshold tuned to the mutation, so it
+    # is declared not applicable instead.
+    if before is None or after is None or before - after < 0.01:
+        return NA
 
 
 def wrong_mark(doc):
     # a kasra that copies as a fatha: the vocalised line is no longer exact
+    if not getattr(NS, "VOCALISED_CLAIM", True):
+        return NA                # the document claims nothing about its marks, so the check is off
+    changed = False
     for xref, *_ in doc[NS.BASMALA].get_fonts():
         kind, tu = doc.xref_get_key(xref, "ToUnicode")
         if kind == "xref":
             x = int(tu.split()[0]); s = doc.xref_stream(x)
-            if b"<0650>" in s: doc.update_stream(x, s.replace(b"<0650>", b"<064E>"))
+            if b"<0650>" in s:
+                doc.update_stream(x, s.replace(b"<0650>", b"<064E>")); changed = True
+    if not changed:
+        return NA
 
 
 def drop_page(doc):
+    if doc.page_count <= 7:
+        return NA
     doc.delete_page(7)
 
 
@@ -371,13 +451,20 @@ def _pikemutate(doc, fn):
 
 
 def drop_page_labels(doc):
+    if doc.xref_get_key(doc.pdf_catalog(), "PageLabels")[0] == "null":
+        return NA
     return _pikemutate(doc, lambda p: p.Root.__delitem__("/PageLabels"))
 
 
 def rename_destination(doc):
     def fn(p):
+        if "/Names" not in p.Root or "/Dests" not in p.Root.Names:
+            raise _NotApplicable
         p.Root.Names.Dests.Names[0] = pikepdf.String("cover-renamed")
-    return _pikemutate(doc, fn)
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
 
 
 def drop_xmp_title(doc):
@@ -400,9 +487,14 @@ def break_box_order(doc):
 
 def drop_attachment(doc):
     def fn(p):
+        if "source.html" not in p.attachments:
+            raise _NotApplicable
         del p.attachments["source.html"]
         p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
-    return _pikemutate(doc, fn)
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
 
 
 
@@ -419,14 +511,62 @@ def art_over_dpi(doc):
 
 def drop_parent_tree(doc):
     def fn(p):
+        if "/StructTreeRoot" not in p.Root or "/ParentTree" not in p.Root.StructTreeRoot:
+            raise _NotApplicable
         del p.Root.StructTreeRoot["/ParentTree"]
-    return _pikemutate(doc, fn)
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
 
 
 def field_without_tu(doc):
     def fn(p):
+        if "/AcroForm" not in p.Root or "/Fields" not in p.Root.AcroForm or not p.Root.AcroForm.Fields:
+            raise _NotApplicable
         del p.Root.AcroForm.Fields[0]["/TU"]
-    return _pikemutate(doc, fn)
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
+
+
+def paragraph_under_document(doc):
+    """Page furniture tagged as a paragraph: a reader then reads the running head after the last section."""
+    def fn(p):
+        root = p.Root.get("/StructTreeRoot")
+        if root is None:
+            raise _NotApplicable
+        kids = root.get("/K")
+        kids = list(kids) if isinstance(kids, pikepdf.Array) else [kids]
+        doc_el = next((k for k in kids if str(k.get("/S")) == "/Document"), None)
+        ch = doc_el.get("/K") if doc_el is not None else None
+        if not isinstance(ch, pikepdf.Array) or not ch:
+            raise _NotApplicable
+        ch[0]["/S"] = pikepdf.Name("/P")          # one section reported as a paragraph under /Document
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
+
+
+def stale_sidecar(doc):
+    """A .source.html from another build sits beside the file: the truth the gate reads is not this file's."""
+    import tempfile
+    side = os.path.splitext(SRC)[0] + ".source.html"
+    if not os.path.exists(side):
+        return NA
+    tmp = tempfile.mkdtemp(prefix="sidecar-")
+    pdf_path, side_path = os.path.join(tmp, "copy.pdf"), os.path.join(tmp, "copy.source.html")
+    with open(pdf_path, "wb") as f:
+        f.write(doc.tobytes())
+    data = bytearray(open(side, "rb").read())
+    data[len(data) // 2] ^= 0x20                  # one byte: not this file's markup any more
+    with open(side_path, "wb") as f:
+        f.write(bytes(data))
+    out = fitz.open(pdf_path)
+    out._sidecar = side_path
+    return out
 
 
 def link_without_contents(doc):
@@ -434,9 +574,15 @@ def link_without_contents(doc):
         for page in p.pages:
             for a in page.obj.get("/Annots", []):
                 if a.get("/Subtype") == pikepdf.Name.Link:
+                    if "/Contents" not in a:
+                        continue
                     del a["/Contents"]
                     return
-    return _pikemutate(doc, fn)
+        raise _NotApplicable
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
 
 
 # (mutation, expected check, must_stay_green)
@@ -488,6 +634,8 @@ MUTATIONS = [
     (drop_parent_tree, "pdfua", False),
     (field_without_tu, "acroform", False),
     (link_without_contents, "link-tagging", False),
+    (paragraph_under_document, "tagged-structure", False),
+    (stale_sidecar, "provenance", False),
     (drop_page, "pages", False),
 ]
 
@@ -495,24 +643,61 @@ if __name__ == "__main__":
     base = G.gate(fresh())
     print(f"\nbaseline: {'PASS' if not base else 'FAIL ' + str(base)}")
     missed = ["baseline"] if base else []
-    if len(MUTATIONS) != NS.GATE_MUTATIONS:
-        print(f"SELFTEST FAILED — {len(MUTATIONS)} mutations registered, nav_spec declares {NS.GATE_MUTATIONS}")
+    declared_na = dict(getattr(NS, "GATE_NA", {}))
+    # The documents CI builds must exercise the whole suite: an exemption there would mean a mutation
+    # the pipeline never proves — and CI is the only place nobody is watching.
+    if getattr(NS, "__name__", "") in ("nav_spec", "report_spec") and declared_na:
+        print(f"SELFTEST FAILED — {NS.__name__} declares GATE_NA but is built by CI; fix the document, not the suite")
         raise SystemExit(1)
+    names = {m[0].__name__ for m in MUTATIONS}
+    if len(MUTATIONS) != SUITE_SIZE:
+        print(f"SELFTEST FAILED — the suite holds {len(MUTATIONS)} mutations, SUITE_SIZE says {SUITE_SIZE}")
+        raise SystemExit(1)
+    if set(declared_na) - names:
+        print(f"SELFTEST FAILED — the spec declares n/a for names the suite does not hold: {sorted(set(declared_na) - names)}")
+        raise SystemExit(1)
+    if len(MUTATIONS) - len(declared_na) != NS.GATE_MUTATIONS:
+        print(f"SELFTEST FAILED — {len(MUTATIONS)} mutations − {len(declared_na)} declared n/a "
+              f"!= the {NS.GATE_MUTATIONS} the spec declares")
+        raise SystemExit(1)
+    applied = 0
     for mutate, expect, green in MUTATIONS:
+        name = mutate.__name__
+        declared = name in declared_na
         d = fresh()
         try:
             out = mutate(d)          # a mutation may return a re-serialised document (pikepdf round-trip)
+            if out is NA:
+                if declared:
+                    print(f"\n>>> {name:24s} declared n/a — {declared_na[name]}\n")
+                else:
+                    print(f"\n>>> {name:24s} NOT APPLICABLE but the spec does not declare it\n")
+                    missed.append(name + " (undeclared n/a)")
+                continue
             if out is not None and hasattr(out, "page_count"):
                 d = out
             failed = G.gate(reread(d))
         finally:
             restore_all()
             NS.SOURCE_HTML, NS.GATE_CHECKS = OLD_SOURCE, OLD_CHECKS
+        if declared:
+            # A declared exemption means «this document cannot exhibit the defect». If the mutation DID
+            # apply, the declaration is wrong: either the gate now catches it (stale) or it does not
+            # (a real miss). Both fail — an exemption may never licence a miss.
+            stale = (not green) and expect in failed
+            print(f"\n>>> {name:24s} declared n/a, yet the mutation applied and the gate says {failed} — "
+                  f"{'STALE EXEMPTION' if stale else 'MISSED, not exempt'}\n")
+            missed.append(name + (" (stale exemption)" if stale else " (declared n/a but applied)"))
+            continue
+        applied += 1
         ok = (not failed) if green else (expect in failed)
-        print(f"\n>>> {mutate.__name__:24s} expect {'PASS' if green else 'FAIL ' + expect:20s} -> "
+        print(f"\n>>> {name:24s} expect {'PASS' if green else 'FAIL ' + expect:20s} -> "
               f"{'CAUGHT' if ok else 'MISSED'} {failed}\n")
         if not ok:
-            missed.append(mutate.__name__)
+            missed.append(name)
+    if applied != NS.GATE_MUTATIONS:
+        print(f"SELFTEST FAILED — {applied} mutations applied to this document, the spec declares {NS.GATE_MUTATIONS}")
+        missed.append(f"applicable:{applied}!={NS.GATE_MUTATIONS}")
     # The blank-page rule does not depend on the document's size (copy-fidelity does: one lost page of 50 is 2% of the
     # words and would pass). Proven on a synthetic 50-page document, outside the 12-page gate.
     big = fitz.open()
@@ -546,5 +731,5 @@ if __name__ == "__main__":
     if missed:
         print(f"SELFTEST FAILED — not caught: {missed}")
         raise SystemExit(1)
-    print(f"SELFTEST PASSED — baseline clean, {len(MUTATIONS)}/{len(MUTATIONS)} mutations on the right side "
-          f"({sum(1 for m in MUTATIONS if m[2])} positive)")
+    print(f"SELFTEST PASSED — baseline clean, {applied}/{applied} applicable mutations on the right side "
+          f"({sum(1 for m in MUTATIONS if m[2])} positive, {len(declared_na)} declared n/a for this document)")

@@ -19,8 +19,11 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import pymupdf as fitz  # noqa: E402
+import pikepdf  # noqa: E402
 
-import nav_spec as NS  # noqa: E402
+import spec_loader  # noqa: E402
+
+NS = spec_loader.load()  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJ = os.path.join(HERE, "..")
@@ -135,16 +138,42 @@ def pdfium_texts(doc) -> list[str] | None:
         return None
 
 
-def footer_numbers(page) -> list[int]:
-    """Latin-digit-only spans inside the footer band, top to bottom."""
+AR_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
+
+
+def _digit_value(t: str, page_text: str | None) -> int | None:
+    """The number a span prints, or None.
+
+    MuPDF reverses Arabic-Indic runs — measured on a number MuPDF itself wrote (٢٠٢٦ → ٦٢٠٢), while
+    PDFium reads it in order. So the VALUE comes from PDFium's page text when that text carries the
+    reverse of this token; the geometry still comes from the span.
+    """
+    tok = t.translate(AR_DIGITS)
+    if not tok.isdigit():
+        return None
+    if page_text is not None and len(tok) > 1:
+        toks = {x.translate(AR_DIGITS) for x in WORD.findall(page_text)}
+        if tok not in toks and tok[::-1] in toks:
+            tok = tok[::-1]
+    return int(tok)
+
+
+def footer_numbers(page, page_text: str | None = None, limit: int | None = None) -> list[int]:
+    """Digit spans inside the footer band, top to bottom — Latin or Arabic-Indic, in printed order.
+
+    `limit` (usually the page count) drops numbers that cannot be a page number: the cover's year also
+    sits in the band, and reading ٢٠٢٦ as a footer would invent a footer the document never printed.
+    """
     out = []
     for b in page.get_text("dict")["blocks"]:
         for line in b.get("lines", []):
             for s in line["spans"]:
                 t = s["text"].strip()
-                if t and all(ch.isdigit() and ord(ch) < 128 for ch in t) \
-                        and NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
-                    out.append(int(t))
+                if not t or not NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
+                    continue
+                v = _digit_value(t, page_text)
+                if v is not None and (limit is None or v <= limit):
+                    out.append(v)
     return out
 
 
@@ -160,7 +189,7 @@ def printed_counts(page) -> dict:
         for line in b.get("lines", []):
             chars = [c for s in line["spans"] for c in s["chars"]]
             text = "".join(c["c"] for c in chars)
-            for key, marker in (("checks", "فحصا"), ("mutations", "عطلا")):
+            for key, marker in (("checks", "فحصا"), ("mutations", "عطلا"), ("links", "رابطا")):
                 if key in out or marker not in text:
                     continue
                 # the marker may be split across spans (Chrome re-shapes Arabic), so locate it in the LINE text
@@ -279,6 +308,9 @@ def output_intent_problems(pdf) -> list[str]:
 
 def attachment_problems(pdf) -> list[str]:
     bad, got = [], {}
+    want = (getattr(NS, "ATTACHMENTS", None)
+            or [f[0] for f in getattr(NS, "ATTACHMENT_FILES", [])]
+            or ["source.html", "manifest.json"])
     for name, spec in pdf.attachments.items():
         try:
             data = spec.get_file().read_bytes()
@@ -289,8 +321,8 @@ def attachment_problems(pdf) -> list[str]:
         if "/AFRelationship" not in spec.obj:
             bad.append(f"{name}: no /AFRelationship")
         got[name] = len(data)
-    if sorted(got) != sorted(NS.ATTACHMENTS):
-        bad.append(f"attachments {sorted(got)}, expected {sorted(NS.ATTACHMENTS)}")
+    if sorted(got) != sorted(want):
+        bad.append(f"attachments {sorted(got)}, expected {sorted(want)}")
     return bad
 
 
@@ -364,16 +396,58 @@ def art_dpi_problems(doc) -> list[str]:
     return bad
 
 
+def conformance_flavour(declared: dict) -> str | None:
+    """veraPDF flavour of a declared identifier: PDF/A part+conformance -> "3b", PDF/UA-1 -> "ua1"."""
+    if declared.get("pdfaid:part"):
+        conformance = str(declared.get("pdfaid:conformance", "")).strip().lower()
+        return f"{declared['pdfaid:part']}{conformance}" if conformance else None
+    if str(declared.get("pdfuaid:part", "")) == "1":
+        return "ua1"
+    return None
+
+
 def pdfua_problems(pdf) -> list[str]:
-    """PDF/UA-1 structural floor (not full conformance: veraPDF is the judge and is not installed)."""
+    """Structure floor, plus the claim rule: an identifier is allowed only when the declared baseline is empty.
+
+    A conformance identifier is a CLAIM, not a decoration. The document may declare PDF/A-3b only if
+    the document's `VERAPDF_BASELINE` records ZERO failing rules for that flavour; the gate reads the claim from XMP and
+    the evidence from the baseline, so a claim can never outlive the failures it was allowed to drop.
+    """
+    import tomllib
     bad = []
+    claim = getattr(NS, "CONFORMANCE", None)
     with pdf.open_metadata() as m:
-        # A conformance identifier is a CLAIM, not a decoration. This file does not meet 3b/ua1 (the
-        # failures are named in verapdf-baseline.toml), so it must declare neither. When a claim is
-        # added, the matching baseline must be empty — that is the closing condition, checked in CI.
-        for key in ("pdfuaid:part", "pdfaid:part", "pdfaid:conformance"):
-            if m.get(key):
-                bad.append(f"{key}={m.get(key)} claimed without conformance")
+        declared = {k: m.get(k) for k in ("pdfuaid:part", "pdfaid:part", "pdfaid:conformance") if m.get(k)}
+        if claim:
+            if declared != claim:
+                bad.append(f"conformance claim {declared or 'absent'} != spec {claim}")
+            # every claimed identifier needs its OWN measured, EMPTY baseline: a PDF/UA claim is never
+            # checked against PDF/A's evidence
+            flavours = []
+            if declared.get("pdfaid:part"):
+                conf = str(declared.get("pdfaid:conformance", "")).strip().lower()
+                flavours.append(f"{declared['pdfaid:part']}{conf}" if conf else "")
+            if str(declared.get("pdfuaid:part", "")) == "1":
+                flavours.append("ua1")
+            flavours = [f for f in flavours if f]
+            if not flavours:
+                bad.append(f"cannot map the claim {declared} to a veraPDF flavour: it cannot be checked")
+            baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
+            try:
+                base = tomllib.load(open(baseline_path, "rb"))
+            except (OSError, tomllib.TOMLDecodeError) as e:
+                bad.append(f"cannot read the baseline: {type(e).__name__}")
+            else:
+                # fail closed: each flavour must be measured, present, and empty
+                for flavour in flavours:
+                    if flavour not in base.get("flavours", []):
+                        bad.append(f"{flavour} is not a measured flavour in {os.path.basename(baseline_path)}")
+                    if flavour not in base or "failing" not in base[flavour]:
+                        bad.append(f"the baseline has no [{flavour}].failing list: the claim cannot be checked")
+                    elif base[flavour]["failing"]:
+                        bad.append(f"{flavour} claimed while the baseline still lists {base[flavour]['failing']}")
+        elif declared:
+            bad.append(f"{declared} claimed without conformance")
     cat = pdf.Root
     if "/StructTreeRoot" not in cat:
         bad.append("no StructTreeRoot")
@@ -386,16 +460,191 @@ def pdfua_problems(pdf) -> list[str]:
     vp = cat.get("/ViewerPreferences")
     if vp is None or not vp.get("/DisplayDocTitle"):
         bad.append("DisplayDocTitle")
+    # The UA floor applies to a file that CLAIMS PDF/UA (or a spec that opted in). A document that makes
+    # no accessibility claim is judged by PDF/A and by its own declared checks, not by a rule its producer
+    # never promised to meet.
+    if str(cat.get("/Lang", "")).strip("()") == NS.LANG and (
+            getattr(NS, "PDFUA", False) or str(declared.get("pdfuaid:part", "")) == "1"):
+        mark = cat.get("/MarkInfo")
+        if mark is not None and mark.get("/Suspects") is True:   # absent means false (Table 321)
+            bad.append("MarkInfo /Suspects is not false: the file admits its own tagging is unreliable")
+        bad += untagged_runs(pdf)
+        bad += figure_alt_problems(pdf)
+    return bad
+
+
+def _parent_tree(pdf) -> dict:
+    """Flatten /ParentTree, following /Kids: large files keep their numbers in intermediate nodes."""
+    table = {}
+
+    def walk(node):
+        if not isinstance(node, pikepdf.Dictionary):
+            return
+        nums = node.get("/Nums")
+        if nums is not None:
+            for i in range(0, len(nums) - 1, 2):
+                table[int(str(nums[i]))] = nums[i + 1]
+        for kid in node.get("/Kids", []):
+            walk(kid)
+
+    try:
+        walk(pdf.Root.StructTreeRoot["/ParentTree"])
+    except (AttributeError, KeyError, TypeError):
+        return {}
+    return table
+
+
+from pdfops import PAINT_OPS  # noqa: E402  (the producer's own list: one definition, no drift)
+
+
+def untagged_runs(pdf) -> list[str]:
+    """The file's own 7.1 floor: every painted thing is an Artifact or carries an MCID that resolves.
+
+    veraPDF proves this from outside; this check proves it from inside, so a regression is caught by the
+    gate even on a machine without veraPDF installed. Fail closed: an unparsable stream is a failure.
+    """
+    bad = []
+    table = _parent_tree(pdf)
+    for pi, page in enumerate(pdf.pages):
+        sp = page.obj.get("/StructParents")
+        arr = table.get(int(sp)) if sp is not None else None
+        try:
+            instrs = list(pikepdf.parse_content_stream(page))
+        except Exception as e:                       # noqa: BLE001 — unreadable means unproven
+            bad.append(f"p{pi+1}: content stream unreadable ({type(e).__name__})")
+            continue
+        depth, loose = 0, 0
+        gs = bt = 0                 # q/Q and BT/ET nesting, tracked so an artifact cannot straddle them
+        art_open = False
+        art_marks = []              # (gs, bt) at the moment each top-level artifact opened
+        for ins in instrs:
+            op = str(ins.operator)
+            if op in ("BMC", "BDC"):
+                if depth == 0:
+                    props = {}
+                    if op == "BDC" and len(ins.operands) > 1 and isinstance(ins.operands[1], pikepdf.Dictionary):
+                        props = ins.operands[1]
+                    if str(ins.operands[0]) == "/Artifact":
+                        art_open = True
+                        art_marks.append((gs, bt))
+                    else:
+                        mcid = props.get("/MCID")
+                        if mcid is None:
+                            loose += 1
+                        elif arr is None or int(mcid) >= len(arr):
+                            loose += 1
+                depth += 1
+            elif op == "EMC":
+                depth = max(0, depth - 1)
+                if depth == 0 and art_open:
+                    art_open = False
+                    opened_gs, opened_bt = art_marks.pop() if art_marks else (gs, bt)
+                    # the producer's rule, now enforced: an artifact may not wrap q/Q or BT/ET
+                    if (opened_gs, opened_bt) != (gs, bt):
+                        bad.append(f"p{pi+1}: an artifact spans a graphics/text state container")
+            elif op == "q":
+                gs += 1
+            elif op == "Q":
+                gs = max(0, gs - 1)
+            elif op == "BT":
+                bt += 1
+            elif op == "ET":
+                bt = max(0, bt - 1)
+            elif depth == 0 and op in PAINT_OPS:
+                loose += 1
+        if loose:
+            bad.append(f"p{pi+1}: {loose} untagged run(s)")
+    return bad
+
+
+def figure_alt_problems(pdf) -> list[str]:
+    """A Figure without /Alt is an image a screen reader must skip or guess."""
+    bad = []
+
+    def walk(node):
+        if isinstance(node, pikepdf.Array):
+            for x in node:
+                walk(x)
+            return
+        if not isinstance(node, pikepdf.Dictionary):
+            return
+        alt = str(node.get("/Alt", "")).strip() or str(node.get("/ActualText", "")).strip()
+        if str(node.get("/S", "")) == "/Figure" and not alt:
+            bad.append(f"Figure {node.objgen} has no /Alt")
+        if "/K" in node:
+            walk(node["/K"])
+
+    st = pdf.Root.get("/StructTreeRoot")
+    if st is not None:
+        walk(st.get("/K"))
     return bad
 
 
 def acroform_problems(pdf) -> list[str]:
+    """Every declared field must exist, on its page, at its rect, named as the spec says, and be ANNOUNCED.
+
+    A field that is drawn but not reachable from the structure tree (no /StructParent -> /Form element ->
+    OBJR pointing at THIS widget) is invisible to a screen reader; the check resolves the OBJR, not the
+    element's type name alone.
+    """
     bad = []
+    import spec_loader as _sl
+    if _sl.declares_no_acroform(NS):
+        return [] if "/AcroForm" not in pdf.Root else \
+               ["/AcroForm present although the spec declares no fields (a filled copy must not leave widgets)"]
     if "/AcroForm" not in pdf.Root:
         return ["no /AcroForm"]
     fields = pdf.Root.AcroForm.get("/Fields", [])
     if not len(fields):
         return ["AcroForm has no fields"]
+    want = getattr(NS, "ACROFORM_FIELDS", None)
+    if want and len(fields) != len(want):
+        bad.append(f"{len(fields)} fields, expected {len(want)}")
+    try:
+        nums = list(pdf.Root.StructTreeRoot["/ParentTree"]["/Nums"])
+        tree = {int(str(nums[i])): nums[i + 1] for i in range(0, len(nums), 2)}
+    except (AttributeError, KeyError):
+        return bad + ["no ParentTree: widgets cannot be announced"]
+
+    def objs(val):
+        return list(val) if isinstance(val, pikepdf.Array) else ([val] if val is not None else [])
+
+    widgets = {}                                    # /T -> (page index, annotation)
+    for pi, page in enumerate(pdf.pages):
+        page_widgets = [a for a in page.obj.get("/Annots", []) if str(a.get("/Subtype")) == "/Widget"]
+        if page_widgets and str(page.obj.get("/Tabs", "")) != "/S":
+            bad.append(f"p{pi+1} has widgets but no /Tabs /S: the tab order is not the structure order")
+        for a in page_widgets:
+            widgets[str(a.get("/T", ""))] = (pi, a)
+            sp = a.get("/StructParent")
+            if sp is None:
+                bad.append(f"p{pi+1} widget without /StructParent")
+                continue
+            forms = [v for v in objs(tree.get(int(sp))) if getattr(v, "get", lambda k, d=None: None)("/S") == pikepdf.Name.Form]
+            if not forms:
+                bad.append(f"p{pi+1} widget /StructParent {sp} does not resolve to a /Form element")
+                continue
+            objr = forms[0].get("/K")
+            obj = objr.get("/Obj") if hasattr(objr, "get") else None
+            if obj is None or obj.objgen != a.objgen:
+                bad.append(f"p{pi+1} {str(a.get('/T',''))}: the /Form element's OBJR does not point at this widget")
+
+    for f in (want or []):
+        got = widgets.get(f["name"])
+        if got is None:
+            bad.append(f"field {f['name']!r} missing (has {sorted(widgets)})")
+            continue
+        pi, a = got
+        if pi != f["page"]:
+            bad.append(f"field {f['name']!r} on p{pi+1}, expected p{f['page']+1}")
+        rect = [float(v) for v in a["/Rect"]]
+        if any(abs(x - y) > 1.5 for x, y in zip(rect, f["rect"])):
+            bad.append(f"field {f['name']!r} rect {[round(v) for v in rect]} != spec {[round(v) for v in f['rect']]}")
+    if want:
+        extra = sorted(set(widgets) - {f["name"] for f in want})
+        if extra:
+            bad.append(f"undeclared fields {extra}")
+
     for f in fields:
         tu = str(f.get("/TU", ""))
         if not tu or not any("\u0600" <= ch <= "\u06ff" for ch in tu):
@@ -405,11 +654,26 @@ def acroform_problems(pdf) -> list[str]:
     dr = pdf.Root.AcroForm.get("/DR", {})
     if not dr.get("/Font", {}):
         bad.append("AcroForm /DR has no embedded font")
+    for _, f in (dr.get("/Font", {}) or {}).items():
+        base = str(f.get("/BaseFont", ""))
+        # A page font is a subset of the words printed on that page and carries no ToUnicode: a field that
+        # borrows one cannot display a letter the page never used (the reader types «ملاحظات» and sees boxes).
+        if "+" in base:
+            bad.append(f"/DR font {base} is a subset: typed letters may be missing")
+        if "/ToUnicode" not in f:
+            bad.append(f"/DR font {base} has no ToUnicode: the value cannot be copied")
+        if not f.get("/DescendantFonts"):
+            bad.append(f"/DR font {base} is not a Type0/CID font")
     return bad
 
 
 def link_tagging_problems(pdf) -> list[str]:
     bad, count = [], 0
+    try:
+        nums = list(pdf.Root.StructTreeRoot["/ParentTree"]["/Nums"])
+        tree = {int(str(nums[i])): nums[i + 1] for i in range(0, len(nums), 2)}
+    except (AttributeError, KeyError):
+        tree = {}
     for i, page in enumerate(pdf.pages):
         for a in page.obj.get("/Annots", []):
             if str(a.get("/Subtype")) != "/Link":
@@ -418,10 +682,36 @@ def link_tagging_problems(pdf) -> list[str]:
             c = str(a.get("/Contents", ""))
             if not c or not any("\u0600" <= ch <= "\u06ff" for ch in c):
                 bad.append(f"p{i+1} link without an Arabic /Contents")
-            if a.get("/StructParent") is None:
+            sp = a.get("/StructParent")
+            if sp is None:
                 bad.append(f"p{i+1} link without /StructParent")
+                continue
+            val = tree.get(int(sp))
+            elems = list(val) if isinstance(val, pikepdf.Array) else ([val] if val is not None else [])
+            ok = False
+            for e in elems:
+                if getattr(e, "get", lambda k, d=None: None)("/S") != pikepdf.Name.Link:
+                    continue
+                objr = e.get("/K")
+                obj = objr.get("/Obj") if hasattr(objr, "get") else None
+                if obj is not None and obj.objgen == a.objgen:
+                    ok = True
+            if not ok:
+                bad.append(f"p{i+1} link /StructParent {sp} does not resolve to a /Link element holding this annot")
     if count != NS.EXPECTED_LINKS:
         bad.append(f"{count} links, expected {NS.EXPECTED_LINKS}")
+    # A generic name on every row is a label in name only: the destination must be announced per row.
+    for pi, key in ((NS.CONTENTS, "CONTENTS_LABELS"), (NS.REF_PAGE, "REF_LABELS")):
+        want = getattr(NS, key, None)
+        if not want:
+            continue
+        h = float(pdf.pages[pi].obj["/MediaBox"][3])
+        rows = sorted([a for a in pdf.pages[pi].obj.get("/Annots", []) if str(a.get("/Subtype")) == "/Link"
+                       and float(a["/Rect"][3]) <= h - 70],
+                      key=lambda a: -float(a["/Rect"][3]))
+        got = [str(a.get("/Contents", "")) for a in rows]
+        if got != list(want):
+            bad.append(f"p{pi+1} link names {got[:2]}... != spec {list(want)[:2]}...")
     return bad
 
 
@@ -476,47 +766,63 @@ def gate(doc) -> list[str]:
     # 3b. render: every nav slot must show ink ON THE PAGE, and the icon the source draws there.
     # A missing source icon is a FAILURE, never a silent pass: a check that lost its input would otherwise
     # print "shape IoU 0.00-0.00" inside a PASS (H2).
-    dead, seen, ious = [], [], []
-    order = sorted(NS.SLOTS, key=NS.SLOTS.get)  # the HTML lists a strip's icons left to right
-    try:
-        icons = source_icons()
-    except Exception as e:                      # a check that cannot read what it needs fails
-        icons = []; dead.append(f"cannot render the source icons: {e}")
-    want_strips, want_slots = NS.EXPECTED["source_strips"], NS.EXPECTED["slots_per_strip"]
-    if not icons:
-        dead.append(f"source icons not found in {NS.SOURCE_HTML}: the gate cannot verify the button shapes")
-    elif (len(icons), {len(r) for r in icons}) != (want_strips, {want_slots}):
-        dead.append(f"source HTML has {[len(r) for r in icons]} icons per strip, expected {want_strips} x {want_slots}")
-        icons = []
-    for n, i in enumerate(NS.NAV_PAGES):
-        for role, x in NS.SLOTS.items():
-            clip = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
-            pm = doc[i].get_pixmap(dpi=300, clip=clip, colorspace=fitz.csGRAY)
-            px = pm.samples
-            bg = statistics.median(px)
-            on = [k for k, v in enumerate(px) if abs(v - bg) > NS.SLOT_INK_CONTRAST]
-            ink = len(on) / len(px)
-            seen.append(ink)
-            if not NS.SLOT_INK_MIN <= ink <= NS.SLOT_INK_MAX:
-                dead.append(f"p{i+1} {role}: ink {ink:.2f}")
-                continue
-            # the right icon, not just some ink: ink share, centre of mass and spread against the icon's signature
-            xs = [k % pm.stride for k in on]; ys = [k // pm.stride for k in on]
-            sig = (ink, statistics.fmean(xs) / pm.width - 0.5, statistics.fmean(ys) / pm.height - 0.5,
-                   statistics.pstdev(xs) / pm.width, statistics.pstdev(ys) / pm.height)
-            if any(abs(a - b) > NS.SLOT_SHAPE_TOL for a, b in zip(sig, NS.SLOT_SHAPE[role])):
-                dead.append(f"p{i+1} {role}: not its icon - " + " ".join(f"{a:+.2f}" for a in sig) +
-                            " vs " + " ".join(f"{b:+.2f}" for b in NS.SLOT_SHAPE[role]))
-                continue
-            # the same shape as the icon the source draws there (the signature alone is five numbers: a striped
-            # rectangle can match them all). With no source icons the check has already failed above: never
-            # compare against nothing, and never let that path reach a PASS.
-            if icons:
-                iou = icon_iou(pm, icons[n][order.index(role)]); ious.append(iou)
-                if iou < NS.SLOT_ICON_MIN_IOU:
-                    dead.append(f"p{i+1} {role}: shape differs from the source icon (IoU {iou:.2f}, min {NS.SLOT_ICON_MIN_IOU})")
-    check("render", not dead, "; ".join(dead[:6]) or
-          f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots: each icon drawn in its own slot (ink {min(seen):.2f}-{max(seen):.2f}, shape IoU {min(ious):.2f}-{max(ious):.2f})")
+    if not getattr(NS, "NAV_VISIBLE", True):
+        # A print copy is proven by its SOURCE, not by ink: the cover and the dividers are full-bleed art, so
+        # "the band is blank" is false there for a reason that has nothing to do with buttons. The link check
+        # above already proves no page carries a strip target; this proves no icon was drawn at all.
+        rendered = os.path.splitext(str(getattr(doc, "name", "")))[0] + ".source.html"
+        try:
+            markup = open(rendered, encoding="utf-8").read()
+            stripped = 'class="nav"' not in markup
+            ok = stripped
+            detail = ("print copy: the markup Chrome printed carries no nav strip" if stripped
+                      else f"print copy: {markup.count('class=\"nav\"')} nav strip(s) were still drawn")
+        except OSError as exc:
+            ok, detail = False, f"cannot read what was printed ({exc})"
+        check("render", ok, detail)
+    else:
+        dead, seen, ious = [], [], []
+        order = sorted(NS.SLOTS, key=NS.SLOTS.get)  # the HTML lists a strip's icons left to right
+        try:
+            icons = source_icons()
+        except Exception as e:                      # a check that cannot read what it needs fails
+            icons = []; dead.append(f"cannot render the source icons: {e}")
+        want_strips, want_slots = NS.EXPECTED["source_strips"], NS.EXPECTED["slots_per_strip"]
+        if not icons:
+            dead.append(f"source icons not found in {NS.SOURCE_HTML}: the gate cannot verify the button shapes")
+        elif (len(icons), {len(r) for r in icons}) != (want_strips, {want_slots}):
+            dead.append(f"source HTML has {[len(r) for r in icons]} icons per strip, expected {want_strips} x {want_slots}")
+            icons = []
+        for n, i in enumerate(NS.NAV_PAGES):
+            for role, x in NS.SLOTS.items():
+                clip = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
+                pm = doc[i].get_pixmap(dpi=300, clip=clip, colorspace=fitz.csGRAY)
+                px = pm.samples
+                bg = statistics.median(px)
+                on = [k for k, v in enumerate(px) if abs(v - bg) > NS.SLOT_INK_CONTRAST]
+                ink = len(on) / len(px)
+                seen.append(ink)
+                if not NS.SLOT_INK_MIN <= ink <= NS.SLOT_INK_MAX:
+                    dead.append(f"p{i+1} {role}: ink {ink:.2f}")
+                    continue
+                # the right icon, not just some ink: ink share, centre of mass and spread against the icon's signature
+                xs = [k % pm.stride for k in on]; ys = [k // pm.stride for k in on]
+                sig = (ink, statistics.fmean(xs) / pm.width - 0.5, statistics.fmean(ys) / pm.height - 0.5,
+                       statistics.pstdev(xs) / pm.width, statistics.pstdev(ys) / pm.height)
+                if any(abs(a - b) > NS.SLOT_SHAPE_TOL for a, b in zip(sig, NS.SLOT_SHAPE[role])):
+                    dead.append(f"p{i+1} {role}: not its icon - " + " ".join(f"{a:+.2f}" for a in sig) +
+                                " vs " + " ".join(f"{b:+.2f}" for b in NS.SLOT_SHAPE[role]))
+                    continue
+                # the same shape as the icon the source draws there (the signature alone is five numbers: a striped
+                # rectangle can match them all). With no source icons the check has already failed above: never
+                # compare against nothing, and never let that path reach a PASS.
+                if icons:
+                    iou = icon_iou(pm, icons[n][order.index(role)]); ious.append(iou)
+                    if iou < NS.SLOT_ICON_MIN_IOU:
+                        dead.append(f"p{i+1} {role}: shape differs from the source icon (IoU {iou:.2f}, min {NS.SLOT_ICON_MIN_IOU})")
+        check("render", not dead, "; ".join(dead[:6]) or
+              f"{len(NS.NAV_PAGES)} pages x {len(NS.SLOTS)} slots: each icon drawn in its own slot (ink {min(seen):.2f}-{max(seen):.2f}, shape IoU {min(ious):.2f}-{max(ious):.2f})")
+
 
     # 3c. images: the page must carry the images it is supposed to carry (H3). A divider whose art vanished
     # while its text survived passes every text check — only an inventory of the page can see it.
@@ -536,7 +842,11 @@ def gate(doc) -> list[str]:
     ink_bad, worst, retention = [], 0.0, 1.0
     for i, page in enumerate(doc):
         frac, cells = page_ink(page)
-        want_frac, want_cells = NS.PAGE_INK[i]
+        want = NS.PAGE_INK.get(i)
+        if want is None:
+            ink_bad.append(f"p{i+1}: no measured baseline (run scripts/calibrate.py)")
+            continue
+        want_frac, want_cells = want
         d = abs(frac - want_frac)
         worst = max(worst, d)
         if d > NS.PAGE_INK_TOL:
@@ -571,9 +881,12 @@ def gate(doc) -> list[str]:
 
     # 5b. footers: the printed page number = the page's own index (H8). The guide DECLARES Latin footer
     # numbers; a declaration with no check is a claim that rots silently.
+    # PDFium's text is read once here: it is the authority on digit ORDER (MuPDF reverses Arabic-Indic
+    # runs — measured on a number MuPDF itself wrote), and section 8 reuses it.
+    texts = pdfium_texts(doc)
     foot_bad = []
     for i, page in enumerate(doc):
-        got_nums = footer_numbers(page)
+        got_nums = footer_numbers(page, texts[i] if texts else None, limit=doc.page_count)
         want_num = NS.FOOTER.get(i)
         if want_num is None:
             if got_nums:
@@ -640,10 +953,15 @@ def gate(doc) -> list[str]:
               f"page art <= {NS.ART_MAX_DPI} dpi, declared pages match")
 
         ua_bad = pdfua_problems(pdf)
-        check("pdfua", not ua_bad, "; ".join(ua_bad[:4]) or "no conformance claim; ParentTree, Lang, MarkInfo, DisplayDocTitle")
+        claim = getattr(NS, "CONFORMANCE", None)
+        detail = (f"claim {claim} checked against an empty 3b baseline" if claim
+                  else "no conformance claim") + "; ParentTree, Lang, MarkInfo, DisplayDocTitle"
+        check("pdfua", not ua_bad, "; ".join(ua_bad[:4]) or detail)
 
         form_bad = acroform_problems(pdf)
-        check("acroform", not form_bad, "; ".join(form_bad[:3]) or "1 field: Arabic /TU, /DA, embedded font in /DR")
+        n_fields = len(getattr(NS, "ACROFORM_FIELDS", [1]))
+        check("acroform", not form_bad, "; ".join(form_bad[:3]) or
+              f"{n_fields} field(s): Arabic /TU, /DA, embedded font in /DR, /StructParent -> /Form")
 
         link_bad = link_tagging_problems(pdf)
         check("link-tagging", not link_bad, "; ".join(link_bad[:4]) or
@@ -658,8 +976,9 @@ def gate(doc) -> list[str]:
 
     # 7. fonts: house family only; the basmala page may add the macOS vocalisation face
     foreign = []
+    vocalised_pages = set(getattr(NS, "VOCALISED_PAGES", {NS.BASMALA}))
     for i, page in enumerate(doc):
-        allowed_extra = NS.BASMALA_FACES if i == NS.BASMALA else set()
+        allowed_extra = NS.BASMALA_FACES if i in vocalised_pages else set()
         for f in page.get_fonts():
             name = f[3].split("+")[-1]
             if not name:
@@ -669,13 +988,15 @@ def gate(doc) -> list[str]:
     check("fonts", not foreign, ", ".join(sorted(set(foreign))[:6]) or f"only {NS.HOUSE_FONT_PREFIX}* (+ {'/'.join(sorted(NS.BASMALA_FACES))} on the basmala page)")
 
     # 8. title metadata carries the guide version, and the cover prints the same one
-    texts = pdfium_texts(doc)
+    # (the PDFium texts were read once at 5b — same call, not a second extraction)
     title = (doc.metadata or {}).get("title", "")
     ver = f"الإصدار {NS.GUIDE_VERSION_AR}"
+    want_title = f"{getattr(NS, 'DOC_TITLE', 'معيار إنتاج ملفات PDF — دليل المعيار')} · {ver}"
     cover = " ".join(texts[NS.COVER].split()) if texts else ""
     on_cover = ver in cover
-    check("title", ver in title and on_cover,
-          title[:70] + ("" if ver in title else f" - missing «{ver}»") + ("" if on_cover else f" - cover does not print «{ver}»"))
+    check("title", title.strip() == want_title and on_cover,
+          title[:70] + ("" if title.strip() == want_title else f" - != «{want_title}»")
+          + ("" if on_cover else f" - cover does not print «{ver}»"))
 
     # 8b. version consistency: EVERY place the version is printed carries the same value (H7). The cover was
     # guarded; the back cover was not, so a stale back cover could ship next to a current cover.
@@ -694,21 +1015,56 @@ def gate(doc) -> list[str]:
 
     # 8c. provenance: the file says which source it was built from, and that is the source this gate compares with
     name, digest = source_stamp()
-    got_name = got_digest = ""
+    got_name = got_digest = got_rendered = ""
+    stray = 0
     try:
+        import hashlib
         import json as _json
         px = pikepdf_open(doc)
         with px.open_metadata() as m:
             doc_id = str(m.get("xmpMM:DocumentID", ""))
         got_digest = doc_id.split("sha256:")[-1] if doc_id.startswith("sha256:") else ""
-        if "manifest.json" in px.attachments:      # the file carries its own manifest: name + hash
-            got_name = _json.loads(px.attachments["manifest.json"].get_file().read_bytes()).get("source", "")
+        if "manifest.json" in px.attachments:      # the file carries its own manifest: source + hashes
+            man = _json.loads(px.attachments["manifest.json"].get_file().read_bytes())
+            got_name = man.get("source", "")
+            got_rendered = man.get("rendered_sha256", "")
+        # Page furniture must not be structure content. A /P element directly under /Document is a
+        # paragraph the post-processor invented for a run that belonged to no section — a reader then
+        # reads the running head once per page, after the last section.
+        root = px.Root.get("/StructTreeRoot")
+        if root is not None:
+            kids = root.get("/K")
+            for k in (list(kids) if isinstance(kids, pikepdf.Array) else [kids]):
+                if str(k.get("/S")) == "/Document":
+                    ch = k.get("/K")
+                    stray += sum(1 for x in (list(ch) if isinstance(ch, pikepdf.Array) else [ch])
+                                 if str(x.get("/S")) == "/P")
         px.close()
     except Exception:
         got_name = got_digest = ""
-    check("provenance", (got_name, got_digest) == (name, digest),
-          f"{name} sha256 {digest[:12]}" if (got_name, got_digest) == (name, digest) else
-          ("no source stamp" if not got_digest else f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}"))
+    # The sidecar beside the file is what copy-fidelity reads as truth. The producer now records the
+    # hash of the markup it actually printed, so a stale sidecar from another build cannot stand in.
+    side_explicit = getattr(doc, "_sidecar", None)
+    fname = str(getattr(doc, "name", "") or "")
+    # A document read from memory has no sidecar (its .name is the stream label, not a path).
+    side_path = side_explicit or (os.path.splitext(fname)[0] + ".source.html"
+                                  if fname and os.path.exists(fname) else "")
+    side_ok, side_why = True, ""
+    if got_rendered and side_path:
+        if not os.path.exists(side_path):
+            side_ok, side_why = False, "the manifest names the markup it printed, but no .source.html sits beside the file"
+        else:
+            import hashlib
+            if hashlib.sha256(open(side_path, "rb").read()).hexdigest() != got_rendered:
+                side_ok, side_why = False, "the .source.html beside the file is not the markup this file was built from"
+    ok = (got_name, got_digest) == (name, digest) and side_ok
+    check("provenance", ok,
+          f"{name} sha256 {digest[:12]}" + ("" if side_ok else " — " + side_why) if ok else
+          (side_why if not side_ok else
+           ("no source stamp" if not got_digest else f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}")))
+    check("tagged-structure", stray == 0,
+          "no paragraph sits directly under /Document" if stray == 0 else
+          f"{stray} paragraph(s) under /Document — page furniture tagged as content")
 
     # 9. no blank / overflow pages: far below the median text (cover + contents excluded) and not excused by image cover
     blank, low, med = blank_pages(doc, [i for i in range(doc.page_count) if i not in (NS.COVER, NS.CONTENTS)])
@@ -744,10 +1100,15 @@ def gate(doc) -> list[str]:
     import unicodedata as _ud
     ctrl = re.compile("[\u2060\u200b\u200e\u200f\u202a-\u202e\u2066-\u2069]")
     norm = lambda t: _ud.normalize("NFC", ctrl.sub("", t))
-    want_v = _ud.normalize("NFC", NS.VOCALISED)
-    got = {"MuPDF": norm(doc[NS.BASMALA].get_text()), "PDFium": norm(texts[NS.BASMALA]) if texts else ""}
-    missing = [k for k, t in got.items() if want_v not in t]
-    check("vocalised", not missing, f"basmala not exact in {missing}" if missing else "basmala exact in PDFium and MuPDF")
+    claimed = getattr(NS, "VOCALISED_CLAIM", True)
+    want_v = _ud.normalize("NFC", NS.VOCALISED) if claimed else None
+
+    got = {} if not claimed else {"MuPDF": norm(doc[NS.BASMALA].get_text()),
+                                  "PDFium": norm(texts[NS.BASMALA]) if texts else ""}
+    missing = [] if not claimed else [k for k, t in got.items() if want_v not in t]
+    detail = ("not claimed — " + getattr(NS, "VOCALISED_REASON", "no reason declared")) if not claimed else (
+        f"basmala not exact in {missing}" if missing else "basmala exact in PDFium and MuPDF")
+    check("vocalised", not missing, detail)
 
     # 14. words per page (H5): aggregate ratios are blind below ~2.4% of the corpus — 18 words can vanish and
     #     every ratio still passes. Per-page counts make a lost paragraph break the build.
@@ -756,16 +1117,21 @@ def gate(doc) -> list[str]:
     else:
         per = [len(source_words(t)) for t in texts]
         w_bad = [f"p{i+1} {n} vs {NS.PAGE_WORDS[i]}" for i, n in enumerate(per)
-                 if abs(n - NS.PAGE_WORDS[i]) > NS.PAGE_WORDS_TOL]
+                 if i in NS.PAGE_WORDS and abs(n - NS.PAGE_WORDS[i]) > NS.PAGE_WORDS_TOL]
+        w_bad += [f"p{i+1}: no measured word count" for i in range(len(per)) if i not in NS.PAGE_WORDS]
         check("page-words", not w_bad, "; ".join(w_bad[:4]) or
               f"{NS.PAGES} pages within +-{NS.PAGE_WORDS_TOL} words (total {sum(per)})")
 
     # 15. the document's own claim about this gate (H9): the printed counts must equal the live ones.
     claims = printed_counts(doc[NS.PRINTED_COUNTS_PAGE])
     want_claims = {"checks": NS.GATE_CHECKS, "mutations": NS.GATE_MUTATIONS}
+    if getattr(NS, "PRINTS_LINK_COUNT", False):      # only where the document actually prints the number
+        want_claims["links"] = NS.EXPECTED_LINKS
     claim_bad = [f"{k}: printed {claims.get(k, 'not found')} vs actual {v}" for k, v in want_claims.items() if claims.get(k) != v]
-    check("gate-claims", not claim_bad, "; ".join(claim_bad) or
-          f"printed {claims['checks']} checks / {claims['mutations']} mutations = actual")
+    detail = f"printed {claims.get('checks')} checks / {claims.get('mutations')} mutations"
+    if "links" in want_claims:
+        detail += f" / {claims.get('links')} links"
+    check("gate-claims", not claim_bad, "; ".join(claim_bad) or detail + " = actual")
 
     final_count()
     return fails
@@ -806,12 +1172,28 @@ def text_layer_violations(doc) -> list[str]:
 
 
 def copy_fidelity(doc, engine="pdfium", text=None):
-    """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order."""
+    """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order.
+
+    The reference is the markup the producer ACTUALLY printed. For the print variant the navigation strip
+    is removed from the markup itself, so comparing against the original HTML counts words the PDF was
+    never asked to carry — the gate would be measuring a decision, not a defect. When Chrome's rendered
+    copy sits next to the file being judged, that copy is the source of truth.
+    """
     import collections
     import difflib
     import html
+    rendered = None
+    name = str(getattr(doc, "name", ""))
+    if name.endswith(".pdf"):
+        candidate = name[:-4] + ".source.html"
+        if os.path.exists(candidate):
+            rendered = candidate
+    if not getattr(NS, "NAV_VISIBLE", True) and rendered is None:
+        # the print variant printed markup we cannot find: fail closed instead of measuring the
+        # original HTML, which still carries the navigation strip the spec removed on purpose
+        return None, None
     try:
-        src = source_text()
+        src = open(rendered, encoding="utf-8").read() if rendered else source_text()
     except OSError:
         return None, None
     truth = source_words(html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I))))

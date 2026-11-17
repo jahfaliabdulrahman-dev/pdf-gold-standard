@@ -10,6 +10,11 @@ MM = 2.83465  # 1 mm in pt
 # The version printed on the cover, the back cover and in the PDF title. A release tag vX.Y.Z must start with it
 # (CI checks the tag, the gate checks the title and the cover).
 GUIDE_VERSION = "2.3"
+# Metadata is part of the document, not of the pipeline (build.py reads these).
+DOC_TITLE = "معيار إنتاج ملفات PDF — دليل المعيار"
+DOC_AUTHOR = "م. عبدالرحمن جحفلي"
+DOC_SUBJECT = "معيار جودة إنتاج ملفات PDF التفاعلية العربية"
+DOC_KEYWORDS = "PDF, Arabic, RTL, تفاعلي, معيار, Gold Standard"
 GUIDE_VERSION_AR = GUIDE_VERSION.translate(str.maketrans("0123456789.", "٠١٢٣٤٥٦٧٨٩٫"))
 
 PAGES = 12
@@ -166,8 +171,17 @@ ART_MAX_DPI = 300          # spec §3.4: art serving >30% of a page is capped at
 ART_DPI_DECLARED = {3: 205, 6: 205, 11: 205}
 ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of the page
 
-GATE_CHECKS = 34
-GATE_MUTATIONS = 48
+GATE_CHECKS = 35
+GATE_MUTATIONS = 50
+GATE_NA = {}                                   # every mutation applies to this document
+# What remains failing when this file DECLARES conformance — measured by scripts/claim_probe.py, one table
+# per document (the guide's file has one untagged rule; the other two are clean under both claims).
+CLAIM_EXPECTED = {"3b": set(), "ua1": {"7.1-3"}}
+ART_FILES = [
+    ("{{ART_COVER}}", "embed-cover.jpg"),
+    ("{{ART_DIVIDER}}", "embed-divider.jpg"),
+    ("{{ART_BACK}}", "embed-back.jpg"),
+]
 
 # --------------------------------------------------------------------------------------------------------------
 # Stage-5 features (postprocess.py, declared in features.toml). Metadata/structure only — no drawing.
