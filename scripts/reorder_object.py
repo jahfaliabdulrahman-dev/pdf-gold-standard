@@ -65,7 +65,8 @@ def rewrite_block(block: str, reverse: bool, state: dict | None = None,
             if font is None or size is None:
                 continue
             gid = int(m.group("gid")[1:-1], 16)
-            events.append((text[4], text[5], font, m.group("gid"), size, tr, text))
+            adv0 = width_of(font, gid, size) if width_of else Decimal(0)
+            events.append((text[4], text[5], font, m.group("gid"), size, tr, text, adv0))
             # `Tj` advances the text matrix by the glyph displacement; the next glyph inherits that advance
             # when no `Td` intervenes. Sixteen glyphs on this page rely on it, which is the whole pixel diff.
             adv = width_of(font, gid, size) if width_of else Decimal(0)
@@ -74,10 +75,30 @@ def rewrite_block(block: str, reverse: bool, state: dict | None = None,
     state.update({"font": font, "size": size, "tr": tr})
     if len(events) < 5:
         return block, 0
-    order = list(reversed(events)) if reverse else events
+    if reverse:
+        # Reverse clusters, not single glyphs. A mark sits on its letter: its x falls inside the letter's
+        # advance, so the two glyph boxes overlap. Drawing that pair in the other order composites the
+        # antialiased overlap differently (measured: 660 bytes). A cluster is therefore a run of glyphs whose
+        # horizontal interval overlaps its predecessor's.
+        clusters: list[list[tuple]] = []
+        for ev in events:
+            x, _y, _font, _gid, size, _tr, _matrix, adv = ev
+            prev = clusters[-1][-1] if clusters else None
+            # A word boundary is a gap wider than a quarter em between one glyph's end and the next origin.
+            # Reversing words (not glyphs) is what the emitter will do, and words never overlap, so the
+            # compositing order inside a word is untouched.
+            gap = x - (prev[0] + prev[7]) if prev else Decimal(0)
+            same_word = bool(prev) and gap < Decimal(str(size)) * Decimal("0.25")
+            if same_word:
+                clusters[-1].append(ev)
+            else:
+                clusters.append([ev])
+        order = [ev for cluster in reversed(clusters) for ev in cluster]
+    else:
+        order = events
     marker = re.search(r"(/\w+) BMC", block)
     parts = ["BT"] + ([marker.group(1) + " BMC"] if marker else [])
-    for _x, _y, font, gid, size, tr, matrix in order:
+    for _x, _y, font, gid, size, tr, matrix, _adv in order:
         a, b, c, d, e, f = matrix
         parts.append(f"{font} {size:.4f} Tf {tr} Tr {a:.10f} {b:.10f} {c:.10f} {d:.10f} {e:.10f} {f:.10f} Tm {gid} Tj")
     if marker:
