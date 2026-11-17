@@ -179,7 +179,10 @@ def main() -> int:
     # The shaped fields: every code, in order, must equal HarfBuzz on the same
     # font and text, segmented where the bidi algorithm splits on digits. The
     # baseline build must disagree — that disagreement is the defect.
-    for name in ("ar", "mixed"):
+    # `vocalized` is held to the same order: 8 codes for 8 characters, in the
+    # order HarfBuzz returned them, which is what tells a per-glyph map from a
+    # per-cluster one.
+    for name in ("ar", "mixed", "vocalized"):
         if name not in after or after[name][1] is None:
             failures.append(f"{name}: missing or not a Type0 field")
             continue
