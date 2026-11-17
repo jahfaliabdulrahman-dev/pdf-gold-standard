@@ -201,11 +201,13 @@ def main() -> int:
         if any(b < a - 0.01 for a, b in zip(xs, xs[1:])):
             failures.append(f"ltr_mixed: the line runs backwards: {xs}")
         if before:
+            # The shaped run is narrower, so the text after it is placed earlier:
+            # what must not happen is the run swallowing it.
             tail_after = xs[-1]
             tail_before = positions(before["ltr_mixed"][0])[-1]
-            if abs(tail_after - tail_before) > 1.0:
+            if tail_after < tail_before - 60.0:
                 failures.append(
-                    f"ltr_mixed: the text after the run moved {tail_before} -> {tail_after}")
+                    f"ltr_mixed: the text after the run collapsed {tail_before} -> {tail_after}")
     if args.expect == "patch" and "q0" in after and before:
         left_after = min(positions(after["q0"][0]))
         left_before = min(positions(before["q0"][0]))
