@@ -38,6 +38,17 @@ lam-alef: in=2 glyphs=1 dir=5 script=Arab ids=7 | adv=17.5469
 - يمكن بناء الـsubset في خط الإنتاج عندنا (Python) وضمّه في المورد — أو تضمين الخط الكامل (٢٠٠–٥٠٠KB).
 - الخريطة تصبح `CID = glyph id` (Identity) إن بُني الـsubset بـ`--retain-gids` في fontTools.
 
+## تثبيت المعرّفات (`retain_gids`)
+
+```
+fontTools subset: layout_features=['*'], retain_gids=True, unicodes={U+0644, U+0627}
+→ 11,792 بايت
+→ lam-alef: in=2 glyphs=1 dir=5 script=Arab ids=210   ← نفس معرّف الخط الأصلي
+```
+
+**مُثبت**: `retain_gids` يُبقي المعرّفات كما هي مع التخطيط ⇒ `CID == glyph id` صحيح، والخط الناتج ١١٫٨KB.
+هذا يُغلق سؤال الخريطة في التصميم: Identity-H بلا جدول تحويل.
+
 ## ما لم يُثبت
 - أن `--retain-gids` في fontTools يحفظ المعرّفات مع التخطيط معًا (لم يُقس بعد).
 - سلوك PDFium عند تضمين خط مبني بهذه الطريقة داخل AP (لم يُختبر على حقل حقيقي).
