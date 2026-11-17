@@ -2,13 +2,20 @@
 
 Each widget's /AP is turned into the only thing page 0 draws, and PDFium's own
 text page is asked for the characters. A shaped run writes glyph ids, which the
-document's /ToUnicode need not cover, so the stream carries the run's characters
-as /ActualText (ISO 32000-1, 14.9.4); this stage is what holds that claim.
+document's /ToUnicode need not cover, so the stream draws the run with a copy of
+the font whose /ToUnicode maps each glyph id to the character it carries
+(ISO 32000-1, 9.10.3); this stage is what holds that claim.
 
-Whitespace at the edges of a run is compared loosely: PDFium places a marked
-content sequence's text at the position of its first text object, so a space
-that sits at the visual edge of a run comes out at the front of that run instead
-of its back. Every other character is compared exactly.
+Two fields are read more loosely, each for a reason that is measured and
+recorded in docs/pdfium-arabic-fields/:
+
+* Whitespace is normalised, because a space at the visual edge of a run comes
+  back at the front of it.
+* A vocalized word is compared as one of each character, because a mark is drawn
+  above the baseline and PDFium's text page starts a new line at a raised glyph,
+  so the word comes back in visual order with breaks between the letters and
+  their marks. The stream is what this stage can hold; the order and the breaks
+  are the reader's (docs 29, section 5).
 
 Run:  .venv/bin/python scripts/pdfium_fields/measure_text.py after.pdf \
           --pdfium-out ~/pdfium/pdfium/out/Release
@@ -29,6 +36,13 @@ EXPECTED = {
     "q0": "الصفحة",
     "ltr_mixed": "abc الصفحة def",
     "mixed": "الصفحة 5 من 10",
+}
+
+# field -> the characters it holds, in any order. A base letter and the marks
+# over it are drawn on different baselines, which splits them into separate
+# lines when a reader walks the page; see the module comment.
+CHARACTERS_ONLY = {
+    "vocalized": "مُحَمَّد",
 }
 
 
@@ -93,6 +107,15 @@ def main() -> int:
         print(f"{field:12s} text={got!r}")
         if normalized(got) != normalized(expected):
             failures.append(f"{field}: {got!r} != {expected!r}")
+
+    for field, expected in CHARACTERS_ONLY.items():
+        page = work / f"{field}.pdf"
+        appearance_only(args.pdf, field, page)
+        got = extracted(probe, page)
+        characters = sorted(unit for unit in got if not unit.isspace())
+        print(f"{field:12s} characters={characters!r}")
+        if characters != sorted(expected):
+            failures.append(f"{field}: {characters!r} != {sorted(expected)!r}")
 
     for failure in failures:
         print("FAIL", failure)
