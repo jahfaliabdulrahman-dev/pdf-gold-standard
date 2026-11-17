@@ -44,7 +44,16 @@ jobs:
       - name: veraPDF baseline — no NEW failing rule, no DEAD exception
         run: |
           brew install verapdf
-          python3 scripts/verapdf_gate.py guide-v2-ar.pdf 3b ua1 4
+          # 4f is the BINDING flavour for a file with attachments; plain 4 does not cover it.
+          python3 scripts/verapdf_gate.py guide-v2-ar.pdf 3b ua1 4f
+
+      - name: Second document — build and gate the report from its own spec
+        run: |
+          PDF_SPEC=report_spec python3 build.py report-v1.html report.pdf
+          PDF_SPEC=report_spec python3 scripts/verify_pdf.py report.pdf
+          VERAPDF_BASELINE=verapdf-baseline-report.toml PDF_SPEC=report_spec \
+            python3 scripts/verapdf_gate.py report.pdf 3b ua1
+          PDF_SPEC=report_spec python3 scripts/claim_probe.py report.pdf --check
 
       - name: Claim probe — what remains if the file DECLARED conformance
         run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check

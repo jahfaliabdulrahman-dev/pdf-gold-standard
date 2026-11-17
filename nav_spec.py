@@ -173,6 +173,9 @@ ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of th
 
 GATE_CHECKS = 34
 GATE_MUTATIONS = 48
+# What remains failing when this file DECLARES conformance — measured by scripts/claim_probe.py, one table
+# per document (the guide's file has one untagged rule; the other two are clean under both claims).
+CLAIM_EXPECTED = {"3b": set(), "ua1": {"7.1-3"}}
 
 # --------------------------------------------------------------------------------------------------------------
 # Stage-5 features (postprocess.py, declared in features.toml). Metadata/structure only — no drawing.

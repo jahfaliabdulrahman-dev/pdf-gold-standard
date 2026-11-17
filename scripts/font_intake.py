@@ -58,11 +58,26 @@ def features(font: TTFont, table: str) -> set[str]:
         return set()
 
 
+def embedding_permission(fs: int | None) -> str:
+    """What the font's OS/2.fsType actually grants, read from the file — not inferred from nameID 0/13/14."""
+    if fs is None:
+        return "no OS/2 table: the licence text is the only source"
+    level = fs & 0x000F
+    names = {0: "installable (fsType=0)", 2: "restricted licence", 4: "preview & print", 8: "editable"}
+    extra = []
+    if fs & 0x0100:
+        extra.append("no subsetting (0x0100)")
+    if fs & 0x0200:
+        extra.append("bitmap only (0x0200)")
+    return names.get(level, f"unknown level {level}") + ("; " + ", ".join(extra) if extra else "")
+
+
 def check(path: str, corpora: list[str]) -> dict:
     font = load(path)
     n = names(font)
     cmap = font.getBestCmap() or {}
     gsub, gpos = features(font, "GSUB"), features(font, "GPOS")
+    fs_type = font["OS/2"].fsType if "OS/2" in font else None
     axes = [(a.axisTag, a.minValue, a.defaultValue, a.maxValue) for a in font["fvar"].axes] if "fvar" in font else []
 
     licence_text = " ".join(n.get(i, "") for i in (0, 13, 14))
@@ -106,6 +121,8 @@ def check(path: str, corpora: list[str]) -> dict:
         "gsub": sorted(gsub),
         "gpos": sorted(gpos),
         "licence": licence_text.strip()[:160] or "(none declared)",
+        "os2_fsType": fs_type,
+        "embedding": embedding_permission(fs_type),
         "redistribution_unclear": restricted,
         "corpus_missing": corpus_missing,
         "problems": problems,
@@ -129,6 +146,7 @@ def main(argv: list[str]) -> int:
         print(f"{report['verdict']}: {report['family']} ({report['version']})")
         print(f"  glyphs={report['glyphs']} cmap={report['cmap']} upem={report['upem']} axes={report['variable_axes']}")
         print(f"  licence: {report['licence']}")
+        print(f"  embedding: {report['embedding']}")
         if report["redistribution_unclear"]:
             print("  NOTE: no explicit redistribution grant — embedding in a document is fine, shipping the font is not.")
         for p in report["problems"]:

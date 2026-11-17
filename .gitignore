@@ -20,6 +20,7 @@ __pycache__/
 # second document outputs and local backups
 report.pdf
 baseline*.pdf
+*.raw.pdf
 
 # Najd font files: licence is «All rights reserved» — the PDF embeds a subset, the repo does not ship the font
 /najd/
