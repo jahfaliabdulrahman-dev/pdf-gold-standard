@@ -32,6 +32,20 @@ Business: in=8 glyphs=8 dir=4 script=Latn ids=817 810 808 798 803 794 808 808 | 
 - «Business» ⇒ ٨ محارف، `dir=4` = LTR، `script=Latn`، وأعراض موجبة.
 - كل ذلك بمكتبة HarfBuzz التي يحملها PDFium، لا بمكتبة خارجية.
 
+## قياس جديد: الخط المضمَّن في PDF لا يصلح للتشكيل
+
+استُخرج `/FontFile2` من `/F10` (Type0، `Identity-H`) في `report.pdf`: **٣٢٩٢ بايت** فقط — مجموعة فرعية.
+
+```
+$ ./shaping_probe /tmp/embedded-font.ttf
+lam-alef: in=2 glyphs=2 dir=5 script=Arab ids=0 0 | adv=12.5781 12.5781
+Business: in=8 glyphs=8 dir=4 script=Latn ids=0 0 0 0 0 0 0 0 | adv=12.5781 ...
+```
+
+**مُثبت**: المجموعة الفرعية بلا `cmap` ⇒ كل المعرّفات صفر. إذن **لا يمكن التشكيل بخط PDF المضمَّن**؛ يجب
+التشكيل بالخط الأصلي الكامل، ثم تحويل `glyph id → CID` بما يطابق الخط المضمَّن (Identity أو `CIDToGIDMap`)،
+أو تضمين الخط كاملًا. هذا شرط تصميمي مُقاس، لا رأي.
+
 ## ما لم يُثبت
 
 - **الدمج في مسار الحقول**: `CPVT_GenerateAP` / `FPDF_FFLDraw` لم يُعدَّلا؛ الوحدة تُستدعى من برنامج اختبار
