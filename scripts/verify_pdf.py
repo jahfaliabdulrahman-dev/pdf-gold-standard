@@ -1015,21 +1015,56 @@ def gate(doc) -> list[str]:
 
     # 8c. provenance: the file says which source it was built from, and that is the source this gate compares with
     name, digest = source_stamp()
-    got_name = got_digest = ""
+    got_name = got_digest = got_rendered = ""
+    stray = 0
     try:
+        import hashlib
         import json as _json
         px = pikepdf_open(doc)
         with px.open_metadata() as m:
             doc_id = str(m.get("xmpMM:DocumentID", ""))
         got_digest = doc_id.split("sha256:")[-1] if doc_id.startswith("sha256:") else ""
-        if "manifest.json" in px.attachments:      # the file carries its own manifest: name + hash
-            got_name = _json.loads(px.attachments["manifest.json"].get_file().read_bytes()).get("source", "")
+        if "manifest.json" in px.attachments:      # the file carries its own manifest: source + hashes
+            man = _json.loads(px.attachments["manifest.json"].get_file().read_bytes())
+            got_name = man.get("source", "")
+            got_rendered = man.get("rendered_sha256", "")
+        # Page furniture must not be structure content. A /P element directly under /Document is a
+        # paragraph the post-processor invented for a run that belonged to no section — a reader then
+        # reads the running head once per page, after the last section.
+        root = px.Root.get("/StructTreeRoot")
+        if root is not None:
+            kids = root.get("/K")
+            for k in (list(kids) if isinstance(kids, pikepdf.Array) else [kids]):
+                if str(k.get("/S")) == "/Document":
+                    ch = k.get("/K")
+                    stray += sum(1 for x in (list(ch) if isinstance(ch, pikepdf.Array) else [ch])
+                                 if str(x.get("/S")) == "/P")
         px.close()
     except Exception:
         got_name = got_digest = ""
-    check("provenance", (got_name, got_digest) == (name, digest),
-          f"{name} sha256 {digest[:12]}" if (got_name, got_digest) == (name, digest) else
-          ("no source stamp" if not got_digest else f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}"))
+    # The sidecar beside the file is what copy-fidelity reads as truth. The producer now records the
+    # hash of the markup it actually printed, so a stale sidecar from another build cannot stand in.
+    side_explicit = getattr(doc, "_sidecar", None)
+    fname = str(getattr(doc, "name", "") or "")
+    # A document read from memory has no sidecar (its .name is the stream label, not a path).
+    side_path = side_explicit or (os.path.splitext(fname)[0] + ".source.html"
+                                  if fname and os.path.exists(fname) else "")
+    side_ok, side_why = True, ""
+    if got_rendered and side_path:
+        if not os.path.exists(side_path):
+            side_ok, side_why = False, "the manifest names the markup it printed, but no .source.html sits beside the file"
+        else:
+            import hashlib
+            if hashlib.sha256(open(side_path, "rb").read()).hexdigest() != got_rendered:
+                side_ok, side_why = False, "the .source.html beside the file is not the markup this file was built from"
+    ok = (got_name, got_digest) == (name, digest) and side_ok
+    check("provenance", ok,
+          f"{name} sha256 {digest[:12]}" + ("" if side_ok else " — " + side_why) if ok else
+          (side_why if not side_ok else
+           ("no source stamp" if not got_digest else f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}")))
+    check("tagged-structure", stray == 0,
+          "no paragraph sits directly under /Document" if stray == 0 else
+          f"{stray} paragraph(s) under /Document — page furniture tagged as content")
 
     # 9. no blank / overflow pages: far below the median text (cover + contents excluded) and not excused by image cover
     blank, low, med = blank_pages(doc, [i for i in range(doc.page_count) if i not in (NS.COVER, NS.CONTENTS)])

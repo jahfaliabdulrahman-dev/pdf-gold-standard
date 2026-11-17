@@ -35,7 +35,7 @@ NA = object()
 # The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
 # and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
 # a silent skip can hide behind a stable number.
-SUITE_SIZE = 48
+SUITE_SIZE = 50
 
 
 class _NotApplicable(Exception):
@@ -52,7 +52,10 @@ def fresh():
 
 
 def reread(doc):
-    return fitz.open("pdf", doc.tobytes())
+    out = fitz.open("pdf", doc.tobytes())
+    if getattr(doc, "_sidecar", None):        # a mutation may point the gate at a sidecar it planted
+        out._sidecar = doc._sidecar
+    return out
 
 
 def strip_link(doc, i, role):
@@ -528,6 +531,44 @@ def field_without_tu(doc):
         return NA
 
 
+def paragraph_under_document(doc):
+    """Page furniture tagged as a paragraph: a reader then reads the running head after the last section."""
+    def fn(p):
+        root = p.Root.get("/StructTreeRoot")
+        if root is None:
+            raise _NotApplicable
+        kids = root.get("/K")
+        kids = list(kids) if isinstance(kids, pikepdf.Array) else [kids]
+        doc_el = next((k for k in kids if str(k.get("/S")) == "/Document"), None)
+        ch = doc_el.get("/K") if doc_el is not None else None
+        if not isinstance(ch, pikepdf.Array) or not ch:
+            raise _NotApplicable
+        ch[0]["/S"] = pikepdf.Name("/P")          # one section reported as a paragraph under /Document
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
+
+
+def stale_sidecar(doc):
+    """A .source.html from another build sits beside the file: the truth the gate reads is not this file's."""
+    import tempfile
+    side = os.path.splitext(SRC)[0] + ".source.html"
+    if not os.path.exists(side):
+        return NA
+    tmp = tempfile.mkdtemp(prefix="sidecar-")
+    pdf_path, side_path = os.path.join(tmp, "copy.pdf"), os.path.join(tmp, "copy.source.html")
+    with open(pdf_path, "wb") as f:
+        f.write(doc.tobytes())
+    data = bytearray(open(side, "rb").read())
+    data[len(data) // 2] ^= 0x20                  # one byte: not this file's markup any more
+    with open(side_path, "wb") as f:
+        f.write(bytes(data))
+    out = fitz.open(pdf_path)
+    out._sidecar = side_path
+    return out
+
+
 def link_without_contents(doc):
     def fn(p):
         for page in p.pages:
@@ -593,6 +634,8 @@ MUTATIONS = [
     (drop_parent_tree, "pdfua", False),
     (field_without_tu, "acroform", False),
     (link_without_contents, "link-tagging", False),
+    (paragraph_under_document, "tagged-structure", False),
+    (stale_sidecar, "provenance", False),
     (drop_page, "pages", False),
 ]
 

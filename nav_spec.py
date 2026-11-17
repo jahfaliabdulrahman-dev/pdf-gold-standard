@@ -171,8 +171,8 @@ ART_MAX_DPI = 300          # spec §3.4: art serving >30% of a page is capped at
 ART_DPI_DECLARED = {3: 205, 6: 205, 11: 205}
 ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of the page
 
-GATE_CHECKS = 34
-GATE_MUTATIONS = 48
+GATE_CHECKS = 35
+GATE_MUTATIONS = 50
 GATE_NA = {}                                   # every mutation applies to this document
 # What remains failing when this file DECLARES conformance — measured by scripts/claim_probe.py, one table
 # per document (the guide's file has one untagged rule; the other two are clean under both claims).

@@ -156,24 +156,13 @@ def _tag_orphan_runs(pdf, page, instructions):
         op = str(ins.operator)
         if op in ("BMC", "BDC"):
             if depth == 0 and op == "BMC" and str(ins.operands[0]) != "/Artifact":
-                mcid = len(arr)
-                elem = pdf.make_indirect(pikepdf.Dictionary(
-                    Type=pikepdf.Name("/StructElem"),
-                    S=pikepdf.Name("/P"),
-                    Pg=page.obj,
-                    P=document,
-                    K=mcid,
-                ))
-                arr.append(elem)
-                kids = document.get("/K")
-                if isinstance(kids, pikepdf.Array):
-                    kids.append(elem)
-                elif kids is None:
-                    document["/K"] = pikepdf.Array([elem])
-                else:                       # a single child: make room without losing it
-                    document["/K"] = pikepdf.Array([kids, elem])
+                # Outside every marked-content block sits page furniture: the printed once-per-page head,
+                # footer and number. Chrome leaves them untagged, and turning them into /P paragraphs made
+                # a screen reader read the running head twelve times AFTER the last section. They are what
+                # they are — pagination artifacts, not reading order.
                 out.append(pikepdf.ContentStreamInstruction(
-                    [ins.operands[0], pikepdf.Dictionary(MCID=mcid)], pikepdf.Operator("BDC")))
+                    [pikepdf.Name("/Artifact"), pikepdf.Dictionary(Type=pikepdf.Name("/Pagination"))],
+                    pikepdf.Operator("BDC")))
                 depth += 1
                 added += 1
                 continue
@@ -356,6 +345,9 @@ def feature_output_intent(pdf, spec) -> None:
         page.obj["/BleedBox"] = box
 
 
+RENDERED_SHA = None      # apply() records the hash of the markup Chrome printed for THIS build
+
+
 def feature_attachments(pdf, spec) -> None:
     """The file carries its own source and a manifest of hashes: reproduction is content, not a claim.
 
@@ -370,6 +362,7 @@ def feature_attachments(pdf, spec) -> None:
     manifest = {
         "source": NS.SOURCE_HTML,
         "source_sha256": hashlib.sha256(data).hexdigest(),
+        "rendered_sha256": RENDERED_SHA,
         "guide_version": NS.GUIDE_VERSION,
         "pages": NS.PAGES,
     }
@@ -704,6 +697,9 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -
     if profile not in SUPPORTED_PROFILES:
         raise SystemExit(f"postprocess: profile {profile!r} is not implemented (supported: {sorted(SUPPORTED_PROFILES)})")
     spec = tomllib.load(open(features_path or os.path.join(PROJ, "features.toml"), "rb"))
+    global RENDERED_SHA
+    rendered = os.path.splitext(src)[0] + ".source.html"      # the markup Chrome printed for this build
+    RENDERED_SHA = hashlib.sha256(open(rendered, "rb").read()).hexdigest() if os.path.exists(rendered) else None
     applied = []
     with pikepdf.open(src) as pdf:
         for name, f in spec.get("features", {}).items():

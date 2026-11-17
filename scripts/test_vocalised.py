@@ -47,6 +47,25 @@ def r2l(src, dst):
         pdf.save(dst)
 
 
+def with_gap(src, dst, em=0.15):
+    """Move one glyph right by `em` so it kerns away from its neighbour — the gap class the fix fills.
+
+    GAP_MIN/GAP_MAX are 0.10/0.25 em; this fixture sits at 0.15, i.e. inside the band the code claims to
+    handle. Without such a gap the strict branch never runs and the test proves nothing about it.
+    """
+    with pikepdf.open(src) as pdf:
+        page = pdf.pages[0]
+        data = bytes(page.Contents.read_bytes())
+        m = list(re.finditer(rb"<([0-9A-Fa-f]+)>\s*Tj", data))
+        if len(m) < 2:
+            raise SystemExit("fixture: fewer than two <...> Tj glyph runs")
+        size = float(re.findall(rb"/\w+\s+([\d.]+)\s+Tf", data)[0])
+        shift = (f"{em * size:.3f} 0 Td\n").encode()
+        pos = m[1].start()
+        page.Contents = pdf.make_stream(data[:pos] + shift + data[pos:])
+        pdf.save(dst)
+
+
 if __name__ == "__main__":
     one = norm(open(TRUTH, encoding="utf-8").read()).split()
     want = one + one                                     # the fixture prints the paragraph twice
@@ -79,6 +98,22 @@ if __name__ == "__main__":
         diff = sum(a[i].get_pixmap(dpi=150).samples != b[i].get_pixmap(dpi=150).samples for i in range(len(a)))
         print(f"{'PASS' if not diff else 'FAIL'} pixels - {diff} page(s) differ at 150 dpi")
         if diff: failed.append("pixels")
+        # The strict branch itself: a fixture whose glyphs kern 0.15 em apart must be filled, and the same
+        # fixture under strict_widths=False must not fill it — otherwise the test never enters the branch
+        # it claims to cover (a test never seen failing is unverified).
+        gap_src, gap_strict, gap_loose = (os.path.join(tmp, n) for n in ("gap.pdf", "gap-fixed.pdf", "gap-loose.pdf"))
+        with_gap(RAW, gap_src)
+        st_strict = fix_text_layer.process(gap_src, gap_strict, strict_widths=True)
+        st_loose = fix_text_layer.process(gap_src, gap_loose, strict_widths=False)
+        filled = st_strict.get("gap_filled", 0)
+        ok = filled >= 1
+        print(f"{'PASS' if ok else 'FAIL'} gap-filled/strict - {filled} gap(s) inside "
+              f"{fix_text_layer.GAP_MIN}–{fix_text_layer.GAP_MAX} em filled by the strict branch")
+        if not ok: failed.append("gap-filled/strict")
+        ok = st_loose.get("gap_filled", 0) == 0
+        print(f"{'PASS' if ok else 'FAIL'} gap-filled/counter - strict_widths=False fills "
+              f"{st_loose.get('gap_filled', 0)} (must be 0: the fill is the strict branch's alone)")
+        if not ok: failed.append("gap-filled/counter")
     if failed:
         print(f"\nTEST FAILED: {failed}"); raise SystemExit(1)
     print("\nTEST PASSED")
