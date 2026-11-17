@@ -108,7 +108,7 @@ $ run.sh (9 stages)                → 9 × RESULT PASS
 vocalized codes                     [62, 648, 650, 136, 648, 53, 649, 135]
 expected (HarfBuzz)                 [62, 648, 650, 136, 648, 53, 649, 135]   ⇒ متطابقة
 baseline codes                      [134, 649, 51, 648, 134, 648, 650, 59]  ⇒ مخالفة (العيب)
-pdfium_unittests                    1271/1271
+pdfium_unittests                    1272/1272
 بناء pdfium                         صفر تحذير · clang-format --Werror = 0
 ap/mx/ltr/ct-after.png              sha256 مطابقة لِـ7940c93 ⇒ الرسم لم يتغيّر
 ```
