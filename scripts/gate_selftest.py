@@ -32,6 +32,10 @@ _RESTORE = []
 # form fields. It is neither a catch nor a miss: the suite reports how many actually applied, and the
 # spec must declare that number.
 NA = object()
+# The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
+# and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
+# a silent skip can hide behind a stable number.
+SUITE_SIZE = 48
 
 
 class _NotApplicable(Exception):
@@ -80,8 +84,15 @@ def rename_nav_class(doc):
 
 
 def stale_back_cover(doc):
-    # only the BACK cover still announces the previous version
-    return _source_variant(lambda s: s.replace(f"الإصدار {NS.GUIDE_VERSION_AR} — نوفمبر", "الإصدار ٢٫٢ — نوفمبر"))
+    # only the BACK cover still announces the previous version — the last occurrence, whatever its date
+    # suffix: the guide prints «الإصدار … — نوفمبر» and najd prints «الإصدار ١٫٠» alone.
+    def fn(s):
+        needle = f"الإصدار {NS.GUIDE_VERSION_AR}"
+        k = s.rfind(needle)
+        if k < 0:
+            return s
+        return s[:k] + "الإصدار ٢٫٢" + s[k + len(needle):]
+    return _source_variant(fn)
 
 
 def icon_input_lost(doc):
@@ -221,6 +232,8 @@ def stale_version(doc):
 def blank_text_page_with_decor(doc):
     # the same overflow artifact, plus a small decorative image: "has an image" must not excuse an empty page
     i = blank_page(doc)
+    if i is NA:
+        return NA
     doc[i].insert_image(fitz.Rect(300, 400, 332, 432), pixmap=fitz.Pixmap(fitz.csRGB, fitz.IRect(0, 0, 32, 32), False))
 
 
@@ -435,13 +448,20 @@ def _pikemutate(doc, fn):
 
 
 def drop_page_labels(doc):
+    if doc.xref_get_key(doc.pdf_catalog(), "PageLabels")[0] == "null":
+        return NA
     return _pikemutate(doc, lambda p: p.Root.__delitem__("/PageLabels"))
 
 
 def rename_destination(doc):
     def fn(p):
+        if "/Names" not in p.Root or "/Dests" not in p.Root.Names:
+            raise _NotApplicable
         p.Root.Names.Dests.Names[0] = pikepdf.String("cover-renamed")
-    return _pikemutate(doc, fn)
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
 
 
 def drop_xmp_title(doc):
@@ -464,9 +484,14 @@ def break_box_order(doc):
 
 def drop_attachment(doc):
     def fn(p):
+        if "source.html" not in p.attachments:
+            raise _NotApplicable
         del p.attachments["source.html"]
         p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
-    return _pikemutate(doc, fn)
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
 
 
 
@@ -483,8 +508,13 @@ def art_over_dpi(doc):
 
 def drop_parent_tree(doc):
     def fn(p):
+        if "/StructTreeRoot" not in p.Root or "/ParentTree" not in p.Root.StructTreeRoot:
+            raise _NotApplicable
         del p.Root.StructTreeRoot["/ParentTree"]
-    return _pikemutate(doc, fn)
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
 
 
 def field_without_tu(doc):
@@ -503,9 +533,15 @@ def link_without_contents(doc):
         for page in p.pages:
             for a in page.obj.get("/Annots", []):
                 if a.get("/Subtype") == pikepdf.Name.Link:
+                    if "/Contents" not in a:
+                        continue
                     del a["/Contents"]
                     return
-    return _pikemutate(doc, fn)
+        raise _NotApplicable
+    try:
+        return _pikemutate(doc, fn)
+    except _NotApplicable:
+        return NA
 
 
 # (mutation, expected check, must_stay_green)
@@ -564,16 +600,31 @@ if __name__ == "__main__":
     base = G.gate(fresh())
     print(f"\nbaseline: {'PASS' if not base else 'FAIL ' + str(base)}")
     missed = ["baseline"] if base else []
-    if len(MUTATIONS) < NS.GATE_MUTATIONS:
-        print(f"SELFTEST FAILED — the suite holds {len(MUTATIONS)} mutations, the spec declares {NS.GATE_MUTATIONS}")
+    declared_na = dict(getattr(NS, "GATE_NA", {}))
+    names = {m[0].__name__ for m in MUTATIONS}
+    if len(MUTATIONS) != SUITE_SIZE:
+        print(f"SELFTEST FAILED — the suite holds {len(MUTATIONS)} mutations, SUITE_SIZE says {SUITE_SIZE}")
+        raise SystemExit(1)
+    if set(declared_na) - names:
+        print(f"SELFTEST FAILED — the spec declares n/a for names the suite does not hold: {sorted(set(declared_na) - names)}")
+        raise SystemExit(1)
+    if len(MUTATIONS) - len(declared_na) != NS.GATE_MUTATIONS:
+        print(f"SELFTEST FAILED — {len(MUTATIONS)} mutations − {len(declared_na)} declared n/a "
+              f"!= the {NS.GATE_MUTATIONS} the spec declares")
         raise SystemExit(1)
     applied = 0
     for mutate, expect, green in MUTATIONS:
+        name = mutate.__name__
+        declared = name in declared_na
         d = fresh()
         try:
             out = mutate(d)          # a mutation may return a re-serialised document (pikepdf round-trip)
             if out is NA:
-                print(f"\n>>> {mutate.__name__:24s} not applicable — this document has nothing of that kind\n")
+                if declared:
+                    print(f"\n>>> {name:24s} declared n/a — {declared_na[name]}\n")
+                else:
+                    print(f"\n>>> {name:24s} NOT APPLICABLE but the spec does not declare it\n")
+                    missed.append(name + " (undeclared n/a)")
                 continue
             if out is not None and hasattr(out, "page_count"):
                 d = out
@@ -581,12 +632,21 @@ if __name__ == "__main__":
         finally:
             restore_all()
             NS.SOURCE_HTML, NS.GATE_CHECKS = OLD_SOURCE, OLD_CHECKS
+        if declared:
+            # An exemption is a measurement too: if the gate now catches the defect, the exemption is
+            # stale and must be removed — otherwise a fixed hole keeps its licence to stay open.
+            stale = (not green) and expect in failed
+            print(f"\n>>> {name:24s} declared n/a, gate says {failed} — "
+                  f"{'STALE EXEMPTION' if stale else 'still uncaught, as declared'}\n")
+            if stale:
+                missed.append(name + " (stale exemption)")
+            continue
         applied += 1
         ok = (not failed) if green else (expect in failed)
-        print(f"\n>>> {mutate.__name__:24s} expect {'PASS' if green else 'FAIL ' + expect:20s} -> "
+        print(f"\n>>> {name:24s} expect {'PASS' if green else 'FAIL ' + expect:20s} -> "
               f"{'CAUGHT' if ok else 'MISSED'} {failed}\n")
         if not ok:
-            missed.append(mutate.__name__)
+            missed.append(name)
     if applied != NS.GATE_MUTATIONS:
         print(f"SELFTEST FAILED — {applied} mutations applied to this document, the spec declares {NS.GATE_MUTATIONS}")
         missed.append(f"applicable:{applied}!={NS.GATE_MUTATIONS}")
@@ -624,4 +684,4 @@ if __name__ == "__main__":
         print(f"SELFTEST FAILED — not caught: {missed}")
         raise SystemExit(1)
     print(f"SELFTEST PASSED — baseline clean, {applied}/{applied} applicable mutations on the right side "
-          f"({sum(1 for m in MUTATIONS if m[2])} positive, {len(MUTATIONS) - applied} not applicable to this document)")
+          f"({sum(1 for m in MUTATIONS if m[2])} positive, {len(declared_na)} declared n/a for this document)")

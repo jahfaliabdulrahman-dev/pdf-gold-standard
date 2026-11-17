@@ -126,11 +126,9 @@ def build_html() -> None:
     # v2 generated-art layer: base64-embed local art so the print stays
     # deterministic (Chrome renders from /tmp; relative paths would break).
     adir = os.path.join(PROJ, "art")
-    art = getattr(NS, "ART_FILES", None) or [
-        ("{{ART_COVER}}", "embed-cover.jpg"),
-        ("{{ART_DIVIDER}}", "embed-divider.jpg"),
-        ("{{ART_BACK}}", "embed-back.jpg"),
-    ]
+    art = getattr(NS, "ART_FILES", None)
+    if not art:
+        raise SystemExit("ART FILES: the spec declares none — every document names its own plates")
     for ph, fn in art:
         fp = fn if os.path.isabs(fn) else os.path.join(adir, fn)
         # A declared plate that is absent used to be skipped in silence, leaving the placeholder in the
