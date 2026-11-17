@@ -161,9 +161,9 @@ ART_MAX_DPI = 300
 ART_DPI_DECLARED = {3: 205, 6: 205, 16: 205}   # measured: min(w,h) dpi of the artwork at A4
 ART_PAGE_SHARE = 0.30
 ART_FILES = [
-    ("{{ART_COVER}}", "final-report-cover-4K.png"),
-    ("{{ART_DIVIDER}}", "final-report-divider-a-2K.png"),
-    ("{{ART_DIVIDER2}}", "final-report-divider-b-2K.png"),
+    ("{{ART_COVER}}", "embed-report-cover.jpg"),
+    ("{{ART_DIVIDER}}", "embed-report-divider-a.jpg"),
+    ("{{ART_DIVIDER2}}", "embed-report-divider-b.jpg"),
     ("{{ART_BACK}}", "embed-back.jpg"),
 ]
 
