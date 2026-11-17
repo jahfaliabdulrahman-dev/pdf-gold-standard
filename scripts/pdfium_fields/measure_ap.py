@@ -81,7 +81,7 @@ def shown_strings(content: bytes) -> list[bytes]:
 
 def used_font(annot: pikepdf.Object, content: bytes) -> tuple[bytes | None, bool]:
     """The font the stream selects with `Tf`, and whether its codes are two bytes."""
-    match = re.search(rb"/([A-Za-z0-9]+)\s+[\d.]+\s+Tf", content)
+    match = re.search(rb"/([A-Za-z0-9+._-]+)\s+[\d.]+\s+Tf", content)
     if not match:
         return None, False
     fonts = annot.get("/AP", {}).get("/N", {}).get("/Resources", {}).get("/Font", {})
