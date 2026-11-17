@@ -68,17 +68,31 @@ def find_window(source_tokens: list[str], wanted: list[str]) -> tuple[int, int] 
 
 
 def recover(line: str, source_tokens: list[str]) -> tuple[str | None, str]:
-    """(logical text, "") when a source window is found; (None, reason) otherwise."""
+    """(logical text, "") when a source window is found; (None, reason) otherwise.
+
+    Anchors are searched one by one, in order: a drawn line may repeat an anchor, or the markup may split it
+    across tags, so demanding the whole sequence contiguously (the first attempt) found only 39% of the
+    non-invertible lines. The window between the first and the last anchor found is accepted only when at least
+    half of the anchors were located and the span stays line-sized.
+    """
     wanted = anchors(line)
     if not wanted:
         return None, "no anchors"
-    window = find_window(source_tokens, wanted)
-    if window is None:
-        return None, "anchors not found in source"
-    start, end = window
-    # grow to whole words: the anchors sit inside words only when punctuation split them
-    text = " ".join(source_tokens[start:end])
-    return text, ""
+    flat = [norm(t) for t in source_tokens]
+    found: list[int] = []
+    cursor = 0
+    for anchor in wanted:
+        for i in range(cursor, len(flat)):
+            if flat[i] == anchor:
+                found.append(i)
+                cursor = i + 1
+                break
+    if len(found) < max(1, (len(wanted) + 1) // 2):
+        return None, f"only {len(found)}/{len(wanted)} anchors found"
+    start, end = found[0], found[-1] + 1
+    if end - start > 60:
+        return None, "window too wide to be one line"
+    return " ".join(source_tokens[start:end]), ""
 
 
 if __name__ == "__main__":
