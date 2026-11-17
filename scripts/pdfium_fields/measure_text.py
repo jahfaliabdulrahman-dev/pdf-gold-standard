@@ -11,11 +11,12 @@ recorded in docs/pdfium-arabic-fields/:
 
 * Whitespace is normalised, because a space at the visual edge of a run comes
   back at the front of it.
-* A vocalized word is compared as one of each character, because a mark is drawn
-  above the baseline and PDFium's text page starts a new line at a raised glyph,
-  so the word comes back in visual order with breaks between the letters and
-  their marks. The stream is what this stage can hold; the order and the breaks
-  are the reader's (docs 29, section 5).
+* A vocalized word is compared as one of each character and its letters in the
+  order a reader walks them, because a mark is drawn above the baseline and
+  PDFium's text page starts a new line at a raised glyph, so the word comes back
+  in visual order with breaks between the letters and their marks. The order of
+  the marks inside one cluster is the shaper's, not the map's; which glyph draws
+  which character is what the codes above pin against HarfBuzz (docs 29, 5).
 
 Run:  .venv/bin/python scripts/pdfium_fields/measure_text.py after.pdf \
           --pdfium-out ~/pdfium/pdfium/out/Release
@@ -26,6 +27,7 @@ from __future__ import annotations
 import argparse
 import pathlib
 import subprocess
+import unicodedata
 
 import pikepdf
 from pikepdf import Dictionary, Name
@@ -82,6 +84,10 @@ def extracted(probe: pathlib.Path, pdf: pathlib.Path) -> str:
     return bytes(text, "ascii").decode("unicode_escape")
 
 
+def is_mark(unit):
+    return unicodedata.category(unit) == "Mn"
+
+
 def normalized(text: str) -> str:
     return " ".join(text.split())
 
@@ -112,10 +118,24 @@ def main() -> int:
         page = work / f"{field}.pdf"
         appearance_only(args.pdf, field, page)
         got = extracted(probe, page)
-        characters = sorted(unit for unit in got if not unit.isspace())
+        characters = [unit for unit in got if not unit.isspace()]
+        # No character lost and none drawn twice, and the letters in the order a
+        # reader walks them -- the text's own order reversed. The marks of one
+        # cluster keep the order the shaper chose for them, which the map does
+        # not decide; which glyph draws which character is what the codes above
+        # pin against HarfBuzz.
+        letters = [unit for unit in characters if not is_mark(unit)]
+        expected_letters = [unit for unit in reversed(expected) if not is_mark(unit)]
         print(f"{field:12s} characters={characters!r}")
-        if characters != sorted(expected):
-            failures.append(f"{field}: {characters!r} != {sorted(expected)!r}")
+        if sorted(characters) != sorted(expected):
+            failures.append(
+                f"{field}: {sorted(characters)!r} != {sorted(expected)!r}"
+            )
+        elif letters != expected_letters:
+            failures.append(
+                f"{field}: letters {letters!r} are not the way round a reader "
+                f"walks them {expected_letters!r}"
+            )
 
     for failure in failures:
         print("FAIL", failure)
