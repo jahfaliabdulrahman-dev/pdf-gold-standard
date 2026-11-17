@@ -37,6 +37,14 @@ echo "== fixture =="
 echo "== appearance streams (patched) =="
 "$python" "$here/measure_ap.py" "$out/after.pdf" --source "$out/fixture.pdf" --probe "$probe"
 
+echo "== extracted text (patched) =="
+"$python" "$here/measure_text.py" "$out/after.pdf" --pdfium-out "$pdfium_out" \
+    --work "$out/text"
+
+echo "== editor against the appearance stream =="
+"$python" "$here/measure_editor.py" "$out/fixture.pdf" --source "$out/after.pdf" \
+    --pdfium-out "$pdfium_out" --work "$out/editor"
+
 if [ -n "$baseline_probe" ]; then
   test -x "$baseline_probe" || { echo "no baseline probe at $baseline_probe" >&2; exit 2; }
   echo "== appearance streams (baseline) =="
