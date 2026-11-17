@@ -12,7 +12,14 @@ grep skia_use_harfbuzz out/HB/args.gn          → skia_use_harfbuzz = true
 find out/HB/obj -path '*harfbuzz*' -name '*.o' | wc -l → 69
 gn desc out/HB //:pdfium deps --all | grep -ci harfbuzz → 0
 nm out/HB/pdfium_test | grep -ci hb_            → 0
+
+# الدقة: الرمز موجود في الكائن لكنه ليس في المحرّك
+nm out/HB/obj/third_party/harfbuzz/harfbuzz/hb-shape.o | grep "_hb_shape"
+→ … 0000000000000164 T _hb_shape        (الشرطة السابقة من Mach-O، والرمز عامّ)
 ```
+
+**تصحيح دقة:** غياب `hb_shape` من `pdfium_test` ليس لأن HarfBuzz لم يُترجم — بل لأن كائناته **لم تُربط**.
+`hb-shape.o` يُصدِّر `_hb_shape` فعلًا، لكن المحرّك لا يحمله.
 
 ## الاستنتاج (مُثبت بالقياس، لا بالقراءة)
 
