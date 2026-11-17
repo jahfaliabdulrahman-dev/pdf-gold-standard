@@ -1,10 +1,10 @@
 # veraPDF baseline for «نجد» (najd.html), measured with its own build.
 version = "1.30.0"
-measured_on = "najd.pdf (11 pages, declared PDF/A-3b)"
+measured_on = "najd.pdf (11 pages, declared PDF/A-3b + PDF/UA-1)"
 flavours = ["3b", "ua1"]
 
 [3b]
 failing = []          # the file claims PDF/A-3b, so this MUST be empty
 
 [ua1]
-failing = ["5", "7.1"]   # not claimed; kept visible instead of hidden
+failing = []   # PDF/UA-1 claimed, so this MUST be empty
