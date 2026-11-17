@@ -138,16 +138,42 @@ def pdfium_texts(doc) -> list[str] | None:
         return None
 
 
-def footer_numbers(page) -> list[int]:
-    """Latin-digit-only spans inside the footer band, top to bottom."""
+AR_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
+
+
+def _digit_value(t: str, page_text: str | None) -> int | None:
+    """The number a span prints, or None.
+
+    MuPDF reverses Arabic-Indic runs — measured on a number MuPDF itself wrote (٢٠٢٦ → ٦٢٠٢), while
+    PDFium reads it in order. So the VALUE comes from PDFium's page text when that text carries the
+    reverse of this token; the geometry still comes from the span.
+    """
+    tok = t.translate(AR_DIGITS)
+    if not tok.isdigit():
+        return None
+    if page_text is not None and len(tok) > 1:
+        toks = {x.translate(AR_DIGITS) for x in WORD.findall(page_text)}
+        if tok not in toks and tok[::-1] in toks:
+            tok = tok[::-1]
+    return int(tok)
+
+
+def footer_numbers(page, page_text: str | None = None, limit: int | None = None) -> list[int]:
+    """Digit spans inside the footer band, top to bottom — Latin or Arabic-Indic, in printed order.
+
+    `limit` (usually the page count) drops numbers that cannot be a page number: the cover's year also
+    sits in the band, and reading ٢٠٢٦ as a footer would invent a footer the document never printed.
+    """
     out = []
     for b in page.get_text("dict")["blocks"]:
         for line in b.get("lines", []):
             for s in line["spans"]:
                 t = s["text"].strip()
-                if t and all(ch.isdigit() and ord(ch) < 128 for ch in t) \
-                        and NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
-                    out.append(int(t))
+                if not t or not NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
+                    continue
+                v = _digit_value(t, page_text)
+                if v is not None and (limit is None or v <= limit):
+                    out.append(v)
     return out
 
 
@@ -855,9 +881,12 @@ def gate(doc) -> list[str]:
 
     # 5b. footers: the printed page number = the page's own index (H8). The guide DECLARES Latin footer
     # numbers; a declaration with no check is a claim that rots silently.
+    # PDFium's text is read once here: it is the authority on digit ORDER (MuPDF reverses Arabic-Indic
+    # runs — measured on a number MuPDF itself wrote), and section 8 reuses it.
+    texts = pdfium_texts(doc)
     foot_bad = []
     for i, page in enumerate(doc):
-        got_nums = footer_numbers(page)
+        got_nums = footer_numbers(page, texts[i] if texts else None, limit=doc.page_count)
         want_num = NS.FOOTER.get(i)
         if want_num is None:
             if got_nums:
@@ -959,7 +988,7 @@ def gate(doc) -> list[str]:
     check("fonts", not foreign, ", ".join(sorted(set(foreign))[:6]) or f"only {NS.HOUSE_FONT_PREFIX}* (+ {'/'.join(sorted(NS.BASMALA_FACES))} on the basmala page)")
 
     # 8. title metadata carries the guide version, and the cover prints the same one
-    texts = pdfium_texts(doc)
+    # (the PDFium texts were read once at 5b — same call, not a second extraction)
     title = (doc.metadata or {}).get("title", "")
     ver = f"الإصدار {NS.GUIDE_VERSION_AR}"
     want_title = f"{getattr(NS, 'DOC_TITLE', 'معيار إنتاج ملفات PDF — دليل المعيار')} · {ver}"
