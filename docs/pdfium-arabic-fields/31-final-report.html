@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: inherit; color: var(--foreground); background: transparent; margin: 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--card); }
+  h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
+  p { margin: 0 0 8px; color: var(--muted-foreground); font-size: 13px; line-height: 1.65; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted-foreground); font-weight: 500; }
+  code { font-family: ui-monospace, monospace; direction: ltr; display: inline-block; font-size: 12px; }
+  .ok { color: #16a34a; font-weight: 600; }
+  .num { font-variant-numeric: tabular-nums; }
+  img { width: 100%; border: 1px solid var(--border); border-radius: 8px; display: block; }
+  .big { font-size: 22px; font-weight: 700; letter-spacing: .5px; }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="card">
+    <h3>الرسم: قبل / بعد</h3>
+    <img src="img/30-vocalized-before-after.png" alt="مُحَمَّد قبل وبعد">
+    <p>أعلى: البناء الأساس — أشكال منفردة والعلامات مبعثرة. أسفل: هذا الفرع — حروف متّصلة وعلامات فوقها. <span class="ok">مقيس: صفر انزياح بكسل</span> بين آخر أربعة التزامات.</p>
+  </div>
+  <div class="card">
+    <h3>الاستخراج: كل محرف مرّة واحدة</h3>
+    <table>
+      <tr><th>الحقل</th><th>المستخرج</th><th>الحكم</th></tr>
+      
+<tr><td><code>vocalized</code> = مُحَمَّد</td><td class="num">8 محارف: د َ ّ م َ ح ُ م</td><td class="ok">✓</td></tr>
+<tr><td><code>ar</code> = لا</td><td>لا (ليجاتور)</td><td class="ok">✓</td></tr>
+<tr><td><code>q0</code> = الصفحة</td><td>الصفحة</td><td class="ok">✓</td></tr>
+<tr><td><code>mixed</code></td><td>الصفحة 5 من 10</td><td class="ok">✓</td></tr>
+<tr><td><code>ltr_mixed</code></td><td>abc الصفحة def</td><td class="ok">✓</td></tr>
+
+    </table>
+    <h3 style="margin-top:16px">البوابات</h3>
+    <table>
+      
+<tr><th>البوابة</th><th>النتيجة</th></tr>
+<tr><td>pdfium_unittests</td><td class="num ok">1279 / 1279</td></tr>
+<tr><td>الهارنس (9 مراحل)</td><td class="num ok">9 / 9 PASS</td></tr>
+<tr><td>ترتيب رموز HarfBuzz</td><td class="ok">مطابق للـ8</td></tr>
+<tr><td>البناء</td><td class="ok">صفر تحذير</td></tr>
+<tr><td>clang-format</td><td class="num ok">0</td></tr>
+<tr><td>الرسم</td><td class="ok">sha256 مطابق</td></tr>
+
+    </table>
+  </div>
+</div>
+</body>
+</html>
