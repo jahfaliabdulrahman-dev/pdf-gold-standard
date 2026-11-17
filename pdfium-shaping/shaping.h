@@ -26,6 +26,15 @@ struct ShapedRun {
   std::string script;
 };
 
+// Shapes `text`, then builds a new subset that contains exactly the shaped glyphs (plus .notdef) with its own
+// cmap. The embedded font in a PDF cannot be shaped with — it is a subset with no cmap — so this is the font a
+// generated appearance stream has to carry.
+bool BuildShapedSubset(const std::string& font_bytes,
+                       const std::u16string& text,
+                       float pixel_size,
+                       ShapedRun* run,
+                       std::string* subset_bytes);
+
 // Shapes `text` with the font in `font_bytes` at `pixel_size`, guessing script and direction from the text
 // itself (the same way a caller that has no layout context would).
 bool ShapeUtf16(const std::string& font_bytes,
