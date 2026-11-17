@@ -28,3 +28,12 @@ baseline*.pdf
 *.source.html
 report-print.pdf
 najd.pdf
+
+# fixtures whose embedded font subset carries the foundry's copyright notice
+artifacts/*.pdf
+
+# local secrets
+.env
+
+# generated review output (the release is the artifact, not the repo)
+guide-check.pdf
