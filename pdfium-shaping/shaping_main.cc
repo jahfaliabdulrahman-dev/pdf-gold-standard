@@ -55,5 +55,28 @@ int main(int argc, char** argv) {
     return 1;
   }
   PrintRun("Business", latin, run);
+
+  // Round trip: shape, subset to the shaped glyphs, then shape again with the new subset. The second shaping
+  // must produce the same glyph ids — proof the subset carries a usable cmap.
+  std::string subset;
+  ShapedRun first;
+  if (!BuildShapedSubset(bytes, arabic, 26.66f, &first, &subset)) {
+    std::cerr << "subset failed\n";
+    return 1;
+  }
+  ShapedRun again;
+  if (!ShapeUtf16(subset, arabic, 26.66f, &again)) {
+    std::cerr << "reshaping the subset failed\n";
+    return 1;
+  }
+  std::cout << "subset: " << subset.size() << " bytes, glyphs kept=" << first.glyphs.size()
+            << ", reshape ids=";
+  for (const auto& g : again.glyphs)
+    std::cout << g.glyph_id << ' ';
+  std::cout << "\n";
+  if (again.glyphs.size() != first.glyphs.size() || again.glyphs[0].glyph_id != first.glyphs[0].glyph_id) {
+    std::cerr << "subset round trip changed the glyphs\n";
+    return 1;
+  }
   return 0;
 }
