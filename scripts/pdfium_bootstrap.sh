@@ -22,7 +22,7 @@ fi
 echo "== bootstrapping depot_tools (downloads its own python)"
 gclient --version >/dev/null
 echo "== syncing (this is the long part)"
-gclient sync --no-history --shallow --nohooks
+gclient sync --no-history --shallow
 
 cd pdfium
 echo "== checked out: $(git rev-parse HEAD)"
