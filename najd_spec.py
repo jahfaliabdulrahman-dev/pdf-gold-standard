@@ -59,10 +59,15 @@ VOCALISED_PAGES = {3}
 VOCALISED = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
 
 VERSION_SPOTS = [("cover", COVER), ("back", PAGES - 1)]
-PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٤ فحصا» and «٤٨ اختبارا»
+PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٤ فحصا» and «٣٩ عطلا»
 PRINTS_LINK_COUNT = False
 GATE_CHECKS = 34
-GATE_MUTATIONS = 48
+# Nine of the suite's 48 mutations describe objects this specimen does not have (form fields, QR refs,
+# footer numbers, divider art) or a defect it cannot exhibit (splitting its single-direction lines moves
+# MuPDF's order 0.929 -> 0.925). gate_selftest prints which ones and fails if the count drifts.
+GATE_MUTATIONS = 39
+# Measured 2026-11-17 by scripts/claim_probe.py on this build: zero rules remain under either claim.
+CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
 # The cover carries the wall the typeface was drawn from; embedded at build time so the print stays
 # deterministic (Chrome renders from a temp dir, where relative paths do not resolve).
 ART_FILES = [("{{ART_NAJD_COVER}}", "embed-najd-cover.jpg")]

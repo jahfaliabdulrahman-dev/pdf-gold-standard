@@ -2,6 +2,8 @@
 
 نسخة محفوظة من `~/pdfium/pdfium/hb_probe/` كي تبقى مع المشروع. تُبنى بأمر:
 
+> **ليست نسخة من الترقيع:** هذه لقطة `hb_probe` عند `f99ec5b`؛ ملف `cpdf_shaping.cpp` (٤١٤ سطرًا) يعيش على تفرّع `arabic-field-shaping` عند `974afb6` **غير المنشور**. يُستبدل هذا السطر برابط + SHA يوم يُدفع التفرّع.
+
 ```
 cd ~/pdfium/pdfium && third_party/ninja/ninja -C out/HB shaping_probe
 ./out/HB/shaping_probe ~/Projects/pdf-gold-standard-fix/najd/Najd-Regular.ttf

@@ -91,26 +91,32 @@ def subset_font_in_dr(pdf):
     dr[next(iter(dr.keys()))] = page_fonts[next(iter(page_fonts.keys()))]
 
 
-CASES = [("acroform/OBJR removed", drop_widget_k), ("acroform/subset font in /DR", subset_font_in_dr), ("acroform/field renamed", rename_field),
-         ("acroform/no /Tabs", drop_tabs), ("link/StructParent dangling", break_link_structparent),
-         ("metadata/wrong title", retitle)]
+CASES = [("acroform/OBJR removed", drop_widget_k, "acroform"), ("acroform/subset font in /DR", subset_font_in_dr, "acroform"),
+         ("acroform/field renamed", rename_field, "acroform"),
+         ("acroform/no /Tabs", drop_tabs, "acroform"), ("link/StructParent dangling", break_link_structparent, "link-tagging"),
+         ("metadata/wrong title", retitle, "title")]
 
 
 def main() -> None:
     global WORK
     WORK = tempfile.mkdtemp(prefix="attack-")
     failed = []
-    for name, fn in CASES:
+    clean = run(SRC)
+    if clean:                     # the reference must be green, else «CAUGHT» means nothing
+        raise SystemExit(f"attack_fixes: the build under test already fails: {clean}")
+    for name, fn, expect in CASES:
         case, fails = mutate(name.replace("/", "_").replace(" ", "_"), fn)
-        caught = bool(fails)
-        print(("CAUGHT   " if caught else "MISSED   ") + case + " -> " + ", ".join(fails))
+        # Any failure is not a catch: the named check must be the one that failed.
+        caught = expect in fails
+        print(("CAUGHT   " if caught else "MISSED   ") + case + " -> " + ", ".join(fails)
+              + ("" if caught else f"  [expected {expect}]"))
         if not caught:
             failed.append(case)
 
     # a PDF/UA claim must be judged against the ua1 baseline, not against 3b
     NS.CONFORMANCE = {"pdfuaid:part": "1"}
     case, fails = mutate("ua_claim", claim_ua)
-    caught = bool(fails)
+    caught = "pdfua" in fails
     print(("CAUGHT   " if caught else "MISSED   ") + "claim/PDF-UA vs ua1 baseline -> " + "; ".join(fails))
     if not caught:
         failed.append("claim/PDF-UA")

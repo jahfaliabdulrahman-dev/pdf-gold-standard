@@ -54,7 +54,7 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as tmp:
         raw, mid, fixed = (os.path.join(tmp, n) for n in ("raw.pdf", "mid.pdf", "fixed.pdf"))
         r2l(RAW, raw)
-        stats = fix_text_layer.process(RAW, mid); r2l(mid, fixed)
+        stats = fix_text_layer.process(RAW, mid, strict_widths=True); r2l(mid, fixed)
         print(f"fix_text_layer: {stats}")
         for engine, text in extract(raw).items():
             s = exact(text, want); ok = s < 0.5

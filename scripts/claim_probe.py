@@ -14,15 +14,28 @@ import tempfile
 
 import pikepdf
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import spec_loader  # noqa: E402
+
+NS = spec_loader.load()  # noqa: E402
+
 def rules(path, flavour):
     r = subprocess.run(["verapdf", "--flavour", flavour, "--format", "json", path],
                        capture_output=True, text=True, timeout=900)
-    data = json.loads(r.stdout or "{}")
+    # `r.stdout or "{}"` turned a crash into «zero violations», so a broken tool passed the claim probe.
+    if r.returncode not in (0, 1):
+        raise SystemExit(f"verapdf {flavour}: exit {r.returncode} — the tool failed: {r.stderr[-300:]}")
+    if not r.stdout.strip():
+        raise SystemExit(f"verapdf {flavour}: empty JSON output (exit {r.returncode}): {r.stderr[-300:]}")
+    data = json.loads(r.stdout)
     out = []
     def walk(o):
         if isinstance(o, dict):
             if "ruleSummaries" in o:
                 for x in o["ruleSummaries"]:
+                    if x.get("ruleStatus", "FAILED") != "FAILED":
+                        continue
                     out.append((f'{x.get("clause")}-{x.get("testNumber")}', x.get("description", "")[:90]))
             for v in o.values(): walk(v)
         elif isinstance(o, list):
@@ -61,7 +74,7 @@ if __name__ == "__main__":
         bad = 0
         for flavour, keys in CLAIMS.items():
             got = {rid for rid, _ in probe(src, flavour, keys)}
-            want = EXPECTED[flavour]
+            want = getattr(NS, "CLAIM_EXPECTED", EXPECTED)[flavour]
             new, dead = got - want, want - got
             ok = not new and not dead
             print(("PASS " if ok else "FAIL ") + f"claim-{flavour} - {len(got)} remaining"

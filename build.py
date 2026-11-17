@@ -164,7 +164,9 @@ def print_pdf() -> None:
     # Keep what Chrome actually produced: the only way to tell a Chrome text-layer defect from a
     # post-processing one is to measure the raw file before anything else touches it.
     try:
-        shutil.copyfile(TMP_PDF, os.path.join(TMPDIR, "raw.kept.pdf"))
+        # Keep Chrome's own output BESIDE the build, not in the run directory that atexit removes, so a
+        # disputed text layer can be re-measured from the file that produced it.
+        shutil.copyfile(TMP_PDF, os.path.splitext(OUT)[0] + ".raw.pdf")
     except OSError as exc:                      # keep building; only the diagnostic copy is lost
         print(f"[!] could not keep the raw Chrome PDF: {exc}")
     print("[2/4] chrome printed:", TMP_PDF)

@@ -84,16 +84,18 @@ def main() -> None:
         return
     spec_file = os.path.join(HERE, "..", NS.__name__ + ".py")
     src = open(spec_file, encoding="utf-8").read()
+    # Read the OLD value before the calibrated blocks are rewritten: for a spec whose EXPECTED_LINKS sits
+    # inside a marked block, reading it afterwards compares the new number with itself and the guard never fires.
+    old_links = re.search(r"^EXPECTED_LINKS = (\d+)", src, re.M)
+    if old_links and int(old_links.group(1)) > m["links"] and "--force" not in sys.argv:
+        raise SystemExit(f"refusing to lower EXPECTED_LINKS {old_links.group(1)} -> {m['links']}: "
+                         "a lost link is a defect, not a new baseline (pass --force only if the design changed)")
     for name, val in new.items():
         pat = re.compile(rf"# >>> CALIBRATED {name}\n.*?\n# <<< CALIBRATED {name}\n", re.S)
         if not pat.search(src):
             raise SystemExit(f"{name}: no marked block in {spec_file}")
         src = pat.sub(lambda _m: block(name, val), src)
     open(spec_file, "w", encoding="utf-8").write(src)
-    old_links = re.search(r"^EXPECTED_LINKS = (\d+)", src, re.M)
-    if old_links and int(old_links.group(1)) > m["links"] and "--force" not in sys.argv:
-        raise SystemExit(f"refusing to lower EXPECTED_LINKS {old_links.group(1)} -> {m['links']}: "
-                         "a lost link is a defect, not a new baseline (pass --force only if the design changed)")
     print("written:", spec_file)
 
 
