@@ -169,8 +169,8 @@ ART_FILES = [
 
 PRINTS_LINK_COUNT = True     # page 12 prints «٦٣ رابطا»; the gate parses and compares it
 LINKS_CLAIM = "و٦٣ رابطا حيا"   # injected into {{LINKS_CLAIM}}; the print variant states its own truth
-GATE_CHECKS = 34
-GATE_MUTATIONS = 48
+GATE_CHECKS = 35
+GATE_MUTATIONS = 50
 GATE_NA = {}                                   # every mutation applies to this document
 # Measured 2026-11-17 by scripts/claim_probe.py on this build: zero rules remain under either claim.
 CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
