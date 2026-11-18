@@ -81,8 +81,9 @@ def rename_nav_class(doc):
     # a benign refactor (HTML + CSS renamed together, page unchanged) must not silence the strongest check
     if not NS.NAV_PAGES:               # a print copy carries no strip: there is no class to rename
         return NA
-    return _source_variant(lambda s: s.replace('class="nav"', 'class="navbar"')
-                           .replace(".nav{", ".navbar{").replace(".nav ", ".navbar ").replace(".nav,", ".navbar,"))
+    cls = NS.NAV_CLASS
+    return _source_variant(lambda s: s.replace(f'class="{cls}"', 'class="navbar"')
+                           .replace(f".{cls}{{", ".navbar{").replace(f".{cls} ", ".navbar ").replace(f".{cls},", ".navbar,"))
 
 
 def stale_back_cover(doc):

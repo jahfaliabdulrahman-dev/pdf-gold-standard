@@ -115,7 +115,10 @@ def rendered_markup(spec, source_html: str, proj: str | None = None) -> str:
     if not getattr(spec, "NAV_VISIBLE", True):
         # A print copy carries no navigation chrome: the icons are ink on paper and take four click
         # targets that can never be clicked. Stripping the markup (not hiding it with CSS) removes both.
-        html = re.sub(r'\s*<div class="nav">.*?</div>', "", html, flags=re.S)
+        cls = getattr(spec, "NAV_CLASS", None)
+        if not cls:
+            raise ValueError("the spec hides the navigation strip but declares no NAV_CLASS")
+        html = re.sub(r'\s*<div class="%s">.*?</div>' % re.escape(cls), "", html, flags=re.S)
     for k, url in enumerate(getattr(spec, "REF_URLS", []), start=1):
         html = html.replace("{{QR_%d}}" % k, _qr_datauri(url))
     # v2 generated-art layer: base64-embed local art so the print stays deterministic (Chrome renders

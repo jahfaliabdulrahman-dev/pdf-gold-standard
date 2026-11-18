@@ -182,6 +182,8 @@ DEST_NAMES = [("cover", COVER), ("basmala", BASMALA), ("contents", CONTENTS), ("
               ("section-2", 6), ("form", 14), ("references", REF_PAGE), ("back", PAGES - 1)]
 PAGE_LABELS = [(0, None, "غ"), (1, "D", 1)]
 XMP_LANGUAGE = "ar"
+# The class the navigation strip is drawn with: the producer removes it and the gate reads it.
+NAV_CLASS = "nav"
 XMP_TITLE = f"{DOC_TITLE} · الإصدار {GUIDE_VERSION_AR}"   # one source of truth for the title string
 XMP_DESCRIPTION = "تشخيص وإصلاح وإثبات لطبقة النص العربية في PDF، بأرقام مقاسة على خمسة قرّاء"
 # Declared only when veraPDF reports ZERO failures for it — the gate reads the baseline and refuses otherwise.
