@@ -35,7 +35,7 @@ NA = object()
 # The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
 # and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
 # a silent skip can hide behind a stable number.
-SUITE_SIZE = 54
+SUITE_SIZE = 57
 
 
 class _NotApplicable(Exception):
@@ -459,6 +459,84 @@ def pagination_body_text(doc):
     return _pikemutate(doc, fn)
 
 
+def artifact_body_text(doc):
+    """An UNTYPED /Artifact BMC carrying a body line (review P1).
+
+    `/Artifact` with no `/Type` is what the producer's own wrapper used to write, and every check accepted it:
+    a body line inside it disappears from a screen reader while the file still passes veraPDF. Position is
+    the only thing that can tell it from the footer, so the gate must judge it by position.
+    """
+    import pikepdf
+
+    def fn(p):
+        page = p.pages[0]
+        streams = page.Contents if isinstance(page.Contents, pikepdf.Array) else [page.Contents]
+        body = b"\n".join(bytes(st.read_bytes()) for st in streams)
+        font = b"/F1"
+        try:
+            font = str(next(iter(page.Resources["/Font"].keys()))).encode()
+        except Exception:
+            pass
+        inject = (b"\nq\n/Artifact BMC\nBT\n" + font +
+                  b" 12 Tf\n1 0 0 1 100 400 Tm\n( ) Tj\nET\nEMC\nQ\n")
+        page.Contents = p.make_stream(inject + body)
+
+    return _pikemutate(doc, fn)
+
+
+def artifact_by_name(doc):
+    """`/Artifact /P1 BDC` — the properties come from a NAMED list, not an inline dictionary (review P1).
+
+    A reader that only looks at the operand's shape sees a bare name and gives up; the name resolves through
+    /Resources /Properties and the block is an untyped artifact holding a body line.
+    """
+    import pikepdf
+
+    def fn(p):
+        page = p.pages[0]
+        streams = page.Contents if isinstance(page.Contents, pikepdf.Array) else [page.Contents]
+        body = b"\n".join(bytes(st.read_bytes()) for st in streams)
+        font = b"/F1"
+        try:
+            font = str(next(iter(page.Resources["/Font"].keys()))).encode()
+        except Exception:
+            pass
+        props = page.Resources.get("/Properties", pikepdf.Dictionary())
+        props["/P1"] = pikepdf.Dictionary(Type=pikepdf.Name("/Foo"))
+        page.Resources["/Properties"] = props
+        inject = (b"\nq\n/Artifact /P1 BDC\nBT\n" + font +
+                  b" 12 Tf\n1 0 0 1 100 400 Tm\n( ) Tj\nET\nEMC\nQ\n")
+        page.Contents = p.make_stream(inject + body)
+
+    return _pikemutate(doc, fn)
+
+
+def form_xobject_text(doc):
+    """A body line drawn from inside a Form XObject invoked inside an artifact (review P2).
+
+    The page's stream carries no text at all: a gate that does not follow `Do` (with the form's /Matrix) sees
+    nothing and passes.
+    """
+    import pikepdf
+
+    def fn(p):
+        page = p.pages[0]
+        form = p.make_stream(b"BT /F1 12 Tf 1 0 0 1 100 0 Tm ( ) Tj ET")
+        form["/Type"] = pikepdf.Name("/XObject")
+        form["/Subtype"] = pikepdf.Name("/Form")
+        form["/Matrix"] = pikepdf.Array([1, 0, 0, 1, 0, 400])
+        form["/Resources"] = page.Resources
+        xo = page.Resources.get("/XObject", pikepdf.Dictionary())
+        xo["/FxForm"] = form
+        page.Resources["/XObject"] = xo
+        streams = page.Contents if isinstance(page.Contents, pikepdf.Array) else [page.Contents]
+        body = b"\n".join(bytes(st.read_bytes()) for st in streams)
+        inject = b"\nq\n/Artifact BMC\n/FxForm Do\nEMC\nQ\n"
+        page.Contents = p.make_stream(inject + body)
+
+    return _pikemutate(doc, fn)
+
+
 def wrong_mark(doc):
     # a kasra that copies as a fatha: the vocalised line is no longer exact
     if not getattr(NS, "VOCALISED_CLAIM", True):
@@ -734,6 +812,9 @@ MUTATIONS = [
     (paragraph_under_document, "tagged-structure", False),
     (pagination_body_text, "furniture-band", False),
     (wrong_chrome_version, "chrome-version", False),
+    (artifact_body_text, "furniture-band", False),
+    (artifact_by_name, "furniture-band", False),
+    (form_xobject_text, "furniture-band", False),
     (missing_rendered_hash, "provenance", False),
     (rendered_mismatch, "provenance", False),
     (print_copy_with_icons, "render", False),
@@ -741,7 +822,11 @@ MUTATIONS = [
 ]
 
 if __name__ == "__main__":
-    base = G.gate(fresh())
+    try:
+        base = G.gate(fresh())
+    except G.GateInput as exc:                    # a missing floor/claim is an input error, named, not a crash
+        print(f"\nFAIL input - {exc}")
+        raise SystemExit("SELFTEST FAILED — the gate refused its input before judging it")
     print(f"\nbaseline: {'PASS' if not base else 'FAIL ' + str(base)}")
     missed = ["baseline"] if base else []
     declared_na = dict(getattr(NS, "GATE_NA", {}))
@@ -777,7 +862,12 @@ if __name__ == "__main__":
                 continue
             if out is not None and hasattr(out, "page_count"):
                 d = out
-            failed = G.gate(reread(d))
+            try:
+                failed = G.gate(reread(d))
+            except G.GateInput as exc:             # the mutation broke the FILE, not the rule: say so
+                print(f"\n>>> {name}: the gate refused the mutated file as input ({exc})")
+                missed.append(name + " (input refusal)")
+                continue
         finally:
             restore_all()
             NS.SOURCE_HTML, NS.GATE_CHECKS = OLD_SOURCE, OLD_CHECKS

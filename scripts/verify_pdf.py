@@ -150,6 +150,8 @@ def pdfium_texts(doc) -> list[str] | None:
         return None
 
 
+NUMERAL_CHARS = frozenset("٠١٢٣٤٥٦٧٨٩0123456789")
+NUMERAL_GAP_PT = 12          # two numerals further apart than this are two numerals, not one footer
 AR_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
 
 
@@ -160,12 +162,13 @@ def _digit_value(span) -> int | None:
     Deciding by «is the token — or its reverse — somewhere in PDFium's page text?» loses as soon as the page
     prints both: ١٢ in the footer and ٢١ in the body made the footer read 21 (B4). A numeral is written
     left-to-right in Arabic as well as in Latin, so sorting the span's digit glyphs by x gives the value
-    whatever string the reader built. Two numerals in one span (a gap over GAP_PT) are not a footer number.
+    whatever string the reader built. Two numerals in one span (a gap over NUMERAL_GAP_PT) are not a footer number.
     """
     text = "".join(c["c"] for c in span.get("chars", ())).strip()
     # A footer number is a numeral, not a number inside prose: the cover also prints «٤٫١ · نوفمبر ٢٠٢٦»
-    # in the band, and reading the digits out of that sentence invented a footer 14 (measured).
-    if not text or not all(ch.isdigit() for ch in text):
+    # in the band, and reading the digits out of that sentence invented a footer 14 (measured). «²» passes
+    # str.isdigit() and then breaks int(); the whitelist is the only answer that holds.
+    if not text or any(ch not in NUMERAL_CHARS for ch in text):
         return None
     glyphs = list(span.get("chars", ()))
     if not glyphs:
@@ -173,7 +176,7 @@ def _digit_value(span) -> int | None:
     glyphs.sort(key=lambda c: c["bbox"][0])
     runs, cur = [], [glyphs[0]]
     for c in glyphs[1:]:
-        if c["bbox"][0] - cur[-1]["bbox"][2] < 12:      # same numeral
+        if c["bbox"][0] - cur[-1]["bbox"][2] < NUMERAL_GAP_PT:      # same numeral
             cur.append(c)
         else:
             runs.append(cur); cur = [c]
@@ -225,7 +228,7 @@ def printed_counts(page) -> dict:
                     continue
                 runs, cur = [], [digits[0]]
                 for c in digits[1:]:
-                    if c["bbox"][0] - cur[-1]["bbox"][2] < 12:      # same numeral
+                    if c["bbox"][0] - cur[-1]["bbox"][2] < NUMERAL_GAP_PT:      # same numeral
                         cur.append(c)
                     else:
                         runs.append(cur); cur = [c]
@@ -546,7 +549,7 @@ def _parent_tree(pdf) -> dict:
     return table
 
 
-from pdfops import PAINT_OPS, text_shows  # noqa: E402  (one definition: producer and gate read the same rule)
+from pdfops import PAINT_OPS, artifact_shows, form_resolver, outside_bands, props_of  # noqa: E402
 from gate_policy import LINE_ORDER_FLOOR  # noqa: E402
 import chrome_pin  # noqa: E402  (the engine every number here was measured on)
 
@@ -1138,16 +1141,17 @@ def gate(doc) -> list[str]:
     #     text show inside one must sit in the band the spec declares. The producer refuses at build time;
     #     this is the same rule on the file, which is where a mutation can be seen.
     bands = list(getattr(NS, "FURNITURE_BANDS", []))
-    swept, shows_seen = [], 0
+    swept, inventory = [], {}
     try:
         xp = pikepdf_open(doc)
         try:
             for pi, page in enumerate(xp.pages, 1):
-                shows = text_shows(pikepdf.parse_content_stream(page))
-                shows_seen += sum(1 for is_pag, *_ in shows if is_pag)
-                strays = [y for is_pag, _x, y, _s in shows
-                          if is_pag and not any(lo <= y <= hi for lo, hi in bands)]
-                swept += [f"p{pi} y={y:.0f}" for y in strays]
+                instr = list(pikepdf.parse_content_stream(page))
+                resolve, props = form_resolver(page), props_of(page)
+                # every artifact that carries text — typed, bare, named, nested, inside a form — is judged
+                for kind, n in artifact_shows(instr, resolve, props).items():
+                    inventory[kind] = inventory.get(kind, 0) + n
+                swept += [f"p{pi} {kind} y={y:.0f}" for kind, y in outside_bands(instr, bands, resolve, props)]
         finally:
             xp.close()
     except GateInput:
@@ -1155,7 +1159,7 @@ def gate(doc) -> list[str]:
     except Exception as exc:                 # an unreadable content stream is a failure, not a crash
         swept = [f"cannot read the page content: {exc}"]
     check("furniture-band", not swept,
-          "; ".join(swept[:4]) or f"{len(bands)} band(s) · {shows_seen} pagination show(s), every one inside")
+          "; ".join(swept[:4]) or f"{len(bands)} band(s) · {inventory or 'no artifact text'}, every show inside")
 
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).

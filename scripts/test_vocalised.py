@@ -40,21 +40,25 @@ def exact(text, want):
     return sum(b.size for b in difflib.SequenceMatcher(None, want, got, autojunk=False).get_matching_blocks()) / len(want)
 
 
-def gap_seam(engine, strict_text, loose_text):
-    """The fill's text, not its count: ONE U+2060 at the seam, and nothing else copied differently.
+# Measured on the checked-in fixture tests/vocalised_raw.pdf (Chrome, GeezaPro): PDFium copies the joiner at
+# character 103 (the end of the first RTL line), MuPDF at character 1 (right after its leading tab). A
+# structural rule («any line end», «any tab») accepted a joiner anywhere along a line; the index does not.
+GAP_SEAT = {"PDFium": 103, "MuPDF": 1}
 
-    The fixture is checked in, so the seat is measured rather than guessed: PDFium orders the RTL line
-    logically and the joiner lands at the line's end (before the CRLF); MuPDF starts the line with a tab and
-    the joiner follows it. A fill that is counted but never read is how a wrong character stays invisible.
+
+def gap_seam(engine, strict_text, loose_text):
+    """The fill's text AND its seat: ONE U+2060 at the measured index, and nothing else copied differently.
+
+    A fill that is counted but never read is how a wrong character stays invisible; a fill read but not
+    placed is how a wrong POSITION stays invisible (review P2).
     """
     n = strict_text.count("\u2060")
     if n != 1:
         return False, f"{n} U+2060 in the copied text (must be exactly 1)"
     i = strict_text.index("\u2060")
-    if engine == "PDFium" and strict_text[i + 1:i + 3] != "\r\n":
-        return False, f"U+2060 at {i} is not at the end of the RTL line: {strict_text[i:i + 4]!r}"
-    if engine == "MuPDF" and strict_text[i - 1:i] != "\t":
-        return False, f"U+2060 at {i} does not follow the line's tab: {strict_text[i - 2:i + 2]!r}"
+    want = GAP_SEAT.get(engine)
+    if want is not None and i != want:
+        return False, f"U+2060 at {i}; the measured seat for {engine} is {want} — {strict_text[max(0, i - 8):i + 8]!r}"
     if norm(strict_text) != norm(loose_text):
         return False, "the fill changed the copied text beyond the one invisible joiner"
     return True, f"U+2060 at {i}, the rest of the copy unchanged"
@@ -149,6 +153,13 @@ if __name__ == "__main__":
             fix_text_layer.process(gap_src, gap_wrong, strict_widths=True)
         finally:
             fix_text_layer.GAP_JOINER = keep
+        # Counter on the SEAT: the same joiner, moved to the head of the text, must be refused.
+        moved = {e: ("\u2060" + t.replace("\u2060", "", 1)) for e, t in strict_text.items()}
+        seat_bad = {e: gap_seam(e, moved[e], loose_text[e])[0] for e in moved}
+        ok = not any(seat_bad.values())
+        print(f"{'PASS' if ok else 'FAIL'} gap-text/counter-seat - a U+2060 at the wrong index is refused: {seat_bad}")
+        if not ok: failed.append("gap-text/counter-seat")
+
         wrong_text = extract(gap_wrong)
         verdicts = {e: gap_seam(e, wrong_text[e], loose_text[e])[0] for e in wrong_text}
         ok = not any(verdicts.values())

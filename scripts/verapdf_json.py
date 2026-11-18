@@ -1,40 +1,25 @@
-"""The shape a veraPDF report must have before its silence counts as «no failing rule».
+"""The one reader of a veraPDF report — and the shape a report must have before its verdict is believed.
 
-An empty failing set looks exactly like a clean document, so a report that judged nothing used to pass both
-screens: a job that raised a `taskException`, or a job with no `validationResult`, produced zero rules and
-the set diff found no new rule. The guard refuses such a report as an INPUT — exit 1 with the reason —
-instead of reading «the tool did not judge» as «the tool found nothing».
+Two things are checked before any rule set is taken from a report (B6, tightened after review):
 
-Shape held here (veraPDF 1.30, measured on a real report):
-  report.jobs[*].validationResult[*] has a boolean `compliant`, and no job carries a `taskException`.
+  · the report says it JUDGED something — a job, no `taskException`, a `validationResult` with a boolean
+    `compliant` for the profile we asked for (a verdict for PDF/A-3b is not a verdict for PDF/UA-1);
+  · the verdict and the rules AGREE — `compliant=false` with no failing rule, or `compliant=true` while
+    naming failing rules, is a report whose silence would otherwise read as «clean» (an empty set is exactly
+    what a clean document looks like).
+
+`failing_rules` is the only place the tool's JSON is turned into a failing set; the gate and the claim probe
+both call it (the B5 message promised one reader, and the review found two).
 """
 import json
 import subprocess
 
-
-def guard(data: dict, flavour: str) -> None:
-    jobs = ((data or {}).get("report") or {}).get("jobs")
-    if not jobs:
-        raise SystemExit(f"verapdf {flavour}: the report has no jobs — nothing was judged, so an empty set "
-                         "proves nothing")
-    for n, job in enumerate(jobs, 1):
-        if job.get("taskException"):
-            raise SystemExit(f"verapdf {flavour}: job {n} raised a taskException "
-                             f"({str(job['taskException'])[:160]}) — the tool did not judge the file")
-        results = job.get("validationResult")
-        if not isinstance(results, list) or not results:
-            raise SystemExit(f"verapdf {flavour}: job {n} carries no validationResult — the report has no verdict")
-        if not any(isinstance(v, dict) and isinstance(v.get("compliant"), bool) for v in results):
-            raise SystemExit(f"verapdf {flavour}: job {n} has no validationResult with a boolean «compliant» "
-                             "— the report carries a verdict we cannot read")
+# The profile veraPDF must name for each flavour we ask for. «PDF/A-4» would also match «PDF/A-4f», hence the
+# trailing space: a flavour's verdict has to be for the flavour requested.
+PROFILE = {"3b": "PDF/A-3b", "4": "PDF/A-4 ", "4f": "PDF/A-4f", "ua1": "PDF/UA-1"}
 
 
-def failing_rules(path: str, flavour: str) -> set[str]:
-    """The rule keys this flavour reports as FAILED, at clause-testNumber level.
-
-    clause+test, not the clause: a new failing test inside a clause that already fails was invisible to a
-    clause-level set. A rule without a test number keeps its clause (PDF/UA identification is clause "5").
-    """
+def _run(path: str, flavour: str) -> dict:
     r = subprocess.run(["verapdf", "--flavour", flavour, "--format", "json", path],
                        capture_output=True, text=True, timeout=900)
     # A crash is not a clean file: exit 1 is «violations found», anything else is the tool failing.
@@ -43,21 +28,73 @@ def failing_rules(path: str, flavour: str) -> set[str]:
                          f"{r.stderr[-300:]}")
     if not r.stdout.strip():
         raise SystemExit(f"verapdf {flavour}: empty JSON output (exit {r.returncode}): {r.stderr[-300:]}")
-    data = json.loads(r.stdout)
+    return json.loads(r.stdout)
+
+
+def _failed(rule) -> bool:
+    return str(rule.get("ruleStatus", "FAILED")) == "FAILED"
+
+
+def guard(data: dict, flavour: str) -> None:
+    jobs = ((data or {}).get("report") or {}).get("jobs")
+    if not jobs:
+        raise SystemExit(f"verapdf {flavour}: the report has no jobs — nothing was judged, so an empty set "
+                         "proves nothing")
+    want = PROFILE.get(flavour)
+    for n, job in enumerate(jobs, 1):
+        if job.get("taskException"):
+            raise SystemExit(f"verapdf {flavour}: job {n} raised a taskException "
+                             f"({str(job['taskException'])[:160]}) — the tool did not judge the file")
+        results = job.get("validationResult")
+        if not isinstance(results, list) or not results:
+            raise SystemExit(f"verapdf {flavour}: job {n} carries no validationResult — the report has no verdict")
+        if not all(isinstance(v, dict) and isinstance(v.get("compliant"), bool) for v in results):
+            raise SystemExit(f"verapdf {flavour}: job {n} has a validationResult without a boolean «compliant» "
+                             "— the report carries a verdict we cannot read")
+        for v in results:
+            name = str(v.get("profileName", ""))
+            if want and not name.startswith(want):
+                raise SystemExit(f"verapdf {flavour}: job {n} was judged against «{name}», not the {flavour} "
+                                 f"profile ({want.strip()}) — a verdict for another profile is not this one")
+            failed = [x for x in ((v.get("details") or {}).get("ruleSummaries") or []) if _failed(x)]
+            if v["compliant"] is False and not failed:
+                raise SystemExit(f"verapdf {flavour}: job {n} says NON-compliant but names no failing rule — "
+                                 "the verdict and the rules disagree")
+            if v["compliant"] is True and failed:
+                raise SystemExit(f"verapdf {flavour}: job {n} says compliant while naming "
+                                 f"{len(failed)} failing rule(s) — the verdict and the rules disagree")
+
+
+def _key(rule) -> str:
+    clause, test = rule.get("clause"), rule.get("testNumber")
+    return str(f"{clause}-{test}" if clause and test else (rule.get("ruleId") or clause))
+
+
+def failing_rules_detail(path: str, flavour: str) -> list[tuple[str, str]]:
+    """(clause-testNumber, description) for every failing rule — the one reader, for both screens.
+
+    clause+test, not the clause: a new failing test inside a clause that already fails was invisible to a
+    clause-level set. A rule without a test number keeps its clause (PDF/UA identification is clause "5").
+    """
+    data = _run(path, flavour)
     guard(data, flavour)
-    out = set()
+    out = {}
 
     def walk(o):
         if isinstance(o, dict):
-            if o.get("ruleStatus") == "FAILED":
-                clause, test = o.get("clause"), o.get("testNumber")
-                rid = f"{clause}-{test}" if clause and test else (o.get("ruleId") or clause)
-                if rid:
-                    out.add(str(rid))
+            if _failed(o) and ("clause" in o or "ruleId" in o):
+                k = _key(o)
+                if k and k != "None":
+                    out.setdefault(k, str(o.get("description", ""))[:90])
             for v in o.values():
                 walk(v)
         elif isinstance(o, list):
             for v in o:
                 walk(v)
     walk(data)
-    return out
+    return sorted(out.items())
+
+
+def failing_rules(path: str, flavour: str) -> set[str]:
+    """The rule keys this flavour reports as FAILED, at clause-testNumber level."""
+    return {k for k, _ in failing_rules_detail(path, flavour)}

@@ -39,7 +39,10 @@ def measure(pdf_path: str) -> dict:
     # STRUCTURE the gate already accepts. Calibration-dependent checks are the ones this tool exists to
     # fill; any other failure means the build is broken and measuring it would bless the defect.
     CALIBRATION_ONLY = {"page-ink", "page-words", "page-images", "footer-numbers"}
-    fails = G.gate(doc)
+    try:
+        fails = G.gate(doc)
+    except G.GateInput as exc:                     # e.g. a floor missing from the spec: name it, do not crash
+        raise SystemExit(f"refusing to calibrate: {exc}")
     blocking = [f for f in fails if f not in CALIBRATION_ONLY]
     if blocking:
         raise SystemExit(f"refusing to calibrate: the build fails {', '.join(blocking)}")
@@ -77,6 +80,8 @@ def main() -> None:
     footer_src = "{" + ", ".join(f"{k}: {v}" for k, v in m["footer"].items()) + "}"
     # The ratchet is the document's own measured order minus drift; it can never fall below the floor three
     # documents once shared, so the gate would refuse a spec that tried to buy green by lowering it.
+    if m.get("mupdf") is None:
+        raise SystemExit("refusing to calibrate: MuPDF could not read the text, so the order floor has no basis")
     line_src = f"{max(LINE_ORDER_FLOOR, round(m['mupdf'] - LINE_ORDER_DRIFT, 3)):.3f}"
     # Each guard has its own key: a design change that moves the link count must not silently lower the
     # word-order floor, and a falling order must not be excused by passing the link flag.

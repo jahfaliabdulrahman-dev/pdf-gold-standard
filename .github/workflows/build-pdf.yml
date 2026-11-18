@@ -15,6 +15,10 @@ jobs:
   build:
     # macOS: same system faces as the owner's Mac (GeezaPro for the vocalised basmala) and Chrome preinstalled
     runs-on: macos-15
+    env:
+      # ONE value in this file: the action input below and chrome_pin.py are compared against it, and the gate
+      # refuses a manifest that names anything else.
+      CHROME_VERSION: "157.0.8103.78"
     steps:
       - uses: actions/checkout@v5
 
@@ -30,13 +34,14 @@ jobs:
 
       - name: Chrome — the pinned engine (chrome_pin.py)
         id: chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce  # v1.7.3, pinned by SHA
         with:
-          chrome-version: 157.0.8103.78
+          chrome-version: ${{ env.CHROME_VERSION }}
 
       - name: CHROME_PATH — one binary, and it is the pin
         run: |
-          python3 -c "import sys, chrome_pin; sys.exit(0 if chrome_pin.CHROME_VERSION == '157.0.8103.78' else 'workflow pin != chrome_pin.CHROME_VERSION — update both in one commit')"
+          # compared against the value the action was given, not a second literal in this file
+          python3 -c "import os, sys, chrome_pin; sys.exit(0 if chrome_pin.CHROME_VERSION == os.environ['CHROME_VERSION'] else 'workflow pin != chrome_pin.CHROME_VERSION — update both in one commit')"
           echo "CHROME_PATH=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
           "${{ steps.chrome.outputs.chrome-path }}" --version
 
@@ -51,7 +56,9 @@ jobs:
         run: python3 scripts/verify_pdf.py guide-v2-ar.pdf
 
       - name: Gate self-test — every mutation must be caught
-        run: python3 scripts/gate_selftest.py guide-v2-ar.pdf
+        run: |
+          python3 scripts/gate_selftest.py guide-v2-ar.pdf
+          PDF_SPEC=nav_spec python3 scripts/artifact_inventory.py guide-v2-ar.pdf
 
       - name: veraPDF baseline — no NEW failing rule, no DEAD exception
         run: |
@@ -74,6 +81,8 @@ jobs:
           python3 scripts/test_verapdf_json_guard.py
           python3 scripts/test_verapdf_test_granularity.py
           python3 scripts/test_digit_value.py
+          python3 scripts/test_baseline_guard.py
+          PDF_SPEC=report_spec python3 scripts/artifact_inventory.py report.pdf
           # the tool ROADMAP cites for the responsible lines must run at this head (it broke once)
           PDF_SPEC=report_spec python3 scripts/line_order_report.py report.pdf > /dev/null
 
@@ -85,6 +94,10 @@ jobs:
           PDF_SPEC=report_print_spec python3 build.py report-v1.html report-print.pdf
           PDF_SPEC=report_print_spec python3 scripts/verify_pdf.py report-print.pdf
           PDF_SPEC=report_print_spec python3 scripts/gate_selftest.py report-print.pdf
+          # the copy declares PDF/A-3b and PDF/UA-1: a claim CI does not measure is a claim that rots
+          PDF_SPEC=report_print_spec python3 scripts/verapdf_gate.py report-print.pdf 3b ua1 4f
+          PDF_SPEC=report_print_spec python3 scripts/claim_probe.py report-print.pdf --check
+          PDF_SPEC=report_print_spec python3 scripts/artifact_inventory.py report-print.pdf
 
       - name: Claim probe — what remains if the file DECLARED conformance
         run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check

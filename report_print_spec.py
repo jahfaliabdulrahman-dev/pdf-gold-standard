@@ -41,7 +41,7 @@ DOC_SUBJECT = _base.DOC_SUBJECT + " — نسخة مهيّأة للطباعة ب�
 # eight mutations that describe a strip have nothing to act on and return NA on it — measured, not
 # assumed: each is named here with its reason, and gate_selftest fails if one applies after all.
 # 54 − 8 = 46.
-GATE_MUTATIONS = 46
+GATE_MUTATIONS = 49
 # The print copy is the same document: it asserts the same conformance and the same expected failing
 # rules, stated here rather than inherited silently.
 CLAIM_EXPECTED = _base.CLAIM_EXPECTED

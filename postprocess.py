@@ -67,57 +67,69 @@ def feature_named_destinations(pdf, spec, ctx=None) -> None:
     pdf.Root.Names = pikepdf.Dictionary(Dests=pikepdf.Dictionary(Names=names))
 
 
-from pdfops import PAINT_OPS, outside_bands  # noqa: E402  (single definition, shared with the gate)
+from pdfops import PAINT_OPS, TEXT_OPS, text_shows, outside_bands  # noqa: E402  (one definition, shared with the gate)
 
 
-def _wrap_untagged(instructions):
-    """Wrap untagged painting runs in /Artifact BMC … EMC; return (new list, blocks added, forms invoked).
+def _wrap_untagged(instructions, bands=None, page_no=0):
+    """Wrap untagged painting runs in an artifact; return (new list, blocks added).
+
+    Text inside a run is judged before it is wrapped (B1): a show outside every declared band is body text
+    Chrome failed to tag, and wrapping it as /Pagination would hide it from a screen reader while the file
+    still passes veraPDF — it stops the build by name instead. A run that carries text becomes a TYPED
+    /Pagination artifact; a run of pure painting (backgrounds, rules, icons) stays a bare /Artifact BMC.
 
     Only painting operators enter the block. Every container operator — BMC/BDC/EMC, q/Q, BT/ET, colour
     and text state — closes the block first, so an artifact can never hold a tagged sequence (7.1-2) and
     can never straddle a state container.
     """
-    out = []
-    mc = 0
-    artifact_open = False
-    added = 0
+    # untagged shows that sit OUTSIDE every marked-content block — the only ones this function wraps
+    shows = [s for s in text_shows(instructions) if s[0] is None and s[4] == 0]
+    pending = iter(shows)
+    out, buf, buf_text, added = [], [], False, 0
 
-    def close() -> None:
-        nonlocal artifact_open
-        if artifact_open:
-            out.append(pikepdf.ContentStreamInstruction([], pikepdf.Operator("EMC")))
-            artifact_open = False
+    def flush():
+        nonlocal buf, buf_text, added
+        if not buf:
+            return
+        wrapper = ([pikepdf.Name("/Artifact"), pikepdf.Dictionary(Type=pikepdf.Name("/Pagination"))]
+                   if buf_text else [pikepdf.Name("/Artifact")])
+        out.append(pikepdf.ContentStreamInstruction(wrapper, pikepdf.Operator("BDC" if buf_text else "BMC")))
+        out.extend(buf)
+        out.append(pikepdf.ContentStreamInstruction([], pikepdf.Operator("EMC")))
+        added += 1
+        buf, buf_text = [], False
 
+    mc = 0                       # marked-content depth: only painting OUTSIDE every block is wrapped
     for ins in instructions:
         op = str(ins.operator)
         if op in ("BMC", "BDC"):
-            close()
+            flush()
+            out.append(ins)
             mc += 1
-            out.append(ins)
         elif op == "EMC":
-            close()
+            flush()
+            out.append(ins)
             mc = max(0, mc - 1)
+        elif op in ("q", "Q", "BT", "ET"):
+            flush()
             out.append(ins)
-        elif op == "Do":
-            if mc == 0 and not artifact_open:
-                out.append(pikepdf.ContentStreamInstruction(
-                    [pikepdf.Name("/Artifact")], pikepdf.Operator("BMC")))
-                artifact_open = True
-                added += 1
-            out.append(ins)
-        elif mc == 0 and op in PAINT_OPS:
-            if not artifact_open:
-                out.append(pikepdf.ContentStreamInstruction(
-                    [pikepdf.Name("/Artifact")], pikepdf.Operator("BMC")))
-                artifact_open = True
-                added += 1
-            out.append(ins)
-        elif mc == 0:
-            close()
-            out.append(ins)
+        elif op in PAINT_OPS and mc == 0:
+            if op in TEXT_OPS:
+                _kind, _x, y, _size, _depth = next(pending)
+                # bands is None inside a Form XObject: its coordinates are the form's, and the page-level
+                # check follows Do to judge them in page space.
+                if bands is not None and not any(lo <= y <= hi for lo, hi in bands):
+                    raise ValueError(f"page {page_no}: untagged text at y={y:.0f} is outside the declared "
+                                     f"furniture band {list(bands)} — marking it /Pagination would hide it "
+                                     "from a screen reader")
+                buf_text = True
+            buf.append(ins)
+        elif mc > 0:
+            out.append(ins)       # inside a tag: not ours to wrap
         else:
+            flush()
             out.append(ins)
-    close()
+    flush()
     return out, added
 
 
@@ -180,7 +192,7 @@ def _tag_orphan_runs(pdf, page, instructions, bands=(), page_no=0):
     # outside the band stops the build by name instead of being swept along.
     stray = outside_bands(out, bands)
     if stray:
-        raise ValueError(f"page {page_no}: untagged text at y={stray[0]:.0f} is outside the declared furniture "
+        raise ValueError(f"page {page_no}: untagged text at y={stray[0][1]:.0f} is outside the declared furniture "
                          f"band {list(bands)} — marking it /Pagination would hide it from a screen reader")
     return out
 
@@ -254,7 +266,8 @@ def feature_pdfua(pdf, spec=None) -> None:
 
     # pass 3: the pages themselves — wrap the untagged painting, then give the leftover runs an owner
     for page_no, page in enumerate(pdf.pages, 1):
-        out, added = _wrap_untagged(pikepdf.parse_content_stream(page))
+        out, added = _wrap_untagged(pikepdf.parse_content_stream(page),
+                                     getattr(NS, "FURNITURE_BANDS", []), page_no)
         out = _tag_orphan_runs(pdf, page, out, getattr(NS, "FURNITURE_BANDS", []), page_no)
         if added or out:
             page.Contents = pdf.make_stream(pikepdf.unparse_content_stream(out))
