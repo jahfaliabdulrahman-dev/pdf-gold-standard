@@ -16,7 +16,7 @@ import tempfile
 import fitz  # PyMuPDF
 
 import spec_loader
-from render_markup import rendered_markup
+from render_markup import rendered_markup, markup_sha256
 
 NS = spec_loader.load()
 
@@ -51,11 +51,15 @@ def chrome_bin() -> str:
 CHROME = chrome_bin()
 
 
-def build_html() -> None:
+def build_html() -> str:
     """Write the markup Chrome will print — derived from the spec and the source, never from a copy."""
-    html = rendered_markup(NS, open(SRC, encoding="utf-8").read(), PROJ)
+    try:
+        html = rendered_markup(NS, open(SRC, encoding="utf-8").read(), PROJ)
+    except ValueError as exc:                  # a broken declaration is a build error, not a traceback
+        raise SystemExit(str(exc)) from None
     open(TMP_HTML, "w", encoding="utf-8").write(html)
     print("[1/4] html ready (QR embedded)")
+    return html
 
 
 def print_pdf() -> None:
@@ -133,10 +137,10 @@ def interactivize() -> None:
 
 
 if __name__ == "__main__":
-    build_html()
-    # The hash of the markup this build handed to Chrome. It is written into the manifest and
-    # recomputed by the gate from the same spec and source: a file from another build cannot stand in.
-    rendered_sha = hashlib.sha256(open(TMP_HTML, "rb").read()).hexdigest()
+    html = build_html()
+    # The hash of the markup this build handed to Chrome, computed from the string (the same function the
+    # gate uses): a file from another build cannot stand in.
+    rendered_sha = markup_sha256(html)
     print_pdf()
     interactivize()
     # rebuild the Arabic text layer (one code point per glyph) — drawing unchanged; see scripts/fix_text_layer.py

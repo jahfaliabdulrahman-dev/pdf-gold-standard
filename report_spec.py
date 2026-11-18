@@ -194,9 +194,6 @@ ATTACHMENT_FILES = [
     ("features.toml", "features.toml", "application/toml", "Data"),
     ("verapdf-baseline.toml", VERAPDF_BASELINE, "application/toml", "Data"),
 ]
-# The page that prints how many files the document carries, and the words it prints them beside.
-# A count in prose is a claim: the gate reads it back and compares it with what the file holds.
-ATTACHMENTS_CLAIM = (12, "ملفات مرفقة")
 
 # Widget rectangles in PDF points (origin bottom-left). The HTML draws the line each field sits on.
 def _field(top_mm: float, height_mm: float) -> list[float]:

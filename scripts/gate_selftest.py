@@ -746,6 +746,25 @@ if __name__ == "__main__":
     print(f">>> 50-page document, page 31 emptied + 32pt image -> {'CAUGHT' if ok else 'MISSED'} {blank}\n")
     if not ok:
         missed.append("blank_page_in_50")
+    # The print-copy predicate, on a page built for it: a rectangle inside a slot must be found, and a
+    # document that draws no icon must come back empty. A predicate never seen finding anything proves
+    # nothing — and the whole-document mutation also fails on the real strip, so it cannot isolate this one.
+    probe = fitz.open()
+    probe_page = probe.new_page(width=595, height=842)
+    slot_x = NS.SLOTS["next"]
+    probe_page.draw_rect(fitz.Rect(slot_x + 4, NS.NAV_Y0 + 4, slot_x + 16, NS.NAV_Y1 - 4),
+                         color=(0, 0, 0), fill=(0, 0, 0))
+    found = G.slot_drawings(probe)
+    ok = len(found) == 1 and "next" in found[0]
+    print(f">>> slot_drawings, one rect inside a slot -> {'CAUGHT' if ok else 'MISSED'} {found}\n")
+    if not ok:
+        missed.append("slot_drawings_positive")
+    if not getattr(NS, "NAV_VISIBLE", True):
+        empty = G.slot_drawings(fresh())
+        ok = not empty
+        print(f">>> slot_drawings, the print document -> {'CLEAN' if ok else 'MISSED'} {empty[:2]}\n")
+        if not ok:
+            missed.append("slot_drawings_negative")
     # Malformed inputs: the CLI must refuse BY NAME (non-zero, no traceback), not crash inside a check.
     import subprocess, tempfile
     data = open(SRC, "rb").read()

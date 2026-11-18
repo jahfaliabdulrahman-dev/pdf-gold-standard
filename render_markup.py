@@ -10,11 +10,11 @@ Pure by design: no argv, no globals, no writes. `proj` defaults to this file's d
 caller in `scripts/` gets the repository root without repeating the path.
 """
 import base64
+import functools
 import io
 import os
 import re
 
-DEFAULT_LINKS_CLAIM = "و٦٣ رابطا حيا"
 _AR_DIGITS = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
 
 
@@ -22,8 +22,9 @@ def arabic_digits(n: int) -> str:
     """The numeral as the documents print it (Arabic-Indic), so a spec never writes the count twice."""
     return str(int(n)).translate(_AR_DIGITS)
 
-# Fixed references the designed pages draw as QRs. {{QR_n}} follows spec.REF_URLS in order.
-URL_QR = [
+# The four fixed references the designed pages print as QRs (guide and report both use them).
+# {{QR_n}} follows spec.REF_URLS in order.
+QR_FIXED = [
     ("{{QR_IBM}}", "https://github.com/IBM/plex"),
     ("{{QR_PYMUPDF}}", "https://pymupdf.readthedocs.io"),
     ("{{QR_PAGEDJS}}", "https://pagedjs.org"),
@@ -40,7 +41,9 @@ def _embed_css(css: str, font_dir: str) -> str:
     """Base64-embed every `url('file')` of a font stylesheet, so the print is offline and deterministic."""
     def _embed(m):
         fp = os.path.join(font_dir, m.group(1))
-        return "url(data:" + _mime(fp) + ";base64," + base64.b64encode(open(fp, "rb").read()).decode() + ")"
+        with open(fp, "rb") as fh:
+            payload = base64.b64encode(fh.read()).decode()
+        return "url(data:" + _mime(fp) + ";base64," + payload + ")"
     return re.sub(r"url\('([^']+)'\)", _embed, css)
 
 
@@ -58,11 +61,29 @@ def _art_for_print(path: str) -> bytes:
     target = (round(21.0 / 2.54 * 300), round(29.7 / 2.54 * 300))     # A4 at 300 dpi = 2480 x 3508
     im = Image.open(path)
     if im.width <= target[0] and im.height <= target[1]:
-        return open(path, "rb").read()
+        with open(path, "rb") as fh:
+            return fh.read()
     im = im.convert("RGB").resize(target, Image.LANCZOS)
     buf = io.BytesIO()
     im.save(buf, "JPEG", quality=85, dpi=(300, 300))
     return buf.getvalue()
+
+
+def markup_sha256(markup: str) -> str:
+    """The hash the manifest carries and the gate recomputes — one function, one encoding.
+
+    Hashing the string (not the bytes of a file written in text mode) keeps the two sides independent of
+    newline translation on the platform that produced the file.
+    """
+    import hashlib
+    return hashlib.sha256(markup.encode("utf-8")).hexdigest()
+
+
+# The pure, expensive steps: their arguments are their whole key, so a cache here cannot go stale when a
+# spec attribute changes (a hand-built key over the markup did exactly that).
+_embed_css = functools.lru_cache(maxsize=8)(_embed_css)
+_qr_datauri = functools.lru_cache(maxsize=64)(_qr_datauri)
+_art_for_print = functools.lru_cache(maxsize=16)(_art_for_print)
 
 
 def rendered_markup(spec, source_html: str, proj: str | None = None) -> str:
@@ -82,13 +103,18 @@ def rendered_markup(spec, source_html: str, proj: str | None = None) -> str:
         ncss = open(os.path.join(ndir, "fonts.css"), encoding="utf-8").read()
         html = html.replace("/*__FONTS_NAJD__*/", _embed_css(ncss, ndir))
     html = re.sub(r"<link[^>]*fonts\.(?:googleapis|gstatic)\.com[^>]*>\s*", "", html)
-    for ph, url in URL_QR:
+    for ph, url in QR_FIXED:
         html = html.replace(ph, _qr_datauri(url))
-    html = html.replace("{{LINKS_CLAIM}}", getattr(spec, "LINKS_CLAIM", DEFAULT_LINKS_CLAIM))
+    if "{{LINKS_CLAIM}}" in html:
+        if not hasattr(spec, "LINKS_CLAIM"):
+            raise ValueError("the source prints {{LINKS_CLAIM}} but the spec declares no LINKS_CLAIM")
+        html = html.replace("{{LINKS_CLAIM}}", spec.LINKS_CLAIM)
     if "{{MUTATIONS_CLAIM}}" in html:
         # The mutation count is a claim about THIS variant: a print copy carries fewer applicable
         # mutations, and the printed number must be its own. Derived from the spec, never typed twice.
-        html = html.replace("{{MUTATIONS_CLAIM}}", arabic_digits(getattr(spec, "GATE_MUTATIONS", 0)))
+        if not hasattr(spec, "GATE_MUTATIONS"):
+            raise ValueError("the source prints {{MUTATIONS_CLAIM}} but the spec declares no GATE_MUTATIONS")
+        html = html.replace("{{MUTATIONS_CLAIM}}", arabic_digits(spec.GATE_MUTATIONS))
     if not getattr(spec, "NAV_VISIBLE", True):
         # A print copy carries no navigation chrome: the icons are ink on paper and take four click
         # targets that can never be clicked. Stripping the markup (not hiding it with CSS) removes both.
@@ -112,4 +138,6 @@ def rendered_markup(spec, source_html: str, proj: str | None = None) -> str:
         html = html.replace(ph, "data:image/jpeg;base64," + payload)
     if "{{ART_" in html:
         raise ValueError("ART FILES: an ART placeholder survived the substitution")
+    if "{{QR_" in html:
+        raise ValueError("QR: a QR placeholder survived — the spec declares fewer QR_FIXED / REF_URLS than the source prints")
     return html
