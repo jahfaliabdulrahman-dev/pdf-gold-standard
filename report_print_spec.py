@@ -18,8 +18,8 @@ DOC_SUBJECT = _base.DOC_SUBJECT + " — نسخة مهيّأة للطباعة ب�
 # The print copy carries no navigation strip at all (the markup is removed, NAV_PAGES = ()), so the
 # eight mutations that describe a strip have nothing to act on and return NA on it — measured, not
 # assumed: each is named here with its reason, and gate_selftest fails if one applies after all.
-# 51 − 8 = 43.
-GATE_MUTATIONS = 43
+# 52 − 8 = 44.
+GATE_MUTATIONS = 44
 GATE_NA = {
     "swap_next_prev": "no strip links: NAV_PAGES = ()",
     "self_link": "no strip links: NAV_PAGES = ()",

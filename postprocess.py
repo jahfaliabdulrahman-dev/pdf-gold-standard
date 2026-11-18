@@ -31,7 +31,7 @@ def _srgb_icc() -> bytes:
     return ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
 
 
-def feature_page_labels(pdf, spec) -> None:
+def feature_page_labels(pdf, spec, ctx=None) -> None:
     """Printed numbering lives in the design; /PageLabels governs what the READER shows.
 
     PDF supports only D/r/R/a/A styles (no Arabic-Indic), so the cover is a prefix-only label («غ») and
@@ -56,7 +56,7 @@ def feature_page_labels(pdf, spec) -> None:
     pdf.Root.PageLabels = pikepdf.Dictionary(Nums=nums)
 
 
-def feature_named_destinations(pdf, spec) -> None:
+def feature_named_destinations(pdf, spec, ctx=None) -> None:
     """A name -> page map, so a target is an identity, not an index that shifts when a page is added."""
     import spec_loader
     NS = spec_loader.load()
@@ -283,7 +283,7 @@ def _pdfua_description() -> str:
     return f'<rdf:Description rdf:about="" {ns}>{PDFUA_XMP_SCHEMA}</rdf:Description>'
 
 
-def feature_xmp(pdf, spec) -> None:
+def feature_xmp(pdf, spec, ctx=None) -> None:
     """XMP is what archive/search tools read; Info alone is invisible to them."""
     import spec_loader
     # `spec` is the feature's entry from features.toml, not the document spec: only a module that carries
@@ -326,7 +326,7 @@ def feature_xmp(pdf, spec) -> None:
                     raise SystemExit("postprocess: the pdfuaid schema block did not survive the XMP write")
 
 
-def feature_output_intent(pdf, spec) -> None:
+def feature_output_intent(pdf, spec, ctx=None) -> None:
     """sRGB output intent + Trim/Bleed boxes. No design change: boxes equal MediaBox (no bleed)."""
     icc = _srgb_icc()
     profile = pdf.make_stream(icc)
@@ -345,7 +345,7 @@ def feature_output_intent(pdf, spec) -> None:
         page.obj["/BleedBox"] = box
 
 
-def feature_attachments(pdf, spec, rendered_sha: str | None) -> None:
+def feature_attachments(pdf, spec, ctx=None) -> None:
     """The file carries its build data and a manifest of hashes: reproduction is content, not a claim.
 
     The file list lives in the spec (`ATTACHMENT_FILES`: name, repo-relative path, mime, /AFRelationship), so a
@@ -356,6 +356,7 @@ def feature_attachments(pdf, spec, rendered_sha: str | None) -> None:
     """
     import spec_loader
     NS = spec_loader.load()
+    rendered_sha = (ctx or {}).get("rendered_sha")
     declared = getattr(NS, "ATTACHMENT_FILES", None)
     if not declared:
         raise SystemExit("postprocess: the spec declares no ATTACHMENT_FILES — the file list is a contract, not a default")
@@ -538,7 +539,7 @@ def feature_bidi_space(pdf) -> None:
         print(f"      bidi-space: repaired the space mapping in {repaired} font(s)")
 
 
-def feature_acroform(pdf, spec) -> None:
+def feature_acroform(pdf, spec, ctx=None) -> None:
     """Real text fields with an Arabic /TU and the COMPLETE house font in /DR.
 
     The fields live in the spec (`ACROFORM_FIELDS`: name, /TU, page, rect in PDF points, optional multiline),
@@ -607,7 +608,7 @@ def feature_acroform(pdf, spec) -> None:
         DA=da)
 
 
-def feature_link_tagging(pdf, spec) -> None:
+def feature_link_tagging(pdf, spec, ctx=None) -> None:
     """Every Link annotation gets a /Link structure element, an OBJR and an Arabic /Contents.
 
     A screen reader announces the label; without it the link is silent. Geometry comes from the document's spec.
@@ -711,11 +712,8 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
                 continue
             if name not in STAGE5:
                 raise SystemExit(f"postprocess: feature {name!r} is declared but has no implementation")
-            if name == "attachments":
-                # The manifest needs the hash of the markup handed to Chrome: passed explicitly, not via a global.
-                feature_attachments(pdf, f, rendered_sha=rendered_sha)
-            else:
-                STAGE5[name](pdf, f)
+            # One signature for every feature; only `attachments` reads the build context.
+            STAGE5[name](pdf, f, {"rendered_sha": rendered_sha})
             applied.append(name)
         for k in ("/SourceFile", "/SourceSHA256"):
             if k in pdf.docinfo:
@@ -730,4 +728,5 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
 
 if __name__ == "__main__":
     import sys
-    print(apply(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "web"))
+    print(apply(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "web",
+                rendered_sha=sys.argv[4] if len(sys.argv) > 4 else None))

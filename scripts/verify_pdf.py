@@ -56,7 +56,7 @@ def source_markup() -> str:
     The gate used to read a copy beside the output. A copy can go stale or belong to another build;
     this is recomputed instead, so the comparison is about this document. Raises whatever the derivation
     raises — the caller reports it by name. No cache of the result: the expensive pure steps inside
-    `render_markup` are cached by their own arguments, which is a key that cannot go stale.
+    `render_markup` are cached by their arguments (a file replaced mid-process is out of scope).
     """
     return render_markup.rendered_markup(NS, source_text(), PROJ)
 
