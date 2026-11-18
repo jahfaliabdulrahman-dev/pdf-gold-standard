@@ -7,7 +7,15 @@ Two deliberate omissions, both stated in the document itself:
   · no AcroForm fields — the brief excludes typing;
   · no variable font — measured: Chrome embeds a variable face as Type3 glyph procedures.
 """
-from report_spec import *                       # noqa: F401,F403  (shared geometry: slots, mm, page height)
+# Borrowed from the screen report BY NAME: a star import also carries its claims, and a claim this
+# document did not declare must not become its own by accident (B7).
+from report_spec import (
+    BLANK_EXEMPT_IMAGE_COVER, CONTENTS, COPY_MIN_RECALL, COPY_MIN_SEQUENCE, COVER, FOOTER_Y_MAX,
+    FOOTER_Y_MIN, IMAGE_COVER_TOL, LINKS_CLAIM, MM, NAV_W, NAV_Y0, NAV_Y1, PAGE_H_MM, PAGE_INK_CELL_FLOOR,
+    PAGE_INK_DPI, PAGE_INK_GRID, PAGE_INK_MIN_RETENTION, PAGE_INK_TOL, PAGE_WORDS_TOL, SLOTS,
+    SLOT_ICON_MIN_IOU, SLOT_INK_CONTRAST, SLOT_INK_MAX, SLOT_INK_MIN, SLOT_SHAPE, SLOT_SHAPE_TOL, TOC_ROW_H,
+    TOC_ROW_X0, TOC_ROW_X1, VOCALISED, toc_row_top,
+)
 
 # This document's MuPDF word-order floor: calibrated by scripts/calibrate.py --write as
 # max(LINE_ORDER_FLOOR, measured - LINE_ORDER_DRIFT); the gate refuses any value below the floor.

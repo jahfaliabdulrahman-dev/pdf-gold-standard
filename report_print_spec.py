@@ -9,7 +9,19 @@ Why a second spec rather than a CSS media query: a PDF page has ONE appearance. 
 what Chrome writes, but the result is a single fixed page — there is no "screen view" left inside it.
 """
 import report_spec as _base
-from report_spec import *                      # noqa: F401,F403  (inherit everything, override below)
+# Borrowed from the screen report BY NAME: a star import also carries its claims, and a claim this
+# document did not declare must not become its own by accident (B7).
+from report_spec import (
+    ACROFORM_FIELDS, ART_DPI_DECLARED, ART_FILES, ART_MAX_DPI, ART_PAGE_SHARE, ATTACHMENT_FILES, BASMALA,
+    BASMALA_FACES, BLANK_EXEMPT_IMAGE_COVER, CONFORMANCE, CONTENTS, CONTENTS_LABELS, COPY_MIN_RECALL,
+    COPY_MIN_SEQUENCE, COVER, DEST_NAMES, DOC_AUTHOR, DOC_KEYWORDS, FOOTER_Y_MAX, FOOTER_Y_MIN, GATE_CHECKS,
+    GUIDE_VERSION, GUIDE_VERSION_AR, HOUSE_FONT_PREFIX, IMAGE_COVER_TOL, LANG, LINK_LABELS, MM, NAV_CLASS,
+    NAV_W, NAV_Y0, NAV_Y1, PAGES, PAGE_H_MM, PAGE_INK_CELL_FLOOR, PAGE_INK_DPI, PAGE_INK_GRID,
+    PAGE_INK_MIN_RETENTION, PAGE_INK_TOL, PAGE_LABELS, PAGE_WORDS_TOL, PDFUA, PRINTED_COUNTS_PAGE,
+    REF_LABELS, REF_PAGE, REF_URLS, SLOTS, SLOT_ICON_MIN_IOU, SLOT_INK_CONTRAST, SLOT_INK_MAX, SLOT_INK_MIN,
+    SLOT_SHAPE, SLOT_SHAPE_TOL, SOURCE_HTML, TOC, TOC_ROWS, TOC_ROW_H, TOC_ROW_X0, TOC_ROW_X1, VERSION_SPOTS,
+    VOCALISED, VOCALISED_PAGES, XMP_DESCRIPTION, XMP_LANGUAGE, nav_target, toc_row_top,
+)
 
 # This document's MuPDF word-order floor: calibrated by scripts/calibrate.py --write as
 # max(LINE_ORDER_FLOOR, measured - LINE_ORDER_DRIFT); the gate refuses any value below the floor.
@@ -30,6 +42,11 @@ DOC_SUBJECT = _base.DOC_SUBJECT + " — نسخة مهيّأة للطباعة ب�
 # assumed: each is named here with its reason, and gate_selftest fails if one applies after all.
 # 53 − 8 = 45.
 GATE_MUTATIONS = 45
+# The print copy is the same document: it asserts the same conformance and the same expected failing
+# rules, stated here rather than inherited silently.
+CLAIM_EXPECTED = _base.CLAIM_EXPECTED
+VERAPDF_BASELINE = _base.VERAPDF_BASELINE
+
 GATE_NA = {
     "swap_next_prev": "no strip links: NAV_PAGES = ()",
     "self_link": "no strip links: NAV_PAGES = ()",
