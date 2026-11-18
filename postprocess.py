@@ -67,7 +67,7 @@ def feature_named_destinations(pdf, spec, ctx=None) -> None:
     pdf.Root.Names = pikepdf.Dictionary(Dests=pikepdf.Dictionary(Names=names))
 
 
-from pdfops import PAINT_OPS  # noqa: E402  (single definition, shared with the gate)
+from pdfops import PAINT_OPS, text_shows  # noqa: E402  (single definition, shared with the gate)
 
 
 def _wrap_untagged(instructions):
@@ -121,7 +121,7 @@ def _wrap_untagged(instructions):
     return out, added
 
 
-def _tag_orphan_runs(pdf, page, instructions):
+def _tag_orphan_runs(pdf, page, instructions, bands=(), page_no=0):
     """Give an /MCID to every top-level marked-content run that Chrome left unlinked.
 
     Chrome wraps reversed RTL text in a bare `BMC /ReversedChars … EMC` with no MCID, so the run paints
@@ -173,6 +173,15 @@ def _tag_orphan_runs(pdf, page, instructions):
             out.append(ins)
         else:
             out.append(ins)
+
+    # A run outside every marked-content block is page furniture ONLY if it sits in a declared band. Wrapping
+    # body text as /Pagination hides it from a screen reader while the file still passes veraPDF, so a run
+    # outside the band stops the build by name instead of being swept along.
+    stray = [y for is_pag, x, y, size in text_shows(out)
+             if is_pag and not any(lo <= y <= hi for lo, hi in bands)]
+    if stray:
+        raise ValueError(f"page {page_no}: untagged text at y={stray[0]:.0f} is outside the declared furniture "
+                         f"band {list(bands)} — marking it /Pagination would hide it from a screen reader")
     return out
 
 
@@ -244,9 +253,9 @@ def feature_pdfua(pdf, spec=None) -> None:
             skipped += 1
 
     # pass 3: the pages themselves — wrap the untagged painting, then give the leftover runs an owner
-    for page in pdf.pages:
+    for page_no, page in enumerate(pdf.pages, 1):
         out, added = _wrap_untagged(pikepdf.parse_content_stream(page))
-        out = _tag_orphan_runs(pdf, page, out)
+        out = _tag_orphan_runs(pdf, page, out, getattr(NS, "FURNITURE_BANDS", []), page_no)
         if added or out:
             page.Contents = pdf.make_stream(pikepdf.unparse_content_stream(out))
             marks += added

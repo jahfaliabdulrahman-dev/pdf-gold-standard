@@ -87,6 +87,10 @@ QR_FIXED = list(zip(("{{QR_IBM}}", "{{QR_PYMUPDF}}", "{{QR_PAGEDJS}}", "{{QR_CHR
 
 # Tagged PDF: declared in README, so the gate guards it.
 LANG = "ar"
+
+# This document has no untagged page furniture (measured: zero runs outside every block), so any text
+# that lands in /Artifact /Pagination here is body text a screen reader would skip: fail by name.
+FURNITURE_BANDS = []
 # The class the navigation strip is drawn with: the producer removes it and the gate reads it.
 NAV_CLASS = "nav"
 # A page far below the median text is excused only when images cover at least this share of it (cover, dividers = 1.0;
@@ -188,8 +192,8 @@ ART_MAX_DPI = 300          # spec §3.4: art serving >30% of a page is capped at
 ART_DPI_DECLARED = {3: 205, 6: 205, 11: 205}
 ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of the page
 
-GATE_CHECKS = 35
-GATE_MUTATIONS = 52
+GATE_CHECKS = 36
+GATE_MUTATIONS = 53
 GATE_NA = {}                                   # every mutation applies to this document
 # What remains failing when this file DECLARES conformance — measured by scripts/claim_probe.py, one table
 # per document (the guide's file has one untagged rule; the other two are clean under both claims).
