@@ -25,8 +25,7 @@ baseline*.pdf
 # Najd font files: licence is «All rights reserved» — the PDF embeds a subset, the repo does not ship the font
 /najd/
 
-# build artefacts (the exact markup Chrome printed, kept for the gate, not for shipping)
-*.source.html
+# build artefacts
 report-print.pdf
 najd.pdf
 

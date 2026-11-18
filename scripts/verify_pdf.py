@@ -22,6 +22,7 @@ import pymupdf as fitz  # noqa: E402
 import pikepdf  # noqa: E402
 
 import spec_loader  # noqa: E402
+import render_markup  # noqa: E402
 
 NS = spec_loader.load()  # noqa: E402
 
@@ -47,6 +48,25 @@ def source_path() -> str:
 
 def source_text() -> str:
     return open(source_path(), encoding="utf-8").read()
+
+
+_MARKUP_CACHE: dict[str, str] = {}
+
+
+def source_markup() -> str:
+    """The markup this spec asks Chrome to print, derived once per (spec, source text).
+
+    The gate used to read a copy beside the output. A copy can go stale or belong to another build;
+    this is recomputed from the same two inputs the producer used, so the comparison is about this
+    document. Raises whatever the derivation raises — the caller reports it by name.
+    """
+    import hashlib
+    text = source_text()
+    key = ":".join((NS.__name__, str(bool(getattr(NS, "NAV_VISIBLE", True))),
+                    hashlib.sha256(text.encode("utf-8")).hexdigest()))
+    if key not in _MARKUP_CACHE:
+        _MARKUP_CACHE[key] = render_markup.rendered_markup(NS, text, PROJ)
+    return _MARKUP_CACHE[key]
 
 
 class GateInput(Exception):
@@ -177,6 +197,23 @@ def footer_numbers(page, page_text: str | None = None, limit: int | None = None)
     return out
 
 
+def _numeral_near(chars, marker_chars):
+    """The numeral nearest the marker on one line, rebuilt left-to-right from its glyph positions."""
+    digits = sorted((c for c in chars if c["c"].isdigit()), key=lambda c: c["bbox"][0])
+    if not digits:
+        return None
+    runs, cur = [], [digits[0]]
+    for c in digits[1:]:
+        if c["bbox"][0] - cur[-1]["bbox"][2] < 12:      # same numeral
+            cur.append(c)
+        else:
+            runs.append(cur); cur = [c]
+    runs.append(cur)
+    mx = (marker_chars[0]["bbox"][0] + marker_chars[-1]["bbox"][2]) / 2
+    near = min(runs, key=lambda r: min(abs(r[0]["bbox"][0] - mx), abs(r[-1]["bbox"][2] - mx)))
+    return int("".join(c["c"] for c in near))
+
+
 def printed_counts(page) -> dict:
     """{'checks': N, 'mutations': M} as PRINTED on the page (visual order, Arabic-Indic aware).
 
@@ -194,21 +231,45 @@ def printed_counts(page) -> dict:
                     continue
                 # the marker may be split across spans (Chrome re-shapes Arabic), so locate it in the LINE text
                 at = text.find(marker)
-                mchars = chars[at:at + len(marker)]
-                digits = sorted((c for c in chars if c["c"].isdigit()), key=lambda c: c["bbox"][0])
-                if not digits:
-                    continue
-                runs, cur = [], [digits[0]]
-                for c in digits[1:]:
-                    if c["bbox"][0] - cur[-1]["bbox"][2] < 12:      # same numeral
-                        cur.append(c)
-                    else:
-                        runs.append(cur); cur = [c]
-                runs.append(cur)
-                mx = (mchars[0]["bbox"][0] + mchars[-1]["bbox"][2]) / 2
-                near = min(runs, key=lambda r: min(abs(r[0]["bbox"][0] - mx), abs(r[-1]["bbox"][2] - mx)))
-                out[key] = int("".join(c["c"] for c in near))
+                n = _numeral_near(chars, chars[at:at + len(marker)])
+                if n is not None:
+                    out[key] = n
     return out
+
+
+def printed_number_near(page, marker: str) -> int | None:
+    """The numeral printed nearest `marker` on this page — for a claim that is prose, not a table.
+
+    The number may sit on its own line above the words (a card's big figure), so this measures in two
+    dimensions against the marker's own box instead of requiring one shared line.
+    """
+    hits = page.search_for(marker)
+    if not hits:
+        return None
+    m = hits[0]
+    digits = [c for b in page.get_text("rawdict")["blocks"] for line in b.get("lines", [])
+              for s in line["spans"] for c in s["chars"] if c["c"].isdigit()]
+    if not digits:
+        return None
+    digits.sort(key=lambda c: (round(c["bbox"][1], 1), c["bbox"][0]))
+    runs, cur = [], [digits[0]]
+    for c in digits[1:]:
+        prev = cur[-1]
+        if abs(c["bbox"][1] - prev["bbox"][1]) < 2 and c["bbox"][0] - prev["bbox"][2] < 12:
+            cur.append(c)
+        else:
+            runs.append(cur); cur = [c]
+    runs.append(cur)
+
+    def _distance(run):
+        x0 = min(c["bbox"][0] for c in run); y0 = min(c["bbox"][1] for c in run)
+        x1 = max(c["bbox"][2] for c in run); y1 = max(c["bbox"][3] for c in run)
+        dx = max(m.x0 - x1, x0 - m.x1, 0)
+        dy = max(m.y0 - y1, y0 - m.y1, 0)
+        return (dx * dx + dy * dy) ** 0.5
+
+    near = min(runs, key=_distance)
+    return int("".join(c["c"] for c in sorted(near, key=lambda c: c["bbox"][0])))
 
 
 def version_spots_in_source() -> list[str]:
@@ -310,7 +371,7 @@ def attachment_problems(pdf) -> list[str]:
     bad, got = [], {}
     want = (getattr(NS, "ATTACHMENTS", None)
             or [f[0] for f in getattr(NS, "ATTACHMENT_FILES", [])]
-            or ["source.html", "manifest.json"])
+            or ["manifest.json"])
     for name, spec in pdf.attachments.items():
         try:
             data = spec.get_file().read_bytes()
@@ -767,19 +828,25 @@ def gate(doc) -> list[str]:
     # A missing source icon is a FAILURE, never a silent pass: a check that lost its input would otherwise
     # print "shape IoU 0.00-0.00" inside a PASS (H2).
     if not getattr(NS, "NAV_VISIBLE", True):
-        # A print copy is proven by its SOURCE, not by ink: the cover and the dividers are full-bleed art, so
-        # "the band is blank" is false there for a reason that has nothing to do with buttons. The link check
-        # above already proves no page carries a strip target; this proves no icon was drawn at all.
-        rendered = os.path.splitext(str(getattr(doc, "name", "")))[0] + ".source.html"
-        try:
-            markup = open(rendered, encoding="utf-8").read()
-            stripped = 'class="nav"' not in markup
-            ok = stripped
-            detail = ("print copy: the markup Chrome printed carries no nav strip" if stripped
-                      else f"print copy: {markup.count('class=\"nav\"')} nav strip(s) were still drawn")
-        except OSError as exc:
-            ok, detail = False, f"cannot read what was printed ({exc})"
-        check("render", ok, detail)
+        # A print copy must carry no icon. Proven FROM THE PAGE, not from the markup this gate derives:
+        # that derivation removes the strip by construction, so a check on it could never fail.
+        # Criterion: a drawing or image whose rectangle sits INSIDE a slot (a page-wide background fill
+        # intersects every slot but is not inside one), with 0.5 pt slack for the geometry Chrome writes.
+        drawn = []
+        for i in range(doc.page_count):
+            page = doc[i]
+            rects = [fitz.Rect(g["rect"]) for g in page.get_drawings()]
+            for xref in {im[0] for im in page.get_images()}:
+                rects += [fitz.Rect(r) for r in page.get_image_rects(xref)]
+            for role, x in NS.SLOTS.items():
+                slot = fitz.Rect(x, NS.NAV_Y0, x + NS.NAV_W, NS.NAV_Y1)
+                inside = [r for r in rects if r.x0 >= slot.x0 - 0.5 and r.x1 <= slot.x1 + 0.5
+                          and r.y0 >= slot.y0 - 0.5 and r.y1 <= slot.y1 + 0.5]
+                if inside:
+                    r = inside[0]
+                    drawn.append(f"p{i+1} {role}: a drawing {tuple(round(v, 1) for v in r)} sits in the slot")
+        check("render", not drawn, "; ".join(drawn[:4]) or
+              f"print copy: {doc.page_count} pages, no drawing or image inside a strip slot")
     else:
         dead, seen, ious = [], [], []
         order = sorted(NS.SLOTS, key=NS.SLOTS.get)  # the HTML lists a strip's icons left to right
@@ -946,6 +1013,15 @@ def gate(doc) -> list[str]:
               f"GTS_PDFA1 sRGB, Trim/Bleed inside MediaBox on {len(pdf.pages)} pages")
 
         att_bad = attachment_problems(pdf)
+        claim = getattr(NS, "ATTACHMENTS_CLAIM", None)
+        if claim:                       # a printed count is a claim: it must equal what the file carries
+            page_no, marker = claim
+            if page_no >= doc.page_count:
+                att_bad.append(f"ATTACHMENTS_CLAIM names page {page_no+1}, the document has {doc.page_count}")
+            else:
+                printed = printed_number_near(doc[page_no], marker)
+                if printed != len(pdf.attachments):
+                    att_bad.append(f"page {page_no+1} prints {printed} attachment file(s), the file carries {len(pdf.attachments)}")
         check("attachments", not att_bad, "; ".join(att_bad[:4]) or
               ", ".join(f"{n} ({len(s.get_file().read_bytes())} B)" for n, s in pdf.attachments.items()))
         art_bad = art_dpi_problems(doc)
@@ -1042,26 +1118,30 @@ def gate(doc) -> list[str]:
         px.close()
     except Exception:
         got_name = got_digest = ""
-    # The sidecar beside the file is what copy-fidelity reads as truth. The producer now records the
-    # hash of the markup it actually printed, so a stale sidecar from another build cannot stand in.
-    side_explicit = getattr(doc, "_sidecar", None)
-    fname = str(getattr(doc, "name", "") or "")
-    # A document read from memory has no sidecar (its .name is the stream label, not a path).
-    side_path = side_explicit or (os.path.splitext(fname)[0] + ".source.html"
-                                  if fname and os.path.exists(fname) else "")
-    side_ok, side_why = True, ""
-    if got_rendered and side_path:
-        if not os.path.exists(side_path):
-            side_ok, side_why = False, "the manifest names the markup it printed, but no .source.html sits beside the file"
-        else:
-            import hashlib
-            if hashlib.sha256(open(side_path, "rb").read()).hexdigest() != got_rendered:
-                side_ok, side_why = False, "the .source.html beside the file is not the markup this file was built from"
-    ok = (got_name, got_digest) == (name, digest) and side_ok
+    # 8c continued — the manifest names the markup this build handed to Chrome, and the gate derives it
+    # again from this spec and this source. There is no sidecar to read: the copy was the stale thing.
+    # A missing key is a FAIL, not a skip: a manifest without it binds the file to nothing.
+    try:
+        import hashlib as _hashlib
+        want_rendered = _hashlib.sha256(source_markup().encode("utf-8")).hexdigest()
+        derive_err = ""
+    except Exception as e:
+        want_rendered, derive_err = "", f"the gate cannot derive the markup this document was built from: {type(e).__name__}: {e}"
+    got_rendered = str(got_rendered or "")
+    if derive_err:
+        rendered_why = derive_err
+    elif not got_rendered:
+        rendered_why = "the manifest carries no rendered_sha256: the build that made this file did not record its markup"
+    elif got_rendered != want_rendered:
+        rendered_why = (f"manifest rendered_sha256 {got_rendered[:12]} is not the markup this spec derives "
+                        f"from {name} ({want_rendered[:12]})")
+    else:
+        rendered_why = ""
+    ok = (got_name, got_digest) == (name, digest) and not rendered_why
     check("provenance", ok,
-          f"{name} sha256 {digest[:12]}" + ("" if side_ok else " — " + side_why) if ok else
-          (side_why if not side_ok else
-           ("no source stamp" if not got_digest else f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}")))
+          f"{name} sha256 {digest[:12]} · rendered {want_rendered[:12]}" if ok else
+          (rendered_why or ("no source stamp" if not got_digest else
+           f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}")))
     check("tagged-structure", stray == 0,
           "no paragraph sits directly under /Document" if stray == 0 else
           f"{stray} paragraph(s) under /Document — page furniture tagged as content")
@@ -1174,27 +1254,17 @@ def text_layer_violations(doc) -> list[str]:
 def copy_fidelity(doc, engine="pdfium", text=None):
     """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order.
 
-    The reference is the markup the producer ACTUALLY printed. For the print variant the navigation strip
-    is removed from the markup itself, so comparing against the original HTML counts words the PDF was
-    never asked to carry — the gate would be measuring a decision, not a defect. When Chrome's rendered
-    copy sits next to the file being judged, that copy is the source of truth.
+    The reference is the markup the producer ACTUALLY handed to Chrome — derived here from the same
+    spec and source, never read from a copy beside the file. For the print variant the navigation
+    strip is removed from that markup itself, so comparing against the original template would count
+    words the PDF was never asked to carry: the gate would be measuring a decision, not a defect.
     """
     import collections
     import difflib
     import html
-    rendered = None
-    name = str(getattr(doc, "name", ""))
-    if name.endswith(".pdf"):
-        candidate = name[:-4] + ".source.html"
-        if os.path.exists(candidate):
-            rendered = candidate
-    if not getattr(NS, "NAV_VISIBLE", True) and rendered is None:
-        # the print variant printed markup we cannot find: fail closed instead of measuring the
-        # original HTML, which still carries the navigation strip the spec removed on purpose
-        return None, None
     try:
-        src = open(rendered, encoding="utf-8").read() if rendered else source_text()
-    except OSError:
+        src = source_markup()
+    except Exception:
         return None, None
     truth = source_words(html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I))))
     if text is not None:                # text extracted by another reader (PDFium, or Preview's PDFKit)

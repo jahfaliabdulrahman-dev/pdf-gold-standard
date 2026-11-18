@@ -367,7 +367,6 @@ def feature_attachments(pdf, spec) -> None:
         "pages": NS.PAGES,
     }
     declared = getattr(NS, "ATTACHMENT_FILES", None) or [
-        ("source.html", NS.SOURCE_HTML, "text/html", "Source"),
         ("manifest.json", None, "application/json", "Source"),
     ]
     payloads = []
@@ -692,14 +691,19 @@ def normalise(pdf) -> None:
     assert "/SourceFile" not in pdf.docinfo and "/SourceSHA256" not in pdf.docinfo
 
 
-def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -> list[str]:
-    """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order."""
+def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
+          rendered_sha: str | None = None) -> list[str]:
+    """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order.
+
+    `rendered_sha` is the hash of the markup this build handed to Chrome. The producer passes it; the
+    manifest carries it, and the gate recomputes it from the same spec and source. This file is never
+    read back from disk, so no copy beside the output can go stale.
+    """
     if profile not in SUPPORTED_PROFILES:
         raise SystemExit(f"postprocess: profile {profile!r} is not implemented (supported: {sorted(SUPPORTED_PROFILES)})")
     spec = tomllib.load(open(features_path or os.path.join(PROJ, "features.toml"), "rb"))
     global RENDERED_SHA
-    rendered = os.path.splitext(src)[0] + ".source.html"      # the markup Chrome printed for this build
-    RENDERED_SHA = hashlib.sha256(open(rendered, "rb").read()).hexdigest() if os.path.exists(rendered) else None
+    RENDERED_SHA = rendered_sha
     applied = []
     with pikepdf.open(src) as pdf:
         for name, f in spec.get("features", {}).items():
