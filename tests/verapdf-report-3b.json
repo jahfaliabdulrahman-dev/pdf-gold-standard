@@ -1,0 +1,28 @@
+{
+ "report": {
+  "jobs": [
+   {
+    "itemDetails": {},
+    "validationResult": [
+     {
+      "profileName": "PDF/A-3b validation profile",
+      "compliant": false,
+      "details": {
+       "passedRules": 145,
+       "failedRules": 1,
+       "ruleSummaries": [
+        {
+         "clause": "6.6.4",
+         "testNumber": 1,
+         "ruleStatus": "FAILED",
+         "description": "The PDF/A version and conformance level of a file shall be specified using the PDF/A Identification extension schema",
+         "failedChecks": 1
+        }
+       ]
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

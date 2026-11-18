@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import pymupdf as fitz  # noqa: E402
 import pikepdf  # noqa: E402
 
+import spec_base  # noqa: E402
 import spec_loader  # noqa: E402
 import render_markup  # noqa: E402
 
@@ -150,40 +151,56 @@ def pdfium_texts(doc) -> list[str] | None:
         return None
 
 
+NUMERAL_CHARS = frozenset("٠١٢٣٤٥٦٧٨٩0123456789")
+NUMERAL_GAP_PT = 12          # two numerals further apart than this are two numerals, not one footer
 AR_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
 
 
-def _digit_value(t: str, page_text: str | None) -> int | None:
-    """The number a span prints, or None.
+def _digit_value(span) -> int | None:
+    """The number this span PRINTS, read from where its digits are drawn.
 
-    MuPDF reverses Arabic-Indic runs — measured on a number MuPDF itself wrote (٢٠٢٦ → ٦٢٠٢), while
-    PDFium reads it in order. So the VALUE comes from PDFium's page text when that text carries the
-    reverse of this token; the geometry still comes from the span.
+    MuPDF may return an Arabic-Indic run reversed (measured on a number MuPDF itself wrote: ٢٠٢٦ → ٦٢٠٢).
+    Deciding by «is the token — or its reverse — somewhere in PDFium's page text?» loses as soon as the page
+    prints both: ١٢ in the footer and ٢١ in the body made the footer read 21 (B4). A numeral is written
+    left-to-right in Arabic as well as in Latin, so sorting the span's digit glyphs by x gives the value
+    whatever string the reader built. Two numerals in one span (a gap over NUMERAL_GAP_PT) are not a footer number.
     """
-    tok = t.translate(AR_DIGITS)
-    if not tok.isdigit():
+    text = "".join(c["c"] for c in span.get("chars", ())).strip()
+    # A footer number is a numeral, not a number inside prose: the cover also prints «٤٫١ · نوفمبر ٢٠٢٦»
+    # in the band, and reading the digits out of that sentence invented a footer 14 (measured). «²» passes
+    # str.isdigit() and then breaks int(); the whitelist is the only answer that holds.
+    if not text or any(ch not in NUMERAL_CHARS for ch in text):
         return None
-    if page_text is not None and len(tok) > 1:
-        toks = {x.translate(AR_DIGITS) for x in WORD.findall(page_text)}
-        if tok not in toks and tok[::-1] in toks:
-            tok = tok[::-1]
-    return int(tok)
+    glyphs = list(span.get("chars", ()))
+    if not glyphs:
+        return None
+    glyphs.sort(key=lambda c: c["bbox"][0])
+    runs, cur = [], [glyphs[0]]
+    for c in glyphs[1:]:
+        if c["bbox"][0] - cur[-1]["bbox"][2] < NUMERAL_GAP_PT:      # same numeral
+            cur.append(c)
+        else:
+            runs.append(cur); cur = [c]
+    runs.append(cur)
+    if len(runs) > 1:
+        return None
+    return int("".join(c["c"] for c in runs[0]).translate(AR_DIGITS))
 
 
-def footer_numbers(page, page_text: str | None = None, limit: int | None = None) -> list[int]:
+def footer_numbers(page, limit: int | None = None) -> list[int]:
     """Digit spans inside the footer band, top to bottom — Latin or Arabic-Indic, in printed order.
 
     `limit` (usually the page count) drops numbers that cannot be a page number: the cover's year also
     sits in the band, and reading ٢٠٢٦ as a footer would invent a footer the document never printed.
     """
     out = []
-    for b in page.get_text("dict")["blocks"]:
+    for b in page.get_text("rawdict")["blocks"]:
         for line in b.get("lines", []):
             for s in line["spans"]:
-                t = s["text"].strip()
+                t = "".join(c["c"] for c in s.get("chars", ())).strip()
                 if not t or not NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
                     continue
-                v = _digit_value(t, page_text)
+                v = _digit_value(s)
                 if v is not None and (limit is None or v <= limit):
                     out.append(v)
     return out
@@ -212,7 +229,7 @@ def printed_counts(page) -> dict:
                     continue
                 runs, cur = [], [digits[0]]
                 for c in digits[1:]:
-                    if c["bbox"][0] - cur[-1]["bbox"][2] < 12:      # same numeral
+                    if c["bbox"][0] - cur[-1]["bbox"][2] < NUMERAL_GAP_PT:      # same numeral
                         cur.append(c)
                     else:
                         runs.append(cur); cur = [c]
@@ -468,7 +485,10 @@ def pdfua_problems(pdf) -> list[str]:
             flavours = [f for f in flavours if f]
             if not flavours:
                 bad.append(f"cannot map the claim {declared} to a veraPDF flavour: it cannot be checked")
-            baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
+            try:
+                baseline_path = os.path.join(PROJ, NS.VERAPDF_BASELINE)
+            except AttributeError:
+                raise SystemExit(f"{NS.__name__} declares no VERAPDF_BASELINE — the baseline is per document")
             try:
                 base = tomllib.load(open(baseline_path, "rb"))
             except (OSError, tomllib.TOMLDecodeError) as e:
@@ -530,7 +550,9 @@ def _parent_tree(pdf) -> dict:
     return table
 
 
-from pdfops import PAINT_OPS  # noqa: E402  (the producer's own list: one definition, no drift)
+from pdfops import PAINT_OPS, artifact_shows, form_resolver, model_stats, outside_bands, props_of  # noqa: E402
+from gate_policy import LINE_ORDER_FLOOR  # noqa: E402
+import chrome_pin  # noqa: E402  (the engine every number here was measured on)
 
 
 def untagged_runs(pdf) -> list[str]:
@@ -764,7 +786,11 @@ def gate(doc) -> list[str]:
     def final_count() -> None:
         # The gate counts its own checks against the declared number, so adding a check without updating
         # nav_spec and the printed page cannot pass unnoticed (H9).
-        check("gate-count", len(ran) + 1 == NS.GATE_CHECKS, f"{len(ran) + 1} checks (declared {NS.GATE_CHECKS})")
+        declared = set(spec_base.CHECK_NAMES)
+        here = set(ran) | {"gate-count"}
+        drift = sorted(here ^ declared)
+        check("gate-count", not drift, f"{len(ran) + 1} checks (declared {len(declared)})"
+              + ("; the set drifted: " + ", ".join(drift[:4]) if drift else "; same set"))
 
     # 1. page count = intended build
     check("pages", doc.page_count == NS.PAGES, f"{doc.page_count} (expected {NS.PAGES})")
@@ -908,13 +934,12 @@ def gate(doc) -> list[str]:
           f"printed {printed} vs links/outline {want}" if printed else "could not parse printed numbers")
 
     # 5b. footers: the printed page number = the page's own index (H8). The guide DECLARES Latin footer
-    # numbers; a declaration with no check is a claim that rots silently.
-    # PDFium's text is read once here: it is the authority on digit ORDER (MuPDF reverses Arabic-Indic
-    # runs — measured on a number MuPDF itself wrote), and section 8 reuses it.
+    # numbers; a declaration with no check is a claim that rots silently. The value comes from the drawn
+    # position of each digit (B4), not from which token happens to appear in another reader's text.
     texts = pdfium_texts(doc)
     foot_bad = []
     for i, page in enumerate(doc):
-        got_nums = footer_numbers(page, texts[i] if texts else None, limit=doc.page_count)
+        got_nums = footer_numbers(page, limit=doc.page_count)
         want_num = NS.FOOTER.get(i)
         if want_num is None:
             if got_nums:
@@ -1043,7 +1068,7 @@ def gate(doc) -> list[str]:
 
     # 8c. provenance: the file says which source it was built from, and that is the source this gate compares with
     name, digest = source_stamp()
-    got_name = got_digest = got_rendered = ""
+    got_name = got_digest = got_rendered = got_chrome = ""
     stray = 0
     try:
         import hashlib
@@ -1056,6 +1081,7 @@ def gate(doc) -> list[str]:
             man = _json.loads(px.attachments["manifest.json"].get_file().read_bytes())
             got_name = man.get("source", "")
             got_rendered = man.get("rendered_sha256", "")
+            got_chrome = man.get("chrome_version", "")
         # Page furniture must not be structure content. A /P element directly under /Document is a
         # paragraph the post-processor invented for a run that belonged to no section — a reader then
         # reads the running head once per page, after the last section.
@@ -1093,6 +1119,12 @@ def gate(doc) -> list[str]:
           f"{name} sha256 {digest[:12]} · rendered {want_rendered[:12]}" if ok else
           (rendered_why or ("no source stamp" if not got_digest else
            f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}")))
+    # 8d. the engine that printed it: Skia decides the text layer this repo patches and measures, so the
+    #     manifest carries the binary's own version and the gate holds it to the pin — by name, not a warning.
+    pin = chrome_pin.CHROME_VERSION
+    check("chrome-version", got_chrome == pin,
+          f"printed by Chrome {got_chrome}" if got_chrome == pin else
+          f"manifest says «{got_chrome or 'nothing'}», the pipeline is pinned to {pin}")
     check("tagged-structure", stray == 0,
           "no paragraph sits directly under /Document" if stray == 0 else
           f"{stray} paragraph(s) under /Document — page furniture tagged as content")
@@ -1110,6 +1142,52 @@ def gate(doc) -> list[str]:
     missing = [n for n, ok in ((f"Lang={NS.LANG}", lang == NS.LANG), ("MarkInfo/Marked", marked), ("StructTreeRoot", tree)) if not ok]
     check("tagged", not missing, "missing: " + ", ".join(missing) if missing else f"Lang={lang}, Marked, structure tree")
 
+    # 9c. what a pagination artifact carries: /Pagination is where a screen reader stops reading, so every
+    #     text show inside one must sit in the band the spec declares. The producer refuses at build time;
+    #     this is the same rule on the file, which is where a mutation can be seen.
+    bands = list(getattr(NS, "FURNITURE_BANDS", []))
+    swept, inventory = [], {}
+    try:
+        xp = pikepdf_open(doc)
+        try:
+            for pi, page in enumerate(xp.pages, 1):
+                instr = list(pikepdf.parse_content_stream(page))
+                resolve, props = form_resolver(page), props_of(page)
+                # every artifact that carries text — typed, bare, named, nested, inside a form — is judged
+                for kind, n in artifact_shows(instr, resolve, props).items():
+                    inventory[kind] = inventory.get(kind, 0) + n
+                swept += [f"p{pi} {kind} y={y:.0f}" for kind, y in outside_bands(instr, bands, resolve, props)]
+                bare = artifact_shows(instr, resolve, props).get("artifact", 0)
+                if bare:
+                    swept.append(f"p{pi}: {bare} artifact text show(s) not typed /Pagination")
+        finally:
+            xp.close()
+    except GateInput:
+        raise
+    except Exception as exc:                 # an unreadable content stream is a failure, not a crash
+        swept = [f"cannot read the page content: {exc}"]
+    check("furniture-band", not swept,
+          "; ".join(swept[:4]) or f"{len(bands)} band(s) · {inventory or 'no artifact text'}, every show inside")
+
+    # 9d. the declared model: the structures this pipeline produces, and nothing else. A form is followed
+    #     for its own sake in 9c; here the FORM ITSELF is the subject — text inside one, a form inside a
+    #     form's resources, a text rise, artifact text under a rotated matrix. Interpreting deeper is how
+    #     every adversarial round found another hole; refusing by name closes the class.
+    model_bad, mstats = [], {}
+    try:
+        xp = pikepdf_open(doc)
+        try:
+            model_bad, mstats = model_stats(xp)
+        finally:
+            xp.close()
+    except GateInput:
+        raise
+    except Exception as exc:
+        model_bad = [f"cannot read the model: {exc}"]
+    check("pdf-model", not model_bad,
+          "; ".join(model_bad[:4]) or
+          f"{mstats.get('forms', 0)} form(s) at depth 1 · no text inside · no nesting · no Ts · no rotated artifact text")
+
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).
     bad_tu = text_layer_violations(doc)
@@ -1124,8 +1202,15 @@ def gate(doc) -> list[str]:
 
     # 12. line order for stream-order readers: MuPDF (PyMuPDF, RAG extractors) must return each line's words in order
     _, mseq = copy_fidelity(doc, engine="mupdf")
-    check("line-order", mseq is not None and mseq >= NS.MUPDF_MIN_SEQUENCE,
-          f"MuPDF sequence {mseq:.3f} (min {NS.MUPDF_MIN_SEQUENCE})" if mseq is not None else "could not read source HTML or PDF text")
+    # Per document, calibrated: the ratchet is what THIS document's layer can do, minus drift, and never
+    # below the historical floor. A single 0.75 for three documents let Najd hide 0.18 of headroom.
+    if not hasattr(NS, "LINE_ORDER_MIN"):
+        raise GateInput("the spec declares no LINE_ORDER_MIN: the floor is not optional")
+    if float(NS.LINE_ORDER_MIN) < LINE_ORDER_FLOOR:
+        raise GateInput(f"LINE_ORDER_MIN {NS.LINE_ORDER_MIN} is below the {LINE_ORDER_FLOOR} floor: refused, not clamped")
+    mmin = float(NS.LINE_ORDER_MIN)
+    check("line-order", mseq is not None and mseq >= mmin,
+          f"MuPDF sequence {mseq:.3f} (min {mmin:.3f})" if mseq is not None else "could not read source HTML or PDF text")
 
     # 13. vocalised text: the basmala must copy exactly, marks on their letters (PDFium and MuPDF)
     import unicodedata as _ud
@@ -1165,6 +1250,8 @@ def gate(doc) -> list[str]:
     check("gate-claims", not claim_bad, "; ".join(claim_bad) or detail + " = actual")
 
     final_count()
+    if os.environ.get("VERIFY_DUMP_CHECKS"):
+        print("CHECKS_DUMP:", " ".join(sorted(set(ran))))
     return fails
 
 
@@ -1202,6 +1289,21 @@ def text_layer_violations(doc) -> list[str]:
     return out
 
 
+def sequence_ratio(truth: list[str], got: list[str]) -> float:
+    """How much of `truth` appears in `got` in the same order — one definition, one number."""
+    import difflib
+    sm = difflib.SequenceMatcher(None, truth, got, autojunk=False)
+    return sum(b.size for b in sm.get_matching_blocks()) / len(truth)
+
+
+def truth_words() -> list[str]:
+    """The markup's words in source order — what copy-fidelity and the line-order report both compare to."""
+    import html
+    src = source_markup()
+    stripped = re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I)
+    return source_words(html.unescape(re.sub(r"<[^>]+>", " ", stripped)))
+
+
 def copy_fidelity(doc, engine="pdfium", text=None):
     """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order.
 
@@ -1212,12 +1314,10 @@ def copy_fidelity(doc, engine="pdfium", text=None):
     """
     import collections
     import difflib
-    import html
     try:
-        src = source_markup()
+        truth = truth_words()
     except Exception:
         return None, None
-    truth = source_words(html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I))))
     if text is not None:                # text extracted by another reader (PDFium, or Preview's PDFKit)
         got = source_words(text)
     elif engine == "mupdf":
@@ -1231,8 +1331,7 @@ def copy_fidelity(doc, engine="pdfium", text=None):
         return None, None
     ct, cg = collections.Counter(truth), collections.Counter(got)
     recall = sum(min(ct[w], cg[w]) for w in ct) / len(truth)
-    sm = difflib.SequenceMatcher(None, truth, got, autojunk=False)
-    return recall, sum(b.size for b in sm.get_matching_blocks()) / len(truth)
+    return recall, sequence_ratio(truth, got)
 
 
 def printed_page_numbers(page) -> list[int]:
@@ -1265,10 +1364,10 @@ if __name__ == "__main__":
     pdf = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
     try:
         doc = open_for_gate(pdf)
-    except GateInput as e:
+        failed = gate(doc)
+    except GateInput as e:            # a rule refused its input: by name, like every other gate failure
         print(f"FAIL input - {e}")
         raise SystemExit(1)
-    failed = gate(doc)
     if failed:
         print(f"\n{len(failed)} gate(s) FAILED: {failed}")
         raise SystemExit(1)

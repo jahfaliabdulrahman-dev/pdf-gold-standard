@@ -17,31 +17,14 @@ import pikepdf
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import spec_loader  # noqa: E402
+from verapdf_json import failing_rules_detail  # noqa: E402  (one reader for both screens)
 
 NS = spec_loader.load()  # noqa: E402
 
 def rules(path, flavour):
-    r = subprocess.run(["verapdf", "--flavour", flavour, "--format", "json", path],
-                       capture_output=True, text=True, timeout=900)
-    # `r.stdout or "{}"` turned a crash into «zero violations», so a broken tool passed the claim probe.
-    if r.returncode not in (0, 1):
-        raise SystemExit(f"verapdf {flavour}: exit {r.returncode} — the tool failed: {r.stderr[-300:]}")
-    if not r.stdout.strip():
-        raise SystemExit(f"verapdf {flavour}: empty JSON output (exit {r.returncode}): {r.stderr[-300:]}")
-    data = json.loads(r.stdout)
-    out = []
-    def walk(o):
-        if isinstance(o, dict):
-            if "ruleSummaries" in o:
-                for x in o["ruleSummaries"]:
-                    if x.get("ruleStatus", "FAILED") != "FAILED":
-                        continue
-                    out.append((f'{x.get("clause")}-{x.get("testNumber")}', x.get("description", "")[:90]))
-            for v in o.values(): walk(v)
-        elif isinstance(o, list):
-            for v in o: walk(v)
-    walk(data)
-    return sorted(set(out))
+    """The gate's own reader — one place turns veraPDF's JSON into a failing set (B5, P3 review)."""
+    return failing_rules_detail(path, flavour)
+
 
 def probe(pdf_path, flavour, keys):
     with pikepdf.open(pdf_path) as pdf:

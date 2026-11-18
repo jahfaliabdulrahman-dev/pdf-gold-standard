@@ -18,7 +18,7 @@
 | `docs/automation-plan.md` | **خطة الأتمتة** — بوابة الاختيار، تحليل سير العمل، الحوكمة، مؤشرات KPI (وفق دليل الأتمتة) |
 | `skill/arabic-rtl-pdf/` | **المهارة — المصدر الوحيد لها** (SKILL.md + 7 مراجع). لا تنسخها: وجّه الوكيل إلى هذا المجلد (انظر «مزامنة المهارة») |
 | `nav_spec.py` | **رقم واحد لكل شيء**: الفهرس، مواضع الأزرار ووجهاتها، صفوف المحتويات، الخطوط المسموحة — يبني منه `build.py` ويفحص عليه البوابة |
-| `scripts/verify_pdf.py` + `scripts/gate_selftest.py` | **بوابة التسليم** واختبارها الذاتي (٣٥ فحصاً، منها فحص يقرأ بكسلات الأزرار وشكل كل أيقونة · ٥٢ عطلاً مزروعاً يجب أن تُكشف كلها) |
+| `scripts/verify_pdf.py` + `scripts/gate_selftest.py` | **بوابة التسليم** واختبارها الذاتي (٣٦ فحصاً، منها فحص يقرأ بكسلات الأزرار وشكل كل أيقونة · ٥٣ عطلاً مزروعاً يجب أن تُكشف كلها) |
 | `scripts/verapdf_gate.py` + `scripts/claim_probe.py` | **بوابة المطابقة**: veraPDF مقابل أساس كل مستند (`3b` · `ua1` · `4f`) — لا قاعدة جديدة ولا استثناء ميت ولا قاعدة مُصلحة تعود · و`claim_probe` يقيس على نسخة ما يبقى لو أُعلن الادعاء |
 | `scripts/test_vocalised.py` + `tests/` | **اختبار النص المشكول**: فقرتان مشكولتان من مخرج Chrome الخام يجب أن تُنسخا مطابقتين بعد `fix_text_layer.py` (والخام يجب أن يفشل) |
 | `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` (الترميز الذي يُسلَّم لـChrome يشتقّه `render_markup.py` من المواصفة والمصدر — لا نسخة محفوظة بجانب المخرج) |
@@ -44,12 +44,17 @@
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate   # نسخة Python التي يستخدمها CI
 python3 -m pip install -r requirements.txt
+# Chrome مثبّت الإصدار: النسخة في chrome_pin.py. بدونه لا يبني — لا بديل صامت إلى Chrome النظامي.
+npx --yes @puppeteer/browsers install chrome@157.0.8103.78 --path "$HOME/.cache/cft"
+export CHROME_PATH="$HOME/.cache/cft/chrome/mac_arm-157.0.8103.78/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
 python3 build.py guide-v2.html out.pdf
 PDF_SPEC=report_spec python3 build.py report-v1.html report.pdf   # الوثيقة الثانية، بنفس البوابة
 ```
 
 كل وثيقة تحمل مواصفتها: `nav_spec.py` للدليل و`report_spec.py` للتقرير — يختارها `PDF_SPEC`، ويقرؤها البناء والبوابة
 والاختبار الذاتي من مكان واحد. الأرقام المقاسة (حبر كل صفحة، كلماتها، صورها) تُولَّد بـ`scripts/calibrate.py`، لا تُكتب يدويًا.
+ومحرّك الرسم نفسه مثبّت: `chrome_pin.CHROME_VERSION` — البناء يقرأ `CHROME_PATH` وحده ويرفض أي إصدار آخر بالاسم،
+لأن Skia هي التي تكتب طبقة النص التي تُرقَّع وتُقاس (مسارات ‎darwin/arm64‎؛ غيّر المسار حسب معماريتك).
 
 **CI (macOS)** يبني الدليل والتقرير ويشغّل عليهما البوابة والاختبار الذاتي وveraPDF و`claim_probe`، ثم اختبار النص المشكول.
 **نجد لا يُبنى في CI** (خطه غير مشحون)، فأوامره إلزامية محليًا قبل أي دمج:
@@ -104,7 +109,7 @@ PDF_SPEC=najd_spec         python build.py najd.html najd.pdf               # ع
 Arabic-first pipeline producing genuinely interactive PDFs (nav buttons, multi-level
 bookmarks, RTL reading direction) from designed HTML: HTML → Chrome headless →
 PyMuPDF interactivity layer. Content-deterministic, offline, font-embedded.
-A delivery gate (35 checks, 52 planted faults that must all be caught) and veraPDF baselines per document guard every build; the second document and the Najd specimen declare PDF/A-3b + PDF/UA-1 and measure zero violations. The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
+A delivery gate (38 checks, 61 planted faults that must all be caught) and veraPDF baselines per document guard every build; the second document and the Najd specimen declare PDF/A-3b + PDF/UA-1 and measure zero violations. The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
 The operating skill lives under `skill/arabic-rtl-pdf/` — point your agent at that directory (Hermes: `skills.external_dirs`) instead of copying it, so there is one source.
 
 MIT © 2026 Abdulrahman Jahfali
