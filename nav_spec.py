@@ -193,7 +193,6 @@ PAGE_LABELS = [(0, None, "غ"), (1, "D", 1)]
 # Minimum XMP fields the archive/search tools read.
 XMP_LANGUAGE = "ar"
 ATTACHMENT_FILES = [("manifest.json", None, "application/json", "Source")]
-ATTACHMENTS = ["manifest.json"]
 # Link accessible names, derived from the geometry the build already uses.
 LINK_LABELS = {"next": "الصفحة التالية", "prev": "الصفحة السابقة",
                "contents": "جدول المحتويات", "home": "الغلاف"}

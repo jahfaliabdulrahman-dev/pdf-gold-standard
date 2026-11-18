@@ -97,9 +97,6 @@ ATTACHMENT_FILES = [
     ("features.toml", "features.toml", "application/toml", "Data"),
     ("verapdf-baseline.toml", VERAPDF_BASELINE, "application/toml", "Data"),
 ]
-# This specimen prints the attachment NAMES, not a count: a numeric claim here would be inherited
-# from the report by `import *` and would point at a page that does not exist (measured).
-ATTACHMENTS_CLAIM = None
 
 ACROFORM_FIELDS = []                # the brief excludes typing
 def nav_target(role: str, i: int) -> int:

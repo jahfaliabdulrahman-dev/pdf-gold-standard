@@ -345,30 +345,32 @@ def feature_output_intent(pdf, spec) -> None:
         page.obj["/BleedBox"] = box
 
 
-RENDERED_SHA = None      # apply() records the hash of the markup Chrome printed for THIS build
-
-
-def feature_attachments(pdf, spec) -> None:
-    """The file carries its own source and a manifest of hashes: reproduction is content, not a claim.
+def feature_attachments(pdf, spec, rendered_sha: str | None) -> None:
+    """The file carries its build data and a manifest of hashes: reproduction is content, not a claim.
 
     The file list lives in the spec (`ATTACHMENT_FILES`: name, repo-relative path, mime, /AFRelationship), so a
     second document adds evidence without touching this code. A name with no path is generated here (the
-    manifest), which is how the hashes always describe the file that was actually built.
+    manifest), which is how the hashes always describe the file that was actually built. A spec without the
+    list is refused by name: the code no longer keeps a default that only one document happens to satisfy.
+    `rendered_sha` is passed in by `apply()` — no module state stands between the producer and the manifest.
     """
     import spec_loader
     NS = spec_loader.load()
+    declared = getattr(NS, "ATTACHMENT_FILES", None)
+    if not declared:
+        raise SystemExit("postprocess: the spec declares no ATTACHMENT_FILES — the file list is a contract, not a default")
+    if not rendered_sha:
+        raise SystemExit("postprocess: manifest.json needs the hash of the markup handed to Chrome; "
+                         "none was passed to apply(rendered_sha=...)")
     src_path = os.path.join(PROJ, NS.SOURCE_HTML)
     data = open(src_path, "rb").read()
     manifest = {
         "source": NS.SOURCE_HTML,
         "source_sha256": hashlib.sha256(data).hexdigest(),
-        "rendered_sha256": RENDERED_SHA,
+        "rendered_sha256": rendered_sha,
         "guide_version": NS.GUIDE_VERSION,
         "pages": NS.PAGES,
     }
-    declared = getattr(NS, "ATTACHMENT_FILES", None) or [
-        ("manifest.json", None, "application/json", "Source"),
-    ]
     payloads = []
     for name, rel, mime, relationship in declared:
         if rel is None:
@@ -661,7 +663,7 @@ STAGE5 = {
     "named-destinations": feature_named_destinations,
     "xmp": feature_xmp,
     "output-intent": feature_output_intent,
-    "attachments": feature_attachments,
+    "attachments": feature_attachments,      # dispatched by name: it alone needs rendered_sha as well
 }
 
 # Profiles this build can actually produce. secure/signed are NOT implemented: refusing them by name is
@@ -702,8 +704,6 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
     if profile not in SUPPORTED_PROFILES:
         raise SystemExit(f"postprocess: profile {profile!r} is not implemented (supported: {sorted(SUPPORTED_PROFILES)})")
     spec = tomllib.load(open(features_path or os.path.join(PROJ, "features.toml"), "rb"))
-    global RENDERED_SHA
-    RENDERED_SHA = rendered_sha
     applied = []
     with pikepdf.open(src) as pdf:
         for name, f in spec.get("features", {}).items():
@@ -711,7 +711,11 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
                 continue
             if name not in STAGE5:
                 raise SystemExit(f"postprocess: feature {name!r} is declared but has no implementation")
-            STAGE5[name](pdf, f)
+            if name == "attachments":
+                # The manifest needs the hash of the markup handed to Chrome: passed explicitly, not via a global.
+                feature_attachments(pdf, f, rendered_sha=rendered_sha)
+            else:
+                STAGE5[name](pdf, f)
             applied.append(name)
         for k in ("/SourceFile", "/SourceSHA256"):
             if k in pdf.docinfo:

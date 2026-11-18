@@ -28,7 +28,8 @@ GATE_NA = {
     "foreign_icon": "no icon slot is drawn on any page",
     "moment_matched_icon": "no icon slot is drawn on any page",
     "icon_input_lost": "no strip icons exist to lose",
-    "rename_nav_class": "the source class is removed by this spec, so renaming it changes nothing",
+    "rename_nav_class": "the render check has no subject on a print copy: no icon is drawn, so a class "
+                        "rename is a provenance event, not a render one",
 }
 
 # ---- the difference: no strip, no strip links, and the page must say so --------------------------------
