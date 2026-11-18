@@ -12,6 +12,9 @@ import subprocess
 import sys
 import tomllib
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from verapdf_json import guard  # noqa: E402  (a report that judged nothing is not a clean file)
+
 PROJ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -38,6 +41,7 @@ def failing_rules(path: str, flavour: str) -> set[str]:
     if not r.stdout.strip():
         raise SystemExit(f"verapdf {flavour}: empty JSON output (exit {r.returncode}): {r.stderr[-300:]}")
     data = json.loads(r.stdout)
+    guard(data, flavour)
     out = set()
 
     def walk(o):

@@ -17,6 +17,7 @@ import pikepdf
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import spec_loader  # noqa: E402
+from verapdf_json import guard  # noqa: E402  (a report that judged nothing is not a clean file)
 
 NS = spec_loader.load()  # noqa: E402
 
@@ -29,6 +30,7 @@ def rules(path, flavour):
     if not r.stdout.strip():
         raise SystemExit(f"verapdf {flavour}: empty JSON output (exit {r.returncode}): {r.stderr[-300:]}")
     data = json.loads(r.stdout)
+    guard(data, flavour)
     out = []
     def walk(o):
         if isinstance(o, dict):
