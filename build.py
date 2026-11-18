@@ -15,6 +15,7 @@ import tempfile
 
 import fitz  # PyMuPDF
 
+import chrome_pin
 import spec_loader
 from render_markup import rendered_markup, markup_sha256
 
@@ -35,20 +36,26 @@ MM = 2.83465  # 1 mm in pt
 
 
 def chrome_bin() -> str:
-    # CHROME_PATH env first, then macOS app, then PATH lookups
-    cands = [os.environ.get("CHROME_PATH", ""),
-             "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-             shutil.which("google-chrome") or "",
-             shutil.which("google-chrome-stable") or "",
-             shutil.which("chromium") or "",
-             shutil.which("chromium-browser") or ""]
-    for c in cands:
-        if c and os.path.exists(c):
-            return c
-    raise SystemExit("Chrome not found - set CHROME_PATH to the Chrome/Chromium binary.")
+    """CHROME_PATH, and only CHROME_PATH.
+
+    A fallback list is how the engine changes under the gate's feet: the owner updates Chrome, every ink and
+    order number is measured on another Skia, and the failure shows up later as a mysterious red gate.
+    The pipeline is pinned (chrome_pin.CHROME_VERSION); another build must be a decision, not an accident.
+    """
+    path = os.environ.get("CHROME_PATH", "")
+    if not path or not os.path.exists(path):
+        raise SystemExit(f"CHROME_PATH is not set: point it at Chrome for Testing {chrome_pin.CHROME_VERSION} "
+                         "(README, «Build») — the system Chrome is not the engine this pipeline was measured on")
+    got = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=60).stdout.strip()
+    ver = got.split()[-1] if got else ""
+    # equality, not «contains»: 157.0.8103.780 contains the pin and is not the pin (review P3)
+    if ver != chrome_pin.CHROME_VERSION:
+        raise SystemExit(f"CHROME_PATH runs «{got or 'an unknown version'}», the pipeline is pinned to "
+                         f"{chrome_pin.CHROME_VERSION}")
+    return path, ver
 
 
-CHROME = chrome_bin()
+CHROME, CHROME_VERSION = chrome_bin()
 
 
 def build_html() -> str:
@@ -153,7 +160,7 @@ if __name__ == "__main__":
     from postprocess import apply as postprocess
     prof = os.environ.get("PDF_PROFILE", "web")
     post = PARTIAL[:-4] + ".post.pdf"
-    print("[4c] postprocess:", ", ".join(postprocess(PARTIAL, post, prof, rendered_sha=rendered_sha)) or "none")
+    print("[4c] postprocess:", ", ".join(postprocess(PARTIAL, post, prof, rendered_sha=rendered_sha, chrome_version=CHROME_VERSION)) or "none")
     os.replace(post, PARTIAL)
     # The gate is imported, not shelled out: it already returns the failing names, so no output format is
     # being parsed (a regex over stdout was one edit away from silently matching nothing).
@@ -164,7 +171,11 @@ if __name__ == "__main__":
     except verify_pdf.GateInput as exc:
         print(f"FAIL input - {exc}")
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
-    failing = set(verify_pdf.gate(gate_doc))
+    try:
+        failing = set(verify_pdf.gate(gate_doc))
+    except verify_pdf.GateInput as exc:            # a missing floor is an input error, not a traceback
+        print(f"FAIL input - {exc}")
+        failing = {"input"}
     if failing:
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
     os.replace(PARTIAL, OUT)

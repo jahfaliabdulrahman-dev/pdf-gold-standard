@@ -67,69 +67,83 @@ def feature_named_destinations(pdf, spec, ctx=None) -> None:
     pdf.Root.Names = pikepdf.Dictionary(Dests=pikepdf.Dictionary(Names=names))
 
 
-from pdfops import PAINT_OPS  # noqa: E402  (single definition, shared with the gate)
+from pdfops import PAINT_OPS, TEXT_OPS, model_boundary, text_shows, outside_bands  # noqa: E402  (one definition, shared with the gate)
 
 
-def _wrap_untagged(instructions):
-    """Wrap untagged painting runs in /Artifact BMC … EMC; return (new list, blocks added, forms invoked).
+def _wrap_untagged(instructions, bands=None, page_no=0):
+    """Wrap untagged painting runs in an artifact; return (new list, blocks added).
+
+    Text inside a run is judged before it is wrapped (B1): a show outside every declared band is body text
+    Chrome failed to tag, and wrapping it as /Pagination would hide it from a screen reader while the file
+    still passes veraPDF — it stops the build by name instead. A run that carries text becomes a TYPED
+    /Pagination artifact; a run of pure painting (backgrounds, rules, icons) stays a bare /Artifact BMC.
 
     Only painting operators enter the block. Every container operator — BMC/BDC/EMC, q/Q, BT/ET, colour
     and text state — closes the block first, so an artifact can never hold a tagged sequence (7.1-2) and
     can never straddle a state container.
     """
-    out = []
-    mc = 0
-    artifact_open = False
-    added = 0
+    # untagged shows that sit OUTSIDE every marked-content block — the only ones this function wraps
+    shows = [s for s in text_shows(instructions) if s[0] is None and s[4] == 0]
+    pending = iter(shows)
+    out, buf, buf_text, added = [], [], False, 0
 
-    def close() -> None:
-        nonlocal artifact_open
-        if artifact_open:
-            out.append(pikepdf.ContentStreamInstruction([], pikepdf.Operator("EMC")))
-            artifact_open = False
+    def flush():
+        nonlocal buf, buf_text, added
+        if not buf:
+            return
+        wrapper = ([pikepdf.Name("/Artifact"), pikepdf.Dictionary(Type=pikepdf.Name("/Pagination"))]
+                   if buf_text else [pikepdf.Name("/Artifact")])
+        out.append(pikepdf.ContentStreamInstruction(wrapper, pikepdf.Operator("BDC" if buf_text else "BMC")))
+        out.extend(buf)
+        out.append(pikepdf.ContentStreamInstruction([], pikepdf.Operator("EMC")))
+        added += 1
+        buf, buf_text = [], False
 
+    mc = 0                       # marked-content depth: only painting OUTSIDE every block is wrapped
     for ins in instructions:
         op = str(ins.operator)
         if op in ("BMC", "BDC"):
-            close()
+            flush()
+            out.append(ins)
             mc += 1
-            out.append(ins)
         elif op == "EMC":
-            close()
+            flush()
+            out.append(ins)
             mc = max(0, mc - 1)
+        elif op in ("q", "Q", "BT", "ET"):
+            flush()
             out.append(ins)
-        elif op == "Do":
-            if mc == 0 and not artifact_open:
-                out.append(pikepdf.ContentStreamInstruction(
-                    [pikepdf.Name("/Artifact")], pikepdf.Operator("BMC")))
-                artifact_open = True
-                added += 1
-            out.append(ins)
-        elif mc == 0 and op in PAINT_OPS:
-            if not artifact_open:
-                out.append(pikepdf.ContentStreamInstruction(
-                    [pikepdf.Name("/Artifact")], pikepdf.Operator("BMC")))
-                artifact_open = True
-                added += 1
-            out.append(ins)
-        elif mc == 0:
-            close()
-            out.append(ins)
+        elif op in PAINT_OPS and mc == 0:
+            if op in TEXT_OPS:
+                _kind, _x, y, _size, _depth = next(pending)
+                # bands is None inside a Form XObject: its coordinates are the form's, and the page-level
+                # check follows Do to judge them in page space.
+                # both ends of the drawn glyph: a 300 pt line with its origin in the band still reaches out
+                if bands is not None and not any(lo <= y <= hi and lo <= y + _size <= hi for lo, hi in bands):
+                    raise ValueError(f"page {page_no}: untagged text at y={y:.0f} (top {y + _size:.0f}) is outside "
+                                     f"the declared furniture band {list(bands)} — marking it /Pagination would "
+                                     "hide it from a screen reader")
+                buf_text = True
+            buf.append(ins)
+        elif mc > 0:
+            out.append(ins)       # inside a tag: not ours to wrap
         else:
+            flush()
             out.append(ins)
-    close()
+    flush()
     return out, added
 
 
-def _tag_orphan_runs(pdf, page, instructions):
-    """Give an /MCID to every top-level marked-content run that Chrome left unlinked.
+def _tag_orphan_runs(pdf, page, instructions, bands=(), page_no=0):
+    """Mark every top-level marked-content run Chrome left unlinked as page furniture — inside the band only.
 
-    Chrome wraps reversed RTL text in a bare `BMC /ReversedChars … EMC` with no MCID, so the run paints
-    visible text that belongs to no structure element — veraPDF calls it «neither Artifact nor tagged»
-    (27 items per affected page). Marking it Artifact would hide real text from a screen reader, so the run
-    becomes real content instead: it gets the next free MCID for the page, a /P structure element carrying
-    that MCID, and an entry in the page's ParentTree array. The text stays where it is; only its ownership
-    changes.
+    Chrome wraps reversed RTL text in a bare `BMC /ReversedChars … EMC` with no MCID. At depth 0 those runs
+    are the running head/footer, which a screen reader should skip: they become /Artifact /Pagination. The
+    text stays where it is; only its ownership changes.
+
+    A run outside the band the spec declares is NOT furniture — it is body text Chrome failed to tag, and
+    marking it /Pagination would hide it from a screen reader while the file still passes veraPDF. It stops
+    the build by name instead.
     """
     st = pdf.Root.get("/StructTreeRoot")
     if st is None or "/ParentTree" not in st:
@@ -173,6 +187,14 @@ def _tag_orphan_runs(pdf, page, instructions):
             out.append(ins)
         else:
             out.append(ins)
+
+    # A run outside every marked-content block is page furniture ONLY if it sits in a declared band. Wrapping
+    # body text as /Pagination hides it from a screen reader while the file still passes veraPDF, so a run
+    # outside the band stops the build by name instead of being swept along.
+    stray = outside_bands(out, bands)
+    if stray:
+        raise ValueError(f"page {page_no}: untagged text at y={stray[0][1]:.0f} is outside the declared furniture "
+                         f"band {list(bands)} — marking it /Pagination would hide it from a screen reader")
     return out
 
 
@@ -244,9 +266,10 @@ def feature_pdfua(pdf, spec=None) -> None:
             skipped += 1
 
     # pass 3: the pages themselves — wrap the untagged painting, then give the leftover runs an owner
-    for page in pdf.pages:
-        out, added = _wrap_untagged(pikepdf.parse_content_stream(page))
-        out = _tag_orphan_runs(pdf, page, out)
+    for page_no, page in enumerate(pdf.pages, 1):
+        out, added = _wrap_untagged(pikepdf.parse_content_stream(page),
+                                     getattr(NS, "FURNITURE_BANDS", []), page_no)
+        out = _tag_orphan_runs(pdf, page, out, getattr(NS, "FURNITURE_BANDS", []), page_no)
         if added or out:
             page.Contents = pdf.make_stream(pikepdf.unparse_content_stream(out))
             marks += added
@@ -357,18 +380,23 @@ def feature_attachments(pdf, spec, ctx=None) -> None:
     import spec_loader
     NS = spec_loader.load()
     rendered_sha = (ctx or {}).get("rendered_sha")
+    chrome_version = (ctx or {}).get("chrome_version")
     declared = getattr(NS, "ATTACHMENT_FILES", None)
     if not declared:
         raise SystemExit("postprocess: the spec declares no ATTACHMENT_FILES — the file list is a contract, not a default")
     if not rendered_sha:
         raise SystemExit("postprocess: manifest.json needs the hash of the markup handed to Chrome; "
                          "none was passed to apply(rendered_sha=...)")
+    if not chrome_version:
+        raise SystemExit("postprocess: manifest.json needs the version of the binary that printed the file; "
+                         "none was passed to apply(chrome_version=...)")
     src_path = os.path.join(PROJ, NS.SOURCE_HTML)
     data = open(src_path, "rb").read()
     manifest = {
         "source": NS.SOURCE_HTML,
         "source_sha256": hashlib.sha256(data).hexdigest(),
         "rendered_sha256": rendered_sha,
+        "chrome_version": chrome_version,
         "guide_version": NS.GUIDE_VERSION,
         "pages": NS.PAGES,
     }
@@ -695,7 +723,7 @@ def normalise(pdf) -> None:
 
 
 def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
-          rendered_sha: str | None = None) -> list[str]:
+          rendered_sha: str | None = None, chrome_version: str | None = None) -> list[str]:
     """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order.
 
     `rendered_sha` is the hash of the markup this build handed to Chrome. The producer passes it; the
@@ -707,13 +735,20 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
     spec = tomllib.load(open(features_path or os.path.join(PROJ, "features.toml"), "rb"))
     applied = []
     with pikepdf.open(src) as pdf:
+        # The model boundary, BEFORE anything is tagged: the pipeline refuses the structures it does not
+        # model instead of growing an interpreter for them (review P2, second round). A Chrome upgrade that
+        # starts emitting nested forms or text inside a form stops the build here, by name.
+        outside = model_boundary(pdf)
+        if outside:
+            raise SystemExit("postprocess: the document is outside the declared model — refused, not interpreted:\n  "
+                             + "\n  ".join(outside[:8]))
         for name, f in spec.get("features", {}).items():
             if f.get("stage") != 5 or profile not in f.get("profiles", []):
                 continue
             if name not in STAGE5:
                 raise SystemExit(f"postprocess: feature {name!r} is declared but has no implementation")
             # One signature for every feature; only `attachments` reads the build context.
-            STAGE5[name](pdf, f, {"rendered_sha": rendered_sha})
+            STAGE5[name](pdf, f, {"rendered_sha": rendered_sha, "chrome_version": chrome_version})
             applied.append(name)
         for k in ("/SourceFile", "/SourceSHA256"):
             if k in pdf.docinfo:
@@ -729,4 +764,5 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
 if __name__ == "__main__":
     import sys
     print(apply(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "web",
-                rendered_sha=sys.argv[4] if len(sys.argv) > 4 else None))
+                rendered_sha=sys.argv[4] if len(sys.argv) > 4 else None,
+                chrome_version=sys.argv[5] if len(sys.argv) > 5 else None))

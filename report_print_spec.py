@@ -8,8 +8,31 @@ the link count and the calibration grid change.
 Why a second spec rather than a CSS media query: a PDF page has ONE appearance. `@media print` decides
 what Chrome writes, but the result is a single fixed page — there is no "screen view" left inside it.
 """
+import spec_base as _gate_base   # the gate's own contract: CHECK_NAMES, MUTATION_SUITE_SIZE
 import report_spec as _base
-from report_spec import *                      # noqa: F401,F403  (inherit everything, override below)
+# Borrowed from the screen report BY NAME: a star import also carries its claims, and a claim this
+# document did not declare must not become its own by accident (B7).
+from report_spec import (
+    ACROFORM_FIELDS, ART_DPI_DECLARED, ART_FILES, ART_MAX_DPI, ART_PAGE_SHARE, ATTACHMENT_FILES, BASMALA,
+    BASMALA_FACES, BLANK_EXEMPT_IMAGE_COVER, CONFORMANCE, CONTENTS, CONTENTS_LABELS, COPY_MIN_RECALL,
+    COPY_MIN_SEQUENCE, COVER, DEST_NAMES, DOC_AUTHOR, DOC_KEYWORDS, FOOTER_Y_MAX, FOOTER_Y_MIN, GATE_CHECKS,
+    GUIDE_VERSION, GUIDE_VERSION_AR, HOUSE_FONT_PREFIX, IMAGE_COVER_TOL, LANG, LINK_LABELS, MM, NAV_CLASS,
+    NAV_W, NAV_Y0, NAV_Y1, PAGES, PAGE_H_MM, PAGE_INK_CELL_FLOOR, PAGE_INK_DPI, PAGE_INK_GRID,
+    PAGE_INK_MIN_RETENTION, PAGE_INK_TOL, PAGE_LABELS, PAGE_WORDS_TOL, PDFUA, PRINTED_COUNTS_PAGE,
+    REF_LABELS, REF_PAGE, REF_URLS, SLOTS, SLOT_ICON_MIN_IOU, SLOT_INK_CONTRAST, SLOT_INK_MAX, SLOT_INK_MIN,
+    SLOT_SHAPE, SLOT_SHAPE_TOL, SOURCE_HTML, TOC, TOC_ROWS, TOC_ROW_H, TOC_ROW_X0, TOC_ROW_X1, VERSION_SPOTS,
+    VOCALISED, VOCALISED_PAGES, XMP_DESCRIPTION, XMP_LANGUAGE, nav_target, toc_row_top,
+)
+
+# This document's MuPDF word-order floor: calibrated by scripts/calibrate.py --write as
+# max(LINE_ORDER_FLOOR, measured - LINE_ORDER_DRIFT); the gate refuses any value below the floor.
+# >>> CALIBRATED LINE_ORDER_MIN
+LINE_ORDER_MIN = 0.750
+# <<< CALIBRATED LINE_ORDER_MIN
+
+# The page geometry is the screen copy's; declared here rather than inherited silently (the rest of the
+# star import is B7's to remove).
+FURNITURE_BANDS = _base.FURNITURE_BANDS
 
 DOC_TITLE = _base.DOC_TITLE + " · نسخة الطباعة"
 XMP_TITLE = f"{DOC_TITLE} · الإصدار {_base.GUIDE_VERSION_AR}"
@@ -18,8 +41,11 @@ DOC_SUBJECT = _base.DOC_SUBJECT + " — نسخة مهيّأة للطباعة ب�
 # The print copy carries no navigation strip at all (the markup is removed, NAV_PAGES = ()), so the
 # eight mutations that describe a strip have nothing to act on and return NA on it — measured, not
 # assumed: each is named here with its reason, and gate_selftest fails if one applies after all.
-# 52 − 8 = 44.
-GATE_MUTATIONS = 44
+# The print copy is the same document: it asserts the same conformance and the same expected failing
+# rules, stated here rather than inherited silently.
+CLAIM_EXPECTED = _base.CLAIM_EXPECTED
+VERAPDF_BASELINE = _base.VERAPDF_BASELINE
+
 GATE_NA = {
     "swap_next_prev": "no strip links: NAV_PAGES = ()",
     "self_link": "no strip links: NAV_PAGES = ()",
@@ -31,6 +57,7 @@ GATE_NA = {
     "rename_nav_class": "the render check has no subject on a print copy: no icon is drawn, so a class "
                         "rename is a provenance event, not a render one",
 }
+GATE_MUTATIONS = _gate_base.MUTATION_SUITE_SIZE - len(GATE_NA)   # derived: the suite minus what cannot apply here
 
 # ---- the difference: no strip, no strip links, and the page must say so --------------------------------
 NAV_VISIBLE = False
@@ -41,9 +68,9 @@ EXPECTED = {**_base.EXPECTED, "nav_pages": 0, "source_strips": 0, "source_icons"
 
 # >>> CALIBRATED PAGE_INK
 PAGE_INK = {
-    0: (0.0797, (0.0, 0.2167, 0.0975, 0.0, 0.0007, 0.1771, 0.3124, 0.0116, 0.0108, 0.1594, 0.1925, 0.0121, 0.0046, 0.0203, 0.0541, 0.004)),
+    0: (0.0797, (0.0, 0.2167, 0.0975, 0.0, 0.0007, 0.1771, 0.3125, 0.0116, 0.0108, 0.1594, 0.1925, 0.0121, 0.0046, 0.0203, 0.0541, 0.004)),
     1: (0.0064, (0.0, 0.01, 0.0132, 0.0, 0.0024, 0.0356, 0.0325, 0.0024, 0.0, 0.0, 0.0, 0.0, 0.005, 0.0, 0.0, 0.0004)),
-    2: (0.0119, (0.0006, 0.0274, 0.0338, 0.0062, 0.0033, 0.0, 0.0301, 0.0246, 0.002, 0.0087, 0.0258, 0.0123, 0.0, 0.0077, 0.0073, 0.0)),
+    2: (0.0119, (0.0006, 0.0274, 0.0338, 0.0062, 0.0033, 0.0, 0.0302, 0.0246, 0.002, 0.0087, 0.0258, 0.0123, 0.0, 0.0077, 0.0073, 0.0)),
     3: (0.1349, (0.0, 0.0, 0.0, 0.0, 0.0, 0.5127, 0.6325, 0.1286, 0.0004, 0.5925, 0.2849, 0.0018, 0.0, 0.0, 0.0, 0.0)),
     4: (0.0287, (0.0187, 0.03, 0.0414, 0.0408, 0.018, 0.0453, 0.0516, 0.0336, 0.0225, 0.0426, 0.0675, 0.0397, 0.0025, 0.0, 0.0, 0.0053)),
     5: (0.0258, (0.0051, 0.034, 0.0601, 0.0399, 0.0061, 0.026, 0.01, 0.032, 0.022, 0.0618, 0.0394, 0.0376, 0.0043, 0.0055, 0.0175, 0.011)),
@@ -52,7 +79,7 @@ PAGE_INK = {
     8: (0.0235, (0.009, 0.0204, 0.0658, 0.0371, 0.0138, 0.0335, 0.0471, 0.0193, 0.0167, 0.0426, 0.0454, 0.0225, 0.0025, 0.0, 0.0, 0.0004)),
     9: (0.0221, (0.0, 0.0165, 0.0335, 0.0148, 0.0167, 0.0558, 0.069, 0.0288, 0.0098, 0.0324, 0.032, 0.0246, 0.0025, 0.0, 0.0088, 0.0086)),
     10: (0.0272, (0.0244, 0.0509, 0.0734, 0.0439, 0.0209, 0.052, 0.0528, 0.0429, 0.0087, 0.0186, 0.029, 0.0146, 0.0025, 0.0, 0.0, 0.001)),
-    11: (0.0214, (0.0072, 0.0305, 0.0657, 0.0382, 0.0086, 0.0533, 0.0633, 0.0236, 0.0066, 0.013, 0.0143, 0.0142, 0.0025, 0.0, 0.0, 0.0008)),
+    11: (0.0212, (0.0072, 0.0306, 0.0643, 0.0382, 0.0086, 0.0534, 0.0633, 0.0235, 0.0066, 0.0122, 0.0142, 0.0142, 0.0025, 0.0, 0.0, 0.0008)),
     12: (0.0222, (0.006, 0.0246, 0.0506, 0.0392, 0.0186, 0.0473, 0.0582, 0.0273, 0.0067, 0.0143, 0.0395, 0.0194, 0.0025, 0.0, 0.0, 0.0008)),
     13: (0.0152, (0.0103, 0.0181, 0.0306, 0.0361, 0.0068, 0.0048, 0.0259, 0.0357, 0.0081, 0.0146, 0.0262, 0.0221, 0.0025, 0.0, 0.0, 0.0009)),
     14: (0.0159, (0.0231, 0.0452, 0.0481, 0.0488, 0.0, 0.0, 0.0, 0.0109, 0.0057, 0.0123, 0.0142, 0.0092, 0.0032, 0.0121, 0.013, 0.0083)),

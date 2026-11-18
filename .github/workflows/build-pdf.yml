@@ -15,6 +15,13 @@ jobs:
   build:
     # macOS: same system faces as the owner's Mac (GeezaPro for the vocalised basmala) and Chrome preinstalled
     runs-on: macos-15
+    env:
+      # ONE value in this file: the action input below and chrome_pin.py are compared against it, and the gate
+      # refuses a manifest that names anything else.
+      CHROME_VERSION: "157.0.8103.78"
+      # The baselines were measured on this validator. Homebrew ships whatever is current, so the pin is
+      # enforced where it matters — at use, by name (the same choice as Chrome).
+      VERAPDF_VERSION: "1.30.0"
     steps:
       - uses: actions/checkout@v5
 
@@ -28,6 +35,19 @@ jobs:
           # the documented install command must be the one CI uses
           grep -q "pip install -r requirements.txt" README.md
 
+      - name: Chrome — the pinned engine (chrome_pin.py)
+        id: chrome
+        uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce  # v1.7.3, pinned by SHA
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+
+      - name: CHROME_PATH — one binary, and it is the pin
+        run: |
+          # compared against the value the action was given, not a second literal in this file
+          python3 -c "import os, sys, chrome_pin; sys.exit(0 if chrome_pin.CHROME_VERSION == os.environ['CHROME_VERSION'] else 'workflow pin != chrome_pin.CHROME_VERSION — update both in one commit')"
+          echo "CHROME_PATH=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+          "${{ steps.chrome.outputs.chrome-path }}" --version
+
       - name: Release tag must match the version the guide prints
         if: startsWith(github.ref, 'refs/tags/v')
         run: python3 -c "import sys, nav_spec as NS; t=sys.argv[1]; sys.exit(0 if t.startswith('v' + NS.GUIDE_VERSION + '.') else f'tag {t} does not start with v{NS.GUIDE_VERSION}. - bump GUIDE_VERSION in nav_spec.py and the two places in guide-v2.html')" "${{ github.ref_name }}"
@@ -39,11 +59,20 @@ jobs:
         run: python3 scripts/verify_pdf.py guide-v2-ar.pdf
 
       - name: Gate self-test — every mutation must be caught
-        run: python3 scripts/gate_selftest.py guide-v2-ar.pdf
+        run: |
+          python3 scripts/gate_selftest.py guide-v2-ar.pdf
+          PDF_SPEC=nav_spec python3 scripts/artifact_inventory.py guide-v2-ar.pdf
+          python3 scripts/constructs.py guide-v2-ar.pdf
 
       - name: veraPDF baseline — no NEW failing rule, no DEAD exception
         run: |
           brew install verapdf
+          got="$(verapdf --version 2>&1 | head -1 | awk '{print $2}')"
+          if [ "$got" != "$VERAPDF_VERSION" ]; then
+            echo "veraPDF $got is installed; the baselines were measured on $VERAPDF_VERSION — refused by name"
+            exit 1
+          fi
+          echo "veraPDF $got — the pinned validator"
           # 4f is the BINDING flavour for a file with attachments; plain 4 does not cover it.
           python3 scripts/verapdf_gate.py guide-v2-ar.pdf 3b ua1 4f
 
@@ -54,7 +83,34 @@ jobs:
           PDF_SPEC=report_spec python3 scripts/gate_selftest.py report.pdf
           # 4f is the binding flavour for a file with attachments, the same rule as the guide.
           PDF_SPEC=report_spec python3 scripts/verapdf_gate.py report.pdf 3b ua1 4f
+          # B8: the baseline has ONE source, the spec — a stray env override must change nothing
+          VERAPDF_BASELINE=/nonexistent/baseline.toml PDF_SPEC=report_spec python3 scripts/verapdf_gate.py report.pdf 3b ua1 4f
           PDF_SPEC=report_spec python3 scripts/claim_probe.py report.pdf --check
+          # the producer's furniture guard, seen failing: an unmarked body run must stop the build
+          PDF_SPEC=report_spec python3 scripts/test_furniture_band.py report.pdf
+          python3 scripts/test_verapdf_json_guard.py
+          python3 scripts/test_verapdf_test_granularity.py
+          python3 scripts/test_digit_value.py
+          python3 scripts/test_baseline_guard.py
+          python3 scripts/test_pdf_model.py
+          PDF_SPEC=report_spec python3 scripts/artifact_inventory.py report.pdf
+          python3 scripts/constructs.py report.pdf
+          # the tool ROADMAP cites for the responsible lines must run at this head (it broke once)
+          PDF_SPEC=report_spec python3 scripts/line_order_report.py report.pdf > /dev/null
+
+      - name: The print copy — the same document without the strip (B10)
+        run: |
+          # Same HTML, its own spec: no nav strip, so every strip check is n/a and the footer/ink tables are
+          # its own. Its line-order floor is the tightest in the repo (measured 0.750), which is why it enters
+          # CI only now that the engine is pinned (B11).
+          PDF_SPEC=report_print_spec python3 build.py report-v1.html report-print.pdf
+          PDF_SPEC=report_print_spec python3 scripts/verify_pdf.py report-print.pdf
+          PDF_SPEC=report_print_spec python3 scripts/gate_selftest.py report-print.pdf
+          # the copy declares PDF/A-3b and PDF/UA-1: a claim CI does not measure is a claim that rots
+          PDF_SPEC=report_print_spec python3 scripts/verapdf_gate.py report-print.pdf 3b ua1 4f
+          PDF_SPEC=report_print_spec python3 scripts/claim_probe.py report-print.pdf --check
+          PDF_SPEC=report_print_spec python3 scripts/artifact_inventory.py report-print.pdf
+          python3 scripts/constructs.py report-print.pdf
 
       - name: Claim probe — what remains if the file DECLARED conformance
         run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check
