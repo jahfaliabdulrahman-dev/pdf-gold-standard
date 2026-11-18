@@ -40,6 +40,26 @@ def exact(text, want):
     return sum(b.size for b in difflib.SequenceMatcher(None, want, got, autojunk=False).get_matching_blocks()) / len(want)
 
 
+def gap_seam(engine, strict_text, loose_text):
+    """The fill's text, not its count: ONE U+2060 at the seam, and nothing else copied differently.
+
+    The fixture is checked in, so the seat is measured rather than guessed: PDFium orders the RTL line
+    logically and the joiner lands at the line's end (before the CRLF); MuPDF starts the line with a tab and
+    the joiner follows it. A fill that is counted but never read is how a wrong character stays invisible.
+    """
+    n = strict_text.count("\u2060")
+    if n != 1:
+        return False, f"{n} U+2060 in the copied text (must be exactly 1)"
+    i = strict_text.index("\u2060")
+    if engine == "PDFium" and strict_text[i + 1:i + 3] != "\r\n":
+        return False, f"U+2060 at {i} is not at the end of the RTL line: {strict_text[i:i + 4]!r}"
+    if engine == "MuPDF" and strict_text[i - 1:i] != "\t":
+        return False, f"U+2060 at {i} does not follow the line's tab: {strict_text[i - 2:i + 2]!r}"
+    if norm(strict_text) != norm(loose_text):
+        return False, "the fill changed the copied text beyond the one invisible joiner"
+    return True, f"U+2060 at {i}, the rest of the copy unchanged"
+
+
 def r2l(src, dst):
     """build.py declares the document right-to-left; PDFium orders a line by that flag."""
     with pikepdf.open(src) as pdf:
@@ -101,7 +121,8 @@ if __name__ == "__main__":
         # The strict branch itself: a fixture whose glyphs kern 0.15 em apart must be filled, and the same
         # fixture under strict_widths=False must not fill it — otherwise the test never enters the branch
         # it claims to cover (a test never seen failing is unverified).
-        gap_src, gap_strict, gap_loose = (os.path.join(tmp, n) for n in ("gap.pdf", "gap-fixed.pdf", "gap-loose.pdf"))
+        gap_src, gap_strict, gap_loose, gap_wrong = (
+            os.path.join(tmp, n) for n in ("gap.pdf", "gap-fixed.pdf", "gap-loose.pdf", "gap-wrong.pdf"))
         with_gap(RAW, gap_src)
         st_strict = fix_text_layer.process(gap_src, gap_strict, strict_widths=True)
         st_loose = fix_text_layer.process(gap_src, gap_loose, strict_widths=False)
@@ -114,6 +135,26 @@ if __name__ == "__main__":
         print(f"{'PASS' if ok else 'FAIL'} gap-filled/counter - strict_widths=False fills "
               f"{st_loose.get('gap_filled', 0)} (must be 0: the fill is the strict branch's alone)")
         if not ok: failed.append("gap-filled/counter")
+        # What the fill PUT in the text, not only that it ran: one joiner at the seam and no other change.
+        strict_text, loose_text = extract(gap_strict), extract(gap_loose)
+        for engine in ("PDFium", "MuPDF"):
+            ok, why = gap_seam(engine, strict_text[engine], loose_text[engine])
+            print(f"{'PASS' if ok else 'FAIL'} gap-text/{engine} - {why}")
+            if not ok: failed.append(f"gap-text/{engine}")
+        # Counter: the same branch filled with another character must be caught (a check never seen failing
+        # is unverified). U+200B is not stripped by norm(), so it also alters the copy — both must show.
+        keep = fix_text_layer.GAP_JOINER
+        try:
+            fix_text_layer.GAP_JOINER = "\u200b"
+            fix_text_layer.process(gap_src, gap_wrong, strict_widths=True)
+        finally:
+            fix_text_layer.GAP_JOINER = keep
+        wrong_text = extract(gap_wrong)
+        verdicts = {e: gap_seam(e, wrong_text[e], loose_text[e])[0] for e in wrong_text}
+        ok = not any(verdicts.values())
+        print(f"{'PASS' if ok else 'FAIL'} gap-text/counter - filling with U+200B instead of U+2060 is "
+              f"refused: {verdicts}")
+        if not ok: failed.append("gap-text/counter")
     if failed:
         print(f"\nTEST FAILED: {failed}"); raise SystemExit(1)
     print("\nTEST PASSED")
