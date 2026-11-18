@@ -7,14 +7,26 @@ Two deliberate omissions, both stated in the document itself:
   · no AcroForm fields — the brief excludes typing;
   · no variable font — measured: Chrome embeds a variable face as Type3 glyph procedures.
 """
+
+from spec_base import (  # what every document shares — B12
+    ART_MAX_DPI, BLANK_EXEMPT_IMAGE_COVER, COPY_MIN_RECALL,
+    COPY_MIN_SEQUENCE, COVER, DOC_AUTHOR,
+    FOOTER_Y_MAX, FOOTER_Y_MIN, IMAGE_COVER_TOL,
+    LANG, LINK_LABELS, MM,
+    NAV_CLASS, NAV_W, NAV_Y0,
+    NAV_Y1, PAGE_INK_CELL_FLOOR, PAGE_INK_DPI,
+    PAGE_INK_GRID, PAGE_INK_MIN_RETENTION, PAGE_INK_TOL,
+    PAGE_WORDS_TOL, SLOTS, SLOT_ICON_MIN_IOU,
+    SLOT_INK_CONTRAST, SLOT_INK_MAX, SLOT_INK_MIN,
+    SLOT_SHAPE, SLOT_SHAPE_TOL, TOC_ROW_H,
+    TOC_ROW_X0, TOC_ROW_X1, VOCALISED,
+    XMP_LANGUAGE,
+)
 # Borrowed from the screen report BY NAME: a star import also carries its claims, and a claim this
 # document did not declare must not become its own by accident (B7).
 from report_spec import (
-    BLANK_EXEMPT_IMAGE_COVER, CONTENTS, COPY_MIN_RECALL, COPY_MIN_SEQUENCE, COVER, FOOTER_Y_MAX,
-    FOOTER_Y_MIN, IMAGE_COVER_TOL, LINKS_CLAIM, MM, NAV_W, NAV_Y0, NAV_Y1, PAGE_H_MM, PAGE_INK_CELL_FLOOR,
-    PAGE_INK_DPI, PAGE_INK_GRID, PAGE_INK_MIN_RETENTION, PAGE_INK_TOL, PAGE_WORDS_TOL, SLOTS,
-    SLOT_ICON_MIN_IOU, SLOT_INK_CONTRAST, SLOT_INK_MAX, SLOT_INK_MIN, SLOT_SHAPE, SLOT_SHAPE_TOL, TOC_ROW_H,
-    TOC_ROW_X0, TOC_ROW_X1, VOCALISED, toc_row_top,
+    CONTENTS, LINKS_CLAIM, PAGE_H_MM,
+    toc_row_top,
 )
 
 # This document's MuPDF word-order floor: calibrated by scripts/calibrate.py --write as
@@ -25,7 +37,6 @@ LINE_ORDER_MIN = 0.909
 
 GUIDE_VERSION = "1.0"
 DOC_TITLE = "نجد — عيّنة خط بروح العمارة النجدية"
-DOC_AUTHOR = "م. عبدالرحمن جحفلي"
 DOC_SUBJECT = "عيّنة خط نجد داخل مستند PDF كامل الميزات، بألوان الخط نفسها"
 DOC_KEYWORDS = "Najd, خط نجد, Arabic type, PDF/A-3b, specimen"
 GUIDE_VERSION_AR = GUIDE_VERSION.translate(str.maketrans("0123456789.", "٠١٢٣٤٥٦٧٨٩٫"))
@@ -63,7 +74,6 @@ CONTENTS_LABELS = ["الأوزان الخمسة", "الحروف والبدائل
                    "ما يفعله هذا الملف", "البوابة والأرقام", "حدود الخط والملف"]
 REF_LABELS = ["خط نجد", "المصمّم على X", "أداة veraPDF", "محرّك Chrome Headless"]
 
-LANG = "ar"
 HOUSE_FONT_PREFIX = "Najd"          # every embedded face must start with this
 BASMALA_FACES = set()
 BASMALA = 3                         # no basmala line in this specimen; the page index is kept for the
@@ -93,16 +103,13 @@ CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
 # The cover carries the wall the typeface was drawn from; embedded at build time so the print stays
 # deterministic (Chrome renders from a temp dir, where relative paths do not resolve).
 ART_FILES = [("{{ART_NAJD_COVER}}", "embed-najd-cover.jpg")]
-ART_MAX_DPI = 300
 ART_DPI_DECLARED = {}
 ART_PAGE_SHARE = 0.0
 
 DEST_NAMES = [("cover", COVER), ("contents", CONTENTS), ("weights", 2), ("glyphs", 3), ("palette", 4),
               ("spirit", 5), ("features", 6), ("gate", 7), ("limits", 8), ("references", REF_PAGE), ("back", PAGES - 1)]
 PAGE_LABELS = [(0, None, "غ")]
-XMP_LANGUAGE = "ar"
 # The class the navigation strip is drawn with: the producer removes it and the gate reads it.
-NAV_CLASS = "nav"
 XMP_TITLE = f"{DOC_TITLE} · الإصدار {GUIDE_VERSION_AR}"
 XMP_DESCRIPTION = "عيّنة خط نجد: خمسة أوزان ثابتة، وألوان الموقع، وميزات خط الأنابيب كاملة بلا حقول كتابة"
 PDFUA = True
@@ -125,8 +132,6 @@ def nav_target(role: str, i: int) -> int:
     return {"home": COVER, "contents": CONTENTS, "prev": i - 1, "next": i + 1}[role]
 
 
-LINK_LABELS = {"next": "الصفحة التالية", "prev": "الصفحة السابقة",
-               "contents": "جدول المحتويات", "home": "الغلاف"}
 
 # >>> DECLARED EXPECTED  (counts the source declares, not a measurement)
 EXPECTED = {"pages": PAGES, "nav_pages": len(NAV_PAGES), "source_strips": len(NAV_PAGES),
@@ -143,7 +148,7 @@ PAGE_INK = {
     4: (0.0956, (0.0582, 0.0839, 0.0891, 0.0342, 0.3128, 0.4589, 0.2041, 0.187, 0.0146, 0.0266, 0.0184, 0.0372, 0.0002, 0.0, 0.0, 0.0018)),
     5: (0.0252, (0.0062, 0.011, 0.0323, 0.0319, 0.0197, 0.0334, 0.0326, 0.0355, 0.0294, 0.0518, 0.0516, 0.0422, 0.0004, 0.0047, 0.0134, 0.0075)),
     6: (0.0175, (0.0108, 0.0186, 0.0261, 0.0298, 0.007, 0.0575, 0.0274, 0.0357, 0.006, 0.0258, 0.0141, 0.0185, 0.0003, 0.0, 0.0, 0.0015)),
-    7: (0.0223, (0.0148, 0.0258, 0.0541, 0.078, 0.0113, 0.0247, 0.0499, 0.0545, 0.0053, 0.0121, 0.0112, 0.0122, 0.0003, 0.0, 0.0, 0.0017)),
+    7: (0.0223, (0.0148, 0.0258, 0.0541, 0.0787, 0.0113, 0.0247, 0.0492, 0.056, 0.0053, 0.0121, 0.0112, 0.0122, 0.0003, 0.0, 0.0, 0.0017)),
     8: (0.0186, (0.0062, 0.0269, 0.0337, 0.032, 0.0183, 0.0552, 0.041, 0.0373, 0.0, 0.0, 0.022, 0.0225, 0.0003, 0.0, 0.0, 0.0015)),
     9: (0.0079, (0.0062, 0.0074, 0.0248, 0.0257, 0.0, 0.0, 0.0133, 0.0249, 0.0, 0.0012, 0.0092, 0.0115, 0.0002, 0.0, 0.0, 0.0017)),
     10: (0.0092, (0.0, 0.0, 0.0, 0.0, 0.0, 0.0639, 0.0682, 0.0, 0.0, 0.0082, 0.007, 0.0, 0.0, 0.0, 0.0, 0.0)),
