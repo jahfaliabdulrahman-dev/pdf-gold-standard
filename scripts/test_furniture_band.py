@@ -44,6 +44,12 @@ def main() -> int:
         print("FAIL footer run at y=36 was not wrapped as an artifact")
         return 1
     print("PASS footer run at y=36 wrapped as /Artifact /Pagination")
+    # a show that follows the closed block is not inside it: stale state would report a false stray
+    after = run(36) + [instr("BT", ), instr("Tm", 1, 0, 0, 1, 100, 400), instr("Tj", pikepdf.String("x")), instr("ET")]
+    if postprocess.outside_bands(after, [(0, 60)]):
+        print("FAIL a show after EMC was still counted as pagination")
+        return 1
+    print("PASS a show after EMC is not pagination")
     return 0
 
 

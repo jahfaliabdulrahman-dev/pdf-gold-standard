@@ -55,6 +55,8 @@ jobs:
           # 4f is the binding flavour for a file with attachments, the same rule as the guide.
           PDF_SPEC=report_spec python3 scripts/verapdf_gate.py report.pdf 3b ua1 4f
           PDF_SPEC=report_spec python3 scripts/claim_probe.py report.pdf --check
+          # the producer's furniture guard, seen failing: an unmarked body run must stop the build
+          PDF_SPEC=report_spec python3 scripts/test_furniture_band.py report.pdf
 
       - name: Claim probe — what remains if the file DECLARED conformance
         run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check

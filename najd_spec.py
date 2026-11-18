@@ -9,8 +9,8 @@ Two deliberate omissions, both stated in the document itself:
 """
 from report_spec import *                       # noqa: F401,F403  (shared geometry: slots, mm, page height)
 
-# This document's MuPDF word-order floor: calibrated as max(0.75, measured - 0.02) by
-# scripts/calibrate.py --write; the gate refuses any value below 0.75.
+# This document's MuPDF word-order floor: calibrated by scripts/calibrate.py --write as
+# max(LINE_ORDER_FLOOR, measured - LINE_ORDER_DRIFT); the gate refuses any value below the floor.
 # >>> CALIBRATED LINE_ORDER_MIN
 LINE_ORDER_MIN = 0.909
 # <<< CALIBRATED LINE_ORDER_MIN

@@ -530,7 +530,7 @@ def _parent_tree(pdf) -> dict:
     return table
 
 
-from pdfops import PAINT_OPS, outside_bands  # noqa: E402  (one definition: producer and gate read the same rule)
+from pdfops import PAINT_OPS, text_shows  # noqa: E402  (one definition: producer and gate read the same rule)
 from gate_policy import LINE_ORDER_FLOOR  # noqa: E402
 
 
@@ -1115,12 +1115,15 @@ def gate(doc) -> list[str]:
     #     text show inside one must sit in the band the spec declares. The producer refuses at build time;
     #     this is the same rule on the file, which is where a mutation can be seen.
     bands = list(getattr(NS, "FURNITURE_BANDS", []))
-    swept = []
+    swept, shows_seen = [], 0
     try:
         xp = pikepdf_open(doc)
         try:
             for pi, page in enumerate(xp.pages, 1):
-                strays = outside_bands(pikepdf.parse_content_stream(page), bands)
+                shows = text_shows(pikepdf.parse_content_stream(page))
+                shows_seen += sum(1 for is_pag, *_ in shows if is_pag)
+                strays = [y for is_pag, _x, y, _s in shows
+                          if is_pag and not any(lo <= y <= hi for lo, hi in bands)]
                 swept += [f"p{pi} y={y:.0f}" for y in strays]
         finally:
             xp.close()
@@ -1129,7 +1132,7 @@ def gate(doc) -> list[str]:
     except Exception as exc:                 # an unreadable content stream is a failure, not a crash
         swept = [f"cannot read the page content: {exc}"]
     check("furniture-band", not swept,
-          "; ".join(swept[:4]) or f"{len(bands)} declared band(s), every pagination show inside")
+          "; ".join(swept[:4]) or f"{len(bands)} band(s) · {shows_seen} pagination show(s), every one inside")
 
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).
@@ -1230,6 +1233,13 @@ def text_layer_violations(doc) -> list[str]:
     return out
 
 
+def sequence_ratio(truth: list[str], got: list[str]) -> float:
+    """How much of `truth` appears in `got` in the same order — one definition, one number."""
+    import difflib
+    sm = difflib.SequenceMatcher(None, truth, got, autojunk=False)
+    return sum(b.size for b in sm.get_matching_blocks()) / len(truth)
+
+
 def truth_words() -> list[str]:
     """The markup's words in source order — what copy-fidelity and the line-order report both compare to."""
     import html
@@ -1265,8 +1275,7 @@ def copy_fidelity(doc, engine="pdfium", text=None):
         return None, None
     ct, cg = collections.Counter(truth), collections.Counter(got)
     recall = sum(min(ct[w], cg[w]) for w in ct) / len(truth)
-    sm = difflib.SequenceMatcher(None, truth, got, autojunk=False)
-    return recall, sum(b.size for b in sm.get_matching_blocks()) / len(truth)
+    return recall, sequence_ratio(truth, got)
 
 
 def printed_page_numbers(page) -> list[int]:

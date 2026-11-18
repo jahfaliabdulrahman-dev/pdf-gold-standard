@@ -108,8 +108,9 @@ SOURCE_HTML = "guide-v2.html"
 COPY_MIN_RECALL = 0.95
 COPY_MIN_SEQUENCE = 0.92
 # Stream-order readers (MuPDF): raw Chrome output 0.16, after the line-joining pass 0.80 (measured on guide v2.1).
-# The MuPDF word-order floor for THIS document: calibrated as max(0.75, measured - 0.02) by
-# scripts/calibrate.py --write. The gate refuses any value below 0.75, so it cannot be bought down.
+# The MuPDF word-order floor for THIS document: calibrated by scripts/calibrate.py --write as
+# max(gate_policy.LINE_ORDER_FLOOR, measured - gate_policy.LINE_ORDER_DRIFT), and the gate refuses any
+# value below the floor. The two numbers live in gate_policy.py, not in this comment.
 # >>> CALIBRATED LINE_ORDER_MIN
 LINE_ORDER_MIN = 0.765
 # <<< CALIBRATED LINE_ORDER_MIN

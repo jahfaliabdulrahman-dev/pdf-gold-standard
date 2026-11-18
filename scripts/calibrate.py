@@ -9,7 +9,7 @@ Usage:
     PDF_SPEC=report_spec python3 scripts/calibrate.py out.pdf            # print the block
     PDF_SPEC=report_spec python3 scripts/calibrate.py out.pdf --write    # patch the spec file in place
 
-`--write` rewrites ONLY the marked blocks (`# >>> CALIBRATED`, `# <<< CALIBRATED`) and the four scalars, so a
+`--write` rewrites ONLY the marked blocks (`# >>> CALIBRATED`, `# <<< CALIBRATED`) and the scalars, so a
 spec's prose and geometry survive. No measurement is taken from a PDF the gate has already refused for a
 structural reason: ink is only meaningful on the intended page count.
 """
@@ -78,6 +78,8 @@ def main() -> None:
     # The ratchet is the document's own measured order minus drift; it can never fall below the floor three
     # documents once shared, so the gate would refuse a spec that tried to buy green by lowering it.
     line_src = f"{max(LINE_ORDER_FLOOR, round(m['mupdf'] - LINE_ORDER_DRIFT, 3)):.3f}"
+    # Each guard has its own key: a design change that moves the link count must not silently lower the
+    # word-order floor, and a falling order must not be excused by passing the link flag.
     new = {
         "PAGE_INK": ink_src, "PAGE_WORDS": words_src, "IMAGE_PAGES": images_src, "FOOTER": footer_src,
         "LINE_ORDER_MIN": line_src,
@@ -97,13 +99,13 @@ def main() -> None:
     # left). Same guard as EXPECTED_LINKS — pass --force only when the layer itself changed.
     old_line = re.search(r"^LINE_ORDER_MIN = ([\d.]+)", src, re.M)
     new_line = float(line_src)
-    if old_line and new_line < float(old_line.group(1)) and "--force" not in sys.argv:
-        raise SystemExit(f"refusing to lower LINE_ORDER_MIN {old_line.group(1)} -> {line_src}: "
-                         "a falling build is a regression, not a new baseline (--force only if the layer changed)")
+    if old_line and new_line < float(old_line.group(1)) and "--force-floor" not in sys.argv:
+        raise SystemExit(f"refusing to lower LINE_ORDER_MIN {old_line.group(1)} -> {line_src}: a falling build is a "
+                         "regression, not a new baseline (--force-floor only if the layer itself changed)")
     old_links = re.search(r"^EXPECTED_LINKS = (\d+)", src, re.M)
-    if old_links and int(old_links.group(1)) > m["links"] and "--force" not in sys.argv:
-        raise SystemExit(f"refusing to lower EXPECTED_LINKS {old_links.group(1)} -> {m['links']}: "
-                         "a lost link is a defect, not a new baseline (pass --force only if the design changed)")
+    if old_links and int(old_links.group(1)) > m["links"] and "--force-links" not in sys.argv:
+        raise SystemExit(f"refusing to lower EXPECTED_LINKS {old_links.group(1)} -> {m['links']}: a lost link is a "
+                         "defect, not a new baseline (pass --force-links only if the design changed)")
     for name, val in new.items():
         pat = re.compile(rf"# >>> CALIBRATED {name}\n.*?\n# <<< CALIBRATED {name}\n", re.S)
         if not pat.search(src):
