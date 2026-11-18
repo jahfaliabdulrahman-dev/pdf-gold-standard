@@ -532,6 +532,7 @@ def _parent_tree(pdf) -> dict:
 
 from pdfops import PAINT_OPS, text_shows  # noqa: E402  (one definition: producer and gate read the same rule)
 from gate_policy import LINE_ORDER_FLOOR  # noqa: E402
+import chrome_pin  # noqa: E402  (the engine every number here was measured on)
 
 
 def untagged_runs(pdf) -> list[str]:
@@ -1044,7 +1045,7 @@ def gate(doc) -> list[str]:
 
     # 8c. provenance: the file says which source it was built from, and that is the source this gate compares with
     name, digest = source_stamp()
-    got_name = got_digest = got_rendered = ""
+    got_name = got_digest = got_rendered = got_chrome = ""
     stray = 0
     try:
         import hashlib
@@ -1057,6 +1058,7 @@ def gate(doc) -> list[str]:
             man = _json.loads(px.attachments["manifest.json"].get_file().read_bytes())
             got_name = man.get("source", "")
             got_rendered = man.get("rendered_sha256", "")
+            got_chrome = man.get("chrome_version", "")
         # Page furniture must not be structure content. A /P element directly under /Document is a
         # paragraph the post-processor invented for a run that belonged to no section — a reader then
         # reads the running head once per page, after the last section.
@@ -1094,6 +1096,12 @@ def gate(doc) -> list[str]:
           f"{name} sha256 {digest[:12]} · rendered {want_rendered[:12]}" if ok else
           (rendered_why or ("no source stamp" if not got_digest else
            f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}")))
+    # 8d. the engine that printed it: Skia decides the text layer this repo patches and measures, so the
+    #     manifest carries the binary's own version and the gate holds it to the pin — by name, not a warning.
+    pin = chrome_pin.CHROME_VERSION
+    check("chrome-version", got_chrome == pin,
+          f"printed by Chrome {got_chrome}" if got_chrome == pin else
+          f"manifest says «{got_chrome or 'nothing'}», the pipeline is pinned to {pin}")
     check("tagged-structure", stray == 0,
           "no paragraph sits directly under /Document" if stray == 0 else
           f"{stray} paragraph(s) under /Document — page furniture tagged as content")

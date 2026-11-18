@@ -40,8 +40,8 @@ DOC_SUBJECT = _base.DOC_SUBJECT + " — نسخة مهيّأة للطباعة ب�
 # The print copy carries no navigation strip at all (the markup is removed, NAV_PAGES = ()), so the
 # eight mutations that describe a strip have nothing to act on and return NA on it — measured, not
 # assumed: each is named here with its reason, and gate_selftest fails if one applies after all.
-# 53 − 8 = 45.
-GATE_MUTATIONS = 45
+# 54 − 8 = 46.
+GATE_MUTATIONS = 46
 # The print copy is the same document: it asserts the same conformance and the same expected failing
 # rules, stated here rather than inherited silently.
 CLAIM_EXPECTED = _base.CLAIM_EXPECTED

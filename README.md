@@ -44,12 +44,17 @@
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate   # نسخة Python التي يستخدمها CI
 python3 -m pip install -r requirements.txt
+# Chrome مثبّت الإصدار: النسخة في chrome_pin.py. بدونه لا يبني — لا بديل صامت إلى Chrome النظامي.
+npx --yes @puppeteer/browsers install chrome@157.0.8103.78 --path "$HOME/.cache/cft"
+export CHROME_PATH="$HOME/.cache/cft/chrome/mac_arm-157.0.8103.78/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
 python3 build.py guide-v2.html out.pdf
 PDF_SPEC=report_spec python3 build.py report-v1.html report.pdf   # الوثيقة الثانية، بنفس البوابة
 ```
 
 كل وثيقة تحمل مواصفتها: `nav_spec.py` للدليل و`report_spec.py` للتقرير — يختارها `PDF_SPEC`، ويقرؤها البناء والبوابة
 والاختبار الذاتي من مكان واحد. الأرقام المقاسة (حبر كل صفحة، كلماتها، صورها) تُولَّد بـ`scripts/calibrate.py`، لا تُكتب يدويًا.
+ومحرّك الرسم نفسه مثبّت: `chrome_pin.CHROME_VERSION` — البناء يقرأ `CHROME_PATH` وحده ويرفض أي إصدار آخر بالاسم،
+لأن Skia هي التي تكتب طبقة النص التي تُرقَّع وتُقاس (مسارات ‎darwin/arm64‎؛ غيّر المسار حسب معماريتك).
 
 **CI (macOS)** يبني الدليل والتقرير ويشغّل عليهما البوابة والاختبار الذاتي وveraPDF و`claim_probe`، ثم اختبار النص المشكول.
 **نجد لا يُبنى في CI** (خطه غير مشحون)، فأوامره إلزامية محليًا قبل أي دمج:
