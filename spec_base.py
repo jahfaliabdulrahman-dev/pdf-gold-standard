@@ -72,4 +72,4 @@ CHECK_NAMES = frozenset({
     "vocalised", "xmp",
 })
 
-MUTATION_SUITE_SIZE = 61      # every mutation the suite carries; a spec declares how many apply to it
+MUTATION_SUITE_SIZE = 62      # every mutation the suite carries; a spec declares how many apply to it

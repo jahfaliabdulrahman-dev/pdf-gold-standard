@@ -92,6 +92,7 @@ jobs:
           python3 scripts/test_verapdf_test_granularity.py
           python3 scripts/test_digit_value.py
           python3 scripts/test_baseline_guard.py
+          python3 scripts/test_pdf_model.py
           PDF_SPEC=report_spec python3 scripts/artifact_inventory.py report.pdf
           python3 scripts/constructs.py report.pdf
           # the tool ROADMAP cites for the responsible lines must run at this head (it broke once)

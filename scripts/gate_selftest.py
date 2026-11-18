@@ -805,6 +805,19 @@ def nested_form(doc):
     return _pikemutate(doc, fn)
 
 
+def unresolved_do_in_form(doc):
+    """A form that invokes a name its own resources do not carry: the chain that hid from a resolver-first scan.
+
+    The boundary promises «Do deeper than 1 is refused» — the refusal must not depend on the lookup succeeding.
+    """
+    def fn(p):
+        page = p.pages[0]
+        outer = _add_form(p, page, "/FxChain", b"q /Missing Do Q", resources=pikepdf.Dictionary({}))
+        outer["/BBox"] = pikepdf.Array([0, 0, 10, 10])
+        _prepend(p, page, b"q\n/FxChain Do\nQ")
+    return _pikemutate(doc, fn)
+
+
 def text_rise(doc):
     """A glyph drawn off its baseline (Ts): the model does not track where it lands."""
     def fn(p):
@@ -877,6 +890,7 @@ MUTATIONS = [
     (form_xobject_text, "furniture-band", False),
     (text_in_form, "pdf-model", False),
     (nested_form, "pdf-model", False),
+    (unresolved_do_in_form, "pdf-model", False),
     (text_rise, "pdf-model", False),
     (rotated_artifact_text, "pdf-model", False),
     (missing_rendered_hash, "provenance", False),

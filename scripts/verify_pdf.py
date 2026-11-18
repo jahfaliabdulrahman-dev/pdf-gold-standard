@@ -1157,6 +1157,9 @@ def gate(doc) -> list[str]:
                 for kind, n in artifact_shows(instr, resolve, props).items():
                     inventory[kind] = inventory.get(kind, 0) + n
                 swept += [f"p{pi} {kind} y={y:.0f}" for kind, y in outside_bands(instr, bands, resolve, props)]
+                bare = artifact_shows(instr, resolve, props).get("artifact", 0)
+                if bare:
+                    swept.append(f"p{pi}: {bare} artifact text show(s) not typed /Pagination")
         finally:
             xp.close()
     except GateInput:

@@ -118,10 +118,11 @@ def _wrap_untagged(instructions, bands=None, page_no=0):
                 _kind, _x, y, _size, _depth = next(pending)
                 # bands is None inside a Form XObject: its coordinates are the form's, and the page-level
                 # check follows Do to judge them in page space.
-                if bands is not None and not any(lo <= y <= hi for lo, hi in bands):
-                    raise ValueError(f"page {page_no}: untagged text at y={y:.0f} is outside the declared "
-                                     f"furniture band {list(bands)} — marking it /Pagination would hide it "
-                                     "from a screen reader")
+                # both ends of the drawn glyph: a 300 pt line with its origin in the band still reaches out
+                if bands is not None and not any(lo <= y <= hi and lo <= y + _size <= hi for lo, hi in bands):
+                    raise ValueError(f"page {page_no}: untagged text at y={y:.0f} (top {y + _size:.0f}) is outside "
+                                     f"the declared furniture band {list(bands)} — marking it /Pagination would "
+                                     "hide it from a screen reader")
                 buf_text = True
             buf.append(ins)
         elif mc > 0:
