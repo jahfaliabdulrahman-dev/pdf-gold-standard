@@ -30,7 +30,8 @@ print(open(os.environ["FAKE_REPORT"], encoding="utf-8").read())
 
 def report(tests: list[str]) -> dict:
     return {"report": {"jobs": [{"itemDetails": {"fileName": "x.pdf"},
-                                 "validationResult": [{"compliant": False, "details": {"ruleSummaries": [
+                                 "validationResult": [{"profileName": "PDF/A-3b validation profile",
+                                                       "compliant": False, "details": {"ruleSummaries": [
                                      {"clause": "6.6.4", "testNumber": t, "ruleStatus": "FAILED",
                                       "description": "identification"} for t in tests]}}]}]}}
 
