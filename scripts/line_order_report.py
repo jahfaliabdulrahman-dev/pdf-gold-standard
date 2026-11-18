@@ -9,6 +9,7 @@ and a per-page count — the input to fixing the layer rather than lowering the 
 """
 import argparse
 import collections
+import difflib
 import os
 import sys
 
@@ -41,6 +42,7 @@ def main() -> int:
                     where.append((pno, bno, lno))
 
     ratio = V.sequence_ratio(truth, got)
+    sm = difflib.SequenceMatcher(None, truth, got, autojunk=False)   # the runs behind that ratio
     gate_stream = V.source_words("\n".join(p.get_text() for p in doc))
     if gate_stream != got:
         print(f"WARNING: line-rebuild stream differs from get_text() ({len(got)} vs {len(gate_stream)} tokens)")

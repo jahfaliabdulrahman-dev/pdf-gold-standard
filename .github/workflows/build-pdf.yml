@@ -57,6 +57,8 @@ jobs:
           PDF_SPEC=report_spec python3 scripts/claim_probe.py report.pdf --check
           # the producer's furniture guard, seen failing: an unmarked body run must stop the build
           PDF_SPEC=report_spec python3 scripts/test_furniture_band.py report.pdf
+          # the tool ROADMAP cites for the responsible lines must run at this head (it broke once)
+          PDF_SPEC=report_spec python3 scripts/line_order_report.py report.pdf > /dev/null
 
       - name: Claim probe — what remains if the file DECLARED conformance
         run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check

@@ -1308,10 +1308,10 @@ if __name__ == "__main__":
     pdf = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
     try:
         doc = open_for_gate(pdf)
-    except GateInput as e:
+        failed = gate(doc)
+    except GateInput as e:            # a rule refused its input: by name, like every other gate failure
         print(f"FAIL input - {e}")
         raise SystemExit(1)
-    failed = gate(doc)
     if failed:
         print(f"\n{len(failed)} gate(s) FAILED: {failed}")
         raise SystemExit(1)
