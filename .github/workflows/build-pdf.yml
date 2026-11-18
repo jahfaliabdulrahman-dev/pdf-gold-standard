@@ -77,6 +77,15 @@ jobs:
           # the tool ROADMAP cites for the responsible lines must run at this head (it broke once)
           PDF_SPEC=report_spec python3 scripts/line_order_report.py report.pdf > /dev/null
 
+      - name: The print copy — the same document without the strip (B10)
+        run: |
+          # Same HTML, its own spec: no nav strip, so every strip check is n/a and the footer/ink tables are
+          # its own. Its line-order floor is the tightest in the repo (measured 0.750), which is why it enters
+          # CI only now that the engine is pinned (B11).
+          PDF_SPEC=report_print_spec python3 build.py report-v1.html report-print.pdf
+          PDF_SPEC=report_print_spec python3 scripts/verify_pdf.py report-print.pdf
+          PDF_SPEC=report_print_spec python3 scripts/gate_selftest.py report-print.pdf
+
       - name: Claim probe — what remains if the file DECLARED conformance
         run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check
 
