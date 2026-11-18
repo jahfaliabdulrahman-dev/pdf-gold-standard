@@ -89,7 +89,7 @@ GATE_CHECKS = 37
 # Five of the suite's 53 mutations cannot be caught on this specimen (no divider art, no QR refs,
 # no form fields, no basmala line, and a measured blind spot in line order); the reasons are measured,
 # not assumed, and gate_selftest fails if one of them applies after all. 54 − 5 = 49.
-GATE_MUTATIONS = 49
+GATE_MUTATIONS = 52
 GATE_NA = {
     "drop_divider_art": "the divider page carries no art",
     "drop_image_object": "the references page carries no QR image",

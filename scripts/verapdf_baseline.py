@@ -55,10 +55,14 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".", help="directory holding the built PDFs")
     ap.add_argument("--write", action="store_true", help="rewrite the baseline files (default: report only)")
+    ap.add_argument("--accept-new", action="store_true",
+                    help="allow a NEW failing rule into the baseline; without it --write refuses (a new failure "
+                         "is a regression to explain, not a table to update)")
     args = ap.parse_args()
 
     measured: dict[str, dict[str, set[str]]] = {}
     writes: dict[str, dict[str, list[str]]] = {}
+    additions: dict[str, list[str]] = {}
     for doc, pdf_name, base_name in DOCS:
         pdf = os.path.join(args.root, pdf_name)
         if not os.path.exists(pdf):
@@ -75,6 +79,7 @@ def main() -> int:
             if want != now:
                 added, gone = sorted(now - want), sorted(want - now)
                 if added:
+                    additions[f"{base_name} {f}"] = added
                     print(f"       + {added}")
                 if gone:
                     print(f"       - {gone}")
@@ -91,6 +96,11 @@ def main() -> int:
     if not args.write:
         print("\n(dry run — pass --write to rewrite the failing sets)")
         return 0
+    if additions and not args.accept_new:
+        for where, added in additions.items():
+            print(f"REFUSED — {where} would gain {added}: a NEW failing rule is a regression to explain, "
+                  "not a baseline edit (pass --accept-new if it is understood and accepted)")
+        return 1
     for base_name, updates in writes.items():
         rewrite(os.path.join(PROJ, base_name), updates)
         print(f"wrote {base_name}")

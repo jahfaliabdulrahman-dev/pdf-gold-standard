@@ -47,15 +47,15 @@ def chrome_bin() -> str:
         raise SystemExit(f"CHROME_PATH is not set: point it at Chrome for Testing {chrome_pin.CHROME_VERSION} "
                          "(README, «Build») — the system Chrome is not the engine this pipeline was measured on")
     got = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=60).stdout.strip()
-    if chrome_pin.CHROME_VERSION not in got:
+    ver = got.split()[-1] if got else ""
+    # equality, not «contains»: 157.0.8103.780 contains the pin and is not the pin (review P3)
+    if ver != chrome_pin.CHROME_VERSION:
         raise SystemExit(f"CHROME_PATH runs «{got or 'an unknown version'}», the pipeline is pinned to "
                          f"{chrome_pin.CHROME_VERSION}")
-    return path
+    return path, ver
 
 
-CHROME = chrome_bin()
-CHROME_VERSION = subprocess.run([CHROME, "--version"], capture_output=True, text=True,
-                                timeout=60).stdout.strip().split()[-1]
+CHROME, CHROME_VERSION = chrome_bin()
 
 
 def build_html() -> str:
@@ -171,7 +171,11 @@ if __name__ == "__main__":
     except verify_pdf.GateInput as exc:
         print(f"FAIL input - {exc}")
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
-    failing = set(verify_pdf.gate(gate_doc))
+    try:
+        failing = set(verify_pdf.gate(gate_doc))
+    except verify_pdf.GateInput as exc:            # a missing floor is an input error, not a traceback
+        print(f"FAIL input - {exc}")
+        failing = {"input"}
     if failing:
         raise SystemExit(f"GATE FAILED — {OUT} left untouched; inspect {PARTIAL}")
     os.replace(PARTIAL, OUT)

@@ -24,8 +24,29 @@ if "--version" in sys.argv:
 print(open(os.environ["BAD_JSON"], encoding="utf-8").read())
 '''
 
+PROFILE = "PDF/A-3b validation profile"
+
+
+def _job(results):
+    return {"report": {"jobs": [{"itemDetails": {"fileName": "x.pdf"}, "validationResult": results}]}}
+
+
+def _result(compliant, rules=None, profile=PROFILE):
+    return {"profileName": profile, "compliant": compliant,
+            "details": {"ruleSummaries": rules or []}}
+
+
 CASES = {
     "no-validationResult": ({"report": {"jobs": [{"itemDetails": {"fileName": "x.pdf"}}]}}, "no validationResult"),
+    # verdict and rules disagree: a non-compliant report that names nothing is the silence that reads as clean
+    "non-compliant-no-rule": (_job([_result(False, [])]), "verdict and the rules disagree"),
+    "compliant-with-failing-rule": (_job([_result(True, [{"clause": "6.6.4", "testNumber": "1",
+                                                          "ruleStatus": "FAILED"}])]),
+                                    "says compliant while naming"),
+    # a verdict for another profile is not this flavour's verdict
+    "wrong-profile": (_job([_result(False, [{"clause": "6.6.4", "testNumber": "1", "ruleStatus": "FAILED"}],
+                                       profile="PDF/UA-1 validation profile")]),
+                      "a verdict for another profile"),
     "taskException": ({"report": {"jobs": [{"itemDetails": {}, "taskException": "PDFBox: cannot parse",
                                            "validationResult": []}]}}, "taskException"),
     "no-compliant-key": ({"report": {"jobs": [{"itemDetails": {},

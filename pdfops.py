@@ -1,16 +1,29 @@
 """The one list of operators that PAINT — and the one way to read where text lands.
 
-Shared by the producer (postprocess: what gets wrapped as an Artifact) and the gate (verify_pdf: what
-counts as an untagged run, and where a pagination artifact's text sits). Two copies would let one side
-drift and quietly silence the other.
+Shared by the producer (postprocess: what may be wrapped as an Artifact, and where its text sits) and the
+gate (verify_pdf: the furniture band, and what counts as an artifact carrying text). Two copies would let one
+side drift and quietly silence the other.
+
+What counts as an artifact (B1, tightened after review):
+  · ANY marked-content block whose tag is `/Artifact`, at any nesting depth — not only a depth-0 BDC with an
+    inline `/Type /Pagination`. A named property list is resolved through the page's /Resources /Properties,
+    and an `/Artifact` nested inside a `/Span` is still an artifact.
+  · Text inside one is page furniture: it must sit in the document's declared band, whatever its `Type` says.
+    An untyped block is not a licence.
+  · `Do` is followed into Form XObjects (with the form's /Matrix), because Chrome may keep a page's text in a
+    form; the text rise (`Ts`) is part of where a glyph is drawn.
 """
 
 PAINT_OPS = frozenset({
     "m", "l", "c", "v", "y", "h", "re",                    # path construction
     "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "n",   # path painting
     "Do", "sh",                                            # XObject / shading
-    "Tj", "TJ", "'", '"',                                  # text showing
+    "Tj", "TJ", "'", '\"',                                  # text showing
 })
+
+TEXT_OPS = frozenset({"Tj", "TJ", "'", '\"'})
+
+PAGINATION, ARTIFACT = "pagination", "artifact"
 
 
 def _mul(m1, m2):
@@ -27,17 +40,37 @@ def _xy(m, x, y):
     return a * x + c * y + e, b * x + d * y + f
 
 
-def text_shows(instructions):
-    """(is_pagination, x, y, size) in page space for every text show, matrices tracked.
+def _kind(tag, operand, props):
+    """The artifact kind of a marked-content tag: pagination, artifact, or None (tagged content)."""
+    if str(tag) != "/Artifact":
+        return None
+    d = operand
+    if isinstance(d, str) and props:
+        d = props.get(d)
+    if not hasattr(d, "get"):
+        return ARTIFACT          # a name we cannot resolve is still an artifact, just an untyped one
+    try:
+        return PAGINATION if str(d.get("/Type")) == "/Pagination" else ARTIFACT
+    except Exception:
+        return ARTIFACT
 
-    `is_pagination` is True when the show sits inside a top-level `/Artifact` whose `/Type` is
-    `/Pagination` — the block the producer creates for page furniture. Chrome writes text in CSS pixels
-    under a `cm` scale and one tall coordinate space, so `Tm` alone is not a page coordinate: the CTM and
-    the q/Q stack are part of the answer. `y` is the baseline; `size` is the font size in page units.
+
+def text_shows(instructions, resolve=None, props=None):
+    """(kind, x, y, size, marked_depth) for every text show: kind is None, 'artifact' or 'pagination'.
+
+    `resolve` follows `Do` into a Form XObject: given the XObject's name it returns
+    (its instructions, its /Matrix), or None. Without it, form text is invisible to the reader — the hole the
+    review found. `size` is the font size in page units and `y` is the drawn baseline: the text matrix, the
+    text rise (`Ts`) and the CTM (scaled by the form matrix) all take part.
     """
-    ctm = [1, 0, 0, 1, 0, 0]
+    return _walk(instructions, resolve, [1, 0, 0, 1, 0, 0], frozenset(), props)
+
+
+def _walk(instructions, resolve, ctm0, seen, props=None, base=None):
+    ctm = list(ctm0)
     stack, tm, tlm = [], [1, 0, 0, 1, 0, 0], [1, 0, 0, 1, 0, 0]
-    size, leading, depth, art = 12.0, 0.0, 0, False
+    size, leading, rise = 12.0, 0.0, 0.0
+    frames = [base] if base else []   # one entry per BMC/BDC; `base` carries the caller's artifact context
     out = []
     for ins in instructions:
         op = str(ins.operator)
@@ -64,35 +97,88 @@ def text_shows(instructions):
             tm = tlm
         elif op == "TL":
             leading = float(o[0])
+        elif op == "Ts":
+            rise = float(o[0])                      # text rise: where the glyph is drawn, not where the line is
         elif op == "Tf":
             size = float(o[1])
-        elif op in ("Tj", "TJ", "'", '"'):
-            if op in ("'", '"'):                      # these also move to the next line first
+        elif op in ("Tj", "TJ", "'", '\"'):
+            if op in ("'", '\"'):
                 tlm = _mul([1, 0, 0, 1, 0, -leading], tlm)
                 tm = tlm
             m = _mul(tm, ctm)
-            x, y = _xy(m, 0, 0)
-            out.append((art, x, y, size * (m[2] ** 2 + m[3] ** 2) ** 0.5))
+            x, y = _xy(m, 0, rise)
+            out.append((_frame_kind(frames), x, y, size * (m[2] ** 2 + m[3] ** 2) ** 0.5, len(frames)))
         if op in ("BMC", "BDC"):
-            if depth == 0:
-                art = False
-                if op == "BDC" and str(o[0]) == "/Artifact" and len(o) > 1:
-                    try:
-                        art = str(o[1].get("/Type")) == "/Pagination"
-                    except Exception:
-                        art = False
-            depth += 1
+            if op == "BDC" and len(o) > 1:
+                frames.append(_kind(o[0], o[1], props))
+            else:
+                frames.append(_kind(o[0], None, None) if o else None)
         elif op == "EMC":
-            depth = max(0, depth - 1)
-            if depth == 0:
-                art = False          # a show after the block is not inside it: stale state would cry wolf
+            if frames:
+                frames.pop()
+        elif op == "Do" and resolve is not None and o:
+            hit = resolve(str(o[0]))
+            if hit is not None:
+                sub, matrix = hit
+                key = id(sub)
+                if key not in seen and len(seen) < 8:      # a form cycle is not a reason to hang the gate
+                    out.extend(_walk(sub, resolve, _mul(matrix, ctm), seen | {key}, props,
+                                    _frame_kind(frames)))
     return out
 
 
-def outside_bands(instructions, bands):
-    """The y of every pagination show outside every declared band — the rule, once for both sides.
+def _frame_kind(frames):
+    """The nearest enclosing artifact kind — a `/Span` inside an artifact does not cancel it."""
+    return next((k for k in reversed(frames) if k), None)
 
-    Empty means the rule holds. The producer refuses a build on it; the gate holds the file to it.
+
+def outside_bands(instructions, bands, resolve=None, props=None):
+    """(kind, y) of every text show inside an artifact whose drawn baseline is outside every declared band.
+
+    Empty means the rule holds. The producer refuses a build on it; the gate holds the file to it. An empty
+    band list means the document declares no page furniture: any artifact text is then outside.
     """
-    return [y for is_pag, _x, y, _size in text_shows(instructions)
-            if is_pag and not any(lo <= y <= hi for lo, hi in bands)]
+    return [(kind, y) for kind, _x, y, _s, _d in text_shows(instructions, resolve, props)
+            if kind is not None and not any(lo <= y <= hi for lo, hi in bands)]
+
+
+def artifact_shows(instructions, resolve=None, props=None):
+    """{kind: count} of the text shows inside artifacts — the inventory the review asked to print."""
+    out = {}
+    for kind, _x, _y, _s, _d in text_shows(instructions, resolve, props):
+        if kind is not None:
+            out[kind] = out.get(kind, 0) + 1
+    return out
+
+
+def props_of(page):
+    """The page's /Resources /Properties: a named property list has to be resolved to be judged."""
+    try:
+        p = page.get("/Resources", {}).get("/Properties", {})
+        return {str(k): v for k, v in p.items()}
+    except Exception:
+        return {}
+
+
+def form_resolver(page):
+    """A `Do` resolver for a page: name -> (instructions, /Matrix), forms only, parsed once each."""
+    try:
+        xo = page.get("/Resources", {}).get("/XObject", {})
+    except Exception:
+        return None
+    cache = {}
+
+    def resolve(name):
+        target = xo.get(name)
+        if target is None or str(target.get("/Subtype")) != "/Form":
+            return None
+        key = target.objgen if hasattr(target, "objgen") else id(target)
+        if key not in cache:
+            try:
+                matrix = [float(v) for v in target.get("/Matrix", [1, 0, 0, 1, 0, 0])]
+                cache[key] = (list(__import__("pikepdf").parse_content_stream(target)), matrix)
+            except Exception:
+                cache[key] = None
+        return cache[key]
+
+    return resolve
