@@ -2,6 +2,9 @@
 # 3b 6.6.4 / 4 6.7.3 / ua1 5 are IDENTIFICATION rules: they must fail while the file declares nothing,
 # and the claim probe (scripts/claim_probe.py) measures what would remain if it did.
 # 4 6.9-3 = "All of the embedded files shall be compliant with ISO 19005-1/2/4": OUR attachments vs PDF/A-4.
+# failing = clause-testNumber (e.g. 6.6.4-1), derived by scripts/verapdf_baseline.py --write.
+# fixed.rules and regressions.open stay at clause level: a rule that stopped failing cannot be
+# re-measured for its test number, so those historical lists are compared by clause.
 version = "1.30.0"
 # measured_on explains the base: at 08e921f the file had NO XMP, so 6.6.2.1/6.7.2.1 failed
 # (metadata absent). With XMP the same defect reports as 6.6.4/6.7.3 (identification absent):
@@ -16,12 +19,12 @@ flavours = ["3b", "ua1", "4f"]
 #   3b 6.6.4 / 4 6.7.3 / ua1 5 = identification rules: they fail while the file declares nothing.
 #   scripts/claim_probe.py injects the identifiers into a COPY and measures what remains.
 [3b]
-failing = ["6.6.4"]
+failing = ["6.6.4-1"]
 [fixed.3b]
 rules = ["6.2.10", "6.2.4.3", "6.2.11.5", "6.3.2", "6.3.3", "6.4.1", "6.6.2.1", "6.6.2.3.1"]
 
 [ua1]
-failing = ["5", "7.1"]
+failing = ["5-1", "7.1-3"]
 [fixed.ua1]
 rules = ["7.4.2", "7.18.1", "7.18.5"]          # 7.18.4 was a REGRESSION this branch closed (see commit 8152d99)
 
@@ -32,4 +35,4 @@ rules = ["6.2.4.3", "6.2.9", "6.2.10.5", "6.3.2", "6.3.3", "6.4.1", "6.7.2.1"]
 
 
 [4f]
-failing = ["6.1.2", "6.1.3", "6.7.3"]   # measured; 6.7.3 = identification
+failing = ["6.1.2-1", "6.1.3-4", "6.1.3-5", "6.7.3-1"]   # measured; 6.7.3 = identification
