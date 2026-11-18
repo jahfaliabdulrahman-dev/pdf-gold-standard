@@ -35,7 +35,7 @@ NA = object()
 # The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
 # and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
 # a silent skip can hide behind a stable number.
-SUITE_SIZE = 50
+SUITE_SIZE = 52
 
 
 class _NotApplicable(Exception):
@@ -52,10 +52,7 @@ def fresh():
 
 
 def reread(doc):
-    out = fitz.open("pdf", doc.tobytes())
-    if getattr(doc, "_sidecar", None):        # a mutation may point the gate at a sidecar it planted
-        out._sidecar = doc._sidecar
-    return out
+    return fitz.open("pdf", doc.tobytes())
 
 
 def strip_link(doc, i, role):
@@ -82,8 +79,11 @@ def _source_variant(transform):
 
 def rename_nav_class(doc):
     # a benign refactor (HTML + CSS renamed together, page unchanged) must not silence the strongest check
-    return _source_variant(lambda s: s.replace('class="nav"', 'class="navbar"')
-                           .replace(".nav{", ".navbar{").replace(".nav ", ".navbar ").replace(".nav,", ".navbar,"))
+    if not NS.NAV_PAGES:               # a print copy carries no strip: there is no class to rename
+        return NA
+    cls = NS.NAV_CLASS
+    return _source_variant(lambda s: s.replace(f'class="{cls}"', 'class="navbar"')
+                           .replace(f".{cls}{{", ".navbar{").replace(f".{cls} ", ".navbar ").replace(f".{cls},", ".navbar,"))
 
 
 def stale_back_cover(doc):
@@ -100,6 +100,8 @@ def stale_back_cover(doc):
 
 def icon_input_lost(doc):
     # the cheap form of H2: the gate's own input disappears
+    if not NS.NAV_PAGES:               # no strip, no icons to lose
+        return NA
     real = G.source_icons
     G.source_icons = lambda: []
     _RESTORE.append(lambda: setattr(G, "source_icons", real))
@@ -113,6 +115,8 @@ def wrong_printed_count(doc):
 
 # ---------------------------------------------------------------- document mutations
 def swap_next_prev(doc):
+    if not NS.NAV_PAGES:               # a print copy carries no strip links to swap
+        return NA
     i = NS.NAV_PAGES[2]
     a, b = strip_link(doc, i, "next"), strip_link(doc, i, "prev")
     a["page"], b["page"] = b["page"], a["page"]
@@ -120,6 +124,8 @@ def swap_next_prev(doc):
 
 
 def self_link(doc):
+    if not NS.NAV_PAGES:
+        return NA
     i = NS.NAV_PAGES[-1]
     a = strip_link(doc, i, "next"); a["page"] = i
     doc[i].update_link(a)
@@ -127,6 +133,8 @@ def self_link(doc):
 
 def whiteout_strip(doc):
     # every link still points where it should, but the buttons are no longer drawn on one page
+    if not NS.NAV_PAGES:
+        return NA
     p = doc[NS.NAV_PAGES[0]]
     p.draw_rect(fitz.Rect(40, NS.NAV_Y0 - 10, 210, NS.NAV_Y1 + 14), color=None, fill=(1, 1, 1), overlay=True)
 
@@ -171,6 +179,8 @@ def drop_image_object(doc):
 
 def swap_icons(doc):
     # both arrows are drawn and both links are right, but each arrow sits in the other's slot
+    if not NS.NAV_PAGES:
+        return NA
     p = doc[NS.NAV_PAGES[1]]
     rect = {r: fitz.Rect(NS.SLOTS[r], NS.NAV_Y0, NS.SLOTS[r] + NS.NAV_W, NS.NAV_Y1) for r in ("next", "prev")}
     pix = {r: p.get_pixmap(dpi=300, clip=rect[r]) for r in rect}
@@ -180,6 +190,8 @@ def swap_icons(doc):
 def foreign_icon(doc):
     # a different icon in the "next" slot: a disc with the arrow's own ink share and centre of mass
     import math
+    if not NS.NAV_PAGES:
+        return NA
     x = NS.SLOTS["next"]; slot = fitz.Rect(x, NS.NAV_Y0, x + NS.NAV_W, NS.NAV_Y1)
     inner = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
     p = doc[NS.NAV_PAGES[2]]
@@ -195,6 +207,8 @@ def foreign_icon(doc):
 def moment_matched_icon(doc):
     # not an arrow at all: horizontal stripes in a rectangle chosen to match the arrow's five-number signature
     # (ink share, centre of mass, spread) — only a comparison of the SHAPE can tell
+    if not NS.NAV_PAGES:
+        return NA
     x = NS.SLOTS["next"]; slot = fitz.Rect(x, NS.NAV_Y0, x + NS.NAV_W, NS.NAV_Y1)
     inner = fitz.Rect(x + 2, NS.NAV_Y0 + 2, x + NS.NAV_W - 2, NS.NAV_Y1 - 2)
     p = doc[NS.NAV_PAGES[3]]
@@ -286,7 +300,9 @@ def foreign_font(doc):
 
 def blank_page(doc):
     # the overflow artifact: a text page reduced to its footer — body text gone, nav strip and footer kept
-    i = next((k for k in NS.NAV_PAGES if not doc[k].get_images()), None)
+    # A print copy has no strip pages: any content page will do, so the mutation still applies to it.
+    pages = NS.NAV_PAGES or range(1, doc.page_count)
+    i = next((k for k in pages if not doc[k].get_images()), None)
     if i is None:
         return NA
     p = doc[i]
@@ -297,7 +313,8 @@ def blank_page(doc):
 
 def delete_paragraph(doc):
     # H5: ~18 words vanish from a body page (one paragraph); every AGGREGATE ratio still passes
-    p = doc[NS.NAV_PAGES[2]]
+    # A print copy has no strip pages, but it still has body pages: use one, not a strip-dependent index.
+    p = doc[NS.NAV_PAGES[2] if NS.NAV_PAGES else 2]
     lines = []
     for b in p.get_text("rawdict")["blocks"]:
         for line in b.get("lines", []):
@@ -487,9 +504,9 @@ def break_box_order(doc):
 
 def drop_attachment(doc):
     def fn(p):
-        if "source.html" not in p.attachments:
+        if "manifest.json" not in p.attachments:
             raise _NotApplicable
-        del p.attachments["source.html"]
+        del p.attachments["manifest.json"]
         p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
     try:
         return _pikemutate(doc, fn)
@@ -550,23 +567,65 @@ def paragraph_under_document(doc):
         return NA
 
 
-def stale_sidecar(doc):
-    """A .source.html from another build sits beside the file: the truth the gate reads is not this file's."""
-    import tempfile
-    side = os.path.splitext(SRC)[0] + ".source.html"
-    if not os.path.exists(side):
+def _rewrite_manifest(p, change):
+    """Replace manifest.json with `change(parsed)` in the shape postprocess writes it.
+
+    `change` returns None when the document lacks what this mutation needs — reported as NA, never a crash.
+    """
+    import json
+    if "manifest.json" not in p.attachments:
+        raise _NotApplicable
+    man = json.loads(p.attachments["manifest.json"].get_file().read_bytes())
+    if change(man) is None:
+        raise _NotApplicable
+    data = json.dumps(man, ensure_ascii=False, indent=1).encode()
+    del p.attachments["manifest.json"]
+    new = pikepdf.AttachedFileSpec(p, data, mime_type="application/json", filename="manifest.json")
+    new.obj["/AFRelationship"] = pikepdf.Name("/Source")
+    new.obj["/Params"] = pikepdf.Dictionary(ModDate=pikepdf.String("D:20261114210000+03'00'"))
+    p.attachments["manifest.json"] = new
+    p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
+
+
+def missing_rendered_hash(doc):
+    """The manifest lost the key the gate compares: a file bound to nothing must fail by name."""
+    def change(man):
+        if not man.get("rendered_sha256"):
+            return None
+        del man["rendered_sha256"]
+        return man
+    try:
+        return _pikemutate(doc, lambda p: _rewrite_manifest(p, change))
+    except _NotApplicable:
         return NA
-    tmp = tempfile.mkdtemp(prefix="sidecar-")
-    pdf_path, side_path = os.path.join(tmp, "copy.pdf"), os.path.join(tmp, "copy.source.html")
-    with open(pdf_path, "wb") as f:
-        f.write(doc.tobytes())
-    data = bytearray(open(side, "rb").read())
-    data[len(data) // 2] ^= 0x20                  # one byte: not this file's markup any more
-    with open(side_path, "wb") as f:
-        f.write(bytes(data))
-    out = fitz.open(pdf_path)
-    out._sidecar = side_path
-    return out
+
+
+def rendered_mismatch(doc):
+    """The manifest names a markup whose hash this spec does not derive: the file is not from this build."""
+    def change(man):
+        h = str(man.get("rendered_sha256") or "")
+        if not h:
+            return None
+        man["rendered_sha256"] = ("1" if h[0] != "1" else "2") + h[1:]
+        return man
+    try:
+        return _pikemutate(doc, lambda p: _rewrite_manifest(p, change))
+    except _NotApplicable:
+        return NA
+
+
+def print_copy_with_icons(doc):
+    """A page that draws the strip while being judged as a print copy: the PAGE must convict it.
+
+    The drawing is injected (not inherited from a screen build), so the mutation also applies to a
+    document that is already a print copy — otherwise the gate would be proven only on the variant
+    that is not shipped.
+    """
+    old = getattr(NS, "NAV_VISIBLE", True)
+    NS.NAV_VISIBLE = False
+    _RESTORE.append(lambda: setattr(NS, "NAV_VISIBLE", old))
+    x = NS.SLOTS["next"]
+    doc[0].draw_rect(fitz.Rect(x + 4, NS.NAV_Y0 + 4, x + 16, NS.NAV_Y1 - 4), color=(0, 0, 0), fill=(0, 0, 0))
 
 
 def link_without_contents(doc):
@@ -635,7 +694,9 @@ MUTATIONS = [
     (field_without_tu, "acroform", False),
     (link_without_contents, "link-tagging", False),
     (paragraph_under_document, "tagged-structure", False),
-    (stale_sidecar, "provenance", False),
+    (missing_rendered_hash, "provenance", False),
+    (rendered_mismatch, "provenance", False),
+    (print_copy_with_icons, "render", False),
     (drop_page, "pages", False),
 ]
 
@@ -710,6 +771,25 @@ if __name__ == "__main__":
     print(f">>> 50-page document, page 31 emptied + 32pt image -> {'CAUGHT' if ok else 'MISSED'} {blank}\n")
     if not ok:
         missed.append("blank_page_in_50")
+    # The print-copy predicate, on a page built for it: a rectangle inside a slot must be found, and a
+    # document that draws no icon must come back empty. A predicate never seen finding anything proves
+    # nothing — and the whole-document mutation also fails on the real strip, so it cannot isolate this one.
+    probe = fitz.open()
+    probe_page = probe.new_page(width=595, height=842)
+    slot_x = NS.SLOTS["next"]
+    probe_page.draw_rect(fitz.Rect(slot_x + 4, NS.NAV_Y0 + 4, slot_x + 16, NS.NAV_Y1 - 4),
+                         color=(0, 0, 0), fill=(0, 0, 0))
+    found = G.slot_drawings(probe)
+    ok = len(found) == 1 and "next" in found[0]
+    print(f">>> slot_drawings, one rect inside a slot -> {'CAUGHT' if ok else 'MISSED'} {found}\n")
+    if not ok:
+        missed.append("slot_drawings_positive")
+    if not getattr(NS, "NAV_VISIBLE", True):
+        empty = G.slot_drawings(fresh())
+        ok = not empty
+        print(f">>> slot_drawings, the print document -> {'CLEAN' if ok else 'MISSED'} {empty[:2]}\n")
+        if not ok:
+            missed.append("slot_drawings_negative")
     # Malformed inputs: the CLI must refuse BY NAME (non-zero, no traceback), not crash inside a check.
     import subprocess, tempfile
     data = open(SRC, "rb").read()

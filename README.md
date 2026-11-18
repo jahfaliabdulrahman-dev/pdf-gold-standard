@@ -18,14 +18,13 @@
 | `docs/automation-plan.md` | **خطة الأتمتة** — بوابة الاختيار، تحليل سير العمل، الحوكمة، مؤشرات KPI (وفق دليل الأتمتة) |
 | `skill/arabic-rtl-pdf/` | **المهارة — المصدر الوحيد لها** (SKILL.md + 7 مراجع). لا تنسخها: وجّه الوكيل إلى هذا المجلد (انظر «مزامنة المهارة») |
 | `nav_spec.py` | **رقم واحد لكل شيء**: الفهرس، مواضع الأزرار ووجهاتها، صفوف المحتويات، الخطوط المسموحة — يبني منه `build.py` ويفحص عليه البوابة |
-| `scripts/verify_pdf.py` + `scripts/gate_selftest.py` | **بوابة التسليم** واختبارها الذاتي (٣٥ فحصاً، منها فحص يقرأ بكسلات الأزرار وشكل كل أيقونة · ٥٠ عطلاً مزروعاً يجب أن تُكشف كلها) |
+| `scripts/verify_pdf.py` + `scripts/gate_selftest.py` | **بوابة التسليم** واختبارها الذاتي (٣٥ فحصاً، منها فحص يقرأ بكسلات الأزرار وشكل كل أيقونة · ٥٢ عطلاً مزروعاً يجب أن تُكشف كلها) |
 | `scripts/verapdf_gate.py` + `scripts/claim_probe.py` | **بوابة المطابقة**: veraPDF مقابل أساس كل مستند (`3b` · `ua1` · `4f`) — لا قاعدة جديدة ولا استثناء ميت ولا قاعدة مُصلحة تعود · و`claim_probe` يقيس على نسخة ما يبقى لو أُعلن الادعاء |
 | `scripts/test_vocalised.py` + `tests/` | **اختبار النص المشكول**: فقرتان مشكولتان من مخرج Chrome الخام يجب أن تُنسخا مطابقتين بعد `fix_text_layer.py` (والخام يجب أن يفشل) |
-| `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` |
+| `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` (الترميز الذي يُسلَّم لـChrome يشتقّه `render_markup.py` من المواصفة والمصدر — لا نسخة محفوظة بجانب المخرج) |
 | `report-v1.html` + `report_spec.py` | **الوثيقة الثانية**: «الحرف المقلوب» — ١٧ صفحة، مواصفتها وحدها (`PDF_SPEC=report_spec`)، تُبنى بنفس البوابة والاختبار الذاتي |
 | `spec_loader.py` + `<name>_spec.py` | **المواصفة لكل مستند**: `PDF_SPEC` يختار الملف، والبناء والبوابة والاختبار الذاتي يقرؤون منه واحدًا (لا مواصفة مكرّرة في الكود) |
-| `postprocess.py` + `pdfops.py` | **المرحلة ٥**: تسميات الصفحات، المنافذ المسمّاة، XMP، OutputIntent، المرفقات، وسم الروابط — وعمليات الرسم المشتركة بين المنتِج والبوابة |
-| `fill.html` + `fill_server.py` | **سطح التعبئة المحلي**: صفحة تكتب قيمًا وتبني PDF حيًّا (`127.0.0.1:8765`) |
+| `postprocess.py` + `pdfops.py` | **المرحلة ٥**: تسميات الصفحات، المنافذ المسمّاة، XMP، OutputIntent، المرفقات (`manifest.json` و`features.toml` وأساس veraPDF — بلا مرفق مصدر)، وسم الروابط — وعمليات الرسم المشتركة بين المنتِج والبوابة |
 | `features.toml` + `verapdf-baseline*.toml` | **الميزان**: كل ميزة معلنة يُفحص وجودها · وأساس veraPDF لكل مستند (‏`-report`، `-najd`) |
 | `pdfium-shaping/` + `artifacts/` | **أرشيف البحث**: لقطة `hb_probe` (ليست الترقيع) · وصور أدلة الاستخراج |
 | `gen_art.py` | توليد فن الأغلفة (OpenRouter Image API — `gemini-3-pro-image`) |
@@ -105,7 +104,7 @@ PDF_SPEC=najd_spec         python build.py najd.html najd.pdf               # ع
 Arabic-first pipeline producing genuinely interactive PDFs (nav buttons, multi-level
 bookmarks, RTL reading direction) from designed HTML: HTML → Chrome headless →
 PyMuPDF interactivity layer. Content-deterministic, offline, font-embedded.
-A delivery gate (35 checks, 50 planted faults that must all be caught) and veraPDF baselines per document guard every build; the second document and the Najd specimen declare PDF/A-3b + PDF/UA-1 and measure zero violations. The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
+A delivery gate (35 checks, 52 planted faults that must all be caught) and veraPDF baselines per document guard every build; the second document and the Najd specimen declare PDF/A-3b + PDF/UA-1 and measure zero violations. The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
 The operating skill lives under `skill/arabic-rtl-pdf/` — point your agent at that directory (Hermes: `skills.external_dirs`) instead of copying it, so there is one source.
 
 MIT © 2026 Abdulrahman Jahfali

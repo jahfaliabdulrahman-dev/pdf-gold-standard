@@ -31,7 +31,7 @@ def _srgb_icc() -> bytes:
     return ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
 
 
-def feature_page_labels(pdf, spec) -> None:
+def feature_page_labels(pdf, spec, ctx=None) -> None:
     """Printed numbering lives in the design; /PageLabels governs what the READER shows.
 
     PDF supports only D/r/R/a/A styles (no Arabic-Indic), so the cover is a prefix-only label («غ») and
@@ -56,7 +56,7 @@ def feature_page_labels(pdf, spec) -> None:
     pdf.Root.PageLabels = pikepdf.Dictionary(Nums=nums)
 
 
-def feature_named_destinations(pdf, spec) -> None:
+def feature_named_destinations(pdf, spec, ctx=None) -> None:
     """A name -> page map, so a target is an identity, not an index that shifts when a page is added."""
     import spec_loader
     NS = spec_loader.load()
@@ -283,7 +283,7 @@ def _pdfua_description() -> str:
     return f'<rdf:Description rdf:about="" {ns}>{PDFUA_XMP_SCHEMA}</rdf:Description>'
 
 
-def feature_xmp(pdf, spec) -> None:
+def feature_xmp(pdf, spec, ctx=None) -> None:
     """XMP is what archive/search tools read; Info alone is invisible to them."""
     import spec_loader
     # `spec` is the feature's entry from features.toml, not the document spec: only a module that carries
@@ -326,7 +326,7 @@ def feature_xmp(pdf, spec) -> None:
                     raise SystemExit("postprocess: the pdfuaid schema block did not survive the XMP write")
 
 
-def feature_output_intent(pdf, spec) -> None:
+def feature_output_intent(pdf, spec, ctx=None) -> None:
     """sRGB output intent + Trim/Bleed boxes. No design change: boxes equal MediaBox (no bleed)."""
     icc = _srgb_icc()
     profile = pdf.make_stream(icc)
@@ -345,31 +345,33 @@ def feature_output_intent(pdf, spec) -> None:
         page.obj["/BleedBox"] = box
 
 
-RENDERED_SHA = None      # apply() records the hash of the markup Chrome printed for THIS build
-
-
-def feature_attachments(pdf, spec) -> None:
-    """The file carries its own source and a manifest of hashes: reproduction is content, not a claim.
+def feature_attachments(pdf, spec, ctx=None) -> None:
+    """The file carries its build data and a manifest of hashes: reproduction is content, not a claim.
 
     The file list lives in the spec (`ATTACHMENT_FILES`: name, repo-relative path, mime, /AFRelationship), so a
     second document adds evidence without touching this code. A name with no path is generated here (the
-    manifest), which is how the hashes always describe the file that was actually built.
+    manifest), which is how the hashes always describe the file that was actually built. A spec without the
+    list is refused by name: the code no longer keeps a default that only one document happens to satisfy.
+    `rendered_sha` is passed in by `apply()` — no module state stands between the producer and the manifest.
     """
     import spec_loader
     NS = spec_loader.load()
+    rendered_sha = (ctx or {}).get("rendered_sha")
+    declared = getattr(NS, "ATTACHMENT_FILES", None)
+    if not declared:
+        raise SystemExit("postprocess: the spec declares no ATTACHMENT_FILES — the file list is a contract, not a default")
+    if not rendered_sha:
+        raise SystemExit("postprocess: manifest.json needs the hash of the markup handed to Chrome; "
+                         "none was passed to apply(rendered_sha=...)")
     src_path = os.path.join(PROJ, NS.SOURCE_HTML)
     data = open(src_path, "rb").read()
     manifest = {
         "source": NS.SOURCE_HTML,
         "source_sha256": hashlib.sha256(data).hexdigest(),
-        "rendered_sha256": RENDERED_SHA,
+        "rendered_sha256": rendered_sha,
         "guide_version": NS.GUIDE_VERSION,
         "pages": NS.PAGES,
     }
-    declared = getattr(NS, "ATTACHMENT_FILES", None) or [
-        ("source.html", NS.SOURCE_HTML, "text/html", "Source"),
-        ("manifest.json", None, "application/json", "Source"),
-    ]
     payloads = []
     for name, rel, mime, relationship in declared:
         if rel is None:
@@ -537,7 +539,7 @@ def feature_bidi_space(pdf) -> None:
         print(f"      bidi-space: repaired the space mapping in {repaired} font(s)")
 
 
-def feature_acroform(pdf, spec) -> None:
+def feature_acroform(pdf, spec, ctx=None) -> None:
     """Real text fields with an Arabic /TU and the COMPLETE house font in /DR.
 
     The fields live in the spec (`ACROFORM_FIELDS`: name, /TU, page, rect in PDF points, optional multiline),
@@ -606,7 +608,7 @@ def feature_acroform(pdf, spec) -> None:
         DA=da)
 
 
-def feature_link_tagging(pdf, spec) -> None:
+def feature_link_tagging(pdf, spec, ctx=None) -> None:
     """Every Link annotation gets a /Link structure element, an OBJR and an Arabic /Contents.
 
     A screen reader announces the label; without it the link is silent. Geometry comes from the document's spec.
@@ -692,14 +694,17 @@ def normalise(pdf) -> None:
     assert "/SourceFile" not in pdf.docinfo and "/SourceSHA256" not in pdf.docinfo
 
 
-def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -> list[str]:
-    """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order."""
+def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
+          rendered_sha: str | None = None) -> list[str]:
+    """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order.
+
+    `rendered_sha` is the hash of the markup this build handed to Chrome. The producer passes it; the
+    manifest carries it, and the gate recomputes it from the same spec and source. This file is never
+    read back from disk, so no copy beside the output can go stale.
+    """
     if profile not in SUPPORTED_PROFILES:
         raise SystemExit(f"postprocess: profile {profile!r} is not implemented (supported: {sorted(SUPPORTED_PROFILES)})")
     spec = tomllib.load(open(features_path or os.path.join(PROJ, "features.toml"), "rb"))
-    global RENDERED_SHA
-    rendered = os.path.splitext(src)[0] + ".source.html"      # the markup Chrome printed for this build
-    RENDERED_SHA = hashlib.sha256(open(rendered, "rb").read()).hexdigest() if os.path.exists(rendered) else None
     applied = []
     with pikepdf.open(src) as pdf:
         for name, f in spec.get("features", {}).items():
@@ -707,7 +712,8 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -
                 continue
             if name not in STAGE5:
                 raise SystemExit(f"postprocess: feature {name!r} is declared but has no implementation")
-            STAGE5[name](pdf, f)
+            # One signature for every feature; only `attachments` reads the build context.
+            STAGE5[name](pdf, f, {"rendered_sha": rendered_sha})
             applied.append(name)
         for k in ("/SourceFile", "/SourceSHA256"):
             if k in pdf.docinfo:
@@ -722,4 +728,5 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None) -
 
 if __name__ == "__main__":
     import sys
-    print(apply(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "web"))
+    print(apply(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "web",
+                rendered_sha=sys.argv[4] if len(sys.argv) > 4 else None))
