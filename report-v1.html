@@ -135,11 +135,6 @@
   .flabel{ font-size:9.5pt; font-weight:600; color:var(--c-muted); margin-bottom:1.5mm; }
   .fline{ border-bottom:0.35mm solid #b9a6f2; height:12mm; margin-bottom:8mm; }
   .fbox{ border:0.35mm solid #b9a6f2; border-radius:2mm; height:45mm; }
-  /* A filled copy prints the value as page text: the build engine shapes it once, and every reader sees
-     the same connected Arabic. Empty in the template, so the template's ink is unchanged. */
-  .fval{ position:absolute; right:23.5mm; left:23.5mm; font-size:11pt; line-height:1.5; color:#1b1630;
-    white-space:pre-wrap; overflow:hidden; }
-  .fval.oneline{ height:10mm; display:flex; align-items:flex-end; }
   /* references */
   .ref-row{ position:absolute; right:20.46mm; width:158mm; height:22mm; background:#fff; border:0.35mm solid var(--c-line);
     border-radius:3mm; display:flex; align-items:center; gap:5mm; padding:0 5mm; }
@@ -406,7 +401,7 @@ for glyph in drawn_glyphs(page):
       <div class="g-row"><span class="g-n">٣</span><span class="g-t"><b>البكسلات:</b> حبر كل صفحة على شبكة، وشكل كل أيقونة مقارنًا بالأيقونة المرسومة في المصدر — فسهمان متبادلان يسقطان.</span></div>
       <div class="g-row"><span class="g-n">٤</span><span class="g-t"><b>النص:</b> طبقة النص، دقة النسخ، ترتيب السطر، والتشكيل — تُقاس بمحرك PDFium لا بثقتنا.</span></div>
     </div>
-    <div class="band" style="margin-top:5mm;"><b>والدليل أن البوابة تعمل:</b> ٥٠ عطلا تزرع عمدًا في نسخة من الملف، ويجب أن تكشفها كلها. بوابة لم تُرَ فاشلة لا تُعد بوابة.</div>
+    <div class="band" style="margin-top:5mm;"><b>والدليل أن البوابة تعمل:</b> {{MUTATIONS_CLAIM}} عطلا تزرع عمدًا في نسخة من الملف، ويجب أن تكشفها كلها. بوابة لم تُرَ فاشلة لا تُعد بوابة.</div>
   </div>
   <div class="tail"><i></i><i class="c"></i><i></i></div>
   <div class="foot" aria-hidden="true"><span class="num">12</span><span>الحرف المقلوب — تقرير إثبات</span></div>
@@ -425,11 +420,11 @@ for glyph in drawn_glyphs(page):
     <p class="lead">هذا الملف يعلن مطابقة <span class="latin">PDF/A-3b</span> في بياناته الوصفية، ولا يعلنها إلا لأن <span class="latin">veraPDF</span> أعطى <b>صفر مخالفة</b> بعد الإعلان. القاعدة عندنا: لا شعار مطابقة بلا عدّاد فارغ.</p>
     <div class="cards3">
       <div class="card"><div class="big">٠</div><div class="cap">مخالفة 3b على هذا البناء</div></div>
-      <div class="card"><div class="big">٤</div><div class="cap">ملفات مرفقة داخل الملف نفسه</div></div>
+      <div class="card"><div class="big">٣</div><div class="cap">ملفات مرفقة داخل الملف نفسه</div></div>
       <div class="card"><div class="big">١٧</div><div class="cap">صفحة بعلامات صفحات وأسماء وجهات</div></div>
     </div>
     <div class="insight"><span class="b">١</span><span class="x"><b>ما يجعل الأرشفة ممكنة:</b> تعريف لون <span class="latin">sRGB</span> كامل، وبيانات <span class="latin">XMP</span> بالعنوان واللغة وأداة الإنشاء، وصناديق <span class="latin">Trim</span> و<span class="latin">Bleed</span>، وعلامات صفحات يقرؤها القارئ.</span></div>
-    <div class="insight"><span class="b">٢</span><span class="x"><b>الملف يحمل مصدره:</b> المرفقات تشمل شيفرة الصفحات وملف الميزات وخط الأساس — فإعادة إنتاج هذا الملف ليست وعدًا، بل خطوة موثقة.</span></div>
+    <div class="insight"><span class="b">٢</span><span class="x"><b>الملف يحمل بيانات بنائه:</b> المرفقات تشمل البيان وملف الميزات وخط الأساس — فإعادة إنتاج هذا الملف ليست وعدًا، بل خطوة موثقة.</span></div>
     <div class="insight"><span class="b">٣</span><span class="x"><b>ولماذا PDF/UA الآن؟</b> لأن كل محتوى زخرفي صار Artifact، وكل تشغيل نصّي حمل MCID؛ نعلن المطابقة بعد أن صار خط أساسها صفرًا، لا قبله.</span></div>
   </div>
   <div class="tail"><i></i><i class="c"></i><i></i></div>
@@ -478,9 +473,6 @@ for glyph in drawn_glyphs(page):
     <div class="fline" style="position:absolute;top:106mm;right:20.46mm;left:20.46mm;"></div>
     <div class="flabel" style="position:absolute;top:138mm;right:20.46mm;">ملاحظة عن الملف</div>
     <div class="fbox" style="position:absolute;top:144mm;right:20.46mm;left:20.46mm;"></div>
-    <div class="fval oneline" style="top:74mm;">{{FILL_NAME}}</div>
-    <div class="fval oneline" style="top:108mm;">{{FILL_EMAIL}}</div>
-    <div class="fval" style="top:147mm;height:39mm;">{{FILL_NOTE}}</div>
   </div>
   <div class="band" style="position:absolute;top:206mm;right:20.46mm;left:20.46mm;"><b>لماذا نموذج في تقرير؟</b> لأنه أقصى اختبار للبنية: الحقل كائن تفاعلي داخل شجرة وسوم، وله اسم وصول عربي، وخط مدمج، وترتيب تبويب. والمعيار الذي لا يستوعب نموذجًا عربيًا لا يستوعب تقريرًا.</div>
   <div class="tail"><i></i><i class="c"></i><i></i></div>

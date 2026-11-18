@@ -59,13 +59,13 @@ VOCALISED_REASON = "لا سطر مشكول في هذا الملف: الوجه ل
 VOCALISED_PAGES = set()
 
 VERSION_SPOTS = [("cover", COVER), ("back", PAGES - 1)]
-PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٥ فحصا» and «٤٥ عطلا»
+PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٥ فحصا» and «٤٦ عطلا»
 PRINTS_LINK_COUNT = False
 GATE_CHECKS = 35
-# Five of the suite's 48 mutations cannot be caught on this specimen (no divider art, no QR refs,
+# Five of the suite's 51 mutations cannot be caught on this specimen (no divider art, no QR refs,
 # no form fields, no basmala line, and a measured blind spot in line order); the reasons are measured,
-# not assumed, and gate_selftest fails if one of them applies after all. 50 − 5 = 45.
-GATE_MUTATIONS = 45
+# not assumed, and gate_selftest fails if one of them applies after all. 51 − 5 = 46.
+GATE_MUTATIONS = 46
 GATE_NA = {
     "drop_divider_art": "the divider page carries no art",
     "drop_image_object": "the references page carries no QR image",
@@ -93,11 +93,13 @@ CONFORMANCE = {"pdfaid:part": "3", "pdfaid:conformance": "B", "pdfuaid:part": "1
 VERAPDF_BASELINE = "verapdf-baseline-najd.toml"
 
 ATTACHMENT_FILES = [
-    ("source.html", SOURCE_HTML, "text/html", "Source"),
     ("manifest.json", None, "application/json", "Source"),
     ("features.toml", "features.toml", "application/toml", "Data"),
     ("verapdf-baseline.toml", VERAPDF_BASELINE, "application/toml", "Data"),
 ]
+# This specimen prints the attachment NAMES, not a count: a numeric claim here would be inherited
+# from the report by `import *` and would point at a page that does not exist (measured).
+ATTACHMENTS_CLAIM = None
 
 ACROFORM_FIELDS = []                # the brief excludes typing
 def nav_target(role: str, i: int) -> int:
@@ -122,8 +124,8 @@ PAGE_INK = {
     3: (0.0175, (0.0155, 0.019, 0.0371, 0.0422, 0.0064, 0.0169, 0.0255, 0.0378, 0.0056, 0.0117, 0.0118, 0.0484, 0.0003, 0.0, 0.0, 0.0016)),
     4: (0.0956, (0.0582, 0.0839, 0.0891, 0.0342, 0.3128, 0.4589, 0.2041, 0.187, 0.0146, 0.0266, 0.0184, 0.0372, 0.0002, 0.0, 0.0, 0.0018)),
     5: (0.0252, (0.0062, 0.011, 0.0323, 0.0319, 0.0197, 0.0334, 0.0326, 0.0355, 0.0294, 0.0518, 0.0516, 0.0422, 0.0004, 0.0047, 0.0134, 0.0075)),
-    6: (0.0176, (0.0108, 0.0186, 0.0261, 0.0298, 0.007, 0.0575, 0.0292, 0.0363, 0.006, 0.0258, 0.0141, 0.0185, 0.0003, 0.0, 0.0, 0.0015)),
-    7: (0.0224, (0.0148, 0.0258, 0.0541, 0.0787, 0.0113, 0.0247, 0.0491, 0.056, 0.0053, 0.0121, 0.0112, 0.0122, 0.0003, 0.0, 0.0, 0.0017)),
+    6: (0.0175, (0.0108, 0.0186, 0.0261, 0.0298, 0.007, 0.0575, 0.0274, 0.0357, 0.006, 0.0258, 0.0141, 0.0185, 0.0003, 0.0, 0.0, 0.0015)),
+    7: (0.0222, (0.0148, 0.0258, 0.0541, 0.078, 0.0113, 0.0247, 0.0494, 0.0545, 0.0053, 0.0121, 0.0112, 0.0122, 0.0003, 0.0, 0.0, 0.0017)),
     8: (0.0186, (0.0062, 0.0269, 0.0337, 0.032, 0.0183, 0.0552, 0.041, 0.0373, 0.0, 0.0, 0.022, 0.0225, 0.0003, 0.0, 0.0, 0.0015)),
     9: (0.0079, (0.0062, 0.0074, 0.0248, 0.0257, 0.0, 0.0, 0.0133, 0.0249, 0.0, 0.0012, 0.0092, 0.0115, 0.0002, 0.0, 0.0, 0.0017)),
     10: (0.0092, (0.0, 0.0, 0.0, 0.0, 0.0, 0.0639, 0.0682, 0.0, 0.0, 0.0082, 0.007, 0.0, 0.0, 0.0, 0.0, 0.0)),
@@ -131,7 +133,7 @@ PAGE_INK = {
 # <<< CALIBRATED PAGE_INK
 
 # >>> CALIBRATED PAGE_WORDS
-PAGE_WORDS = {0: 33, 1: 43, 2: 74, 3: 105, 4: 92, 5: 143, 6: 120, 7: 106, 8: 130, 9: 58, 10: 21}
+PAGE_WORDS = {0: 33, 1: 43, 2: 74, 3: 105, 4: 92, 5: 143, 6: 119, 7: 106, 8: 130, 9: 58, 10: 21}
 # <<< CALIBRATED PAGE_WORDS
 
 # >>> CALIBRATED IMAGE_PAGES
