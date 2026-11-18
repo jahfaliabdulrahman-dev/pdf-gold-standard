@@ -57,7 +57,8 @@ def measure(pdf_path: str) -> dict:
         if nums:
             footer[i] = nums[0]
     return {"ink": ink, "words": words, "images": images, "footer": footer,
-            "pages": doc.page_count, "links": sum(len(G.goto_links(p)) for p in doc) + sum(
+            "mupdf": G.copy_fidelity(doc, engine="mupdf")[1],
+        "pages": doc.page_count, "links": sum(len(G.goto_links(p)) for p in doc) + sum(
                 len([l for l in p.get_links() if l.get("kind") == fitz.LINK_URI]) for p in doc)}
 
 
@@ -73,8 +74,12 @@ def main() -> None:
     words_src = "{" + ", ".join(f"{k}: {v}" for k, v in m["words"].items()) + "}"
     images_src = "{" + ", ".join(f"{k}: {v}" for k, v in m["images"].items()) + "}"
     footer_src = "{" + ", ".join(f"{k}: {v}" for k, v in m["footer"].items()) + "}"
+    # The ratchet is the document's own measured order minus drift; it can never fall below the floor three
+    # documents once shared, so the gate would refuse a spec that tried to buy green by lowering it.
+    line_src = f"{max(0.75, round(m['mupdf'] - 0.02, 3)):.3f}"
     new = {
         "PAGE_INK": ink_src, "PAGE_WORDS": words_src, "IMAGE_PAGES": images_src, "FOOTER": footer_src,
+        "LINE_ORDER_MIN": line_src,
         "EXPECTED_LINKS": str(m["links"]),
     }
     print(f"pages={m['pages']} links={m['links']}")

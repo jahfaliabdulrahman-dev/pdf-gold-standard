@@ -1124,8 +1124,11 @@ def gate(doc) -> list[str]:
 
     # 12. line order for stream-order readers: MuPDF (PyMuPDF, RAG extractors) must return each line's words in order
     _, mseq = copy_fidelity(doc, engine="mupdf")
-    check("line-order", mseq is not None and mseq >= NS.MUPDF_MIN_SEQUENCE,
-          f"MuPDF sequence {mseq:.3f} (min {NS.MUPDF_MIN_SEQUENCE})" if mseq is not None else "could not read source HTML or PDF text")
+    # Per document, calibrated: the ratchet is what THIS document's layer can do, minus drift, and never
+    # below the historical floor. A single 0.75 for three documents let Najd hide 0.18 of headroom.
+    mmin = max(0.75, getattr(NS, "LINE_ORDER_MIN", 0.0))
+    check("line-order", mseq is not None and mseq >= mmin,
+          f"MuPDF sequence {mseq:.3f} (min {mmin:.3f})" if mseq is not None else "could not read source HTML or PDF text")
 
     # 13. vocalised text: the basmala must copy exactly, marks on their letters (PDFium and MuPDF)
     import unicodedata as _ud

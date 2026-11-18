@@ -104,7 +104,11 @@ SOURCE_HTML = "guide-v2.html"
 COPY_MIN_RECALL = 0.95
 COPY_MIN_SEQUENCE = 0.92
 # Stream-order readers (MuPDF): raw Chrome output 0.16, after the line-joining pass 0.80 (measured on guide v2.1).
-MUPDF_MIN_SEQUENCE = 0.75
+# The MuPDF word-order floor for THIS document: calibrated as max(0.75, measured - 0.02) by
+# scripts/calibrate.py --write. The gate refuses any value below 0.75, so it cannot be bought down.
+# >>> CALIBRATED LINE_ORDER_MIN
+LINE_ORDER_MIN = 0.765
+# <<< CALIBRATED LINE_ORDER_MIN
 # Vocalised text that must copy exactly (letters with their marks, in order).
 VOCALISED = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
 
@@ -132,34 +136,42 @@ PAGE_INK_DPI, PAGE_INK_GRID, PAGE_INK_TOL = 72, 4, 0.02
 # A cell that had ink must keep most of it: on a page with 0.8% ink a ±0.02 absolute tolerance cannot tell
 # "nothing" from "everything" (it is larger than the whole page), so removal is judged by retention instead.
 PAGE_INK_MIN_RETENTION, PAGE_INK_CELL_FLOOR = 0.60, 0.005
+# >>> CALIBRATED PAGE_INK
 PAGE_INK = {
     0: (0.1227, (0.0254, 0.1697, 0.0891, 0.0078, 0.0007, 0.1141, 0.2429, 0.0136, 0.0119, 0.2259, 0.2252, 0.0155, 0.0056, 0.3936, 0.4133, 0.0044)),
-    1: (0.0077, (0.0000, 0.0100, 0.0132, 0.0000, 0.0049, 0.0423, 0.0395, 0.0054, 0.0000, 0.0000, 0.0000, 0.0000, 0.0051, 0.0016, 0.0000, 0.0004)),
-    2: (0.0101, (0.0006, 0.0268, 0.0319, 0.0051, 0.0019, 0.0000, 0.0419, 0.0238, 0.0005, 0.0086, 0.0144, 0.0061, 0.0000, 0.0000, 0.0000, 0.0000)),
-    3: (0.0313, (0.0066, 0.0066, 0.0000, 0.0000, 0.0037, 0.0137, 0.0541, 0.1330, 0.0457, 0.0838, 0.0765, 0.0266, 0.0016, 0.0244, 0.0235, 0.0011)),
-    4: (0.0210, (0.0184, 0.0352, 0.0389, 0.0440, 0.0173, 0.0401, 0.0521, 0.0346, 0.0073, 0.0143, 0.0164, 0.0139, 0.0030, 0.0006, 0.0000, 0.0004)),
-    5: (0.0183, (0.0116, 0.0232, 0.0380, 0.0402, 0.0065, 0.0305, 0.0237, 0.0293, 0.0120, 0.0289, 0.0298, 0.0160, 0.0030, 0.0006, 0.0000, 0.0003)),
-    6: (0.0284, (0.0067, 0.0065, 0.0000, 0.0000, 0.0036, 0.0149, 0.0213, 0.1176, 0.0262, 0.0767, 0.0832, 0.0464, 0.0011, 0.0234, 0.0244, 0.0017)),
-    7: (0.0409, (0.0121, 0.0845, 0.1605, 0.1025, 0.0218, 0.0325, 0.0946, 0.0722, 0.0058, 0.0153, 0.0296, 0.0182, 0.0030, 0.0006, 0.0000, 0.0005)),
-    8: (0.0262, (0.0497, 0.0903, 0.1091, 0.0584, 0.0133, 0.0333, 0.0316, 0.0303, 0.0000, 0.0000, 0.0000, 0.0000, 0.0030, 0.0006, 0.0000, 0.0004)),
-    9: (0.0255, (0.0205, 0.0336, 0.0603, 0.0523, 0.0134, 0.0394, 0.0663, 0.0441, 0.0070, 0.0236, 0.0274, 0.0156, 0.0030, 0.0006, 0.0000, 0.0009)),
-    10: (0.0202, (0.0063, 0.0145, 0.0286, 0.0431, 0.0014, 0.0015, 0.0469, 0.1054, 0.0005, 0.0000, 0.0204, 0.0388, 0.0030, 0.0058, 0.0061, 0.0010)),
-    11: (0.1739, (0.0000, 0.0000, 0.0000, 0.0000, 0.0024, 0.0400, 0.0441, 0.0016, 0.0935, 0.5274, 0.5165, 0.1030, 0.1202, 0.5879, 0.5931, 0.1485)),
+    1: (0.0077, (0.0, 0.01, 0.0132, 0.0, 0.0049, 0.0423, 0.0395, 0.0054, 0.0, 0.0, 0.0, 0.0, 0.0051, 0.0016, 0.0, 0.0004)),
+    2: (0.0103, (0.0007, 0.0272, 0.0324, 0.0051, 0.002, 0.0, 0.0425, 0.024, 0.0005, 0.0087, 0.0148, 0.0062, 0.0, 0.0, 0.0, 0.0)),
+    3: (0.0313, (0.0066, 0.0066, 0.0, 0.0, 0.0037, 0.0137, 0.0541, 0.133, 0.0457, 0.0838, 0.0765, 0.0266, 0.0016, 0.0244, 0.0235, 0.0011)),
+    4: (0.0213, (0.0186, 0.0355, 0.0392, 0.0445, 0.0173, 0.0404, 0.0524, 0.0356, 0.0073, 0.0144, 0.0168, 0.0144, 0.003, 0.0007, 0.0, 0.0004)),
+    5: (0.0186, (0.0118, 0.0234, 0.0384, 0.0409, 0.0065, 0.0308, 0.0238, 0.0297, 0.012, 0.0293, 0.03, 0.0166, 0.003, 0.0007, 0.0, 0.0003)),
+    6: (0.0284, (0.0067, 0.0065, 0.0, 0.0, 0.0036, 0.0149, 0.0213, 0.1176, 0.0262, 0.0767, 0.0832, 0.0464, 0.0011, 0.0234, 0.0244, 0.0017)),
+    7: (0.0411, (0.0122, 0.0849, 0.161, 0.1027, 0.022, 0.0325, 0.0951, 0.0732, 0.0058, 0.0154, 0.0296, 0.0184, 0.003, 0.0007, 0.0, 0.0005)),
+    8: (0.0264, (0.0499, 0.0904, 0.1095, 0.0589, 0.0134, 0.0335, 0.0317, 0.0306, 0.0, 0.0, 0.0, 0.0, 0.003, 0.0007, 0.0, 0.0004)),
+    9: (0.0258, (0.0208, 0.0339, 0.0611, 0.0531, 0.0134, 0.0406, 0.0669, 0.0449, 0.0063, 0.024, 0.0276, 0.0156, 0.003, 0.0007, 0.0, 0.0009)),
+    10: (0.0205, (0.0065, 0.0147, 0.0289, 0.0435, 0.0014, 0.0015, 0.0471, 0.1063, 0.0005, 0.0, 0.0208, 0.0397, 0.003, 0.0059, 0.0061, 0.001)),
+    11: (0.1737, (0.0, 0.0, 0.0, 0.0, 0.0024, 0.0392, 0.0424, 0.0017, 0.0935, 0.5271, 0.5167, 0.103, 0.1202, 0.5878, 0.5928, 0.1485)),
 }
+# <<< CALIBRATED PAGE_INK
 
 # Words per page, tokenised exactly like copy-fidelity (NFC, bidi controls and tatweel dropped, tashkeel dropped;
 # Arabic letters, Arabic-Indic digits and Latin words). Latin footer digits are NOT tokens — footer-numbers owns them.
 PAGE_WORDS_TOL = 2
+# >>> CALIBRATED PAGE_WORDS
 PAGE_WORDS = {0: 48, 1: 44, 2: 54, 3: 11, 4: 126, 5: 108, 6: 8, 7: 86, 8: 65, 9: 141, 10: 65, 11: 21}
+# <<< CALIBRATED PAGE_WORDS
 
 # Images: page index -> (distinct image objects, share of the page under them). Covers and dividers are one
 # full-page image; the references page carries the four QR codes; every other page carries none.
+# >>> CALIBRATED IMAGE_PAGES
 IMAGE_PAGES = {0: (1, 0.9995), 3: (1, 0.9995), 6: (1, 0.9995), 10: (4, 0.0185), 11: (1, 0.9995)}
+# <<< CALIBRATED IMAGE_PAGES
 IMAGE_COVER_TOL = 0.02
 
 # Printed footer numbers: page index -> the Latin number it must print (1-based page number). Pages absent from
 # this table must print NO Latin-digit footer (cover, contents, both dividers, back cover — measured).
+# >>> CALIBRATED FOOTER
 FOOTER = {1: 2, 4: 5, 5: 6, 7: 8, 8: 9, 9: 10, 10: 11}
+# <<< CALIBRATED FOOTER
 FOOTER_Y_MIN, FOOTER_Y_MAX = 770, 830
 
 # Every place the version is printed: (name, 0-based page index). The source must contain exactly this many
@@ -201,5 +213,7 @@ ATTACHMENT_FILES = [("manifest.json", None, "application/json", "Source")]
 # Link accessible names, derived from the geometry the build already uses.
 LINK_LABELS = {"next": "الصفحة التالية", "prev": "الصفحة السابقة",
                "contents": "جدول المحتويات", "home": "الغلاف"}
-EXPECTED_LINKS = 42        # 8 nav pages x 4 + 6 contents rows + 4 references
+# >>> CALIBRATED EXPECTED_LINKS
+EXPECTED_LINKS = 42
+# <<< CALIBRATED EXPECTED_LINKS
 
