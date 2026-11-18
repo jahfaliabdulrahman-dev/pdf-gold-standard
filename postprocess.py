@@ -67,7 +67,7 @@ def feature_named_destinations(pdf, spec, ctx=None) -> None:
     pdf.Root.Names = pikepdf.Dictionary(Dests=pikepdf.Dictionary(Names=names))
 
 
-from pdfops import PAINT_OPS, text_shows  # noqa: E402  (single definition, shared with the gate)
+from pdfops import PAINT_OPS, outside_bands  # noqa: E402  (single definition, shared with the gate)
 
 
 def _wrap_untagged(instructions):
@@ -177,8 +177,7 @@ def _tag_orphan_runs(pdf, page, instructions, bands=(), page_no=0):
     # A run outside every marked-content block is page furniture ONLY if it sits in a declared band. Wrapping
     # body text as /Pagination hides it from a screen reader while the file still passes veraPDF, so a run
     # outside the band stops the build by name instead of being swept along.
-    stray = [y for is_pag, x, y, size in text_shows(out)
-             if is_pag and not any(lo <= y <= hi for lo, hi in bands)]
+    stray = outside_bands(out, bands)
     if stray:
         raise ValueError(f"page {page_no}: untagged text at y={stray[0]:.0f} is outside the declared furniture "
                          f"band {list(bands)} — marking it /Pagination would hide it from a screen reader")

@@ -70,8 +70,9 @@ def text_shows(instructions):
             if op in ("'", '"'):                      # these also move to the next line first
                 tlm = _mul([1, 0, 0, 1, 0, -leading], tlm)
                 tm = tlm
-            x, y = _xy(_mul(tm, ctm), 0, 0)
-            out.append((art, x, y, size * abs(ctm[3] * tm[3])))
+            m = _mul(tm, ctm)
+            x, y = _xy(m, 0, 0)
+            out.append((art, x, y, size * (m[2] ** 2 + m[3] ** 2) ** 0.5))
         if op in ("BMC", "BDC"):
             if depth == 0:
                 art = False
@@ -83,4 +84,15 @@ def text_shows(instructions):
             depth += 1
         elif op == "EMC":
             depth = max(0, depth - 1)
+            if depth == 0:
+                art = False          # a show after the block is not inside it: stale state would cry wolf
     return out
+
+
+def outside_bands(instructions, bands):
+    """The y of every pagination show outside every declared band — the rule, once for both sides.
+
+    Empty means the rule holds. The producer refuses a build on it; the gate holds the file to it.
+    """
+    return [y for is_pag, _x, y, _size in text_shows(instructions)
+            if is_pag and not any(lo <= y <= hi for lo, hi in bands)]

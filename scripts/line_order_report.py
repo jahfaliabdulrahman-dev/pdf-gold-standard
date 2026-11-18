@@ -10,9 +10,7 @@ and a per-page count — the input to fixing the layer rather than lowering the 
 import argparse
 import collections
 import difflib
-import html
 import os
-import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -27,10 +25,8 @@ def main() -> int:
     ap.add_argument("--top", type=int, default=40, help="print at most this many runs (largest first)")
     args = ap.parse_args()
 
-    NS = spec_loader.load()
-    src = V.source_markup()
-    stripped = re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I)
-    truth = V.source_words(html.unescape(re.sub(r"<[^>]+>", " ", stripped)))
+    spec_loader.load()                     # PDF_SPEC decides which document the truth is read from
+    truth = V.truth_words()
 
     import fitz
     doc = fitz.open(args.pdf)
