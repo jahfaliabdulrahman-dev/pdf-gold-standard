@@ -22,6 +22,7 @@ import pymupdf as fitz  # noqa: E402
 import pikepdf  # noqa: E402
 
 import spec_loader  # noqa: E402
+import render_markup  # noqa: E402
 
 NS = spec_loader.load()  # noqa: E402
 
@@ -47,6 +48,17 @@ def source_path() -> str:
 
 def source_text() -> str:
     return open(source_path(), encoding="utf-8").read()
+
+
+def source_markup() -> str:
+    """The markup this spec asks Chrome to print, derived from the same two inputs the producer used.
+
+    The gate used to read a copy beside the output. A copy can go stale or belong to another build;
+    this is recomputed instead, so the comparison is about this document. Raises whatever the derivation
+    raises — the caller reports it by name. No cache of the result: the expensive pure steps inside
+    `render_markup` are cached by their arguments (a file replaced mid-process is out of scope).
+    """
+    return render_markup.rendered_markup(NS, source_text(), PROJ)
 
 
 class GateInput(Exception):
@@ -308,9 +320,10 @@ def output_intent_problems(pdf) -> list[str]:
 
 def attachment_problems(pdf) -> list[str]:
     bad, got = [], {}
-    want = (getattr(NS, "ATTACHMENTS", None)
-            or [f[0] for f in getattr(NS, "ATTACHMENT_FILES", [])]
-            or ["source.html", "manifest.json"])
+    declared = getattr(NS, "ATTACHMENT_FILES", None)
+    if not declared:
+        return ["the spec declares no ATTACHMENT_FILES: a file cannot be judged on a list the code assumes"]
+    want = [f[0] for f in declared]
     for name, spec in pdf.attachments.items():
         try:
             data = spec.get_file().read_bytes()
@@ -344,7 +357,7 @@ def source_icons():
     """The nav icons as the source HTML draws them: one list of normalised masks per nav strip, left to right."""
     from PIL import Image
     strips = []
-    for nav in re.findall(r'<div class="nav">(.*?)</div>', source_text(), re.S):
+    for nav in re.findall(r'<div class="%s">(.*?)</div>' % re.escape(NS.NAV_CLASS), source_text(), re.S):
         row = []
         for svg in re.findall(r"<svg.*?</svg>", nav, re.S):
             svg = re.sub(r'stroke="#[0-9a-fA-F]+"', 'stroke="#000000"', svg)
@@ -364,6 +377,29 @@ def icon_iou(pm, ref) -> float:
         return 0.0
     a, b = got.tobytes(), ref.tobytes()
     return sum(1 for x, y in zip(a, b) if x and y) / max(1, sum(1 for x, y in zip(a, b) if x or y))
+
+
+def slot_drawings(doc) -> list[str]:
+    """Drawings or images whose rectangle sits INSIDE a navigation slot (a page-wide fill does not).
+
+    Criterion for a print copy: no icon was drawn. The rectangle must be contained (0.5 pt slack), not
+    merely intersect: every page paints a background that intersects all four slots. Kept as its own
+    predicate so the self-test can exercise it on a page it builds, not only through a whole document.
+    """
+    drawn = []
+    for i in range(doc.page_count):
+        page = doc[i]
+        rects = [fitz.Rect(g["rect"]) for g in page.get_drawings()]
+        for xref in {im[0] for im in page.get_images()}:
+            rects += [fitz.Rect(r) for r in page.get_image_rects(xref)]
+        for role, x in NS.SLOTS.items():
+            slot = fitz.Rect(x, NS.NAV_Y0, x + NS.NAV_W, NS.NAV_Y1)
+            inside = [r for r in rects if r.x0 >= slot.x0 - 0.5 and r.x1 <= slot.x1 + 0.5
+                      and r.y0 >= slot.y0 - 0.5 and r.y1 <= slot.y1 + 0.5]
+            if inside:
+                r = inside[0]
+                drawn.append(f"p{i+1} {role}: a drawing {tuple(round(v, 1) for v in r)} sits in the slot")
+    return drawn
 
 
 def blank_pages(doc, body):
@@ -767,19 +803,11 @@ def gate(doc) -> list[str]:
     # A missing source icon is a FAILURE, never a silent pass: a check that lost its input would otherwise
     # print "shape IoU 0.00-0.00" inside a PASS (H2).
     if not getattr(NS, "NAV_VISIBLE", True):
-        # A print copy is proven by its SOURCE, not by ink: the cover and the dividers are full-bleed art, so
-        # "the band is blank" is false there for a reason that has nothing to do with buttons. The link check
-        # above already proves no page carries a strip target; this proves no icon was drawn at all.
-        rendered = os.path.splitext(str(getattr(doc, "name", "")))[0] + ".source.html"
-        try:
-            markup = open(rendered, encoding="utf-8").read()
-            stripped = 'class="nav"' not in markup
-            ok = stripped
-            detail = ("print copy: the markup Chrome printed carries no nav strip" if stripped
-                      else f"print copy: {markup.count('class=\"nav\"')} nav strip(s) were still drawn")
-        except OSError as exc:
-            ok, detail = False, f"cannot read what was printed ({exc})"
-        check("render", ok, detail)
+        # A print copy must draw no icon. Proven FROM THE PAGE, not from the markup this gate derives:
+        # that derivation removes the strip by construction, so a check on it could never fail.
+        drawn = slot_drawings(doc)
+        check("render", not drawn, "; ".join(drawn[:4]) or
+              f"print copy: {doc.page_count} pages, no drawing or image inside a strip slot")
     else:
         dead, seen, ious = [], [], []
         order = sorted(NS.SLOTS, key=NS.SLOTS.get)  # the HTML lists a strip's icons left to right
@@ -1042,26 +1070,29 @@ def gate(doc) -> list[str]:
         px.close()
     except Exception:
         got_name = got_digest = ""
-    # The sidecar beside the file is what copy-fidelity reads as truth. The producer now records the
-    # hash of the markup it actually printed, so a stale sidecar from another build cannot stand in.
-    side_explicit = getattr(doc, "_sidecar", None)
-    fname = str(getattr(doc, "name", "") or "")
-    # A document read from memory has no sidecar (its .name is the stream label, not a path).
-    side_path = side_explicit or (os.path.splitext(fname)[0] + ".source.html"
-                                  if fname and os.path.exists(fname) else "")
-    side_ok, side_why = True, ""
-    if got_rendered and side_path:
-        if not os.path.exists(side_path):
-            side_ok, side_why = False, "the manifest names the markup it printed, but no .source.html sits beside the file"
-        else:
-            import hashlib
-            if hashlib.sha256(open(side_path, "rb").read()).hexdigest() != got_rendered:
-                side_ok, side_why = False, "the .source.html beside the file is not the markup this file was built from"
-    ok = (got_name, got_digest) == (name, digest) and side_ok
+    # 8c continued — the manifest names the markup this build handed to Chrome, and the gate derives it
+    # again from this spec and this source. There is no sidecar to read: the copy was the stale thing.
+    # A missing key is a FAIL, not a skip: a manifest without it binds the file to nothing.
+    try:
+        want_rendered = render_markup.markup_sha256(source_markup())
+        derive_err = ""
+    except Exception as e:
+        want_rendered, derive_err = "", f"the gate cannot derive the markup this document was built from: {type(e).__name__}: {e}"
+    got_rendered = str(got_rendered or "")
+    if derive_err:
+        rendered_why = derive_err
+    elif not got_rendered:
+        rendered_why = "the manifest carries no rendered_sha256: the build that made this file did not record its markup"
+    elif got_rendered != want_rendered:
+        rendered_why = (f"manifest rendered_sha256 {got_rendered[:12]} is not the markup this spec derives "
+                        f"from {name} ({want_rendered[:12]})")
+    else:
+        rendered_why = ""
+    ok = (got_name, got_digest) == (name, digest) and not rendered_why
     check("provenance", ok,
-          f"{name} sha256 {digest[:12]}" + ("" if side_ok else " — " + side_why) if ok else
-          (side_why if not side_ok else
-           ("no source stamp" if not got_digest else f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}")))
+          f"{name} sha256 {digest[:12]} · rendered {want_rendered[:12]}" if ok else
+          (rendered_why or ("no source stamp" if not got_digest else
+           f"built from {got_name} {got_digest[:12]}, gate truth is {name} {digest[:12]}")))
     check("tagged-structure", stray == 0,
           "no paragraph sits directly under /Document" if stray == 0 else
           f"{stray} paragraph(s) under /Document — page furniture tagged as content")
@@ -1174,27 +1205,17 @@ def text_layer_violations(doc) -> list[str]:
 def copy_fidelity(doc, engine="pdfium", text=None):
     """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order.
 
-    The reference is the markup the producer ACTUALLY printed. For the print variant the navigation strip
-    is removed from the markup itself, so comparing against the original HTML counts words the PDF was
-    never asked to carry — the gate would be measuring a decision, not a defect. When Chrome's rendered
-    copy sits next to the file being judged, that copy is the source of truth.
+    The reference is the markup the producer ACTUALLY handed to Chrome — derived here from the same
+    spec and source, never read from a copy beside the file. For the print variant the navigation
+    strip is removed from that markup itself, so comparing against the original template would count
+    words the PDF was never asked to carry: the gate would be measuring a decision, not a defect.
     """
     import collections
     import difflib
     import html
-    rendered = None
-    name = str(getattr(doc, "name", ""))
-    if name.endswith(".pdf"):
-        candidate = name[:-4] + ".source.html"
-        if os.path.exists(candidate):
-            rendered = candidate
-    if not getattr(NS, "NAV_VISIBLE", True) and rendered is None:
-        # the print variant printed markup we cannot find: fail closed instead of measuring the
-        # original HTML, which still carries the navigation strip the spec removed on purpose
-        return None, None
     try:
-        src = open(rendered, encoding="utf-8").read() if rendered else source_text()
-    except OSError:
+        src = source_markup()
+    except Exception:
         return None, None
     truth = source_words(html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I))))
     if text is not None:                # text extracted by another reader (PDFium, or Preview's PDFKit)

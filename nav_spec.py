@@ -81,9 +81,14 @@ REF_URLS = [
     "https://pagedjs.org",
     "https://developer.chrome.com/docs/chromium/headless",
 ]
+# The four fixed references the guide prints as QRs on its content pages (same URLs, different
+# placement). {{QR_n}} on the references page is filled from REF_URLS in order.
+QR_FIXED = list(zip(("{{QR_IBM}}", "{{QR_PYMUPDF}}", "{{QR_PAGEDJS}}", "{{QR_CHROME}}"), REF_URLS))
 
 # Tagged PDF: declared in README, so the gate guards it.
 LANG = "ar"
+# The class the navigation strip is drawn with: the producer removes it and the gate reads it.
+NAV_CLASS = "nav"
 # A page far below the median text is excused only when images cover at least this share of it (cover, dividers = 1.0;
 # the references page with its QR codes = 0.018 and needs no excuse).
 BLANK_EXEMPT_IMAGE_COVER = 0.25
@@ -172,7 +177,7 @@ ART_DPI_DECLARED = {3: 205, 6: 205, 11: 205}
 ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of the page
 
 GATE_CHECKS = 35
-GATE_MUTATIONS = 50
+GATE_MUTATIONS = 52
 GATE_NA = {}                                   # every mutation applies to this document
 # What remains failing when this file DECLARES conformance — measured by scripts/claim_probe.py, one table
 # per document (the guide's file has one untagged rule; the other two are clean under both claims).
@@ -192,7 +197,7 @@ DEST_NAMES = [("cover", 0), ("contents", 2), ("section-1", 3), ("section-2", 6),
 PAGE_LABELS = [(0, None, "غ"), (1, "D", 1)]
 # Minimum XMP fields the archive/search tools read.
 XMP_LANGUAGE = "ar"
-ATTACHMENTS = ["source.html", "manifest.json"]
+ATTACHMENT_FILES = [("manifest.json", None, "application/json", "Source")]
 # Link accessible names, derived from the geometry the build already uses.
 LINK_LABELS = {"next": "الصفحة التالية", "prev": "الصفحة السابقة",
                "contents": "جدول المحتويات", "home": "الغلاف"}
