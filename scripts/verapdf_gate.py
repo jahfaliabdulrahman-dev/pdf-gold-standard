@@ -19,14 +19,16 @@ PROJ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def baseline_path() -> str:
-    """The document's own baseline (declared by its spec), unless the caller overrides it by name."""
-    env = os.environ.get("VERAPDF_BASELINE")
-    if env:
-        return env if os.path.isabs(env) else os.path.join(PROJ, env)
+    """The document's own baseline, as its spec declares it — and nowhere else.
+
+    An environment variable used to override it here while verify_pdf.py read the spec's, so one run could be
+    judged against a baseline the other half of the gate had never been told about (B8). Each spec now names
+    its file; there is no second source to disagree with.
+    """
     sys.path.insert(0, os.path.join(PROJ, "scripts"))
     sys.path.insert(0, PROJ)
     import spec_loader
-    return os.path.join(PROJ, getattr(spec_loader.load(), "VERAPDF_BASELINE", "verapdf-baseline.toml"))
+    return os.path.join(PROJ, spec_loader.load().VERAPDF_BASELINE)
 
 
 BASELINE = baseline_path()

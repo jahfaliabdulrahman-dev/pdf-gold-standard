@@ -66,6 +66,8 @@ jobs:
           PDF_SPEC=report_spec python3 scripts/gate_selftest.py report.pdf
           # 4f is the binding flavour for a file with attachments, the same rule as the guide.
           PDF_SPEC=report_spec python3 scripts/verapdf_gate.py report.pdf 3b ua1 4f
+          # B8: the baseline has ONE source, the spec — a stray env override must change nothing
+          VERAPDF_BASELINE=/nonexistent/baseline.toml PDF_SPEC=report_spec python3 scripts/verapdf_gate.py report.pdf 3b ua1 4f
           PDF_SPEC=report_spec python3 scripts/claim_probe.py report.pdf --check
           # the producer's furniture guard, seen failing: an unmarked body run must stop the build
           PDF_SPEC=report_spec python3 scripts/test_furniture_band.py report.pdf
