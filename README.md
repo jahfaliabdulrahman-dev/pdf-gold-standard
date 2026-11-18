@@ -18,7 +18,7 @@
 | `docs/automation-plan.md` | **خطة الأتمتة** — بوابة الاختيار، تحليل سير العمل، الحوكمة، مؤشرات KPI (وفق دليل الأتمتة) |
 | `skill/arabic-rtl-pdf/` | **المهارة — المصدر الوحيد لها** (SKILL.md + 7 مراجع). لا تنسخها: وجّه الوكيل إلى هذا المجلد (انظر «مزامنة المهارة») |
 | `nav_spec.py` | **رقم واحد لكل شيء**: الفهرس، مواضع الأزرار ووجهاتها، صفوف المحتويات، الخطوط المسموحة — يبني منه `build.py` ويفحص عليه البوابة |
-| `scripts/verify_pdf.py` + `scripts/gate_selftest.py` | **بوابة التسليم** واختبارها الذاتي (٣٦ فحصاً، منها فحص يقرأ بكسلات الأزرار وشكل كل أيقونة · ٥٢ عطلاً مزروعاً يجب أن تُكشف كلها) |
+| `scripts/verify_pdf.py` + `scripts/gate_selftest.py` | **بوابة التسليم** واختبارها الذاتي (٣٦ فحصاً، منها فحص يقرأ بكسلات الأزرار وشكل كل أيقونة · ٥٣ عطلاً مزروعاً يجب أن تُكشف كلها) |
 | `scripts/verapdf_gate.py` + `scripts/claim_probe.py` | **بوابة المطابقة**: veraPDF مقابل أساس كل مستند (`3b` · `ua1` · `4f`) — لا قاعدة جديدة ولا استثناء ميت ولا قاعدة مُصلحة تعود · و`claim_probe` يقيس على نسخة ما يبقى لو أُعلن الادعاء |
 | `scripts/test_vocalised.py` + `tests/` | **اختبار النص المشكول**: فقرتان مشكولتان من مخرج Chrome الخام يجب أن تُنسخا مطابقتين بعد `fix_text_layer.py` (والخام يجب أن يفشل) |
 | `guide-v2.html` + `build.py` | **المصدر**: صفحات HTML مصممة → `python3 build.py guide-v2.html out.pdf` (الترميز الذي يُسلَّم لـChrome يشتقّه `render_markup.py` من المواصفة والمصدر — لا نسخة محفوظة بجانب المخرج) |
@@ -104,7 +104,7 @@ PDF_SPEC=najd_spec         python build.py najd.html najd.pdf               # ع
 Arabic-first pipeline producing genuinely interactive PDFs (nav buttons, multi-level
 bookmarks, RTL reading direction) from designed HTML: HTML → Chrome headless →
 PyMuPDF interactivity layer. Content-deterministic, offline, font-embedded.
-A delivery gate (36 checks, 52 planted faults that must all be caught) and veraPDF baselines per document guard every build; the second document and the Najd specimen declare PDF/A-3b + PDF/UA-1 and measure zero violations. The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
+A delivery gate (36 checks, 53 planted faults that must all be caught) and veraPDF baselines per document guard every build; the second document and the Najd specimen declare PDF/A-3b + PDF/UA-1 and measure zero violations. The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
 The operating skill lives under `skill/arabic-rtl-pdf/` — point your agent at that directory (Hermes: `skills.external_dirs`) instead of copying it, so there is one source.
 
 MIT © 2026 Abdulrahman Jahfali

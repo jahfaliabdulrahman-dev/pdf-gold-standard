@@ -24,6 +24,7 @@ import pymupdf as fitz  # noqa: E402
 
 import spec_loader  # noqa: E402
 import verify_pdf as G  # noqa: E402
+from gate_policy import LINE_ORDER_FLOOR, LINE_ORDER_DRIFT  # noqa: E402
 
 NS = spec_loader.load()
 
@@ -76,7 +77,7 @@ def main() -> None:
     footer_src = "{" + ", ".join(f"{k}: {v}" for k, v in m["footer"].items()) + "}"
     # The ratchet is the document's own measured order minus drift; it can never fall below the floor three
     # documents once shared, so the gate would refuse a spec that tried to buy green by lowering it.
-    line_src = f"{max(0.75, round(m['mupdf'] - 0.02, 3)):.3f}"
+    line_src = f"{max(LINE_ORDER_FLOOR, round(m['mupdf'] - LINE_ORDER_DRIFT, 3)):.3f}"
     new = {
         "PAGE_INK": ink_src, "PAGE_WORDS": words_src, "IMAGE_PAGES": images_src, "FOOTER": footer_src,
         "LINE_ORDER_MIN": line_src,
@@ -91,6 +92,14 @@ def main() -> None:
     src = open(spec_file, encoding="utf-8").read()
     # Read the OLD value before the calibrated blocks are rewritten: for a spec whose EXPECTED_LINKS sits
     # inside a marked block, reading it afterwards compares the new number with itself and the guard never fires.
+    # The floor is a ratchet, not a measurement to copy: a rebuild that measures lower must not lower it
+    # (the next build would then be allowed to fall further, 0.02 at a time, until the floor is all that is
+    # left). Same guard as EXPECTED_LINKS — pass --force only when the layer itself changed.
+    old_line = re.search(r"^LINE_ORDER_MIN = ([\d.]+)", src, re.M)
+    new_line = float(line_src)
+    if old_line and new_line < float(old_line.group(1)) and "--force" not in sys.argv:
+        raise SystemExit(f"refusing to lower LINE_ORDER_MIN {old_line.group(1)} -> {line_src}: "
+                         "a falling build is a regression, not a new baseline (--force only if the layer changed)")
     old_links = re.search(r"^EXPECTED_LINKS = (\d+)", src, re.M)
     if old_links and int(old_links.group(1)) > m["links"] and "--force" not in sys.argv:
         raise SystemExit(f"refusing to lower EXPECTED_LINKS {old_links.group(1)} -> {m['links']}: "

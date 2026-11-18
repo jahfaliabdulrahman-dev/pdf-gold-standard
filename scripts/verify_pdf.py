@@ -530,7 +530,8 @@ def _parent_tree(pdf) -> dict:
     return table
 
 
-from pdfops import PAINT_OPS, text_shows  # noqa: E402  (the producer's own list: one definition, no drift)
+from pdfops import PAINT_OPS, outside_bands  # noqa: E402  (one definition: producer and gate read the same rule)
+from gate_policy import LINE_ORDER_FLOOR  # noqa: E402
 
 
 def untagged_runs(pdf) -> list[str]:
@@ -1115,11 +1116,18 @@ def gate(doc) -> list[str]:
     #     this is the same rule on the file, which is where a mutation can be seen.
     bands = list(getattr(NS, "FURNITURE_BANDS", []))
     swept = []
-    xp = pikepdf_open(doc)
-    for pi, page in enumerate(xp.pages, 1):
-        for is_pag, _x, y, _size in text_shows(pikepdf.parse_content_stream(page)):
-            if is_pag and not any(lo <= y <= hi for lo, hi in bands):
-                swept.append(f"p{pi} y={y:.0f}")
+    try:
+        xp = pikepdf_open(doc)
+        try:
+            for pi, page in enumerate(xp.pages, 1):
+                strays = outside_bands(pikepdf.parse_content_stream(page), bands)
+                swept += [f"p{pi} y={y:.0f}" for y in strays]
+        finally:
+            xp.close()
+    except GateInput:
+        raise
+    except Exception as exc:                 # an unreadable content stream is a failure, not a crash
+        swept = [f"cannot read the page content: {exc}"]
     check("furniture-band", not swept,
           "; ".join(swept[:4]) or f"{len(bands)} declared band(s), every pagination show inside")
 
@@ -1139,7 +1147,11 @@ def gate(doc) -> list[str]:
     _, mseq = copy_fidelity(doc, engine="mupdf")
     # Per document, calibrated: the ratchet is what THIS document's layer can do, minus drift, and never
     # below the historical floor. A single 0.75 for three documents let Najd hide 0.18 of headroom.
-    mmin = max(0.75, getattr(NS, "LINE_ORDER_MIN", 0.0))
+    if not hasattr(NS, "LINE_ORDER_MIN"):
+        raise GateInput("the spec declares no LINE_ORDER_MIN: the floor is not optional")
+    if float(NS.LINE_ORDER_MIN) < LINE_ORDER_FLOOR:
+        raise GateInput(f"LINE_ORDER_MIN {NS.LINE_ORDER_MIN} is below the {LINE_ORDER_FLOOR} floor: refused, not clamped")
+    mmin = float(NS.LINE_ORDER_MIN)
     check("line-order", mseq is not None and mseq >= mmin,
           f"MuPDF sequence {mseq:.3f} (min {mmin:.3f})" if mseq is not None else "could not read source HTML or PDF text")
 
@@ -1218,6 +1230,14 @@ def text_layer_violations(doc) -> list[str]:
     return out
 
 
+def truth_words() -> list[str]:
+    """The markup's words in source order — what copy-fidelity and the line-order report both compare to."""
+    import html
+    src = source_markup()
+    stripped = re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I)
+    return source_words(html.unescape(re.sub(r"<[^>]+>", " ", stripped)))
+
+
 def copy_fidelity(doc, engine="pdfium", text=None):
     """(recall, sequence) of the source words in the engine's extraction; sequence counts words in order.
 
@@ -1228,12 +1248,10 @@ def copy_fidelity(doc, engine="pdfium", text=None):
     """
     import collections
     import difflib
-    import html
     try:
-        src = source_markup()
+        truth = truth_words()
     except Exception:
         return None, None
-    truth = source_words(html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<(style|script|svg)\b.*?</\1>", " ", src, flags=re.S | re.I))))
     if text is not None:                # text extracted by another reader (PDFium, or Preview's PDFKit)
         got = source_words(text)
     elif engine == "mupdf":
