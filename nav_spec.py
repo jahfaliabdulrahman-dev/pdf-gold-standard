@@ -81,6 +81,14 @@ REF_URLS = [
     "https://pagedjs.org",
     "https://developer.chrome.com/docs/chromium/headless",
 ]
+# The four fixed references the guide prints as QRs on its content pages (same URLs, different
+# placement). {{QR_n}} on the references page is filled from REF_URLS in order.
+QR_FIXED = [
+    ("{{QR_IBM}}", "https://github.com/IBM/plex"),
+    ("{{QR_PYMUPDF}}", "https://pymupdf.readthedocs.io"),
+    ("{{QR_PAGEDJS}}", "https://pagedjs.org"),
+    ("{{QR_CHROME}}", "https://developer.chrome.com/docs/chromium/headless"),
+]
 
 # Tagged PDF: declared in README, so the gate guards it.
 LANG = "ar"
@@ -172,7 +180,7 @@ ART_DPI_DECLARED = {3: 205, 6: 205, 11: 205}
 ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of the page
 
 GATE_CHECKS = 35
-GATE_MUTATIONS = 51
+GATE_MUTATIONS = 52
 GATE_NA = {}                                   # every mutation applies to this document
 # What remains failing when this file DECLARES conformance — measured by scripts/claim_probe.py, one table
 # per document (the guide's file has one untagged rule; the other two are clean under both claims).

@@ -59,13 +59,13 @@ VOCALISED_REASON = "لا سطر مشكول في هذا الملف: الوجه ل
 VOCALISED_PAGES = set()
 
 VERSION_SPOTS = [("cover", COVER), ("back", PAGES - 1)]
-PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٥ فحصا» and «٤٦ عطلا»
+PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٥ فحصا» and «٤٧ عطلا»
 PRINTS_LINK_COUNT = False
 GATE_CHECKS = 35
-# Five of the suite's 51 mutations cannot be caught on this specimen (no divider art, no QR refs,
+# Five of the suite's 52 mutations cannot be caught on this specimen (no divider art, no QR refs,
 # no form fields, no basmala line, and a measured blind spot in line order); the reasons are measured,
-# not assumed, and gate_selftest fails if one of them applies after all. 51 − 5 = 46.
-GATE_MUTATIONS = 46
+# not assumed, and gate_selftest fails if one of them applies after all. 52 − 5 = 47.
+GATE_MUTATIONS = 47
 GATE_NA = {
     "drop_divider_art": "the divider page carries no art",
     "drop_image_object": "the references page carries no QR image",

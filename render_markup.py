@@ -22,15 +22,6 @@ def arabic_digits(n: int) -> str:
     """The numeral as the documents print it (Arabic-Indic), so a spec never writes the count twice."""
     return str(int(n)).translate(_AR_DIGITS)
 
-# The four fixed references the designed pages print as QRs (guide and report both use them).
-# {{QR_n}} follows spec.REF_URLS in order.
-QR_FIXED = [
-    ("{{QR_IBM}}", "https://github.com/IBM/plex"),
-    ("{{QR_PYMUPDF}}", "https://pymupdf.readthedocs.io"),
-    ("{{QR_PAGEDJS}}", "https://pagedjs.org"),
-    ("{{QR_CHROME}}", "https://developer.chrome.com/docs/chromium/headless"),
-]
-
 
 def _mime(path: str) -> str:
     return {".woff2": "font/woff2", ".ttf": "font/ttf", ".otf": "font/otf"}.get(
@@ -79,8 +70,8 @@ def markup_sha256(markup: str) -> str:
     return hashlib.sha256(markup.encode("utf-8")).hexdigest()
 
 
-# The pure, expensive steps: their arguments are their whole key, so a cache here cannot go stale when a
-# spec attribute changes (a hand-built key over the markup did exactly that).
+# The pure, expensive steps are cached by their arguments. A file replaced inside one process is out of
+# scope: a build reads each font/art file once, and nothing rewrites them mid-run.
 _embed_css = functools.lru_cache(maxsize=8)(_embed_css)
 _qr_datauri = functools.lru_cache(maxsize=64)(_qr_datauri)
 _art_for_print = functools.lru_cache(maxsize=16)(_art_for_print)
@@ -103,7 +94,7 @@ def rendered_markup(spec, source_html: str, proj: str | None = None) -> str:
         ncss = open(os.path.join(ndir, "fonts.css"), encoding="utf-8").read()
         html = html.replace("/*__FONTS_NAJD__*/", _embed_css(ncss, ndir))
     html = re.sub(r"<link[^>]*fonts\.(?:googleapis|gstatic)\.com[^>]*>\s*", "", html)
-    for ph, url in QR_FIXED:
+    for ph, url in getattr(spec, "QR_FIXED", []):
         html = html.replace(ph, _qr_datauri(url))
     if "{{LINKS_CLAIM}}" in html:
         if not hasattr(spec, "LINKS_CLAIM"):
@@ -115,6 +106,12 @@ def rendered_markup(spec, source_html: str, proj: str | None = None) -> str:
         if not hasattr(spec, "GATE_MUTATIONS"):
             raise ValueError("the source prints {{MUTATIONS_CLAIM}} but the spec declares no GATE_MUTATIONS")
         html = html.replace("{{MUTATIONS_CLAIM}}", arabic_digits(spec.GATE_MUTATIONS))
+    if "{{ATTACHMENTS_CLAIM}}" in html:
+        # The number of attached files is not a claim to be read back: it is derived from the list the
+        # producer actually attaches, so it cannot disagree with the file.
+        if not getattr(spec, "ATTACHMENT_FILES", None):
+            raise ValueError("the source prints {{ATTACHMENTS_CLAIM}} but the spec declares no ATTACHMENT_FILES")
+        html = html.replace("{{ATTACHMENTS_CLAIM}}", arabic_digits(len(spec.ATTACHMENT_FILES)))
     if not getattr(spec, "NAV_VISIBLE", True):
         # A print copy carries no navigation chrome: the icons are ink on paper and take four click
         # targets that can never be clicked. Stripping the markup (not hiding it with CSS) removes both.

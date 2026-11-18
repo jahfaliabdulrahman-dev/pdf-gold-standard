@@ -35,7 +35,7 @@ NA = object()
 # The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
 # and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
 # a silent skip can hide behind a stable number.
-SUITE_SIZE = 51
+SUITE_SIZE = 52
 
 
 class _NotApplicable(Exception):
@@ -566,26 +566,49 @@ def paragraph_under_document(doc):
         return NA
 
 
+def _rewrite_manifest(p, change):
+    """Replace manifest.json with `change(parsed)` in the shape postprocess writes it.
+
+    `change` returns None when the document lacks what this mutation needs — reported as NA, never a crash.
+    """
+    import json
+    if "manifest.json" not in p.attachments:
+        raise _NotApplicable
+    man = json.loads(p.attachments["manifest.json"].get_file().read_bytes())
+    if change(man) is None:
+        raise _NotApplicable
+    data = json.dumps(man, ensure_ascii=False, indent=1).encode()
+    del p.attachments["manifest.json"]
+    new = pikepdf.AttachedFileSpec(p, data, mime_type="application/json", filename="manifest.json")
+    new.obj["/AFRelationship"] = pikepdf.Name("/Source")
+    new.obj["/Params"] = pikepdf.Dictionary(ModDate=pikepdf.String("D:20261114210000+03'00'"))
+    p.attachments["manifest.json"] = new
+    p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
+
+
+def missing_rendered_hash(doc):
+    """The manifest lost the key the gate compares: a file bound to nothing must fail by name."""
+    def change(man):
+        if not man.get("rendered_sha256"):
+            return None
+        del man["rendered_sha256"]
+        return man
+    try:
+        return _pikemutate(doc, lambda p: _rewrite_manifest(p, change))
+    except _NotApplicable:
+        return NA
+
+
 def rendered_mismatch(doc):
     """The manifest names a markup whose hash this spec does not derive: the file is not from this build."""
-    import json
-    def fn(p):
-        if "manifest.json" not in p.attachments:
-            raise _NotApplicable
-        man = json.loads(p.attachments["manifest.json"].get_file().read_bytes())
+    def change(man):
         h = str(man.get("rendered_sha256") or "")
         if not h:
-            raise _NotApplicable
+            return None
         man["rendered_sha256"] = ("1" if h[0] != "1" else "2") + h[1:]
-        data = json.dumps(man, ensure_ascii=False, indent=1).encode()
-        del p.attachments["manifest.json"]
-        new = pikepdf.AttachedFileSpec(p, data, mime_type="application/json", filename="manifest.json")
-        new.obj["/AFRelationship"] = pikepdf.Name("/Source")
-        new.obj["/Params"] = pikepdf.Dictionary(ModDate=pikepdf.String("D:20261114210000+03'00'"))
-        p.attachments["manifest.json"] = new
-        p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
+        return man
     try:
-        return _pikemutate(doc, fn)
+        return _pikemutate(doc, lambda p: _rewrite_manifest(p, change))
     except _NotApplicable:
         return NA
 
@@ -670,6 +693,7 @@ MUTATIONS = [
     (field_without_tu, "acroform", False),
     (link_without_contents, "link-tagging", False),
     (paragraph_under_document, "tagged-structure", False),
+    (missing_rendered_hash, "provenance", False),
     (rendered_mismatch, "provenance", False),
     (print_copy_with_icons, "render", False),
     (drop_page, "pages", False),
