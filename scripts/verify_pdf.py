@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import pymupdf as fitz  # noqa: E402
 import pikepdf  # noqa: E402
 
+import spec_base  # noqa: E402
 import spec_loader  # noqa: E402
 import render_markup  # noqa: E402
 
@@ -549,7 +550,7 @@ def _parent_tree(pdf) -> dict:
     return table
 
 
-from pdfops import PAINT_OPS, artifact_shows, form_resolver, outside_bands, props_of  # noqa: E402
+from pdfops import PAINT_OPS, artifact_shows, form_resolver, model_stats, outside_bands, props_of  # noqa: E402
 from gate_policy import LINE_ORDER_FLOOR  # noqa: E402
 import chrome_pin  # noqa: E402  (the engine every number here was measured on)
 
@@ -785,7 +786,11 @@ def gate(doc) -> list[str]:
     def final_count() -> None:
         # The gate counts its own checks against the declared number, so adding a check without updating
         # nav_spec and the printed page cannot pass unnoticed (H9).
-        check("gate-count", len(ran) + 1 == NS.GATE_CHECKS, f"{len(ran) + 1} checks (declared {NS.GATE_CHECKS})")
+        declared = set(spec_base.CHECK_NAMES)
+        here = set(ran) | {"gate-count"}
+        drift = sorted(here ^ declared)
+        check("gate-count", not drift, f"{len(ran) + 1} checks (declared {len(declared)})"
+              + ("; the set drifted: " + ", ".join(drift[:4]) if drift else "; same set"))
 
     # 1. page count = intended build
     check("pages", doc.page_count == NS.PAGES, f"{doc.page_count} (expected {NS.PAGES})")
@@ -1161,6 +1166,25 @@ def gate(doc) -> list[str]:
     check("furniture-band", not swept,
           "; ".join(swept[:4]) or f"{len(bands)} band(s) · {inventory or 'no artifact text'}, every show inside")
 
+    # 9d. the declared model: the structures this pipeline produces, and nothing else. A form is followed
+    #     for its own sake in 9c; here the FORM ITSELF is the subject — text inside one, a form inside a
+    #     form's resources, a text rise, artifact text under a rotated matrix. Interpreting deeper is how
+    #     every adversarial round found another hole; refusing by name closes the class.
+    model_bad, mstats = [], {}
+    try:
+        xp = pikepdf_open(doc)
+        try:
+            model_bad, mstats = model_stats(xp)
+        finally:
+            xp.close()
+    except GateInput:
+        raise
+    except Exception as exc:
+        model_bad = [f"cannot read the model: {exc}"]
+    check("pdf-model", not model_bad,
+          "; ".join(model_bad[:4]) or
+          f"{mstats.get('forms', 0)} form(s) at depth 1 · no text inside · no nesting · no Ts · no rotated artifact text")
+
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).
     bad_tu = text_layer_violations(doc)
@@ -1223,6 +1247,8 @@ def gate(doc) -> list[str]:
     check("gate-claims", not claim_bad, "; ".join(claim_bad) or detail + " = actual")
 
     final_count()
+    if os.environ.get("VERIFY_DUMP_CHECKS"):
+        print("CHECKS_DUMP:", " ".join(sorted(set(ran))))
     return fails
 
 

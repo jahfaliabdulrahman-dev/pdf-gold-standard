@@ -8,6 +8,7 @@ the link count and the calibration grid change.
 Why a second spec rather than a CSS media query: a PDF page has ONE appearance. `@media print` decides
 what Chrome writes, but the result is a single fixed page — there is no "screen view" left inside it.
 """
+import spec_base as _gate_base   # the gate's own contract: CHECK_NAMES, MUTATION_SUITE_SIZE
 import report_spec as _base
 # Borrowed from the screen report BY NAME: a star import also carries its claims, and a claim this
 # document did not declare must not become its own by accident (B7).
@@ -40,8 +41,6 @@ DOC_SUBJECT = _base.DOC_SUBJECT + " — نسخة مهيّأة للطباعة ب�
 # The print copy carries no navigation strip at all (the markup is removed, NAV_PAGES = ()), so the
 # eight mutations that describe a strip have nothing to act on and return NA on it — measured, not
 # assumed: each is named here with its reason, and gate_selftest fails if one applies after all.
-# 54 − 8 = 46.
-GATE_MUTATIONS = 49
 # The print copy is the same document: it asserts the same conformance and the same expected failing
 # rules, stated here rather than inherited silently.
 CLAIM_EXPECTED = _base.CLAIM_EXPECTED
@@ -58,6 +57,7 @@ GATE_NA = {
     "rename_nav_class": "the render check has no subject on a print copy: no icon is drawn, so a class "
                         "rename is a provenance event, not a render one",
 }
+GATE_MUTATIONS = _gate_base.MUTATION_SUITE_SIZE - len(GATE_NA)   # derived: the suite minus what cannot apply here
 
 # ---- the difference: no strip, no strip links, and the page must say so --------------------------------
 NAV_VISIBLE = False

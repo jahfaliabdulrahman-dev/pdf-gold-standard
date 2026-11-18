@@ -5,6 +5,7 @@ so a geometry or target change happens in one place (house rule: CSS, rects and 
 of numbers). All page indices are 0-based.
 """
 
+import spec_base as _gate_base   # the gate's own contract: CHECK_NAMES, MUTATION_SUITE_SIZE
 from spec_base import (  # what every document shares — B12
     ART_MAX_DPI, BLANK_EXEMPT_IMAGE_COVER, COPY_MIN_RECALL,
     COPY_MIN_SEQUENCE, COVER, DOC_AUTHOR,
@@ -188,9 +189,11 @@ PRINTED_COUNTS_PAGE = 9      # the page that prints «N فحصا» and «M عط�
 ART_DPI_DECLARED = {3: 205, 6: 205, 11: 205}
 ART_PAGE_SHARE = 0.30       # an image counts as page art above this share of the page
 
-GATE_CHECKS = 37
-GATE_MUTATIONS = 57
 GATE_NA = {}                                   # every mutation applies to this document
+# Derived from the gate's own contract, never typed: a check or a mutation added to the suite changes these
+# two numbers by existing (review P2, second round).
+GATE_CHECKS = len(_gate_base.CHECK_NAMES)
+GATE_MUTATIONS = _gate_base.MUTATION_SUITE_SIZE - len(GATE_NA)
 # What remains failing when this file DECLARES conformance — measured by scripts/claim_probe.py, one table
 # per document (the guide's file has one untagged rule; the other two are clean under both claims).
 CLAIM_EXPECTED = {"3b": set(), "ua1": {"7.1-3"}}

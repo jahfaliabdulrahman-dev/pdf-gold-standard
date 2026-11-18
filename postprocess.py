@@ -67,7 +67,7 @@ def feature_named_destinations(pdf, spec, ctx=None) -> None:
     pdf.Root.Names = pikepdf.Dictionary(Dests=pikepdf.Dictionary(Names=names))
 
 
-from pdfops import PAINT_OPS, TEXT_OPS, text_shows, outside_bands  # noqa: E402  (one definition, shared with the gate)
+from pdfops import PAINT_OPS, TEXT_OPS, model_boundary, text_shows, outside_bands  # noqa: E402  (one definition, shared with the gate)
 
 
 def _wrap_untagged(instructions, bands=None, page_no=0):
@@ -734,6 +734,13 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
     spec = tomllib.load(open(features_path or os.path.join(PROJ, "features.toml"), "rb"))
     applied = []
     with pikepdf.open(src) as pdf:
+        # The model boundary, BEFORE anything is tagged: the pipeline refuses the structures it does not
+        # model instead of growing an interpreter for them (review P2, second round). A Chrome upgrade that
+        # starts emitting nested forms or text inside a form stops the build here, by name.
+        outside = model_boundary(pdf)
+        if outside:
+            raise SystemExit("postprocess: the document is outside the declared model — refused, not interpreted:\n  "
+                             + "\n  ".join(outside[:8]))
         for name, f in spec.get("features", {}).items():
             if f.get("stage") != 5 or profile not in f.get("profiles", []):
                 continue

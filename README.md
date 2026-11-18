@@ -109,7 +109,7 @@ PDF_SPEC=najd_spec         python build.py najd.html najd.pdf               # ع
 Arabic-first pipeline producing genuinely interactive PDFs (nav buttons, multi-level
 bookmarks, RTL reading direction) from designed HTML: HTML → Chrome headless →
 PyMuPDF interactivity layer. Content-deterministic, offline, font-embedded.
-A delivery gate (36 checks, 53 planted faults that must all be caught) and veraPDF baselines per document guard every build; the second document and the Najd specimen declare PDF/A-3b + PDF/UA-1 and measure zero violations. The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
+A delivery gate (38 checks, 61 planted faults that must all be caught) and veraPDF baselines per document guard every build; the second document and the Najd specimen declare PDF/A-3b + PDF/UA-1 and measure zero violations. The forensic standard behind it: `docs/PDF-Gold-Standard.md`.
 The operating skill lives under `skill/arabic-rtl-pdf/` — point your agent at that directory (Hermes: `skills.external_dirs`) instead of copying it, so there is one source.
 
 MIT © 2026 Abdulrahman Jahfali

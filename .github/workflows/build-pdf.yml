@@ -19,6 +19,9 @@ jobs:
       # ONE value in this file: the action input below and chrome_pin.py are compared against it, and the gate
       # refuses a manifest that names anything else.
       CHROME_VERSION: "157.0.8103.78"
+      # The baselines were measured on this validator. Homebrew ships whatever is current, so the pin is
+      # enforced where it matters — at use, by name (the same choice as Chrome).
+      VERAPDF_VERSION: "1.30.0"
     steps:
       - uses: actions/checkout@v5
 
@@ -59,10 +62,17 @@ jobs:
         run: |
           python3 scripts/gate_selftest.py guide-v2-ar.pdf
           PDF_SPEC=nav_spec python3 scripts/artifact_inventory.py guide-v2-ar.pdf
+          python3 scripts/constructs.py guide-v2-ar.pdf
 
       - name: veraPDF baseline — no NEW failing rule, no DEAD exception
         run: |
           brew install verapdf
+          got="$(verapdf --version 2>&1 | head -1 | awk '{print $2}')"
+          if [ "$got" != "$VERAPDF_VERSION" ]; then
+            echo "veraPDF $got is installed; the baselines were measured on $VERAPDF_VERSION — refused by name"
+            exit 1
+          fi
+          echo "veraPDF $got — the pinned validator"
           # 4f is the BINDING flavour for a file with attachments; plain 4 does not cover it.
           python3 scripts/verapdf_gate.py guide-v2-ar.pdf 3b ua1 4f
 
@@ -83,6 +93,7 @@ jobs:
           python3 scripts/test_digit_value.py
           python3 scripts/test_baseline_guard.py
           PDF_SPEC=report_spec python3 scripts/artifact_inventory.py report.pdf
+          python3 scripts/constructs.py report.pdf
           # the tool ROADMAP cites for the responsible lines must run at this head (it broke once)
           PDF_SPEC=report_spec python3 scripts/line_order_report.py report.pdf > /dev/null
 
@@ -98,6 +109,7 @@ jobs:
           PDF_SPEC=report_print_spec python3 scripts/verapdf_gate.py report-print.pdf 3b ua1 4f
           PDF_SPEC=report_print_spec python3 scripts/claim_probe.py report-print.pdf --check
           PDF_SPEC=report_print_spec python3 scripts/artifact_inventory.py report-print.pdf
+          python3 scripts/constructs.py report-print.pdf
 
       - name: Claim probe — what remains if the file DECLARED conformance
         run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check

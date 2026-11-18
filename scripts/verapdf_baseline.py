@@ -54,6 +54,9 @@ def rewrite(path: str, updates: dict[str, list[str]]) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".", help="directory holding the built PDFs")
+    ap.add_argument("--baselines-dir", default=PROJ,
+                    help="where the baseline .toml files live (default: the repo). A test seam: the GATE always "
+                         "reads the file its spec declares, never this directory")
     ap.add_argument("--write", action="store_true", help="rewrite the baseline files (default: report only)")
     ap.add_argument("--accept-new", action="store_true",
                     help="allow a NEW failing rule into the baseline; without it --write refuses (a new failure "
@@ -67,7 +70,7 @@ def main() -> int:
         pdf = os.path.join(args.root, pdf_name)
         if not os.path.exists(pdf):
             raise SystemExit(f"{doc}: {pdf} does not exist — build it first; a baseline is measured, not assumed")
-        base = tomllib.load(open(os.path.join(PROJ, base_name), "rb"))
+        base = tomllib.load(open(os.path.join(args.baselines_dir, base_name), "rb"))
         got = {f: failing_rules(pdf, f) for f in base["flavours"]}
         measured[doc] = got
         print(f"{doc:13s} ({base_name})")
@@ -102,7 +105,7 @@ def main() -> int:
                   "not a baseline edit (pass --accept-new if it is understood and accepted)")
         return 1
     for base_name, updates in writes.items():
-        rewrite(os.path.join(PROJ, base_name), updates)
+        rewrite(os.path.join(args.baselines_dir, base_name), updates)
         print(f"wrote {base_name}")
     return 0
 

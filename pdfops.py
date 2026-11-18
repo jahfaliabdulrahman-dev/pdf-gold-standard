@@ -14,6 +14,8 @@ What counts as an artifact (B1, tightened after review):
     form; the text rise (`Ts`) is part of where a glyph is drawn.
 """
 
+import pikepdf
+
 PAINT_OPS = frozenset({
     "m", "l", "c", "v", "y", "h", "re",                    # path construction
     "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "n",   # path painting
@@ -76,9 +78,10 @@ def _walk(instructions, resolve, ctm0, seen, props=None, base=None):
         op = str(ins.operator)
         o = ins.operands
         if op == "q":
-            stack.append(list(ctm))
+            stack.append((list(ctm), rise, size, leading))   # text state is part of the graphics state
         elif op == "Q":
-            ctm = stack.pop() if stack else ctm
+            if stack:
+                ctm, rise, size, leading = stack.pop()
         elif op == "cm":
             ctm = _mul([float(v) for v in o], ctm)
         elif op == "BT":
@@ -119,7 +122,7 @@ def _walk(instructions, resolve, ctm0, seen, props=None, base=None):
         elif op == "Do" and resolve is not None and o:
             hit = resolve(str(o[0]))
             if hit is not None:
-                sub, matrix = hit
+                sub, matrix = hit[0], hit[1]
                 key = id(sub)
                 if key not in seen and len(seen) < 8:      # a form cycle is not a reason to hang the gate
                     out.extend(_walk(sub, resolve, _mul(matrix, ctm), seen | {key}, props,
@@ -160,25 +163,164 @@ def props_of(page):
         return {}
 
 
-def form_resolver(page):
-    """A `Do` resolver for a page: name -> (instructions, /Matrix), forms only, parsed once each."""
+def _resolve_from(res):
+    """`Do` resolver for a Resources dictionary: name -> (instructions, /Matrix, Resources)."""
     try:
-        xo = page.get("/Resources", {}).get("/XObject", {})
+        xo = res.get("/XObject") if res is not None else None
     except Exception:
-        return None
+        xo = None
     cache = {}
 
     def resolve(name):
-        target = xo.get(name)
+        if xo is None:
+            return None
+        try:
+            target = xo.get(name)
+        except Exception:
+            return None
         if target is None or str(target.get("/Subtype")) != "/Form":
             return None
         key = target.objgen if hasattr(target, "objgen") else id(target)
         if key not in cache:
             try:
                 matrix = [float(v) for v in target.get("/Matrix", [1, 0, 0, 1, 0, 0])]
-                cache[key] = (list(__import__("pikepdf").parse_content_stream(target)), matrix)
+                cache[key] = (pikepdf.parse_content_stream(target), matrix, target.get("/Resources"))
             except Exception:
                 cache[key] = None
         return cache[key]
 
     return resolve
+
+
+def form_resolver(page):
+    """A `Do` resolver for a page: name -> (instructions, /Matrix, Resources), forms only, parsed once each."""
+    try:
+        return _resolve_from(page.get("/Resources"))
+    except Exception:
+        return None
+
+
+def _form_names(res):
+    """Names of the Form XObjects a Resources dictionary carries — invoked or not."""
+    try:
+        xo = res.get("/XObject") if res is not None else None
+        if xo is None:
+            return []
+        return [str(k) for k, v in xo.items()
+                if hasattr(v, "get") and str(v.get("/Subtype")) == "/Form"]
+    except Exception:
+        return []
+
+
+def _axis_aligned(m, eps=1e-6):
+    return abs(m[1]) <= eps and abs(m[2]) <= eps
+
+
+# --- the model boundary (review P2, second round) --------------------------------------------------
+# The gate MODELS a page: it follows `Do`, keeps text state across q/Q, and judges a glyph where it is
+# drawn. Every structure it can model is another structure an attacker — or a Chrome upgrade — can hide
+# text in, and each adversarial round found one more. So the pipeline stops interpreting and declares a
+# boundary instead, measured on what it actually produces (scripts/constructs.py): Form XObjects at depth
+# 1 with no text inside them, no nesting, no text rise, no artifact text under a rotated matrix. Anything
+# else is REFUSED BY NAME by the producer and by the gate's `pdf-model` check — not interpreted.
+
+def _scan_model(instructions, res, page_no, depth, frames, seen, out, stats, props):
+    ctm = [1, 0, 0, 1, 0, 0]
+    stack, tm, tlm = [], [1, 0, 0, 1, 0, 0], [1, 0, 0, 1, 0, 0]
+    rise, size, leading = 0.0, 12.0, 0.0
+    frames = list(frames)
+    resolve = _resolve_from(res)
+    for ins in instructions:
+        op, o = str(ins.operator), ins.operands
+        if op == "q":
+            stack.append((list(ctm), rise, size, leading))
+        elif op == "Q":
+            if stack:
+                ctm, rise, size, leading = stack.pop()
+        elif op == "cm":
+            m = [float(v) for v in o]
+            ctm = _mul(m, ctm)
+            if depth == 0 and not _axis_aligned(m):
+                stats["rotated_cm"] += 1
+        elif op == "BT":
+            tm = tlm = [1, 0, 0, 1, 0, 0]
+        elif op == "Tm":
+            tm = tlm = [float(v) for v in o]
+        elif op == "Td":
+            tlm = _mul([1, 0, 0, 1, float(o[0]), float(o[1])], tlm)
+            tm = tlm
+        elif op == "TD":
+            tlm = _mul([1, 0, 0, 1, float(o[0]), float(o[1])], tlm)
+            leading = -float(o[1])
+            tm = tlm
+        elif op == "T*":
+            tlm = _mul([1, 0, 0, 1, 0, -leading], tlm)
+            tm = tlm
+        elif op == "TL":
+            leading = float(o[0])
+        elif op == "Ts":
+            rise = float(o[0])
+            if abs(rise) > 1e-9:
+                stats["rise"] += 1
+                out.append(f"p{page_no}: text rise {rise:g} (Ts) — a glyph off its baseline is not modelled")
+        elif op == "Tf":
+            size = float(o[1])
+        elif op in TEXT_OPS:
+            if op in ("'", '"'):
+                tlm = _mul([1, 0, 0, 1, 0, -leading], tlm)
+                tm = tlm
+            if depth >= 1:
+                stats["text_in_form"] += 1
+                out.append(f"p{page_no}: text inside a Form XObject (depth {depth})")
+            if _frame_kind(frames) and not _axis_aligned(_mul(tm, ctm)):
+                out.append(f"p{page_no}: artifact text under a non-axis-aligned matrix")
+        if op in ("BMC", "BDC"):
+            if op == "BDC" and len(o) > 1:
+                frames.append(_kind(o[0], o[1], props))
+            else:
+                frames.append(_kind(o[0], None, None) if o else None)
+        elif op == "EMC":
+            if frames:
+                frames.pop()
+        elif op == "Do" and o:
+            hit = resolve(str(o[0]))
+            if hit is None:
+                continue
+            if depth >= 1:
+                stats["nested"] += 1
+                out.append(f"p{page_no}: Do inside a Form XObject (depth {depth + 1})")
+            sub, matrix, subres = hit
+            nested = _form_names(subres)
+            if nested:
+                stats["nested"] += len(nested)
+                out.append(f"p{page_no}: a Form XObject inside a form's /Resources ({', '.join(nested[:2])})")
+            key = id(sub)
+            if key in seen:
+                continue
+            _scan_model(sub, subres, page_no, depth + 1, frames, seen | {key}, out, stats,
+                        {str(k): v for k, v in (subres or {}).get("/Properties", {}).items()} if subres else {})
+
+
+def model_stats(pdf):
+    """(violations, stats) for a whole file — the boundary the pipeline declares, measured."""
+    out, stats = [], {"forms": 0, "nested": 0, "text_in_form": 0, "rise": 0, "rotated_cm": 0}
+    for pi, page in enumerate(pdf.pages, 1):
+        try:
+            instr = list(pikepdf.parse_content_stream(page))
+        except Exception as exc:
+            out.append(f"p{pi}: cannot read the page content ({exc})")
+            continue
+        res = page.get("/Resources")
+        stats["forms"] += len(_form_names(res))
+        _scan_model(instr, res, pi, 0, [], frozenset(), out, stats, props_of(page))
+    seen, uniq = set(), []
+    for v in out:
+        if v not in seen:
+            seen.add(v)
+            uniq.append(v)
+    return uniq, stats
+
+
+def model_boundary(pdf):
+    """Every structure outside the declared model, by name. Empty means the file is inside the boundary."""
+    return model_stats(pdf)[0]
