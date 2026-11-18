@@ -9,6 +9,9 @@ Run: python3 scripts/test_baseline_guard.py
 """
 import os
 import sys
+import tempfile
+
+import fitz
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -19,10 +22,17 @@ import verapdf_baseline as B  # noqa: E402
 def main() -> int:
     before = {n: open(os.path.join(os.path.dirname(HERE), n), "rb").read() for n in
               ("verapdf-baseline.toml", "verapdf-baseline-report.toml", "verapdf-baseline-najd.toml")}
+    # The test needs a PDF that exists, not a measured one: the measurement itself is shimmed below.
+    tmp = tempfile.mkdtemp(prefix="baseline-guard-")
+    pdf = os.path.join(tmp, "guide.pdf")
+    d = fitz.open()
+    d.new_page()
+    d.save(pdf)
+    d.close()
     real_rules, real_docs = B.failing_rules, B.DOCS
     B.failing_rules = lambda pdf, flavour: {"9.9.9-1"}      # a rule no document has ever failed
     B.DOCS = (("guide", "guide.pdf", "verapdf-baseline.toml"),)
-    sys.argv = ["verapdf_baseline.py", "--root", "/tmp/b9", "--write"]
+    sys.argv = ["verapdf_baseline.py", "--root", tmp, "--write"]
     try:
         rc = B.main()
     finally:
