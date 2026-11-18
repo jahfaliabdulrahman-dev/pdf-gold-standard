@@ -122,14 +122,15 @@ def _wrap_untagged(instructions):
 
 
 def _tag_orphan_runs(pdf, page, instructions, bands=(), page_no=0):
-    """Give an /MCID to every top-level marked-content run that Chrome left unlinked.
+    """Mark every top-level marked-content run Chrome left unlinked as page furniture — inside the band only.
 
-    Chrome wraps reversed RTL text in a bare `BMC /ReversedChars … EMC` with no MCID, so the run paints
-    visible text that belongs to no structure element — veraPDF calls it «neither Artifact nor tagged»
-    (27 items per affected page). Marking it Artifact would hide real text from a screen reader, so the run
-    becomes real content instead: it gets the next free MCID for the page, a /P structure element carrying
-    that MCID, and an entry in the page's ParentTree array. The text stays where it is; only its ownership
-    changes.
+    Chrome wraps reversed RTL text in a bare `BMC /ReversedChars … EMC` with no MCID. At depth 0 those runs
+    are the running head/footer, which a screen reader should skip: they become /Artifact /Pagination. The
+    text stays where it is; only its ownership changes.
+
+    A run outside the band the spec declares is NOT furniture — it is body text Chrome failed to tag, and
+    marking it /Pagination would hide it from a screen reader while the file still passes veraPDF. It stops
+    the build by name instead.
     """
     st = pdf.Root.get("/StructTreeRoot")
     if st is None or "/ParentTree" not in st:
