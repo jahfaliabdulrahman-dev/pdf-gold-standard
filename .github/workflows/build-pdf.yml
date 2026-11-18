@@ -71,6 +71,7 @@ jobs:
           PDF_SPEC=report_spec python3 scripts/test_furniture_band.py report.pdf
           python3 scripts/test_verapdf_json_guard.py
           python3 scripts/test_verapdf_test_granularity.py
+          python3 scripts/test_digit_value.py
           # the tool ROADMAP cites for the responsible lines must run at this head (it broke once)
           PDF_SPEC=report_spec python3 scripts/line_order_report.py report.pdf > /dev/null
 

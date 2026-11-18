@@ -153,37 +153,50 @@ def pdfium_texts(doc) -> list[str] | None:
 AR_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
 
 
-def _digit_value(t: str, page_text: str | None) -> int | None:
-    """The number a span prints, or None.
+def _digit_value(span) -> int | None:
+    """The number this span PRINTS, read from where its digits are drawn.
 
-    MuPDF reverses Arabic-Indic runs — measured on a number MuPDF itself wrote (٢٠٢٦ → ٦٢٠٢), while
-    PDFium reads it in order. So the VALUE comes from PDFium's page text when that text carries the
-    reverse of this token; the geometry still comes from the span.
+    MuPDF may return an Arabic-Indic run reversed (measured on a number MuPDF itself wrote: ٢٠٢٦ → ٦٢٠٢).
+    Deciding by «is the token — or its reverse — somewhere in PDFium's page text?» loses as soon as the page
+    prints both: ١٢ in the footer and ٢١ in the body made the footer read 21 (B4). A numeral is written
+    left-to-right in Arabic as well as in Latin, so sorting the span's digit glyphs by x gives the value
+    whatever string the reader built. Two numerals in one span (a gap over GAP_PT) are not a footer number.
     """
-    tok = t.translate(AR_DIGITS)
-    if not tok.isdigit():
+    text = "".join(c["c"] for c in span.get("chars", ())).strip()
+    # A footer number is a numeral, not a number inside prose: the cover also prints «٤٫١ · نوفمبر ٢٠٢٦»
+    # in the band, and reading the digits out of that sentence invented a footer 14 (measured).
+    if not text or not all(ch.isdigit() for ch in text):
         return None
-    if page_text is not None and len(tok) > 1:
-        toks = {x.translate(AR_DIGITS) for x in WORD.findall(page_text)}
-        if tok not in toks and tok[::-1] in toks:
-            tok = tok[::-1]
-    return int(tok)
+    glyphs = list(span.get("chars", ()))
+    if not glyphs:
+        return None
+    glyphs.sort(key=lambda c: c["bbox"][0])
+    runs, cur = [], [glyphs[0]]
+    for c in glyphs[1:]:
+        if c["bbox"][0] - cur[-1]["bbox"][2] < 12:      # same numeral
+            cur.append(c)
+        else:
+            runs.append(cur); cur = [c]
+    runs.append(cur)
+    if len(runs) > 1:
+        return None
+    return int("".join(c["c"] for c in runs[0]).translate(AR_DIGITS))
 
 
-def footer_numbers(page, page_text: str | None = None, limit: int | None = None) -> list[int]:
+def footer_numbers(page, limit: int | None = None) -> list[int]:
     """Digit spans inside the footer band, top to bottom — Latin or Arabic-Indic, in printed order.
 
     `limit` (usually the page count) drops numbers that cannot be a page number: the cover's year also
     sits in the band, and reading ٢٠٢٦ as a footer would invent a footer the document never printed.
     """
     out = []
-    for b in page.get_text("dict")["blocks"]:
+    for b in page.get_text("rawdict")["blocks"]:
         for line in b.get("lines", []):
             for s in line["spans"]:
-                t = s["text"].strip()
+                t = "".join(c["c"] for c in s.get("chars", ())).strip()
                 if not t or not NS.FOOTER_Y_MIN <= s["bbox"][1] <= NS.FOOTER_Y_MAX:
                     continue
-                v = _digit_value(t, page_text)
+                v = _digit_value(s)
                 if v is not None and (limit is None or v <= limit):
                     out.append(v)
     return out
@@ -910,13 +923,12 @@ def gate(doc) -> list[str]:
           f"printed {printed} vs links/outline {want}" if printed else "could not parse printed numbers")
 
     # 5b. footers: the printed page number = the page's own index (H8). The guide DECLARES Latin footer
-    # numbers; a declaration with no check is a claim that rots silently.
-    # PDFium's text is read once here: it is the authority on digit ORDER (MuPDF reverses Arabic-Indic
-    # runs — measured on a number MuPDF itself wrote), and section 8 reuses it.
+    # numbers; a declaration with no check is a claim that rots silently. The value comes from the drawn
+    # position of each digit (B4), not from which token happens to appear in another reader's text.
     texts = pdfium_texts(doc)
     foot_bad = []
     for i, page in enumerate(doc):
-        got_nums = footer_numbers(page, texts[i] if texts else None, limit=doc.page_count)
+        got_nums = footer_numbers(page, limit=doc.page_count)
         want_num = NS.FOOTER.get(i)
         if want_num is None:
             if got_nums:

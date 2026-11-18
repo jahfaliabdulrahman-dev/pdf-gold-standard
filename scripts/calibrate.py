@@ -54,7 +54,7 @@ def measure(pdf_path: str) -> dict:
         if n_img:
             images[i] = (n_img, round(cover, 4))
         words[i] = len(G.source_words(texts[i])) if i < len(texts) else 0
-        nums = G.footer_numbers(page, texts[i] if i < len(texts) else None, limit=doc.page_count)
+        nums = G.footer_numbers(page, limit=doc.page_count)
         if nums:
             footer[i] = nums[0]
     return {"ink": ink, "words": words, "images": images, "footer": footer,
