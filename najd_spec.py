@@ -9,6 +9,12 @@ Two deliberate omissions, both stated in the document itself:
 """
 from report_spec import *                       # noqa: F401,F403  (shared geometry: slots, mm, page height)
 
+# This document's MuPDF word-order floor: calibrated as max(0.75, measured - 0.02) by
+# scripts/calibrate.py --write; the gate refuses any value below 0.75.
+# >>> CALIBRATED LINE_ORDER_MIN
+LINE_ORDER_MIN = 0.909
+# <<< CALIBRATED LINE_ORDER_MIN
+
 GUIDE_VERSION = "1.0"
 DOC_TITLE = "نجد — عيّنة خط بروح العمارة النجدية"
 DOC_AUTHOR = "م. عبدالرحمن جحفلي"
@@ -71,7 +77,8 @@ GATE_NA = {
     "drop_image_object": "the references page carries no QR image",
     "field_without_tu": "the specimen has no AcroForm fields",
     "wrong_mark": "no basmala line in this document, and VOCALISED_CLAIM is False besides",
-    "split_text_objects": "measured blind spot: splitting its single-direction lines moves MuPDF order 0.929 → 0.925, above the 0.75 floor",
+    "split_text_objects": "measured blind spot: splitting its single-direction lines moves MuPDF order 0.929 → 0.925, "
+                          "above this document's calibrated floor 0.909, and the mutation returns n/a unless the drop reaches 0.010",
 }
 # Measured 2026-11-17 by scripts/claim_probe.py on this build: zero rules remain under either claim.
 CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
@@ -124,7 +131,7 @@ PAGE_INK = {
     4: (0.0956, (0.0582, 0.0839, 0.0891, 0.0342, 0.3128, 0.4589, 0.2041, 0.187, 0.0146, 0.0266, 0.0184, 0.0372, 0.0002, 0.0, 0.0, 0.0018)),
     5: (0.0252, (0.0062, 0.011, 0.0323, 0.0319, 0.0197, 0.0334, 0.0326, 0.0355, 0.0294, 0.0518, 0.0516, 0.0422, 0.0004, 0.0047, 0.0134, 0.0075)),
     6: (0.0175, (0.0108, 0.0186, 0.0261, 0.0298, 0.007, 0.0575, 0.0274, 0.0357, 0.006, 0.0258, 0.0141, 0.0185, 0.0003, 0.0, 0.0, 0.0015)),
-    7: (0.0222, (0.0148, 0.0258, 0.0541, 0.078, 0.0113, 0.0247, 0.0494, 0.0545, 0.0053, 0.0121, 0.0112, 0.0122, 0.0003, 0.0, 0.0, 0.0017)),
+    7: (0.0223, (0.0148, 0.0258, 0.0541, 0.078, 0.0113, 0.0247, 0.0499, 0.0545, 0.0053, 0.0121, 0.0112, 0.0122, 0.0003, 0.0, 0.0, 0.0017)),
     8: (0.0186, (0.0062, 0.0269, 0.0337, 0.032, 0.0183, 0.0552, 0.041, 0.0373, 0.0, 0.0, 0.022, 0.0225, 0.0003, 0.0, 0.0, 0.0015)),
     9: (0.0079, (0.0062, 0.0074, 0.0248, 0.0257, 0.0, 0.0, 0.0133, 0.0249, 0.0, 0.0012, 0.0092, 0.0115, 0.0002, 0.0, 0.0, 0.0017)),
     10: (0.0092, (0.0, 0.0, 0.0, 0.0, 0.0, 0.0639, 0.0682, 0.0, 0.0, 0.0082, 0.007, 0.0, 0.0, 0.0, 0.0, 0.0)),
