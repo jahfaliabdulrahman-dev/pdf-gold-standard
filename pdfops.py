@@ -141,8 +141,10 @@ def outside_bands(instructions, bands, resolve=None, props=None):
     Empty means the rule holds. The producer refuses a build on it; the gate holds the file to it. An empty
     band list means the document declares no page furniture: any artifact text is then outside.
     """
-    return [(kind, y) for kind, _x, y, _s, _d in text_shows(instructions, resolve, props)
-            if kind is not None and not any(lo <= y <= hi for lo, hi in bands)]
+    # Both ends of the drawn glyph: a 300 pt line whose ORIGIN sits in the band still reaches far above it.
+    return [(kind, y) for kind, _x, y, size, _d in text_shows(instructions, resolve, props)
+            if kind is not None
+            and not any(lo <= y <= hi and lo <= y + size <= hi for lo, hi in bands)]
 
 
 def artifact_shows(instructions, resolve=None, props=None):
@@ -210,6 +212,16 @@ def _form_names(res):
                 if hasattr(v, "get") and str(v.get("/Subtype")) == "/Form"]
     except Exception:
         return []
+
+
+def _is_image(res, name):
+    """An image XObject is a legitimate `Do`; anything else that does not resolve is a hole."""
+    try:
+        xo = res.get("/XObject") if res is not None else None
+        target = xo.get(name) if xo is not None else None
+        return target is not None and str(target.get("/Subtype")) == "/Image"
+    except Exception:
+        return False
 
 
 def _axis_aligned(m, eps=1e-6):
@@ -283,12 +295,18 @@ def _scan_model(instructions, res, page_no, depth, frames, seen, out, stats, pro
             if frames:
                 frames.pop()
         elif op == "Do" and o:
-            hit = resolve(str(o[0]))
-            if hit is None:
-                continue
+            name = str(o[0])
+            # The boundary PROMISES «Do deeper than 1 is refused». That promise is kept before any lookup:
+            # a name that does not resolve is exactly how the chain hid (review J4).
             if depth >= 1:
                 stats["nested"] += 1
-                out.append(f"p{page_no}: Do inside a Form XObject (depth {depth + 1})")
+                out.append(f"p{page_no}: Do inside a Form XObject («{name}», depth {depth + 1})")
+                continue
+            hit = resolve(name)
+            if hit is None:
+                if not _is_image(res, name):
+                    out.append(f"p{page_no}: unresolved Do «{name}» — not a form in the page resources, not an image")
+                continue
             sub, matrix, subres = hit
             nested = _form_names(subres)
             if nested:
