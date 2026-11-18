@@ -530,7 +530,7 @@ def _parent_tree(pdf) -> dict:
     return table
 
 
-from pdfops import PAINT_OPS  # noqa: E402  (the producer's own list: one definition, no drift)
+from pdfops import PAINT_OPS, text_shows  # noqa: E402  (the producer's own list: one definition, no drift)
 
 
 def untagged_runs(pdf) -> list[str]:
@@ -1109,6 +1109,19 @@ def gate(doc) -> list[str]:
     tree = doc.xref_get_key(doc.pdf_catalog(), "StructTreeRoot")[0] == "xref"
     missing = [n for n, ok in ((f"Lang={NS.LANG}", lang == NS.LANG), ("MarkInfo/Marked", marked), ("StructTreeRoot", tree)) if not ok]
     check("tagged", not missing, "missing: " + ", ".join(missing) if missing else f"Lang={lang}, Marked, structure tree")
+
+    # 9c. what a pagination artifact carries: /Pagination is where a screen reader stops reading, so every
+    #     text show inside one must sit in the band the spec declares. The producer refuses at build time;
+    #     this is the same rule on the file, which is where a mutation can be seen.
+    bands = list(getattr(NS, "FURNITURE_BANDS", []))
+    swept = []
+    xp = pikepdf_open(doc)
+    for pi, page in enumerate(xp.pages, 1):
+        for is_pag, _x, y, _size in text_shows(pikepdf.parse_content_stream(page)):
+            if is_pag and not any(lo <= y <= hi for lo, hi in bands):
+                swept.append(f"p{pi} y={y:.0f}")
+    check("furniture-band", not swept,
+          "; ".join(swept[:4]) or f"{len(bands)} declared band(s), every pagination show inside")
 
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).

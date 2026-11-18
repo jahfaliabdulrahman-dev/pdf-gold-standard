@@ -35,7 +35,7 @@ NA = object()
 # The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
 # and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
 # a silent skip can hide behind a stable number.
-SUITE_SIZE = 52
+SUITE_SIZE = 53
 
 
 class _NotApplicable(Exception):
@@ -435,6 +435,30 @@ def split_text_objects(doc):
         return NA
 
 
+def pagination_body_text(doc):
+    """A top-level /Artifact /Pagination block whose text sits in the body, not the furniture band.
+
+    The tag says «furniture» and veraPDF accepts it; only the position can tell it from the running footer.
+    A space is shown, so no word and no ink changes — the probe is the position alone.
+    """
+    import pikepdf
+
+    def fn(p):
+        page = p.pages[0]
+        streams = page.Contents if isinstance(page.Contents, pikepdf.Array) else [page.Contents]
+        body = b"\n".join(bytes(st.read_bytes()) for st in streams)
+        font = b"/F1"
+        try:
+            font = str(next(iter(page.Resources["/Font"].keys()))).encode()
+        except Exception:
+            pass
+        inject = (b"\nq\n/Artifact << /Type /Pagination >> BDC\nBT\n" + font +
+                  b" 12 Tf\n1 0 0 1 100 400 Tm\n( ) Tj\nET\nEMC\nQ\n")
+        page.Contents = p.make_stream(inject + body)
+
+    return _pikemutate(doc, fn)
+
+
 def wrong_mark(doc):
     # a kasra that copies as a fatha: the vocalised line is no longer exact
     if not getattr(NS, "VOCALISED_CLAIM", True):
@@ -694,6 +718,7 @@ MUTATIONS = [
     (field_without_tu, "acroform", False),
     (link_without_contents, "link-tagging", False),
     (paragraph_under_document, "tagged-structure", False),
+    (pagination_body_text, "furniture-band", False),
     (missing_rendered_hash, "provenance", False),
     (rendered_mismatch, "provenance", False),
     (print_copy_with_icons, "render", False),

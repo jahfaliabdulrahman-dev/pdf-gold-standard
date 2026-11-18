@@ -65,13 +65,13 @@ VOCALISED_REASON = "لا سطر مشكول في هذا الملف: الوجه ل
 VOCALISED_PAGES = set()
 
 VERSION_SPOTS = [("cover", COVER), ("back", PAGES - 1)]
-PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٥ فحصا» and «٤٧ عطلا»
+PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٥ فحصا» and «٤٨ عطلا»
 PRINTS_LINK_COUNT = False
-GATE_CHECKS = 35
+GATE_CHECKS = 36
 # Five of the suite's 52 mutations cannot be caught on this specimen (no divider art, no QR refs,
 # no form fields, no basmala line, and a measured blind spot in line order); the reasons are measured,
-# not assumed, and gate_selftest fails if one of them applies after all. 52 − 5 = 47.
-GATE_MUTATIONS = 47
+# not assumed, and gate_selftest fails if one of them applies after all. 53 − 5 = 48.
+GATE_MUTATIONS = 48
 GATE_NA = {
     "drop_divider_art": "the divider page carries no art",
     "drop_image_object": "the references page carries no QR image",
@@ -98,6 +98,10 @@ NAV_CLASS = "nav"
 XMP_TITLE = f"{DOC_TITLE} · الإصدار {GUIDE_VERSION_AR}"
 XMP_DESCRIPTION = "عيّنة خط نجد: خمسة أوزان ثابتة، وألوان الموقع، وميزات خط الأنابيب كاملة بلا حقول كتابة"
 PDFUA = True
+
+# This document has no untagged page furniture (measured: zero runs outside every block), so any text
+# that lands in /Artifact /Pagination here is body text a screen reader would skip: fail by name.
+FURNITURE_BANDS = []
 CONFORMANCE = {"pdfaid:part": "3", "pdfaid:conformance": "B", "pdfuaid:part": "1"}
 VERAPDF_BASELINE = "verapdf-baseline-najd.toml"
 

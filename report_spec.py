@@ -173,8 +173,8 @@ ART_FILES = [
 
 PRINTS_LINK_COUNT = True     # page 12 prints «٦٣ رابطا»; the gate parses and compares it
 LINKS_CLAIM = "و٦٣ رابطا حيا"   # injected into {{LINKS_CLAIM}}; the print variant states its own truth
-GATE_CHECKS = 35
-GATE_MUTATIONS = 52
+GATE_CHECKS = 36
+GATE_MUTATIONS = 53
 GATE_NA = {}                                   # every mutation applies to this document
 # Measured 2026-11-17 by scripts/claim_probe.py on this build: zero rules remain under either claim.
 CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
@@ -192,6 +192,11 @@ XMP_TITLE = f"{DOC_TITLE} · الإصدار {GUIDE_VERSION_AR}"   # one source o
 XMP_DESCRIPTION = "تشخيص وإصلاح وإثبات لطبقة النص العربية في PDF، بأرقام مقاسة على خمسة قرّاء"
 # Declared only when veraPDF reports ZERO failures for it — the gate reads the baseline and refuses otherwise.
 PDFUA = True
+
+# Text that sits outside every marked-content block is page furniture. The producer marks it
+# /Artifact /Pagination, and this band is the ONLY place such text may sit: a body line swept into the
+# artifact is text a screen reader never reads, so anything outside the band stops the build by name.
+FURNITURE_BANDS = [(0, 60)]   # the running footer prints at y=36.4 (measured)
 CONFORMANCE = {"pdfaid:part": "3", "pdfaid:conformance": "B", "pdfuaid:part": "1"}
 VERAPDF_BASELINE = "verapdf-baseline-report.toml"
 
