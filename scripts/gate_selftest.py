@@ -35,7 +35,7 @@ NA = object()
 # The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
 # and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
 # a silent skip can hide behind a stable number.
-SUITE_SIZE = 57
+from spec_base import MUTATION_SUITE_SIZE as SUITE_SIZE  # derived: the suite and the spec cannot disagree
 
 
 class _NotApplicable(Exception):
@@ -760,6 +760,66 @@ def link_without_contents(doc):
         return NA
 
 
+def _add_form(p, page, name, body, matrix=(1, 0, 0, 1, 0, 0), resources=None):
+    form = p.make_stream(body)
+    form["/Type"] = pikepdf.Name("/XObject")
+    form["/Subtype"] = pikepdf.Name("/Form")
+    form["/Matrix"] = pikepdf.Array(list(matrix))
+    form["/Resources"] = resources if resources is not None else page.Resources
+    xo = page.Resources.get("/XObject", pikepdf.Dictionary())
+    xo[name] = form
+    page.Resources["/XObject"] = xo
+    return form
+
+
+def _prepend(p, page, inject: bytes):
+    streams = page.Contents if isinstance(page.Contents, pikepdf.Array) else [page.Contents]
+    body = b"\n".join(bytes(st.read_bytes()) for st in streams)
+    page.Contents = p.make_stream(inject + b"\n" + body)
+
+
+def text_in_form(doc):
+    """Text that exists ONLY inside a Form XObject invoked as TAGGED content: the band cannot see it.
+
+    A model that follows `Do` would judge it; the boundary refuses the structure itself.
+    """
+    def fn(p):
+        page = p.pages[0]
+        _add_form(p, page, "/FxTagged", b"BT /F1 12 Tf 1 0 0 1 100 0 Tm ( ) Tj ET")
+        _prepend(p, page, b"q\n/FxTagged Do\nQ")
+    return _pikemutate(doc, fn)
+
+
+def nested_form(doc):
+    """A Form XObject that carries its own Form XObjects — depth the model does not interpret."""
+    def fn(p):
+        page = p.pages[0]
+        inner = p.make_stream(b"")
+        inner["/Type"] = pikepdf.Name("/XObject")
+        inner["/Subtype"] = pikepdf.Name("/Form")
+        inner["/BBox"] = pikepdf.Array([0, 0, 10, 10])
+        res = pikepdf.Dictionary({"/XObject": pikepdf.Dictionary({"/FxInner": inner})})
+        outer = _add_form(p, page, "/FxOuter", b"", resources=res)
+        outer["/BBox"] = pikepdf.Array([0, 0, 10, 10])
+        _prepend(p, page, b"q\n/FxOuter Do\nQ")
+    return _pikemutate(doc, fn)
+
+
+def text_rise(doc):
+    """A glyph drawn off its baseline (Ts): the model does not track where it lands."""
+    def fn(p):
+        _prepend(p, p.pages[0], b"BT /F1 12 Tf 4 Ts ( ) Tj ET")
+    return _pikemutate(doc, fn)
+
+
+def rotated_artifact_text(doc):
+    """Artifact text under a rotated matrix: an axis-aligned band cannot judge where it sits."""
+    def fn(p):
+        _prepend(p, p.pages[0],
+                b"/Artifact BMC q 0 1 -1 0 200 200 cm BT /F1 12 Tf ( ) Tj ET Q EMC")
+    return _pikemutate(doc, fn)
+
+
 # (mutation, expected check, must_stay_green)
 MUTATIONS = [
     (swap_next_prev, "nav-buttons", False),
@@ -815,6 +875,10 @@ MUTATIONS = [
     (artifact_body_text, "furniture-band", False),
     (artifact_by_name, "furniture-band", False),
     (form_xobject_text, "furniture-band", False),
+    (text_in_form, "pdf-model", False),
+    (nested_form, "pdf-model", False),
+    (text_rise, "pdf-model", False),
+    (rotated_artifact_text, "pdf-model", False),
     (missing_rendered_hash, "provenance", False),
     (rendered_mismatch, "provenance", False),
     (print_copy_with_icons, "render", False),

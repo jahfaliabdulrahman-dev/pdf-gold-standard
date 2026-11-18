@@ -14,9 +14,10 @@ both call it (the B5 message promised one reader, and the review found two).
 import json
 import subprocess
 
-# The profile veraPDF must name for each flavour we ask for. «PDF/A-4» would also match «PDF/A-4f», hence the
-# trailing space: a flavour's verdict has to be for the flavour requested.
-PROFILE = {"3b": "PDF/A-3b", "4": "PDF/A-4 ", "4f": "PDF/A-4f", "ua1": "PDF/UA-1"}
+# The profile veraPDF must name for each flavour we ask for. The match is exact, against
+# f"{PROFILE[flavour]} validation profile": «PDF/UA-1» must not match «PDF/UA-10…», and «PDF/A-4» must not
+# match «PDF/A-4f» — a verdict for another profile is not this one.
+PROFILE = {"3b": "PDF/A-3b", "4": "PDF/A-4", "4f": "PDF/A-4f", "ua1": "PDF/UA-1"}
 
 
 def _run(path: str, flavour: str) -> dict:
@@ -40,7 +41,9 @@ def guard(data: dict, flavour: str) -> None:
     if not jobs:
         raise SystemExit(f"verapdf {flavour}: the report has no jobs — nothing was judged, so an empty set "
                          "proves nothing")
-    want = PROFILE.get(flavour)
+    if flavour not in PROFILE:
+        raise SystemExit(f"verapdf: flavour «{flavour}» is not declared — declared: {sorted(PROFILE)}")
+    want = PROFILE[flavour]
     for n, job in enumerate(jobs, 1):
         if job.get("taskException"):
             raise SystemExit(f"verapdf {flavour}: job {n} raised a taskException "
@@ -53,9 +56,10 @@ def guard(data: dict, flavour: str) -> None:
                              "— the report carries a verdict we cannot read")
         for v in results:
             name = str(v.get("profileName", ""))
-            if want and not name.startswith(want):
+            # Exact, not a prefix: «PDF/UA-1» would also match «PDF/UA-10…» (review N7).
+            if name != f"{want} validation profile":
                 raise SystemExit(f"verapdf {flavour}: job {n} was judged against «{name}», not the {flavour} "
-                                 f"profile ({want.strip()}) — a verdict for another profile is not this one")
+                                 f"profile ({want} validation profile) — a verdict for another profile is not this one")
             failed = [x for x in ((v.get("details") or {}).get("ruleSummaries") or []) if _failed(x)]
             if v["compliant"] is False and not failed:
                 raise SystemExit(f"verapdf {flavour}: job {n} says NON-compliant but names no failing rule — "
@@ -70,29 +74,26 @@ def _key(rule) -> str:
     return str(f"{clause}-{test}" if clause and test else (rule.get("ruleId") or clause))
 
 
+def read_report(data: dict, flavour: str) -> list[tuple[str, str]]:
+    """(rule, description) from an ALREADY PARSED report — the same guard, no subprocess (a saved report is
+    a fixture, and a fixture is what makes the shape testable without veraPDF installed)."""
+    guard(data, flavour)
+    out = []
+    for job in data["report"]["jobs"]:
+        for v in job["validationResult"]:
+            for rule in ((v.get("details") or {}).get("ruleSummaries") or []):
+                if _failed(rule):
+                    out.append((_key(rule), str(rule.get("description", ""))[:160]))
+    return out
+
+
 def failing_rules_detail(path: str, flavour: str) -> list[tuple[str, str]]:
     """(clause-testNumber, description) for every failing rule — the one reader, for both screens.
 
     clause+test, not the clause: a new failing test inside a clause that already fails was invisible to a
     clause-level set. A rule without a test number keeps its clause (PDF/UA identification is clause "5").
     """
-    data = _run(path, flavour)
-    guard(data, flavour)
-    out = {}
-
-    def walk(o):
-        if isinstance(o, dict):
-            if _failed(o) and ("clause" in o or "ruleId" in o):
-                k = _key(o)
-                if k and k != "None":
-                    out.setdefault(k, str(o.get("description", ""))[:90])
-            for v in o.values():
-                walk(v)
-        elif isinstance(o, list):
-            for v in o:
-                walk(v)
-    walk(data)
-    return sorted(out.items())
+    return read_report(_run(path, flavour), flavour)
 
 
 def failing_rules(path: str, flavour: str) -> set[str]:

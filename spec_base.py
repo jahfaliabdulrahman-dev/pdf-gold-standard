@@ -54,3 +54,22 @@ LINK_LABELS = {"next": "الصفحة التالية", "prev": "الصفحة ال
                "contents": "جدول المحتويات", "home": "الغلاف"}
 
 COVER = 0                                   # page index of the cover, for readers of these specs
+
+
+# The gate's own contract, in ONE place: verify_pdf fails if the checks it ran are not exactly this set,
+# and a spec's GATE_CHECKS is len(CHECK_NAMES) — a check added, renamed or dropped cannot hide behind a
+# number that still adds up. The mutation suite is the same idea for the self-test.
+CHECK_NAMES = frozenset({
+    "acroform", "art-dpi", "attachments", "chrome-version",
+    "contents-links", "contents-numbers", "copy-fidelity", "fonts",
+    "footer-numbers", "furniture-band", "gate-claims", "gate-count",
+    "line-order", "link-tagging", "named-destinations", "nav-buttons",
+    "no-blank-pages", "outline", "output-intent", "page-images",
+    "page-ink", "page-labels", "page-words", "pages",
+    "pdf-model", "pdfua", "provenance", "ref-links",
+    "render", "rtl-direction", "single-page", "tagged",
+    "tagged-structure", "text-layer", "title", "version-consistency",
+    "vocalised", "xmp",
+})
+
+MUTATION_SUITE_SIZE = 61      # every mutation the suite carries; a spec declares how many apply to it

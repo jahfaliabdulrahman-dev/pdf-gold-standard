@@ -8,6 +8,7 @@ Two deliberate omissions, both stated in the document itself:
   · no variable font — measured: Chrome embeds a variable face as Type3 glyph procedures.
 """
 
+import spec_base as _gate_base   # the gate's own contract: CHECK_NAMES, MUTATION_SUITE_SIZE
 from spec_base import (  # what every document shares — B12
     ART_MAX_DPI, BLANK_EXEMPT_IMAGE_COVER, COPY_MIN_RECALL,
     COPY_MIN_SEQUENCE, COVER, DOC_AUTHOR,
@@ -85,11 +86,10 @@ VOCALISED_PAGES = set()
 VERSION_SPOTS = [("cover", COVER), ("back", PAGES - 1)]
 PRINTED_COUNTS_PAGE = 7             # the page that prints «٣٦ فحصا» and «٤٩ عطلا»
 PRINTS_LINK_COUNT = False
-GATE_CHECKS = 37
-# Five of the suite's 53 mutations cannot be caught on this specimen (no divider art, no QR refs,
-# no form fields, no basmala line, and a measured blind spot in line order); the reasons are measured,
-# not assumed, and gate_selftest fails if one of them applies after all. 54 − 5 = 49.
-GATE_MUTATIONS = 52
+GATE_CHECKS = len(_gate_base.CHECK_NAMES)           # derived from the gate's contract, not typed
+# Five of the suite's mutations cannot be caught on this specimen (no divider art, no QR refs, no form
+# fields, no basmala line, and a measured blind spot in line order); the reasons are measured, not
+# assumed, and gate_selftest fails if one of them applies after all.
 GATE_NA = {
     "drop_divider_art": "the divider page carries no art",
     "drop_image_object": "the references page carries no QR image",
@@ -98,6 +98,7 @@ GATE_NA = {
     "split_text_objects": "measured blind spot: splitting its single-direction lines moves MuPDF order 0.929 → 0.925, "
                           "above this document's calibrated floor 0.909, and the mutation returns n/a unless the drop reaches 0.010",
 }
+GATE_MUTATIONS = _gate_base.MUTATION_SUITE_SIZE - len(GATE_NA)
 # Measured 2026-11-17 by scripts/claim_probe.py on this build: zero rules remain under either claim.
 CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
 # The cover carries the wall the typeface was drawn from; embedded at build time so the print stays

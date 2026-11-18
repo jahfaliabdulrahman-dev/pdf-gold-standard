@@ -8,6 +8,7 @@ Measurement provenance: every figure printed in the report is copied from ROADMA
 and the reader it was measured on. This file carries no claim of its own.
 """
 
+import spec_base as _gate_base   # the gate's own contract: CHECK_NAMES, MUTATION_SUITE_SIZE
 from spec_base import (  # what every document shares — B12
     ART_MAX_DPI, BLANK_EXEMPT_IMAGE_COVER, COPY_MIN_RECALL,
     COPY_MIN_SEQUENCE, COVER, DOC_AUTHOR,
@@ -168,9 +169,9 @@ ART_FILES = [
 
 PRINTS_LINK_COUNT = True     # page 12 prints «٦٣ رابطا»; the gate parses and compares it
 LINKS_CLAIM = "و٦٣ رابطا حيا"   # injected into {{LINKS_CLAIM}}; the print variant states its own truth
-GATE_CHECKS = 37
-GATE_MUTATIONS = 57
 GATE_NA = {}                                   # every mutation applies to this document
+GATE_CHECKS = len(_gate_base.CHECK_NAMES)           # derived, not typed: the gate publishes its own contract
+GATE_MUTATIONS = _gate_base.MUTATION_SUITE_SIZE - len(GATE_NA)
 # Measured 2026-11-17 by scripts/claim_probe.py on this build: zero rules remain under either claim.
 CLAIM_EXPECTED = {"3b": set(), "ua1": set()}
 

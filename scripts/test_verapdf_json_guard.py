@@ -15,6 +15,9 @@ import tempfile
 
 import fitz
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
+import verapdf_json as VJ  # noqa: E402  (the reader under test, called in-process on a REAL report)
+
 PROJ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHIM = '''#!/usr/bin/env python3
 import os, sys
@@ -55,6 +58,42 @@ CASES = {
 }
 
 
+FIXTURE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tests", "verapdf-report-3b.json")
+
+
+def _fixture_cases():
+    """A REAL report (saved from veraPDF 1.30.0), not a hand-written shape: it proves the reader on the
+    bytes the tool actually emits, and that a renamed status key cannot pass as «clean»."""
+    if not os.path.exists(FIXTURE):
+        return []
+    data = json.load(open(FIXTURE, encoding="utf-8"))
+    got = [k for k, _ in VJ.read_report(data, "3b")]
+    want = [f"{r['clause']}-{r['testNumber']}"
+            for r in data["report"]["jobs"][0]["validationResult"][0]["details"]["ruleSummaries"]]
+    out = []
+    if sorted(got) != sorted(want):
+        out.append(f"the fixture's failing set is {got}, its rules say {want}")
+    renamed = json.loads(json.dumps(data))
+    for r in renamed["report"]["jobs"][0]["validationResult"][0]["details"]["ruleSummaries"]:
+        r["status"] = r.pop("ruleStatus")          # a renamed key must not read as «no failing rule»
+    # A renamed status key must not SHRINK the failing set: the reader treats an absent status as FAILED,
+    # which is the conservative direction (a clean report may look dirty; never the reverse).
+    try:
+        kept = sorted(k for k, _ in VJ.read_report(renamed, "3b"))
+    except SystemExit as exc:
+        out.append(f"a renamed status crashed the reader instead of defaulting to FAILED: {exc}")
+    else:
+        if kept != sorted(want):
+            out.append(f"a renamed ruleStatus lost rules: {kept} != {sorted(want)}")
+    try:
+        VJ.guard(data, "ua1")                      # the same bytes, asked for another flavour
+    except SystemExit:
+        pass
+    else:
+        out.append("a 3b report was accepted as a ua1 verdict")
+    return out
+
+
 def main() -> int:
     tmp = tempfile.mkdtemp(prefix="verapdf-guard-")
     pdf = os.path.join(tmp, "one.pdf")
@@ -86,6 +125,11 @@ def main() -> int:
             print(f"{'PASS' if ok else 'FAIL'} {label:5s} {name:20s} -> exit {r.returncode}: "
                   f"{out.splitlines()[-1][:110] if out else '(no output)'}")
             failures += 0 if ok else 1
+    fixture_bad = _fixture_cases()
+    print(f"{'PASS' if not fixture_bad else 'FAIL'} fixture {'':13s} {'real report (veraPDF 1.30.0)':20s} -> "
+          + (", ".join(fixture_bad) if fixture_bad else "the reader returns exactly the rules the report names; "
+             "a renamed status cannot shrink them; another flavour is refused"))
+    failures += len(fixture_bad)
     if failures:
         print(f"\nVERAPDF JSON GUARD FAILED — {failures} case(s) did not refuse the report")
         return 1
