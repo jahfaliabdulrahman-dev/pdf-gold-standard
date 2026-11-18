@@ -114,6 +114,8 @@ COPY_MIN_SEQUENCE = 0.92
 # >>> CALIBRATED LINE_ORDER_MIN
 LINE_ORDER_MIN = 0.765
 # <<< CALIBRATED LINE_ORDER_MIN
+# The document's veraPDF baseline: one source, the spec (B8) — the gate and the claim check read it here.
+VERAPDF_BASELINE = "verapdf-baseline.toml"
 # Vocalised text that must copy exactly (letters with their marks, in order).
 VOCALISED = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
 

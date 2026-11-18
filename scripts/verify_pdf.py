@@ -481,7 +481,10 @@ def pdfua_problems(pdf) -> list[str]:
             flavours = [f for f in flavours if f]
             if not flavours:
                 bad.append(f"cannot map the claim {declared} to a veraPDF flavour: it cannot be checked")
-            baseline_path = os.path.join(PROJ, getattr(NS, "VERAPDF_BASELINE", "verapdf-baseline.toml"))
+            try:
+                baseline_path = os.path.join(PROJ, NS.VERAPDF_BASELINE)
+            except AttributeError:
+                raise SystemExit(f"{NS.__name__} declares no VERAPDF_BASELINE — the baseline is per document")
             try:
                 base = tomllib.load(open(baseline_path, "rb"))
             except (OSError, tomllib.TOMLDecodeError) as e:
