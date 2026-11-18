@@ -664,7 +664,7 @@ STAGE5 = {
     "named-destinations": feature_named_destinations,
     "xmp": feature_xmp,
     "output-intent": feature_output_intent,
-    "attachments": feature_attachments,      # dispatched by name: it alone needs rendered_sha as well
+    "attachments": feature_attachments,
 }
 
 # Profiles this build can actually produce. secure/signed are NOT implemented: refusing them by name is

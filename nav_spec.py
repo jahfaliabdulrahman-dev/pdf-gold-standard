@@ -83,15 +83,12 @@ REF_URLS = [
 ]
 # The four fixed references the guide prints as QRs on its content pages (same URLs, different
 # placement). {{QR_n}} on the references page is filled from REF_URLS in order.
-QR_FIXED = [
-    ("{{QR_IBM}}", "https://github.com/IBM/plex"),
-    ("{{QR_PYMUPDF}}", "https://pymupdf.readthedocs.io"),
-    ("{{QR_PAGEDJS}}", "https://pagedjs.org"),
-    ("{{QR_CHROME}}", "https://developer.chrome.com/docs/chromium/headless"),
-]
+QR_FIXED = list(zip(("{{QR_IBM}}", "{{QR_PYMUPDF}}", "{{QR_PAGEDJS}}", "{{QR_CHROME}}"), REF_URLS))
 
 # Tagged PDF: declared in README, so the gate guards it.
 LANG = "ar"
+# The class the navigation strip is drawn with: the producer removes it and the gate reads it.
+NAV_CLASS = "nav"
 # A page far below the median text is excused only when images cover at least this share of it (cover, dividers = 1.0;
 # the references page with its QR codes = 0.018 and needs no excuse).
 BLANK_EXEMPT_IMAGE_COVER = 0.25

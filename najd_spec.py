@@ -86,6 +86,8 @@ DEST_NAMES = [("cover", COVER), ("contents", CONTENTS), ("weights", 2), ("glyphs
               ("spirit", 5), ("features", 6), ("gate", 7), ("limits", 8), ("references", REF_PAGE), ("back", PAGES - 1)]
 PAGE_LABELS = [(0, None, "غ")]
 XMP_LANGUAGE = "ar"
+# The class the navigation strip is drawn with: the producer removes it and the gate reads it.
+NAV_CLASS = "nav"
 XMP_TITLE = f"{DOC_TITLE} · الإصدار {GUIDE_VERSION_AR}"
 XMP_DESCRIPTION = "عيّنة خط نجد: خمسة أوزان ثابتة، وألوان الموقع، وميزات خط الأنابيب كاملة بلا حقول كتابة"
 PDFUA = True

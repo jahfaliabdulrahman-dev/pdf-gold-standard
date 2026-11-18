@@ -357,7 +357,7 @@ def source_icons():
     """The nav icons as the source HTML draws them: one list of normalised masks per nav strip, left to right."""
     from PIL import Image
     strips = []
-    for nav in re.findall(r'<div class="nav">(.*?)</div>', source_text(), re.S):
+    for nav in re.findall(r'<div class="%s">(.*?)</div>' % re.escape(NS.NAV_CLASS), source_text(), re.S):
         row = []
         for svg in re.findall(r"<svg.*?</svg>", nav, re.S):
             svg = re.sub(r'stroke="#[0-9a-fA-F]+"', 'stroke="#000000"', svg)
