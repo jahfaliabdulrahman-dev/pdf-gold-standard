@@ -35,7 +35,7 @@ NA = object()
 # The suite this file carries. A spec declares how many of them APPLY to its document (GATE_MUTATIONS)
 # and names the ones that do not (GATE_NA); the difference is checked, so neither a deleted mutation nor
 # a silent skip can hide behind a stable number.
-SUITE_SIZE = 53
+SUITE_SIZE = 54
 
 
 class _NotApplicable(Exception):
@@ -611,6 +611,20 @@ def _rewrite_manifest(p, change):
     p.Root.AF = pikepdf.Array([s.obj for n, s in p.attachments.items()])
 
 
+def wrong_chrome_version(doc):
+    """The manifest names another Chrome: every ink and order number in this file was measured on the pin."""
+    def change(man):
+        v = str(man.get("chrome_version") or "")
+        if not v:
+            return None
+        man["chrome_version"] = ("0" if not v.startswith("0") else "1") + v[1:]
+        return man
+    try:
+        return _pikemutate(doc, lambda p: _rewrite_manifest(p, change))
+    except _NotApplicable:
+        return NA
+
+
 def missing_rendered_hash(doc):
     """The manifest lost the key the gate compares: a file bound to nothing must fail by name."""
     def change(man):
@@ -719,6 +733,7 @@ MUTATIONS = [
     (link_without_contents, "link-tagging", False),
     (paragraph_under_document, "tagged-structure", False),
     (pagination_body_text, "furniture-band", False),
+    (wrong_chrome_version, "chrome-version", False),
     (missing_rendered_hash, "provenance", False),
     (rendered_mismatch, "provenance", False),
     (print_copy_with_icons, "render", False),

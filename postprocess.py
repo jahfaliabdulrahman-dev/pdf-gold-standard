@@ -366,18 +366,23 @@ def feature_attachments(pdf, spec, ctx=None) -> None:
     import spec_loader
     NS = spec_loader.load()
     rendered_sha = (ctx or {}).get("rendered_sha")
+    chrome_version = (ctx or {}).get("chrome_version")
     declared = getattr(NS, "ATTACHMENT_FILES", None)
     if not declared:
         raise SystemExit("postprocess: the spec declares no ATTACHMENT_FILES — the file list is a contract, not a default")
     if not rendered_sha:
         raise SystemExit("postprocess: manifest.json needs the hash of the markup handed to Chrome; "
                          "none was passed to apply(rendered_sha=...)")
+    if not chrome_version:
+        raise SystemExit("postprocess: manifest.json needs the version of the binary that printed the file; "
+                         "none was passed to apply(chrome_version=...)")
     src_path = os.path.join(PROJ, NS.SOURCE_HTML)
     data = open(src_path, "rb").read()
     manifest = {
         "source": NS.SOURCE_HTML,
         "source_sha256": hashlib.sha256(data).hexdigest(),
         "rendered_sha256": rendered_sha,
+        "chrome_version": chrome_version,
         "guide_version": NS.GUIDE_VERSION,
         "pages": NS.PAGES,
     }
@@ -704,7 +709,7 @@ def normalise(pdf) -> None:
 
 
 def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
-          rendered_sha: str | None = None) -> list[str]:
+          rendered_sha: str | None = None, chrome_version: str | None = None) -> list[str]:
     """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order.
 
     `rendered_sha` is the hash of the markup this build handed to Chrome. The producer passes it; the
@@ -722,7 +727,7 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
             if name not in STAGE5:
                 raise SystemExit(f"postprocess: feature {name!r} is declared but has no implementation")
             # One signature for every feature; only `attachments` reads the build context.
-            STAGE5[name](pdf, f, {"rendered_sha": rendered_sha})
+            STAGE5[name](pdf, f, {"rendered_sha": rendered_sha, "chrome_version": chrome_version})
             applied.append(name)
         for k in ("/SourceFile", "/SourceSHA256"):
             if k in pdf.docinfo:
@@ -738,4 +743,5 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
 if __name__ == "__main__":
     import sys
     print(apply(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "web",
-                rendered_sha=sys.argv[4] if len(sys.argv) > 4 else None))
+                rendered_sha=sys.argv[4] if len(sys.argv) > 4 else None,
+                chrome_version=sys.argv[5] if len(sys.argv) > 5 else None))

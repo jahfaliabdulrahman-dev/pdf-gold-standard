@@ -18,6 +18,11 @@
 - **العدّادات**: ٣٦ فحصًا · ٥٣ طفرة (نسخة الطباعة ٤٥ بثمانية استثناءات بنيوية معلنة؛ نجد ٤٨ بخمسة).
   الطفرات الجديدة: `missing_rendered_hash` ⇒ `provenance` · `rendered_mismatch` ⇒ `provenance` ·
   `print_copy_with_icons` ⇒ `render` · `pagination_body_text` ⇒ `furniture-band`.
+- **المحرّك مثبّت ومعاير:** `chrome_pin.CHROME_VERSION = 157.0.8103.78` (Chrome for Testing). البناء يقرأ
+  `CHROME_PATH` وحده ويرفض أي إصدار آخر بالاسم (جُرِّب: غير المعرّف، وChrome النظامي 157.0.8103.80)، و`manifest.json`
+  يحمل `chrome_version`، والبوابة ترفض ملفًا بغير الإصدار المثبّت (`chrome-version` + طفرة `wrong_chrome_version`).
+  قياس الانتقال ‎.80 → .78‎: لم تتغيّر الأرقام — line-order 0.785/0.753/0.750/0.929، وأقصى فرق حبر ٠٫٠٠٠٢، والكلمات
+  داخل ±٢، وveraPDF/claim HELD في الأربعة.
 - **الحدّ المعلن:** لا شاهد محفوظ يثبت أن Chrome طبع الترميز المشتق حرفًا بحرف؛ الشاهد الباقي هو مخرج Chrome (الـPDF)
   وقياساته. ومن مسافة مقاسة: `line-order` صار أرضية معايَرة لكل مستند يكتبها `calibrate --write`
   (`max(0.75، المقيس − 0.02)`، ولا تنزل عن ٠٫٧٥): الدليل ٠٫٧٦٥ (مقيس ٠٫٧٨٥) · التقرير ٠٫٧٥٠ (٠٫٧٥٣) ·
@@ -134,7 +139,7 @@
    مهما كان نصّه. الآن `FURNITURE_BANDS` معلنة صراحة: `report_spec` `[(0, 60)]` (التذييل يطبع عند ٣٦٫٤ نقطة — مقيس)،
    و`nav_spec`/`najd_spec` `[]` (لا مقطع أثاث فيهما — مقيس). والمنتِج يرفض البناء باسمه إن وقع نصّ خارج النطاق،
    والبوابة تتحقق من الملف نفسه بفحص `furniture-band` (٣٦ فحصًا) عبر `pdfops.text_shows` — تتبّع `cm`/`q`/`Q` و`Tm`،
-   فالإحداثيات في الصفحة لا في فضاء Chrome الممتد. `report_print_spec` ترث النطاق عبر `import *` (حدّ البند B7).
+   فالإحداثيات في الصفحة لا في فضاء Chrome الممتد. `report_print_spec` تُعلن النطاق صراحةً (`FURNITURE_BANDS = _base.FURNITURE_BANDS`) — لا `import *` بعد B7.
    الطفرة `pagination_body_text` (كتلة `/Artifact /Pagination` في منتصف الصفحة) ⇒ `CAUGHT ['furniture-band']` في
    الأربعة، والمنتِج يُرى فاشلًا بـ`scripts/test_furniture_band.py` (نصّ عند y=400 ⇒ رفض بالاسم؛ y=36 ⇒ تغليف).
    التقرير: ٣٦ كتلة ترقيم على ١٢ صفحة، و٣٢٤ عرض نصّ كلها عند y=36.4 — الأمر: `python3 scripts/verify_pdf.py report.pdf | grep furniture-band`.
