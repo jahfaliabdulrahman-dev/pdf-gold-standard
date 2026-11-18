@@ -13,7 +13,7 @@ import sys
 import tomllib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from verapdf_json import guard  # noqa: E402  (a report that judged nothing is not a clean file)
+from verapdf_json import guard, failing_rules  # noqa: E402  (one reader; a report that judged nothing is not a clean file)
 
 PROJ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -32,33 +32,6 @@ def baseline_path() -> str:
 BASELINE = baseline_path()
 
 
-def failing_rules(path: str, flavour: str) -> set[str]:
-    r = subprocess.run(["verapdf", "--flavour", flavour, "--format", "json", path],
-                       capture_output=True, text=True, timeout=900)
-    # A crash is not a clean file: exit 1 is "violations found", anything else is the tool failing.
-    if r.returncode not in (0, 1):
-        raise SystemExit(f"verapdf {flavour}: exit {r.returncode} — the tool failed, not the document: {r.stderr[-300:]}")
-    if not r.stdout.strip():
-        raise SystemExit(f"verapdf {flavour}: empty JSON output (exit {r.returncode}): {r.stderr[-300:]}")
-    data = json.loads(r.stdout)
-    guard(data, flavour)
-    out = set()
-
-    def walk(o):
-        if isinstance(o, dict):
-            if o.get("ruleStatus") == "FAILED":
-                rid = o.get("ruleId") or o.get("clause")
-                if rid:   # keep bare ids too: PDF/UA identification is clause "5"
-                    out.add(str(rid))
-            for v in o.values():
-                walk(v)
-        elif isinstance(o, list):
-            for v in o:
-                walk(v)
-    walk(data)
-    return out
-
-
 if __name__ == "__main__":
     pdf = sys.argv[1] if len(sys.argv) > 1 else "out.pdf"
     base = tomllib.load(open(BASELINE, "rb"))
@@ -73,10 +46,17 @@ if __name__ == "__main__":
         raise SystemExit(1)
     bad = 0
     for f in flavours:
+        if f not in base:
+            raise SystemExit(f"verapdf: flavour «{f}» is not declared in {os.path.basename(BASELINE)} — "
+                             f"declared: {sorted(k for k in base if k in ('3b', '4', '4f', 'ua1'))}")
         want = set(base[f]["failing"])
         known = set(base.get("regressions", {}).get(f, {}).get("open", []))
         allowed_dead = set(base.get("fixed", {}).get(f, {}).get("rules", []))
-        both = want & allowed_dead
+        # `failing` is clause-testNumber (measured). `fixed.rules` and `regressions.open` stay at clause
+        # level: a rule that stopped failing cannot be re-measured to recover its test number, so those
+        # historical lists are compared by clause and say so in the baseline header.
+        clause = lambda k: k.split("-")[0]  # noqa: E731
+        both = {w for w in want if clause(w) in allowed_dead}
         if both:
             # A rule listed as a known failure AND as fixed is a hole: when it returns, the diff below
             # finds it in neither set and the gate passes. Refuse the table instead of trusting it.
@@ -85,10 +65,12 @@ if __name__ == "__main__":
             bad += 1
             continue
         got = failing_rules(pdf, f)
-        want -= allowed_dead
-        new, dead = got - want - known, want - got
-        returned = got & allowed_dead          # a rule recorded as fixed is failing again
-        open_reg = got & known
+        want -= {w for w in want if clause(w) in allowed_dead}
+        open_reg = {g for g in got if clause(g) in known}
+        new = {g for g in got if g not in want and clause(g) not in known
+               and clause(g) not in allowed_dead}
+        dead = want - got
+        returned = {g for g in got if clause(g) in allowed_dead and g not in want}  # a fixed clause failing again
         ok = not new and not dead and not returned and not open_reg
         print(("PASS " if ok else "FAIL ") + f"verapdf-{f} - {len(got)} failing rules "
               f"(baseline {len(want)}, as in {os.path.basename(BASELINE)})" + (f" · NEW {sorted(new)}" if new else "")
