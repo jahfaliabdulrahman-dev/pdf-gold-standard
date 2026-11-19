@@ -67,7 +67,7 @@ def feature_named_destinations(pdf, spec, ctx=None) -> None:
     pdf.Root.Names = pikepdf.Dictionary(Dests=pikepdf.Dictionary(Names=names))
 
 
-from pdfops import PAINT_OPS, TEXT_OPS, model_boundary, text_shows, outside_bands  # noqa: E402  (one definition, shared with the gate)
+from pdfops import PAINT_OPS, TEXT_OPS, MARK_CIDS_KEY, model_boundary, text_shows, outside_bands  # noqa: E402  (one definition, shared with the gate)
 
 
 def _wrap_untagged(instructions, bands=None, page_no=0):
@@ -538,12 +538,12 @@ def feature_bidi_space(pdf) -> None:
         for _key, font in (page.obj.get("/Resources", {}).get("/Font", {}) or {}).items():
             # The CIDs the text layer created for direction marks, published by it in `/PLMarkCids` (see
             # fix_text_layer.FontState.finish). A mark is a decision, not an accident: it is never renamed.
-            ours = {int(c) for c in (font.get("/PLMarkCids") or [])}
+            ours = {int(c) for c in (font.get(MARK_CIDS_KEY) or [])}
             # Consumed here, then removed: a house key is our bookkeeping, not the customer's document. It was
             # shipping inside the delivered font dict (measured on mon-negative-table.pdf), and an unregistered
             # private key does not belong in a PDF/A-3b file.
-            if "/PLMarkCids" in font:
-                del font["/PLMarkCids"]
+            if MARK_CIDS_KEY in font:
+                del font[MARK_CIDS_KEY]
 
             tu = font.get("/ToUnicode")
             if tu is None or font.objgen in seen:

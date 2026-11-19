@@ -73,11 +73,15 @@ def certify_command(a) -> int:
 
 def validate_command(a) -> int:
     from . import certificate
-    problems = certificate.validate(a.cert, a.pdf)
+    # `--recheck` re-measures the file (tier-1 readers + every structural check); without it, a certificate
+    # is checked against itself. The flag existed in the parser but was never passed here — a command that
+    # re-validates without re-measuring is not the control its name promises.
+    problems = certificate.validate(a.cert, a.pdf, do_recheck=getattr(a, "recheck", False))
     if problems:
         print("INVALID CERTIFICATE:\n  " + "\n  ".join(problems))
         return 1
-    print("CERTIFICATE VALID — schema, file sha256 and a recomputed verdict that agrees")
+    print("CERTIFICATE VALID — schema, file sha256 and a recomputed verdict that agrees"
+          + (" — and the file re-measured" if getattr(a, "recheck", False) else ""))
     return 0
 
 

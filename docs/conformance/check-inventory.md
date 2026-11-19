@@ -1,4 +1,4 @@
-# Check inventory — the 38 checks of `scripts/verify_pdf.py`
+# Check inventory — the 39 checks of `scripts/verify_pdf.py`
 
 Every check in `verify_pdf.py` carries a kind in `verify_pdf.CHECK_KIND`, and the kind is printed on its own
 line (`PASS pages [calibrated] - 12 (expected 12)`). A check with no kind is a **failure**, not a warning:
@@ -54,6 +54,12 @@ directions (no missing row, no extra row, no drifting name). Row count is derive
 | 37 | `page-words` | calibrated | `NS.PAGE_WORDS` per page + `NS.PAGE_WORDS_TOL`. |
 | 38 | `gate-claims` | calibrated | `NS.GATE_CHECKS`, `NS.GATE_MUTATIONS` as printed in this document. |
 | 39 | `private-keys` | generic | No `/PL*` key anywhere in the file: house bookkeeping is consumed by the stage after the one that wrote it and never ships. |
+
+**The same rule has a second gate.** `conformance/checks/structure.py` runs `private-keys` (generic) on any
+file — it is the gate that issues the certificate, and no PDF/A validator judges private data (PDF Association
+TechNote 0010, A009, puts Annex E outside ISO 19005). Both gates read `pdfops.private_keys`;
+`conformance/tests/test_private_keys.py` holds the reader (indirect dictionary · stream dictionary · direct
+dictionary · array · trailer) and `conformance/selftest.py` plants one key per site.
 
 ## Candidates to move into the public gate
 

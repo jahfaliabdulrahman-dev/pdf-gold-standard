@@ -599,7 +599,7 @@ def _parent_tree(pdf) -> dict:
     return table
 
 
-from pdfops import PAINT_OPS, artifact_shows, form_resolver, model_stats, outside_bands, props_of  # noqa: E402
+from pdfops import PAINT_OPS, artifact_shows, form_resolver, model_stats, outside_bands, private_keys, props_of  # noqa: E402
 from gate_policy import LINE_ORDER_FLOOR  # noqa: E402
 import chrome_pin  # noqa: E402  (the engine every number here was measured on)
 
@@ -1237,15 +1237,14 @@ def gate(doc) -> list[str]:
     try:
         xp = pikepdf_open(doc)
         try:
-            leaked = sorted({str(k) for obj in xp.objects if isinstance(obj, pikepdf.Dictionary)
-                             for k in obj.keys() if str(k).startswith("/PL")})
+            leaked = private_keys(xp)         # the same reader the certificate gate runs (pdfops)
         finally:
             xp.close()
     except GateInput:
         raise
     except Exception as exc:
         leaked = [f"cannot read the objects: {exc}"]
-    check("private-keys", not leaked, ", ".join(leaked[:6]) or "no /PL* key anywhere in the file")
+    check("private-keys", not leaked, ", ".join(leaked[:6]) or "no /PL* key in the object graph")
 
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).

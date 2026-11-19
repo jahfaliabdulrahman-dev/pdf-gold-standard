@@ -234,10 +234,15 @@ def recheck(pdf_path: str, cert: dict) -> list[str]:
     live_checks = structure.evaluate(pdf_path, case, {"postprocess": cert["producer"].get("postprocess")},
                                      run_verapdf=True)
     stored_checks = {c["id"]: c["status"] for c in cert["checks"]}
+    live_ids = {c["id"] for c in live_checks}
     for chk in live_checks:
         if stored_checks.get(chk["id"]) != chk["status"]:
             problems.append(f"check {chk['id']}: re-ran {chk['status']}, certificate says "
                             f"{stored_checks.get(chk['id'])}")
+    # Both directions: a check the certificate names but the gate no longer runs is a stale claim, not a
+    # match. (A renamed/removed id would otherwise keep its stored `pass` forever.)
+    for cid in sorted(set(stored_checks) - live_ids):
+        problems.append(f"check {cid}: the certificate names it and the gate no longer runs it — re-issue")
     if problems:
         return problems
     from . import ratchet
