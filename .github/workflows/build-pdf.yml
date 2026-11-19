@@ -161,6 +161,8 @@ jobs:
           python3 conformance/tests/test_limits.py
           python3 conformance/tests/test_certificate.py
           python3 conformance/tests/test_engine_behaviour.py
+          python3 conformance/tests/test_mcid_text.py
+          python3 conformance/tests/test_a3b_claim.py
 
       # The run's raw numbers are what a floors acceptance is made from: a version with no floors fails the
       # step above, and this artifact is the input to `conformance ratchet accept --from results.json`.
