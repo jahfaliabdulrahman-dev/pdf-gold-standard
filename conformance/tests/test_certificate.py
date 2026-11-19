@@ -10,6 +10,7 @@ Controls:
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -83,6 +84,21 @@ r = subprocess.run([sys.executable, "-m", "conformance", "validate", good, pdf],
 check("no-control-in-validate", r.returncode == 0 and "control script ran" not in (r.stderr + r.stdout),
       (r.stdout + r.stderr).strip().splitlines()[-1][:120])
 
+# --- 6 · a FAILING certificate, issued for a case whose text layer fails
+fail_pdf = os.path.join(tmp, "voc-full.pdf")
+chrome.render_case(corpus_cases.by_id(["voc-full"])[0], fail_pdf, "chrome")
+fail_cert = certificate.certify(fail_pdf, "voc-full", engine="chrome")
+fail_path = os.path.join(tmp, "fail.cert.json")
+with open(fail_path, "w", encoding="utf-8") as fh:
+    json.dump(fail_cert, fh, ensure_ascii=False, indent=1)
+problems = certificate.validate(fail_path, fail_pdf)
+check("failing-certificate-valid", not problems, "; ".join(problems[:2]) or
+      f"verdict {fail_cert['verdict']}: {fail_cert['verdict_detail'][:70]}")
+check("failing-verdict", fail_cert["verdict"] == "FAIL"
+      and ("failed checks" in fail_cert["verdict_detail"] or "pdfium exact 0" in fail_cert["verdict_detail"]),
+      fail_cert["verdict_detail"][:90])
+
+shutil.rmtree(tmp, ignore_errors=True)
 print(f"\nCHECKS IN CERTIFICATE: {len(cert['checks'])} · READERS: {len(cert['readers'])} · "
       f"TIER-1 UNAVAILABLE: {len(cert['tier1_unavailable'])}")
 if fails:

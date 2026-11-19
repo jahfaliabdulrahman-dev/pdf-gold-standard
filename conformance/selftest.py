@@ -15,10 +15,15 @@ counts as a catch.
 """
 import os
 import shutil
+import sys
 import tempfile
 
 import pikepdf
 import pymupdf
+
+REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if os.path.join(REPO, "scripts") not in sys.path:
+    sys.path.insert(0, os.path.join(REPO, "scripts"))
 
 
 class _NA(Exception):
@@ -133,10 +138,12 @@ def _swap_digits(instr, pdf):
         elif op in ("Tj", "TJ") and current in fonts:
             text = fonts[current].decode(_raw(ins.operands[0]))[0]
             if len(text) == 1 and text.isdigit():
-                digits.append(i)
-    for a, b in zip(digits, digits[1:]):
-        ta = fonts[current].decode(_raw(instr[a].operands[0]))[0]
-        tb = fonts[current].decode(_raw(instr[b].operands[0]))[0]
+                digits.append((i, current))       # the font at the run, not «whatever came last»
+    for (a, fa), (b, fb) in zip(digits, digits[1:]):
+        if fa != fb:
+            continue
+        ta = fonts[fa].decode(_raw(instr[a].operands[0]))[0]
+        tb = fonts[fb].decode(_raw(instr[b].operands[0]))[0]
         if ta != tb:
             _replace(instr, a, [pikepdf.String(_raw(instr[b].operands[0]))], instr[a].operator)
             _replace(instr, b, [pikepdf.String(_raw(instr[a].operands[0]))], instr[b].operator)
@@ -328,8 +335,11 @@ MUTATIONS = [
     ("presentation-form", "text", m_presentation_form,
      "check presentation-forms", lambda b, m: b["checks"]["presentation-forms"] == "pass"
      and m["checks"]["presentation-forms"] == "fail"),
+    # The witness must be something a VERDICT consumes: `tagged-text` fails because the mark replaces a space
+    # and glues two words (measured). A raw counter that no check reads caught nothing (review F2/S3).
     ("insert-U+200F", "text", m_insert_bidi,
-     "file direction marks", lambda b, m: m["file_bidi"] > b["file_bidi"]),
+     "check tagged-text", lambda b, m: b["checks"]["tagged-text"] == "pass"
+     and m["checks"]["tagged-text"] == "fail"),
     ("drop-lang", "struct", m_drop_lang,
      "check lang", lambda b, m: b["checks"]["lang"] == "pass" and m["checks"]["lang"] == "fail"),
     ("TH-to-TD", "struct", m_th_to_td,
@@ -363,8 +373,11 @@ def run(engine: str = "chrome") -> list[str]:
             try:
                 fn(src, dst)
             except _NA as exc:
-                print(f">>> {name:22s} N/A — {exc}")
+                # A declared mutation that cannot be planted is a MISS, not a skip: "N/A never counts as a
+                # catch" was in this file's prose while the code returned success on an all-N/A run (review F4).
+                print(f">>> {name:22s} MISSED — the mutation could not be planted: {exc}")
                 na.append(name)
+                missed.append(name)
                 continue
             got = _measure(dst, fixture)
             ok = assertion(baseline[fixture], got)
@@ -372,7 +385,7 @@ def run(engine: str = "chrome") -> list[str]:
             print(f">>> {name:22s} expect {witness:26s} -> {'CAUGHT' if ok else 'MISSED'}")
             if not ok:
                 missed.append(name)
-        print(f"\n{applied} mutations applied · {len(na)} declared n/a · {len(missed)} missed")
+        print(f"\n{applied} mutations applied · {len(na)} could not be planted · {len(missed)} missed")
         if missed:
             print(f"SELFTEST FAILED — not caught: {missed}")
         else:

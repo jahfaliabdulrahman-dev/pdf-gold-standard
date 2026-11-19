@@ -6,14 +6,21 @@ Everything on this page is implemented in `conformance/checks/metrics.py` and he
 ## `N(s)` — the one normalization
 
 ```
-NFC  →  drop direction controls  →  drop invisible format characters  →  collapse whitespace  →  trim
+NFC  →  drop direction controls  →  collapse whitespace  →  trim
 ```
+
+That is the assignment's definition and nothing else. An earlier version of this file also dropped
+U+200B/U+200C/U+200D/U+2060 because `fix_text_layer` inserts them on purpose — and the review was right that it
+flattered the pipeline: a character the producer put in the file is a character a copy-paste carries. The
+joiners are now **counted** (`zero_width`), the file-level check `invisible-format` names them, and they make
+`exact` fail. `head-h1-h3` has none; a vocalised case has several, and its certificate says so.
 
 - **Direction controls**: U+200E, U+200F, U+061C, U+202A–U+202E, U+2066–U+2069. They are not text; a reader
   that attaches them to a run has not read anything wrong. They are **counted** (`bidi`).
-- **Invisible format characters**: U+200B, U+200C, U+200D, U+2060. The pipeline inserts them on purpose —
-  `fix_text_layer` maps a drawn mark and a gap glyph to U+200B/U+2060, and its own comment says *«Preview,
-  PDFium, MuPDF and poppler paste the invisible U+2060 inside those words»*. They are counted (`zero_width`).
+- **Invisible format characters are NOT dropped**: U+200B, U+200C, U+200D, U+2060 stay in the comparison and
+  are counted (`zero_width`). `fix_text_layer` maps a drawn mark and a gap glyph to them on purpose (its own
+  comment: *«Preview, PDFium, MuPDF and poppler paste the invisible U+2060 inside those words»*) — which is
+  exactly why the gate must keep them: the trade is real, and the metric now prices it.
 - **Not** dropped: Arabic diacritics (that is `skeleton`, its own metric), tatweel U+0640 (an engine-added
   kashida is a difference), the digit script (٢٠٢٦ is not 2026), or anything about order.
 
@@ -47,7 +54,7 @@ still count. Counted per run with a `Counter`, not «does this string appear som
 | `pua` | U+E000–U+F8FF | private-use codes |
 | `replacement` | U+FFFD | a code the font map could not name |
 | `bidi` | direction controls **above the file's own count** | a reader that adds decorations, never the producer's deliberate LRM/RLM |
-| `zero_width` | U+200B/C/D, U+2060 above the truth's count | the producer's own joiners are visible as a number, not as a failure |
+| `zero_width` | U+200B/C/D, U+2060 above the truth's count | the producer's own joiners: counted, and the check `invisible-format` fails the file for them |
 | `tatweel_excess` | U+0640 above the truth's count | an engine that adds kashida the source does not carry |
 
 ## Measured engine behaviours this corpus found (2026-11-19)

@@ -30,11 +30,11 @@ def check(name, ok, detail):
 original = L.load
 L.load = lambda: [{"id": "fake-no-control", "reader": "mupdf", "metric": "digit_runs",
                    "pattern": "reversed_truth_run"}]
-ok, refused = L.usable("mupdf", "2.1", run_controls=False)
+ok, refused, _controls = L.usable("mupdf", "2.1")
 check("no-control-refused", not ok and any("fake-no-control" in r for r in refused), "; ".join(refused))
 L.load = lambda: [{"id": "fake-missing-script", "reader": "mupdf", "metric": "digit_runs",
                    "pattern": "reversed_truth_run", "control_script": "controls/nope.py"}]
-ok, refused = L.usable("mupdf", "2.1", run_controls=True)
+ok, refused, _controls = L.usable("mupdf", "2.1")
 check("missing-script-refused", not ok and any("does not exist" in r for r in refused), "; ".join(refused))
 L.load = original
 
@@ -60,13 +60,17 @@ check("digit:reversal-excused", a_rev["excused"] >= 1, f"excused {a_rev['excused
 check("digit:non-reversal-kept", a_bad["excused"] == 0, f"excused {a_bad['excused']} on a non-reversal")
 check("digit:intact-needs-nothing", res_ok["metrics"]["digit_runs"] == 1.0, "1.0 without a limit")
 
-bidi_limit = {"id": "b", "reader": "poppler", "metric": "defects.bidi", "pattern": "reader_bidi_decorations",
-              "reader_version_measured": "26.07.0"}
-decorated = "أ\nب\nج" + "\u202b" * 9
-res = {"metrics": {}, "defects": {"bidi": 9}}
-a = L.apply(bidi_limit, "أ\nب\nج", decorated, res, {"detail": {"per_line": 2}})
-check("bidi:capped-per-line", a["excused"] == 6 and res["defects"]["bidi"] == 3,
-      f"excused {a['excused']} of 9 at 2/line over 3 lines, {res['defects']['bidi']} left")
+# The real control's own output — a hand-written {"per_line": 2} hid a key-name bug once (review S1): the
+# control wrote `pdftotext_per_line`, the predicate read `per_line`, and the limit excused nothing.
+bidi_limit = next(l for l in L.load() if l["id"] == "poppler-bidi-decorations")
+real = L.run_control(bidi_limit)
+per_line = int(real["detail"]["per_line"])
+check("bidi:control-key", per_line >= 1, f"the control's detail carries per_line={per_line}")
+decorated = "أ\nب\nج" + "\u202b" * (per_line * 3 + 4)
+res = {"metrics": {}, "defects": {"bidi": per_line * 3 + 4}}
+a = L.apply(bidi_limit, "أ\nب\nج", decorated, res, real)
+check("bidi:capped-per-line", a["excused"] == per_line * 3 and res["defects"]["bidi"] == 4,
+      f"excused {a['excused']} of {per_line * 3 + 4} at {per_line}/line over 3 lines, {res['defects']['bidi']} left")
 
 print(f"\nDECLARED LIMITS: {len(L.load())}")
 if fails:

@@ -4,8 +4,8 @@
   "title": "PDF Gold Standard conformance certificate v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "file", "producer", "corpus", "tools", "claims", "checks", "readers",
-               "tier1_unavailable", "not_checked", "verdict", "verdict_detail"],
+  "required": ["schema_version", "file", "producer", "corpus", "ratchet_sha256", "tools", "claims", "checks",
+               "readers", "tier1_unavailable", "not_checked", "verdict", "verdict_detail"],
   "properties": {
     "schema_version": {"const": "certificate/1"},
     "file": {
@@ -37,6 +37,7 @@
         "cases": {"type": "integer", "minimum": 1}
       }
     },
+    "ratchet_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
     "tools": {
       "type": "object", "additionalProperties": false,
       "required": ["verapdf"],

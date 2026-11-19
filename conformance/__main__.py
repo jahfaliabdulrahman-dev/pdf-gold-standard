@@ -27,6 +27,8 @@ def main(argv=None) -> int:
     r.add_argument("--ratchet", action="store_true", help="compare the run to ratchet.json (exit 1 on a drop)")
     r.add_argument("--accept", action="store_true", help="record this run as the new floors (manual, per commit)")
     r.add_argument("--time-repeats", type=int, default=1, help="builds per case for the median time (E uses 3)")
+    r.add_argument("--no-structure", action="store_true",
+                   help="skip the structural checks and veraPDF (a quick text-metric run only)")
 
     c = sub.add_parser("certify", help="write a certificate for one file against one case")
     c.add_argument("pdf")

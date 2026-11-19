@@ -104,10 +104,10 @@ def certify(pdf_path: str, case_id: str, engine: str = "unknown") -> dict:
     floors = ratchet.load()
     for name in readings:
         version = readers_ok[name].version()
-        limits, refused = limitations.usable(name, version, run_controls=True)
+        limits, refused, controls = limitations.usable(name, version)
         result = metrics.measure(readings[name], structure._truth_text(case), file_bidi)
-        applied = [limitations.apply(lim, structure._truth_text(case), readings[name], result,
-                                     limitations.control_data(lim)) for lim in limits]
+        applied = [limitations.apply(lim, structure._truth_text(case), readings[name], result, control)
+                   for lim, control in zip(limits, controls)]
         floor = (floors.get(name) or {}).get("cases", {}).get(case_id)
         readers[name] = {
             "version": version,
@@ -127,6 +127,9 @@ def certify(pdf_path: str, case_id: str, engine: str = "unknown") -> dict:
                      "pipeline_commit": commit, "postprocess": bool(producer["postprocess"])},
         "corpus": {"case": case_id, "category": case["category"],
                    "manifest_sha256": _sha256(manifest.MANIFEST), "cases": manifest.derive()["total"]},
+        # The floors in force when this certificate was issued: a later --accept makes the record visible
+        # instead of silently re-judging an old certificate against new floors.
+        "ratchet_sha256": _sha256(ratchet.FILE) if os.path.exists(ratchet.FILE) else None,
         "tools": {"verapdf": _verapdf_version(), **{n: (readers_ok[n].version() if n in readers_ok else None)
                                                     for n in ("pdfium", "mupdf", "poppler", "pdfminer", "pdfkit")}},
         "claims": {"pdfua": "1", "pdfa": "3b"},

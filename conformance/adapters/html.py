@@ -51,7 +51,8 @@ def render(case: dict) -> str:
             head = "".join("<tr>" + "".join(f"<th>{esc(c)}</th>" for c in r) + "</tr>" for r in rows)
             body_rows = "".join("<tr>" + "".join(f"<td>{esc(c)}</td>" for c in r) + "</tr>"
                                 for r in block["rows"])
-            body.append(f"<table><thead>{head}</thead><tbody>{body_rows}</tbody></table>")
+            style = f' style="width: {esc(block["width"])}"' if block.get("width") else ""
+            body.append(f"<table{style}><thead>{head}</thead><tbody>{body_rows}</tbody></table>")
     return template(case, "\n".join(body))
 
 

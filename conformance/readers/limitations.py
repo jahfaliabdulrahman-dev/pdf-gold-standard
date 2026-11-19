@@ -70,21 +70,27 @@ def control_data(limit: dict) -> dict:
     return _CONTROL_CACHE[limit["id"]]
 
 
-def usable(reader_name: str, reader_version: str, *, run_controls: bool) -> tuple[list[dict], list[str]]:
-    """The limits that may be applied to `reader_name`, and the named refusals."""
-    ok, refused = [], []
+def usable(reader_name: str, reader_version: str) -> tuple[list[dict], list[str], list[dict]]:
+    """(limits to apply, named refusals, the control measurements they rest on).
+
+    The control runs HERE, once per limit, inside the try: a control that stopped reproducing is a named
+    refusal (`limitations_refused`), never an exception that escapes as a traceback. The version in the file is
+    the version the defect was measured on; when the installed reader differs, the control is re-run and its
+    verdict decides — the assignment's «upgrade ⇒ re-run the control» as code, not as a comment.
+    """
+    ok, refused, controls = [], [], []
     for limit in load():
         if limit.get("reader") != reader_name:
             continue
         try:
             if not limit.get("control_script"):
                 raise LimitRefused(f"{limit['id']}: no control_script — an unproven limit is an exemption")
-            if run_controls and reader_version != limit.get("reader_version_measured"):
-                control_data(limit)
+            control = control_data(limit)
             ok.append(limit)
+            controls.append(control)
         except LimitRefused as exc:
             refused.append(str(exc))
-    return ok, refused
+    return ok, refused, controls
 
 
 # ---------------------------------------------------------------- predicates

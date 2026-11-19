@@ -14,6 +14,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -51,7 +52,7 @@ os.chdir(%r)
 from conformance.adapters import chrome
 from conformance.corpus import cases
 case = cases.load(os.path.join(%r, "conformance/corpus/cases/head-h1-h3.json"))
-chrome.render_case(case, "/tmp/isolation-probe.pdf", "chrome")
+chrome.render_case(case, os.path.join(tempfile.mkdtemp(prefix="isolation-"), "probe.pdf"), "chrome")
 bad = [m for m in %r if m in sys.modules]
 print(json.dumps({"loaded": bad, "modules": len(sys.modules)}))
 ''' % (REPO, REPO, REPO, FORBIDDEN)

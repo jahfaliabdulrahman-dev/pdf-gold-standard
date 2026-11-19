@@ -52,6 +52,11 @@ that is the claim; the certificate says whether it holds.
 Versions are printed in every result and in every certificate. A reader that cannot run is `n/a` **with its
 reason**; it never prints `PASS`.
 
+One reader is **OS-versioned**: PDFKit ships with macOS, so its version is the runner image, not a pin. The
+ratchet records it and skips the floor comparison for PDFKit when the version differs (a note, not a silent
+pass), while every other reader — pdfium, mupdf, pdfminer from pip, poppler checked by version — is gated. A
+reader that disappears from a run is a **failure**, never a skip.
+
 ## The declared limits
 
 `conformance/readers/limitations.json`. A limit is applied only when its control reproduces the defect on the
@@ -60,7 +65,7 @@ installed version — and each one excuses a narrow, named slice:
 | id | reader | excuses | control |
 |---|---|---|---|
 | `mupdf-ar-digit-reversal` | MuPDF | the deficit of a digit run whose exact reverse is present | `controls/mupdf_digits.py` — MuPDF writes the file, MuPDF misreads it, PDFium reads it right |
-| `poppler-bidi-decorations` | poppler | direction controls up to the measured per-line count | `controls/poppler_bidi.py` — Chrome-raw file, pdftotext adds 4 per line, PDFium adds 0 |
+| `poppler-bidi-decorations` | poppler | direction controls up to the measured per-line count | `controls/poppler_bidi.py` — a **PyMuPDF**-written file (not our pipeline, not the engine under test), pdftotext adds 4 per line, PDFium adds 0 |
 
 A limit with no control script, or whose control no longer reproduces, is **refused by name**
 (`tests/test_limits.py` proves both refusals). `validate` never runs a control: a certificate must be checkable
@@ -100,6 +105,10 @@ commit message, and a category at its floor cannot lose one (`conformance/corpus
 
 The corpus is refused before any build when 1 or 2 fails. A measurement of the wrong corpus is worse than no
 measurement.
+
+Step 3 also runs the **structural checks** and veraPDF (one batch per flavour over all 54 files) unless
+`--no-structure` is passed, so a corpus run reports, per check id, how many cases pass and which cases are not
+clean — the number Path E needs.
 
 ## The ratchet
 
