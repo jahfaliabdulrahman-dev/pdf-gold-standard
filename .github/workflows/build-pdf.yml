@@ -92,6 +92,10 @@ jobs:
           PDF_SPEC=report_spec python3 scripts/claim_probe.py report.pdf --check
           # the producer's furniture guard, seen failing: an unmarked body run must stop the build
           PDF_SPEC=report_spec python3 scripts/test_furniture_band.py report.pdf
+          # first: every test file in the repository is named by this workflow, or excused with a reason
+          python3 scripts/test_ci_wiring.py
+          # the space repair is decided by a published name, not by counting draws (no engine, two pages)
+          python3 scripts/test_bidi_space.py
           python3 scripts/test_verapdf_json_guard.py
           python3 scripts/test_verapdf_test_granularity.py
           python3 scripts/test_digit_value.py

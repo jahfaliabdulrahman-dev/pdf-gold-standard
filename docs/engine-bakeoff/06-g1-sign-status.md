@@ -64,6 +64,22 @@ Tried and measured, all equal or worse: no isolation (sign ends on the right, PD
 with no element (PDFium 0). The next lever is the layer's run assembly for a paragraph containing an isolated
 amount — merging the fragments back into one text object — a different change from this one, not attempted here.
 
+## Round 2 — the review's three items, each closed with a measurement
+
+| # | item | what was done | proof |
+|---|---|---|---|
+| P2 | `/PLMarkCids` shipped inside the delivered font | `postprocess` consumes it and **deletes** it; `scripts/g1_audit.py` reads every object of every produced file | `files 68 · Type0 fonts 155 · house keys 0`; a new gate check `private-keys` (generic) + mutation `private-key-leak` ⇒ **CAUGHT** in all four suites (63/63 · 63/63 · 55/55 · 58/58) |
+| P2 | `test_bidi_space.py` outside CI — third time this defect | `scripts/test_ci_wiring.py`: every `test_*.py` must be named in `build-pdf.yml` or excused with a reason, and the checker must flag a fabricated unwired test | `18 test file(s) · 18 wired · 0 exempt`; it caught exactly the two unwired files before they were wired |
+| P3 | the fallback changed silently (a font with no readable widths is no longer repaired) | the named-space branch is back (`space_gid` from the face's own cmap) before the width rule, and fonts no rule can judge are **counted** and printed | `unjudgeable fonts 0` over 68 files · 155 Type0 fonts |
+
+**A fourth defect, found by the check above:** the printed check count was typed as `٣٨` in three sources, so the
+document printed a number its own gate then failed on (`gate-claims: printed 38 vs actual 39`). It is now
+`{{CHECKS_CLAIM}}`, derived from `spec.GATE_CHECKS` the same way `{{MUTATIONS_CLAIM}}` already was — the number is
+printed once, from one source.
+
+**The whole suite after these changes:** build + verify + selftest + veraPDF + claim + inventory + constructs on
+all four documents, `test_vocalised`, and the 60-case corpus — **rose 2 · fell 0 · RATCHET HELD**, no floor edited.
+
 ## ما لم يُثبت
 
 - That the separate-show mark works for a signed amount that is the **first** thing on a line with no following

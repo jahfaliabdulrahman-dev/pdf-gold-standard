@@ -100,6 +100,13 @@ def rendered_markup(spec, source_html: str, proj: str | None = None) -> str:
         if not hasattr(spec, "LINKS_CLAIM"):
             raise ValueError("the source prints {{LINKS_CLAIM}} but the spec declares no LINKS_CLAIM")
         html = html.replace("{{LINKS_CLAIM}}", spec.LINKS_CLAIM)
+    if "{{CHECKS_CLAIM}}" in html:
+        # The check count is a claim about THIS variant too: the print copy declares eight fewer applicable
+        # mutations but the SAME checks. It was typed as ٣٨ in three sources and went stale the moment a check
+        # was added — the document then printed a number its own gate failed on. Derived from the spec.
+        if not hasattr(spec, "GATE_CHECKS"):
+            raise ValueError("the source prints {{CHECKS_CLAIM}} but the spec declares no GATE_CHECKS")
+        html = html.replace("{{CHECKS_CLAIM}}", arabic_digits(spec.GATE_CHECKS))
     if "{{MUTATIONS_CLAIM}}" in html:
         # The mutation count is a claim about THIS variant: a print copy carries fewer applicable
         # mutations, and the printed number must be its own. Derived from the spec, never typed twice.
