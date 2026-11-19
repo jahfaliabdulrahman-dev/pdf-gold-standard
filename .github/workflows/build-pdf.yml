@@ -22,9 +22,10 @@ jobs:
       # The baselines were measured on this validator. Homebrew ships whatever is current, so the pin is
       # enforced where it matters — at use, by name (the same choice as Chrome).
       VERAPDF_VERSION: "1.30.0"
-      # poppler ships from brew with no version switch; the check below refuses the wrong one by name, the
-      # same discipline as veraPDF (its bidi decoration count is what the limit is measured on).
-      POPPLER_VERSION: "26.07.0"
+      # poppler is pinned to an exact conda-forge build, not to whatever brew has today: a reader's floors are
+      # recorded per version, so an unpinned source turns every upstream bump into a red main. The version below
+      # is the one whose floors the ratchet holds, and the step refuses any other by name.
+      POPPLER_VERSION: "26.11.0"
     steps:
       - uses: actions/checkout@v5
 
@@ -121,31 +122,55 @@ jobs:
       - name: Vocalised paragraphs — raw Chrome output must fail, the rebuilt text layer must copy exactly
         run: python3 scripts/test_vocalised.py
 
+      - name: poppler, pinned to an exact conda-forge build
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: pinned
+          create-args: >-
+            poppler=${{ env.POPPLER_VERSION }}
+
       - name: Conformance gate — the public corpus, every declared reader, the ratchet, and the mutations
         id: conformance
         run: |
-          # The declared readers must be pinned readers: poppler comes from brew and is recorded in the
-          # ratchet by version, so a brew bump is a decision (the same discipline as Chrome and veraPDF).
-          brew install poppler
-          got="$(pdftotext -v 2>&1 | sed -n 's/.*pdftotext version \([^ ]*\).*/\1/p' | head -1)"
+          # poppler comes from conda-forge at an EXACT version: brew ships whatever is current, and every bump
+          # would turn main red (it did — 26.10.0 → 26.11.0 between two runs an hour apart). Same source, same
+          # version, locally and here, so the floors mean one thing.
+          # The binary is resolved from the pinned env, not from PATH: the runner image also carries Homebrew's
+          # poppler, and PATH order is not a contract.
+          pdftext="$(micromamba run -n pinned sh -c 'command -v pdftotext')"
+          # `export`, not $GITHUB_ENV: the latter applies to LATER steps only, and this run happens in this one
+          # (measured the hard way — the gate failed with "poppler: floors recorded but the reader did not run").
+          export CONFORMANCE_PDFTOTEXT="$pdftext"
+          echo "CONFORMANCE_PDFTOTEXT=$pdftext" >> "$GITHUB_ENV"
+          got="$("$pdftext" -v 2>&1 | sed -n 's/.*pdftotext version \([^ ]*\).*/\1/p' | head -1)"
           if [ "$got" != "$POPPLER_VERSION" ]; then
-            # poppler is brew-supplied and has no version switch: the ratchet records it as UNPINNED and skips
-            # its floors with a note (the run prints that note). What still holds on this machine is the
-            # limit's control, which every run re-executes — so the version is recorded, not pretended.
-            echo "::warning::poppler $got (floors measured on $POPPLER_VERSION) — floors not compared; the control is re-run"
+            echo "::error::poppler $got, pinned $POPPLER_VERSION — the floors belong to the pinned build"
+            exit 1
           fi
+          echo "poppler $got (pinned)"
           python3 -m conformance.adapters.fetch_fonts
           # Refuses a stale manifest or a category below its floor BEFORE building anything.
           python3 -m conformance manifest --check
           python3 -m conformance run --engine chrome --out /tmp/conf --ratchet
           python3 -m conformance selftest
           python3 scripts/test_check_kinds.py
-          # the guards of the corpus, the metrics, the isolation and the limits — each can fail
+          # the guards of the corpus, the metrics, the isolation, the limits, the engine-behaviour claims
           python3 conformance/tests/test_corpus.py
           python3 conformance/tests/test_metrics.py
           python3 conformance/tests/test_isolation.py
           python3 conformance/tests/test_limits.py
           python3 conformance/tests/test_certificate.py
+          python3 conformance/tests/test_engine_behaviour.py
+
+      # The run's raw numbers are what a floors acceptance is made from: a version with no floors fails the
+      # step above, and this artifact is the input to `conformance ratchet accept --from results.json`.
+      - name: Upload the conformance run
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: conformance-results
+          path: /tmp/conf/results.json
+          if-no-files-found: warn
 
       - name: Upload partial on failure (for inspection)
         if: failure()

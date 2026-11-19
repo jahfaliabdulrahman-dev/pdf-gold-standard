@@ -227,6 +227,23 @@ def write(results: dict, outdir: str) -> tuple[str, str]:
             for cid, v in c["per_check"].items():
                 fh.write(f"| {cid} | {v['pass']} | {v['fail']} | {v['na']} |\n")
             fh.write("\n")
+        # A limit that was refused excuses nothing, which SHIFTS the numbers upward. It must be visible here:
+        # a silently-withheld limit reads as a reader that got worse (it happened: the control lost its binary
+        # on the CI runner and poppler's defects jumped from 0 to 20 with no explanation in the summary).
+        refused, applied = set(), {}
+        for c in results["cases"]:
+            for name, r in c["per_reader"].items():
+                for why in r.get("limitations_refused") or []:
+                    refused.add(f"{name}: {why}")
+                for a in r.get("limitations_applied") or []:
+                    applied.setdefault(a["id"], set()).add(a["detail"])
+        if refused or applied:
+            fh.write("## reader limits\n\n")
+            for lid, details in sorted(applied.items()):
+                fh.write(f"- applied `{lid}` — {sorted(details)[0]}\n")
+            for why in sorted(refused):
+                fh.write(f"- **REFUSED** {why}\n")
+            fh.write("\n")
         misses = [(c["id"], n) for c in results["cases"] for n, r in c["per_reader"].items()
                   if r["metrics"]["exact"] != 1.0]
         fh.write("## not exact, by case\n\n")

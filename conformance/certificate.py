@@ -108,7 +108,8 @@ def certify(pdf_path: str, case_id: str, engine: str = "unknown") -> dict:
         result = metrics.measure(readings[name], structure._truth_text(case), file_bidi)
         applied = [limitations.apply(lim, structure._truth_text(case), readings[name], result, control)
                    for lim, control in zip(limits, controls)]
-        floor = (floors.get(name) or {}).get("cases", {}).get(case_id)
+        floor = (((floors.get(name) or {}).get("floors") or {}).get(version) or {}).get(
+            "cases", {}).get(case_id)
         readers[name] = {
             "version": version,
             **result["metrics"],
@@ -175,7 +176,9 @@ def decide(checks: list[dict], readers: dict, unavailable: list[dict], floors: d
         return "FAIL", "pdfkit exact 0 (tier-1)"
     low = []
     for name, block in readers.items():
-        floor = (floors.get(name) or {}).get("cases", {}).get(case_id)
+        # The floor of THIS reader's version: a certificate is judged against the floors its own tools imply.
+        floor = ((((floors.get(name) or {}).get("floors") or {}).get(block.get("version")) or {})
+                 .get("cases", {}).get(case_id))
         if floor is None:
             continue
         for metric in ("exact", "word_f1", "order", "digit_runs", "skeleton_exact"):
@@ -188,7 +191,63 @@ def decide(checks: list[dict], readers: dict, unavailable: list[dict], floors: d
     return "PASS", "PASS (both tier-1 readers exact, every check passed)"
 
 
-def validate(cert_path: str, pdf_path: str) -> list[str]:
+def recheck(pdf_path: str, cert: dict) -> list[str]:
+    """Re-measure the file and compare with what the certificate claims. A forged reading has no place to hide.
+
+    This is the answer to the one hole the review would not let stand as a declared limit: a certificate is
+    unsigned JSON, so `readers` could be edited. Re-extracting with the tier-1 readers and re-running the
+    structural checks costs seconds for one file and needs no trust in the file being checked. What it cannot
+    do is prove the *producer* — that is what the pipeline commit and the markup hash are for.
+    """
+    from .checks import metrics, structure
+    from .corpus import cases as corpus_cases
+    from .readers import available, text_many, version_of
+    problems = []
+    case_id = cert["corpus"]["case"]
+    case = next((c for c in corpus_cases.load_all() if c["id"] == case_id), None)
+    if case is None:
+        return [f"the case {case_id!r} named in the certificate is not in this corpus"]
+    ok, _missing = available()
+    names = [n for n in ("pdfium", "pdfkit") if n in ok]
+    readings = {n: text_many(n, [pdf_path])[0] for n in names}
+    versions = {n: version_of(n) for n in names}
+    file_bidi = metrics.bidi_count("\n".join(structure.mcid_text.scan(pdf_path)["text"].values()))
+    for name, reading in readings.items():
+        live = metrics.measure(reading, structure._truth_text(case), file_bidi)
+        stored = cert["readers"].get(name)
+        if stored is None:
+            problems.append(f"{name}: the file was re-read but the certificate has no block for it")
+            continue
+        for metric in ("exact", "word_f1", "order", "digit_runs", "skeleton_exact"):
+            if abs(float(live["metrics"][metric]) - float(stored[metric])) > 1e-9:
+                problems.append(f"{name}.{metric}: re-read {live['metrics'][metric]:.4f} but the certificate "
+                                f"says {stored[metric]:.4f}")
+        for kind, n in live["defects"].items():
+            if int(n) != int(stored.get("defects", {}).get(kind, 0)):
+                problems.append(f"{name}.defect {kind}: re-read {n}, certificate says "
+                                f"{stored.get('defects', {}).get(kind, 0)}")
+        if versions.get(name) and stored.get("version") != versions[name]:
+            problems.append(f"{name}: the installed reader is {versions[name]}, the certificate names "
+                            f"{stored.get('version')} — re-issue it")
+    live_checks = structure.evaluate(pdf_path, case, {"postprocess": cert["producer"].get("postprocess")},
+                                     run_verapdf=True)
+    stored_checks = {c["id"]: c["status"] for c in cert["checks"]}
+    for chk in live_checks:
+        if stored_checks.get(chk["id"]) != chk["status"]:
+            problems.append(f"check {chk['id']}: re-ran {chk['status']}, certificate says "
+                            f"{stored_checks.get(chk['id'])}")
+    if problems:
+        return problems
+    from . import ratchet
+    verdict, detail = decide(live_checks, {k: cert["readers"][k] for k in readings},
+                             cert["tier1_unavailable"], ratchet.load(), case_id)
+    if verdict != cert["verdict"]:
+        problems.append(f"verdict {cert['verdict']} does not follow from the re-measured file "
+                        f"(recomputed {verdict}: {detail})")
+    return problems
+
+
+def validate(cert_path: str, pdf_path: str, do_recheck: bool = False) -> list[str]:
     """[] means valid. Every refusal names its reason — schema, file hash, verdict, or a limit's evidence."""
     import jsonschema
     try:
@@ -216,6 +275,8 @@ def validate(cert_path: str, pdf_path: str) -> list[str]:
     if verdict != cert["verdict"]:
         problems.append(f"verdict {cert['verdict']} does not follow from the checks and readers (recomputed "
                         f"{verdict}: {detail})")
+    if do_recheck:
+        problems.extend(recheck(pdf_path, cert))
     # A limit must name an evidence-carrying entry for this reader, at the version the control was measured on.
     from .readers import limitations
     known = {lim["id"]: lim for lim in limitations.load()}

@@ -30,6 +30,30 @@ def run_command(a) -> int:
     return 0
 
 
+def ratchet_command(a) -> int:
+    """`accept --from results.json` / `check --from results.json` — the CI loop, on a saved run."""
+    import json
+
+    from . import ratchet
+    with open(a.source, encoding="utf-8") as fh:
+        results = json.load(fh)
+    path = a.path or ratchet.FILE
+    if a.action == "accept":
+        ratchet.accept(results, path)
+        print(f"RATCHET ACCEPTED — {path}")
+        return 0
+    bad, notes = ratchet.check(results, path)
+    for note in notes:
+        print(f"note: {note}")
+    if bad:
+        print("RATCHET FAILED:")
+        for b in bad:
+            print(f"  {b}")
+        return 1
+    print("RATCHET HELD — no reader, case or metric below the floor of its version")
+    return 0
+
+
 def certify_command(a) -> int:
     from . import certificate
     from .corpus.cases import CaseError

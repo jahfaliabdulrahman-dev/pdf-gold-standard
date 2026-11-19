@@ -43,7 +43,15 @@ json.dump(cert, open(good, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 problems = certificate.validate(good, pdf)
 check("valid-certificate", not problems, "; ".join(problems[:3]) or f"verdict {cert['verdict']} accepted")
-check("verdict-is-pass", cert["verdict"] == "PASS", f"{cert['verdict']} — {cert['verdict_detail'][:80]}")
+# The verdict must FOLLOW from the readings, not from the machine's luck: PDFKit is tier-1 and its behaviour
+# differs across macOS versions (measured: exact 1.0 on 27.2, 0.0 on the CI image's 15.8.2 for the same file),
+# so demanding PASS here would assert the runner's PDFKit instead of the rule. The rule itself stays pinned by
+# `flipped-verdict-refused` and by the failing certificate below.
+tier1 = [cert["readers"][r]["exact"] for r in ("pdfium", "pdfkit") if r in cert["readers"]]
+failed_checks = [c["id"] for c in cert["checks"] if c["status"] == "fail"]
+expected = "PASS" if tier1 and min(tier1) == 1.0 and not failed_checks else "FAIL"
+check("verdict-follows-readings", cert["verdict"] == expected,
+      f"{cert['verdict']} with tier-1 exact {tier1} and failed checks {failed_checks}")
 
 # --- 2 · wrong sha ----------------------------------------------------------
 bad = json.loads(json.dumps(cert))
@@ -97,6 +105,31 @@ check("failing-certificate-valid", not problems, "; ".join(problems[:2]) or
 check("failing-verdict", fail_cert["verdict"] == "FAIL"
       and ("failed checks" in fail_cert["verdict_detail"] or "pdfium exact 0" in fail_cert["verdict_detail"]),
       fail_cert["verdict_detail"][:90])
+
+# --- 7 · --recheck: a forged reading has no place to hide --------------------
+# The one hole the first report declared as a limit instead of fixing: the certificate is unsigned JSON, so
+# `readers` could be edited to claim a PASS. Re-extracting with the tier-1 readers costs seconds for one file.
+clean = certificate.validate(fail_path, fail_pdf, do_recheck=True)
+check("recheck:honest-certificate", not clean, "; ".join(clean[:2]) or "re-measured and agrees")
+
+forged_up = json.loads(json.dumps(fail_cert))          # the dangerous direction: make a FAIL look like PASS
+for r in ("pdfium", "pdfkit"):
+    if r in forged_up["readers"]:
+        forged_up["readers"][r]["exact"] = 1.0
+forged_up["verdict"] = "PASS"
+forged_up["verdict_detail"] = "PASS (both tier-1 readers exact, every check passed)"
+for path, payload in ((os.path.join(tmp, "forged-up.json"), forged_up),):
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=1)
+    problems = certificate.validate(path, fail_pdf, do_recheck=True)
+    check("recheck:forged-pass-refused", any("re-read" in p for p in problems), "; ".join(problems[:2]))
+
+forged_down = json.loads(json.dumps(cert))
+forged_down["readers"]["pdfium"]["exact"] = 0.0
+with open(os.path.join(tmp, "forged-down.json"), "w", encoding="utf-8") as fh:
+    json.dump(forged_down, fh, ensure_ascii=False, indent=1)
+problems = certificate.validate(os.path.join(tmp, "forged-down.json"), pdf, do_recheck=True)
+check("recheck:forged-fail-refused", any("exact" in p for p in problems), "; ".join(problems[:2]))
 
 shutil.rmtree(tmp, ignore_errors=True)
 print(f"\nCHECKS IN CERTIFICATE: {len(cert['checks'])} · READERS: {len(cert['readers'])} · "

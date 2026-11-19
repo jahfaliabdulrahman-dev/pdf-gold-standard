@@ -1,13 +1,14 @@
 {
-  "id": "tbl-explicit-width",
+  "id": "tbl-plain-fragment",
   "category": "tables",
   "lang": "ar",
   "font": "plex",
+  "plain": true,
   "blocks": [
     {
       "type": "heading",
       "level": 1,
-      "text": "جدول بعرض صريح"
+      "text": "جدول بلا صفحة معلنة"
     },
     {
       "type": "table",
@@ -28,5 +29,5 @@
       ]
     }
   ],
-  "note": "width:100% — the shape that makes Chrome paint a table as one run and PDFium reverse its rows (measured); kept as a case so the corpus measures the defect instead of avoiding it"
+  "note": "the bare fragment a customer hands over: no @page, no line-height, no body reset — the shape that collapses a 100% table into one run (measured conjunction)"
 }
