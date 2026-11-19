@@ -36,6 +36,55 @@ BIDI = re.compile("[\u200e\u200f\u202a-\u202e\u2066-\u2069\u061c\u0640\u2060]") 
 MARKS = re.compile("[\u064b-\u0652\u0653-\u0655\u0670]")
 WORD = re.compile(r"[\u0621-\u064a\u0671]+|[\u0660-\u0669]+|[A-Za-z][A-Za-z0-9.]*")
 
+# What kind of claim each check makes (Path C, C0). This gate is excellent for the documents it was
+# calibrated on and blind to any document it has not seen; the split is the whole point of the public
+# conformance gate (`conformance/`), and it has to be visible where the check lives, not only in a doc.
+#   generic     = reads no constant of a document's spec (no expected ink, footer value, slot position,
+#                 link/field count, calibrated floor). It would hold on a file this repo never saw.
+#   calibrated  = reads at least one such constant, so its verdict is about THIS document. A check that
+#                 mixes both is calibrated, and its generic part is named in docs/conformance/check-inventory.md
+#                 as a candidate to move.
+# A check with no entry here FAILS the gate (see make_checker): a new check cannot enter without a kind.
+CHECK_KIND = {
+    "gate-count": "generic", "pages": "calibrated", "single-page": "generic",
+    "rtl-direction": "generic", "nav-buttons": "calibrated", "render": "calibrated",
+    "page-images": "calibrated", "page-ink": "calibrated", "outline": "calibrated",
+    "contents-links": "calibrated", "contents-numbers": "calibrated", "footer-numbers": "calibrated",
+    "page-labels": "calibrated", "named-destinations": "calibrated", "xmp": "calibrated",
+    "output-intent": "generic", "attachments": "calibrated", "art-dpi": "calibrated",
+    "pdfua": "calibrated", "acroform": "calibrated", "link-tagging": "calibrated",
+    "ref-links": "calibrated", "fonts": "calibrated", "title": "calibrated",
+    "version-consistency": "calibrated", "provenance": "calibrated", "chrome-version": "generic",
+    "tagged-structure": "generic", "no-blank-pages": "calibrated", "tagged": "calibrated",
+    "furniture-band": "calibrated", "pdf-model": "generic", "text-layer": "generic",
+    "copy-fidelity": "calibrated", "line-order": "calibrated", "vocalised": "calibrated",
+    "page-words": "calibrated", "gate-claims": "calibrated",
+}
+
+
+def make_checker(kinds=None):
+    """(check, fails, ran) — the one place a check is printed, counted and kinded.
+
+    Module level so the guard can be proven: a check name with no kind is a FAILURE even when the
+    comparison it carries is true (a passing check with no declared kind is still an undeclared claim).
+    """
+    kinds = CHECK_KIND if kinds is None else kinds
+    fails: list[str] = []               # local: two gates may run in one process
+    ran: list[str] = []
+
+    def check(name: str, ok: bool, detail: str) -> None:
+        kind = kinds.get(name)
+        ran.append(name)
+        if kind is None:
+            print("FAIL " + name + " - no CHECK_KIND declared for this check (every check names its kind)")
+            fails.append(name)
+            return
+        print(("PASS " if ok else "FAIL ") + name + " [" + kind + "] - " + detail)
+        if not ok:
+            fails.append(name)
+
+    return check, fails, ran
+
 
 def source_words(text: str) -> list[str]:
     """Tokens of a text, with the normalisation copy-fidelity and page-words share."""
@@ -774,14 +823,7 @@ def link_tagging_problems(pdf) -> list[str]:
 
 
 def gate(doc) -> list[str]:
-    fails: list[str] = []               # local: two gates may run in one process
-    ran: list[str] = []
-
-    def check(name: str, ok: bool, detail: str) -> None:
-        print(("PASS " if ok else "FAIL ") + name + " - " + detail)
-        ran.append(name)
-        if not ok:
-            fails.append(name)
+    check, fails, ran = make_checker()
 
     def final_count() -> None:
         # The gate counts its own checks against the declared number, so adding a check without updating
