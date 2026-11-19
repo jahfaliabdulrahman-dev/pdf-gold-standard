@@ -227,7 +227,17 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         # FAIL, never a pass by default.
         try:
             keys = pdfops.private_keys(pdf)
-            add("private-keys", not keys, ", ".join(keys[:6]) or "no /PL* key anywhere in the file")
+            if honour_second_file and (producer or {}).get("a3b_path"):
+                # A bake-off may judge the A-3b claim on a second file; the key rule follows the claim.
+                # An undeclared or missing second file is refused by the veraPDF check below, by name.
+                try:
+                    second = a3b_target(producer, pdf_path)
+                except ValueError:
+                    second = None
+                if second and os.path.realpath(second) != os.path.realpath(pdf_path):
+                    with pikepdf.open(second) as second_pdf:
+                        keys += [f"{os.path.basename(second)}: {k}" for k in pdfops.private_keys(second_pdf)]
+            add("private-keys", not keys, ", ".join(keys[:6]) or "no /PL* key in the object graph")
         except Exception as exc:
             add("private-keys", False, f"cannot read the objects: {exc}")
 
@@ -236,6 +246,8 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         except ValueError as exc:
             add("tagged", False, str(exc))
             tree = None
+        else:
+            add("tagged", True, "structure tree present and readable")
         nodes = list(tree.walk()) if tree is not None else []
 
         # --- every character is tagged (no text outside any MCID) -----------------------------------
@@ -349,6 +361,13 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         add("outline", ok_toc, f"{len(toc)} entr(y/ies)" + ("" if ok_toc else
             f" — the case declares {[(l, t[:16]) for l, t in want_toc]}"))
 
+        # --- the declared model, read from the same open file (one parse per certificate) ------------
+        if producer.get("postprocess"):
+            problems = pdfops.model_boundary(pdf)
+            add("model-boundary", not problems, "; ".join(problems[:3]) or "inside the declared model")
+        else:
+            add("model-boundary", None, "n/a — our post-processing did not run, and the boundary is its guard")
+
     if run_verapdf:
         # A CERTIFICATE judges the file it names: `certificate.py` passes honour_second_file=False, so the A-3b
         # claim can never be satisfied by a different document than the certified one.
@@ -363,12 +382,6 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             add(cid, not fails, "no failing rule" if not fails else
                 f"{len(fails)} failing rule(s): " + ", ".join(k for k, _ in fails[:6]))
 
-    if producer.get("postprocess"):
-        with pikepdf.open(pdf_path) as pdf:
-            problems = pdfops.model_boundary(pdf)
-        add("model-boundary", not problems, "; ".join(problems[:3]) or "inside the declared model")
-    else:
-        add("model-boundary", None, "n/a — our post-processing did not run, and the boundary is its guard")
     return checks
 
 

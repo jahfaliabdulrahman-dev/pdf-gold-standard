@@ -44,11 +44,11 @@ def read(reader: str, path: str) -> str:
     return text_many(reader, [path])[0]
 
 
-def shape(text: str) -> str:
-    """The reading with letter FORM differences folded — NFKC maps a presentation form to its base letter, and
-    Chrome's raw `/ToUnicode` carries a NUL for a glyph it cannot name. The line/fragment structure is kept:
-    that is what this probe compares."""
-    return unicodedata.normalize("NFKC", text).replace("\x00", "")
+def shape(text: str) -> tuple[str, ...]:
+    """The reading's LINE structure, with letter FORM differences folded: NFKC maps a presentation form to its
+    base letter, and Chrome's raw `/ToUnicode` carries a NUL for a glyph it cannot name. Lines are kept apart,
+    so a merged/split line is visible even when the characters agree."""
+    return tuple(unicodedata.normalize("NFKC", line).replace("\x00", "") for line in text.splitlines())
 
 
 def exact(reader: str, path: str, case: dict) -> float:

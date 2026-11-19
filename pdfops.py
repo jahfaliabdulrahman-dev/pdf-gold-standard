@@ -1,4 +1,5 @@
-"""The one list of operators that PAINT — and the one way to read where text lands.
+"""The one list of operators that PAINT, the one way to read where text lands — and the one owner of the
+house-key prefix.
 
 Shared by the producer (postprocess: what may be wrapped as an Artifact, and where its text sits) and the
 gate (verify_pdf: the furniture band, and what counts as an artifact carrying text). Two copies would let one
@@ -356,27 +357,32 @@ MARK_CIDS_KEY = HOUSE_KEY_PREFIX + "MarkCids"
 
 
 def private_keys(pdf) -> list[str]:
-    """Every `/PL*` name in the file, read from every place a key can live.
+    """Every `/PL*` name in the file's OBJECT GRAPH — every dictionary, stream dictionary, direct container,
+    and the trailer.
 
     `pdf.objects` reaches INDIRECT objects only, so the walk also reads the trailer and descends into direct
     dictionaries and arrays: an inline `/Resources`, a structure-element attribute dictionary, or a stream's
-    own dictionary would otherwise be a hole in a rule stated as "any object". Indirect values are not
+    own dictionary would otherwise be a hole in a rule stated as "every object". Indirect values are not
     followed — `pdf.objects` already visits them.
+
+    The boundary, stated rather than implied: a dictionary written INSIDE a content stream (a `BDC` property
+    dictionary, an inline image's dictionary) is stream syntax, not an object-graph dictionary, and is not
+    scanned. Our bookkeeping has never lived there; a gate that claimed to read it would need a content-stream
+    parser, not this walk.
     """
     found: set[str] = set()
 
     def scan(obj) -> None:
-        kind = getattr(obj, "_type_code", None)          # pikepdf 10.18.1 (pinned): the public type enum
-        if kind == pikepdf.ObjectType.stream:
+        if isinstance(obj, pikepdf.Stream):
             scan(obj.stream_dict)                        # a stream's keys are its stream dictionary
-        elif kind == pikepdf.ObjectType.dictionary:
+        elif isinstance(obj, pikepdf.Dictionary):
             for key in obj.keys():
                 if str(key).startswith(HOUSE_KEY_PREFIX):
                     found.add(str(key))
             for value in obj.values():
                 if isinstance(value, pikepdf.Object) and not value.is_indirect:
                     scan(value)
-        elif kind == pikepdf.ObjectType.array:
+        elif isinstance(obj, pikepdf.Array):
             for item in obj:
                 if isinstance(item, pikepdf.Object) and not item.is_indirect:
                     scan(item)

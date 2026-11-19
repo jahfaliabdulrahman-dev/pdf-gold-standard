@@ -51,8 +51,8 @@ and our engine does not produce it.
 
 ## Still open: `mon-negative-hindi` in Preview
 
-Chrome writes the paragraph around an isolated amount as **several text objects**, and Preview emits **one line
-per text object** — measured on the RAW Chrome output too, so it is not this layer:
+Chrome writes the paragraph around an isolated amount as **several text objects**, and Preview's reading splits
+at those object boundaries — measured on the RAW Chrome output too, so it is not this layer:
 
 ```
 raw : ٦٬- ريال. | ٠٠٦٫٩٦٥ | المبلغ: ...
@@ -68,7 +68,7 @@ amount — merging the fragments back into one text object — a different chang
 
 | # | item | what was done | proof |
 |---|---|---|---|
-| P2 | `/PLMarkCids` shipped inside the delivered font | `postprocess` consumes it and **deletes** it; `scripts/g1_audit.py` reads every object of every produced file | `files 68 · Type0 fonts 155 · house keys 0`; a new gate check `private-keys` (generic) + mutation `private-key-leak` ⇒ **CAUGHT** in all four suites (63/63 · 63/63 · 55/55 · 58/58) |
+| P2 | `/PLMarkCids` shipped inside the delivered font | `postprocess` consumes it and **deletes** it; `scripts/g1_audit.py` reads every indirect dictionary of every produced file (stream, direct-dictionary and trailer gaps closed in G#1b) | `files 68 · Type0 fonts 155 · house keys 0`; a new gate check `private-keys` (generic) + mutation `private-key-leak` ⇒ **CAUGHT** in all four suites (63/63 · 63/63 · 55/55 · 58/58) |
 | P2 | `test_bidi_space.py` outside CI — third time this defect | `scripts/test_ci_wiring.py`: every `test_*.py` must be named in `build-pdf.yml` or excused with a reason, and the checker must flag a fabricated unwired test | `18 test file(s) · 18 wired · 0 exempt`; it caught exactly the two unwired files before they were wired |
 | P3 | the fallback changed silently (a font with no readable widths is no longer repaired) | the named-space branch is back (`space_gid` from the face's own cmap) before the width rule, and fonts no rule can judge are **counted** and printed | `unjudgeable fonts 0` over 68 files · 155 Type0 fonts |
 
