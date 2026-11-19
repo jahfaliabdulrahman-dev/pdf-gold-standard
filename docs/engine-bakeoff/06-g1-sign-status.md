@@ -82,8 +82,9 @@ all four documents, `test_vocalised`, and the 60-case corpus — **rose 2 · fel
 
 ## ما لم يُثبت
 
-- That the separate-show mark works for a signed amount that is the **first** thing on a line with no following
-  glyph: the mark is placed relative to the next glyph, and that case is not in the corpus.
+- **Closed 2026-11-19 (G#1b, `08-g1b-preview-money.md`) — the separate-show mark:** when the signed amount is
+  the **first** thing on a line with no following glyph, PDFium reads `-٦٬٠٠٦٫٩٦٥` in order (exact 1.0); Preview
+  reads `٦٬-` + `٠٠٦٫٩٦٥` — the separator split, not the mark. The mark is not the cause.
 - That `mon-negative-hindi` is fixable by merging runs: the fragmentation is measured, the merge is not built.
 - That the four documents' numbers equal `main`'s for the same code: they are measured on this branch after the
   rebase; CI is the independent check, not a hand comparison.
