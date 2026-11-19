@@ -20,6 +20,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import pymupdf as fitz  # noqa: E402
 import pikepdf  # noqa: E402
 
+import pdfops  # noqa: E402  (the key name the producer writes and this mutation must plant)
+
 import spec_loader  # noqa: E402
 
 NS = spec_loader.load()  # noqa: E402
@@ -838,7 +840,7 @@ def private_key_leak(doc):
     def fn(p):
         fonts = p.pages[0]["/Resources"]["/Font"]
         font = next(iter(fonts.values()))
-        font["/PLMarkCids"] = pikepdf.Array([1])
+        font[pdfops.MARK_CIDS_KEY] = pikepdf.Array([1])
     return _pikemutate(doc, fn)
 
 

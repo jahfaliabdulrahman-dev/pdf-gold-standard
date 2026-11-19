@@ -23,6 +23,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..")))
 
 import postprocess  # noqa: E402
+import pdfops  # noqa: E402  (the key name the producer writes and this test must plant)
 
 FAILS = []
 
@@ -60,7 +61,7 @@ def build(path: str, mark_cids: list[int] | None, occurrences: int) -> None:
         "/ToUnicode": pdf.make_stream(cmap({3: "\u200f", 5: "\u0628"})),
     }))
     if mark_cids:
-        font["/PLMarkCids"] = pikepdf.Array(mark_cids)
+        font[pdfops.MARK_CIDS_KEY] = pikepdf.Array(mark_cids)
     word = b"<0005> Tj"
     content = b"BT\n/F1 12 Tf\n1 0 0 -1 72 700 Tm\n" + word
     for _ in range(occurrences - 1):

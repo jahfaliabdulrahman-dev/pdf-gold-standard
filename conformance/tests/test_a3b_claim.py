@@ -82,12 +82,33 @@ def main() -> int:
     check("certificate-path-ignores-the-claim",
           bool(a3b_calls) and all(p == "case.pdf" for p in a3b_calls), f"verapdf saw {seen}")
 
+    # The key rule follows the A-3b claim: a bake-off that judges the second file must scan it too.
+    _minimal_pdf(second)
+    with _pikepdf().open(second) as sp:
+        sp.Root["/PLSecond"] = _pikepdf().String("x")
+        sp.save(second + ".tmp")
+    os.replace(second + ".tmp", second)
+    rows = {r["id"]: r for r in structure.evaluate(main_pdf, _case(main_pdf), good, run_verapdf=False,
+                                                    honour_second_file=True)}
+    check("second-file-key-refused", rows["private-keys"]["status"] == "fail"
+          and "case.a3b.pdf" in rows["private-keys"]["reason"], rows["private-keys"]["reason"])
+
+    _minimal_pdf(second)                                  # the same file without a key
+    rows = {r["id"]: r for r in structure.evaluate(main_pdf, _case(main_pdf), good, run_verapdf=False,
+                                                    honour_second_file=True)}
+    check("second-file-clean", rows["private-keys"]["status"] == "pass", rows["private-keys"]["reason"])
+
     print()
     if FAILS:
         print(f"A3B CLAIM GUARD FAILED — {len(FAILS)}: {', '.join(FAILS)}")
         return 1
     print("A3B CLAIM GUARD PASSED — a bakeoff may name a second file, a certificate may not")
     return 0
+
+
+def _pikepdf():
+    import pikepdf
+    return pikepdf
 
 
 def _minimal_pdf(path: str) -> None:

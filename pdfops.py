@@ -1,4 +1,5 @@
-"""The one list of operators that PAINT — and the one way to read where text lands.
+"""The one list of operators that PAINT, the one way to read where text lands — and the one owner of the
+house-key prefix.
 
 Shared by the producer (postprocess: what may be wrapped as an Artifact, and where its text sits) and the
 gate (verify_pdf: the furniture band, and what counts as an artifact carrying text). Two copies would let one
@@ -342,3 +343,51 @@ def model_stats(pdf):
 def model_boundary(pdf):
     """Every structure outside the declared model, by name. Empty means the file is inside the boundary."""
     return model_stats(pdf)[0]
+
+
+# ---------------------------------------------------------------- private keys (ISO 32000-1 Annex E)
+# Annex E (normative, "PDF Name Registry") is the registry for private data added to a PDF: a conforming writer
+# may add private keys, but only under a registered developer prefix (second class) or the reserved internal
+# prefix (third class). Our bookkeeping is neither — it is how one stage talks to the next, and it is consumed
+# before the file leaves. A PDF/A validator will NOT catch a leak: PDF Association TechNote 0010 (A009) puts
+# Annex E outside ISO 19005's validation scope (private data is legal; only its low-level syntax is checked).
+# So the file's own gate must, and the prefix is declared once so the writer and both gates cannot disagree.
+HOUSE_KEY_PREFIX = "/PL"
+MARK_CIDS_KEY = HOUSE_KEY_PREFIX + "MarkCids"
+
+
+def private_keys(pdf) -> list[str]:
+    """Every `/PL*` name in the file's OBJECT GRAPH — every dictionary, stream dictionary, direct container,
+    and the trailer.
+
+    `pdf.objects` reaches INDIRECT objects only, so the walk also reads the trailer and descends into direct
+    dictionaries and arrays: an inline `/Resources`, a structure-element attribute dictionary, or a stream's
+    own dictionary would otherwise be a hole in a rule stated as "every object". Indirect values are not
+    followed — `pdf.objects` already visits them.
+
+    The boundary, stated rather than implied: a dictionary written INSIDE a content stream (a `BDC` property
+    dictionary, an inline image's dictionary) is stream syntax, not an object-graph dictionary, and is not
+    scanned. Our bookkeeping has never lived there; a gate that claimed to read it would need a content-stream
+    parser, not this walk.
+    """
+    found: set[str] = set()
+
+    def scan(obj) -> None:
+        if isinstance(obj, pikepdf.Stream):
+            scan(obj.stream_dict)                        # a stream's keys are its stream dictionary
+        elif isinstance(obj, pikepdf.Dictionary):
+            for key in obj.keys():
+                if str(key).startswith(HOUSE_KEY_PREFIX):
+                    found.add(str(key))
+            for value in obj.values():
+                if isinstance(value, pikepdf.Object) and not value.is_indirect:
+                    scan(value)
+        elif isinstance(obj, pikepdf.Array):
+            for item in obj:
+                if isinstance(item, pikepdf.Object) and not item.is_indirect:
+                    scan(item)
+
+    for obj in pdf.objects:
+        scan(obj)
+    scan(pdf.trailer)                                    # not in pdf.objects, and not a place Annex E allows
+    return sorted(found)
