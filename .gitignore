@@ -16,6 +16,7 @@ __pycache__/
 
 # local virtualenv
 .venv/
+.venv-bakeoff/
 # the conformance corpus fonts: downloaded by `python3 -m conformance.adapters.fetch_fonts`, sha256-checked,
 # never committed (the owner's decision on committing them is open)
 fonts/full/
