@@ -29,10 +29,22 @@ MuPDF 13.5→80.0%, pdf.js 12.3→58.7%.
 """
 import collections, io, os, re, sys, unicodedata
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import pdfops  # noqa: E402  (the house-key name is declared once, where both gates read it)
 import pikepdf
 from fontTools.ttLib import TTFont
+
+
+def _house_key() -> str:
+    """The key name, imported at CALL time.
+
+    This module is also the standalone script its `Usage:` line documents; a top-level `import pdfops`
+    repointed `sys.path[0]` for every importer (one of them is the certificate gate) and made the script
+    fail outside the repo root. The contract lives in one place; the import costs nothing after the first call.
+    """
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    from pdfops import MARK_CIDS_KEY
+    return MARK_CIDS_KEY
 
 PRES = lambda ch: 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF
 is_mark = lambda ch: unicodedata.category(ch) == "Mn"
@@ -163,7 +175,7 @@ class FontState:
         # not inference.
         marks = sorted(self.signed_marks)
         if marks:
-            self.F[pdfops.MARK_CIDS_KEY] = pikepdf.Array(marks)
+            self.F[_house_key()] = pikepdf.Array(marks)
         for cid, s in self.old.items():                 # glyphs never seen inside a span keep a folded default
             self.map.setdefault(cid, self.base(cid) or s)
         self.F.ToUnicode = pdf.make_stream(write_tu({c: s for c, s in self.map.items() if s and s != "\x00"}))

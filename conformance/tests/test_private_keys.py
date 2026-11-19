@@ -55,6 +55,15 @@ def make_clean(path: str) -> None:
     pdf.save(path)
 
 
+def make_object_stream(path: str) -> None:
+    """A key on an object that pikepdf compresses into an object stream — `pdf.objects` must still reach it."""
+    pdf = pikepdf.Pdf.new()
+    pdf.add_blank_page(page_size=(300, 300))
+    hidden = pdf.make_indirect(pikepdf.Dictionary({"/PLInObjectStream": 1}))
+    pdf.Root["/Holder"] = hidden
+    pdf.save(path, object_stream_mode=pikepdf.ObjectStreamMode.generate)
+
+
 tmp = tempfile.mkdtemp(prefix="private-keys-")
 try:
     poisoned = os.path.join(tmp, "poisoned.pdf")
@@ -77,7 +86,26 @@ try:
     with pikepdf.open(poisoned) as pdf:
         keys = pdfops.private_keys(pdf)
         check("prefix-is-the-contract", "/XYNotOurs" not in keys, f"found {keys}")
-        check("direct-and-array-are-found", {"/PLDirect", "/PLInArray"} <= set(keys), f"found {keys}")
+
+    object_stream = os.path.join(tmp, "object-stream.pdf")
+    make_object_stream(object_stream)
+    with pikepdf.open(object_stream) as pdf:
+        keys = pdfops.private_keys(pdf)
+        check("object-stream-read", "/PLInObjectStream" in keys, f"found {keys}")
+
+    # Fail closed: the check's `except` branch must be a FAIL, never a skip. No fixture is unreadable, so the
+    # branch is entered by making the reader raise — the contract is the check row, not the exception.
+    from conformance.checks import structure
+    real = pdfops.private_keys
+    pdfops.private_keys = lambda pdf: (_ for _ in ()).throw(RuntimeError("boom"))
+    try:
+        rows = structure.evaluate(clean, {"id": "x", "font": "plex",
+                                          "blocks": [{"type": "paragraph", "text": "نص"}]},
+                                  {"postprocess": False}, run_verapdf=False)
+    finally:
+        pdfops.private_keys = real
+    row = next((r for r in rows if r["id"] == "private-keys"), None)
+    check("fail-closed", row is not None and row["status"] == "fail" and "boom" in row["reason"], f"{row}")
 finally:
     import shutil
     shutil.rmtree(tmp, ignore_errors=True)

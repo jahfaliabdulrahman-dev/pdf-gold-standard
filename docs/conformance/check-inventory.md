@@ -1,4 +1,4 @@
-# Check inventory — the 38 checks of `scripts/verify_pdf.py`
+# Check inventory — the 39 checks of `scripts/verify_pdf.py`
 
 Every check in `verify_pdf.py` carries a kind in `verify_pdf.CHECK_KIND`, and the kind is printed on its own
 line (`PASS pages [calibrated] - 12 (expected 12)`). A check with no kind is a **failure**, not a warning:

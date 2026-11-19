@@ -19,12 +19,13 @@ probes under a heading, and prints every reader's exact reading. It is a diagnos
 | `mon-riyal-sign` | `١٢٣٤٫٥٦ ⃁، … ٧٨٩٫٠٠ ⃁.` | `٧٨٩٫ ⃁.` + `المبلغ ١٢٣٤٫٥٦ ⃁، والمبلغ ٠٠` | the second amount's fractional `٠٠` detaches; the paragraph reads in two fragments |
 | `mon-rs-abbrev` | `الرسوم ٢٥٠٫٠٠ ر.س شهريًّا.` | `٢٥٠٫ ر.س شهريًّا. اختصار العملة` + `الرسوم ٠٠` | the amount's `٠٠` detaches and the paragraph start moves to a second line with it |
 
-Two facts hold for all four: the split is at an Arabic-Indic amount that carries the Arabic thousands separator
-(**U+066C**, `٬`) or decimal separator (**U+066B**, `٫`), and the fragment after the split is reordered to the
-wrong line. Neither occurs for the same number in Latin digits with ASCII separators, nor for Arabic-Indic
-digits with no separator.
+Two facts hold for all four: the amount that splits carries the Arabic thousands separator (**U+066C**, `٬`) or
+decimal separator (**U+066B**, `٫`), and the fragment after the split is reordered to the wrong line. But a
+separator alone is not the trigger — the matrix below shows a 3+3 amount with the same decimal separator
+reading exact. What reproduces the split is a **four-digit integer part with three decimals** (`١٢٣٤٫٠٠٠`,
+`١٢٠٠٫٠٠٠`), or a thousands separator combined with a decimal (`١٬٢٠٠٫٠٠٠`, `١٬٢٠٠٬٠٠٠`).
 
-## The trigger matrix (controlled probes)
+## The probe matrix (what reproduces, and what does not)
 
 | probe (paragraph text) | PDFium exact | Preview exact | Preview's reading |
 |---|---|---|---|
@@ -41,10 +42,10 @@ reproduces. PDFKit is a closed framework; its internal rule is not observable, s
 ## Is the text layer the cause? No — measured on raw Chrome
 
 `chrome-raw` stops after Chrome, before `fix_text_layer`. Preview's exact is **0 on all four** raw files: the
-failure is already in Chrome's output. The probe's `same-shape?` column compares the raw and installed
-readings after NFKC (letter forms folded, fragment structure kept): **yes** for three cases, **no** for
-`mon-rs-abbrev` — our layer changes the *grouping* there, but the failure is present either way. So the layer
-can move fragments; it is not what makes the line split.
+failure is already in Chrome's output. The probe's `same-shape?` column compares the **line structure** of the
+raw and installed readings after NFKC (letter forms folded, lines kept apart): **yes** for three cases, **no**
+for `mon-rs-abbrev` — our layer changes which line the fragments land on there, but the failure is present
+either way. So the layer can move fragments; it is not what makes the line split.
 
 ## The sign at line start — the open item from `06`
 
@@ -61,7 +62,7 @@ class, not the mark.
 
 ## `mon-negative-hindi` — status
 
-Unchanged: PDFium 1.0, Preview 0. Same class as the four; the measured split reproduces on raw Chrome. The
+Unchanged: PDFium 1.0, Preview 0. Same class as the other three; the measured split reproduces on raw Chrome.
 next lever is the one already named in `06`: merge a visual line's runs into one text object in the layer.
 That change is **not built** and is not part of this commit.
 

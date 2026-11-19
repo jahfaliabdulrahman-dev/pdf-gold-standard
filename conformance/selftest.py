@@ -360,6 +360,24 @@ def m_private_key_direct(src, dst):
     with pikepdf.open(src) as pdf:
         pdf.Root["/ProbeHolder"] = pikepdf.Dictionary({pdfops.HOUSE_KEY_PREFIX + "Direct": 1})
         pdf.save(dst)
+    with pikepdf.open(dst) as check:          # the clause is only witnessed if the holder STAYED direct
+        if check.Root["/ProbeHolder"].is_indirect:
+            raise _NA("pikepdf promoted the direct dictionary; the clause is untested")
+
+
+def m_private_key_array(src, dst):
+    """A key on a direct dictionary INSIDE an array — the container the walk descends into."""
+    with pikepdf.open(src) as pdf:
+        pdf.Root["/ProbeArr"] = pikepdf.Array([
+            pikepdf.Dictionary({pdfops.HOUSE_KEY_PREFIX + "InArray": 1})])
+        pdf.save(dst)
+
+
+def m_private_key_trailer(src, dst):
+    """A key on the trailer — not in `pdf.objects` at all, and a place Annex E names as forbidden."""
+    with pikepdf.open(src) as pdf:
+        pdf.trailer[pdfops.HOUSE_KEY_PREFIX + "TrailerKey"] = pikepdf.String("probe")
+        pdf.save(dst)
 
 
 # ---------------------------------------------------------------- harness
@@ -427,6 +445,12 @@ MUTATIONS = [
      "check private-keys", lambda b, m: b["checks"]["private-keys"] == "pass"
      and m["checks"]["private-keys"] == "fail"),
     ("private-key-direct", "struct", m_private_key_direct,
+     "check private-keys", lambda b, m: b["checks"]["private-keys"] == "pass"
+     and m["checks"]["private-keys"] == "fail"),
+    ("private-key-in-array", "struct", m_private_key_array,
+     "check private-keys", lambda b, m: b["checks"]["private-keys"] == "pass"
+     and m["checks"]["private-keys"] == "fail"),
+    ("private-key-in-trailer", "struct", m_private_key_trailer,
      "check private-keys", lambda b, m: b["checks"]["private-keys"] == "pass"
      and m["checks"]["private-keys"] == "fail"),
 ]

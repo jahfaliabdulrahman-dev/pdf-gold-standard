@@ -10,6 +10,8 @@ Controls:
   6. A certificate for a failing file is valid, and its verdict says FAIL.
   7. `--recheck` refuses a forged reading, in both directions.
   8. `--recheck` refuses a certificate that predates a check the gate now runs (it must be re-issued).
+  9. The CLI actually passes `--recheck` to `validate` (the flag existed in the parser and was ignored).
+ 10. `--recheck` refuses a certificate naming a check the gate no longer runs.
 """
 import json
 import os
@@ -144,6 +146,21 @@ with open(path, "w", encoding="utf-8") as fh:
     json.dump(old, fh, ensure_ascii=False, indent=1)
 problems = certificate.validate(path, pdf, do_recheck=True)
 check("recheck:missing-check-refused", any("private-keys" in p for p in problems), "; ".join(problems[:2]))
+
+# --- 9 · the CLI passes --recheck (the flag was parsed and ignored) -----------
+r = subprocess.run([sys.executable, "-m", "conformance", "validate", path, pdf, "--recheck"],
+                   capture_output=True, text=True, cwd=REPO, timeout=300)
+check("cli:recheck-wired", r.returncode == 1 and "private-keys" in (r.stdout + r.stderr),
+      (r.stdout + r.stderr).strip().splitlines()[-1][:140])
+
+# --- 10 · a stored check the gate no longer runs ------------------------------
+ghost = json.loads(json.dumps(cert))
+ghost["checks"].append({"id": "ghost-check", "status": "pass", "reason": "a check that no longer exists"})
+path = os.path.join(tmp, "ghost-cert.json")
+with open(path, "w", encoding="utf-8") as fh:
+    json.dump(ghost, fh, ensure_ascii=False, indent=1)
+problems = certificate.validate(path, pdf, do_recheck=True)
+check("recheck:removed-check-refused", any("no longer runs" in p for p in problems), "; ".join(problems[:2]))
 
 shutil.rmtree(tmp, ignore_errors=True)
 print(f"\nCHECKS IN CERTIFICATE: {len(cert['checks'])} · READERS: {len(cert['readers'])} · "

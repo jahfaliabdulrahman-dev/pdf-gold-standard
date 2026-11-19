@@ -1244,7 +1244,7 @@ def gate(doc) -> list[str]:
         raise
     except Exception as exc:
         leaked = [f"cannot read the objects: {exc}"]
-    check("private-keys", not leaked, ", ".join(leaked[:6]) or "no /PL* key anywhere in the file")
+    check("private-keys", not leaked, ", ".join(leaked[:6]) or "no /PL* key in the object graph")
 
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).
