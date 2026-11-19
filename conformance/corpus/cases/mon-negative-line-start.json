@@ -1,0 +1,18 @@
+{
+  "id": "mon-negative-line-start",
+  "category": "money",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "مبلغ سالب في أول السطر"
+    },
+    {
+      "type": "paragraph",
+      "text": "-٦٬٠٠٦٫٩٦٥ ريال."
+    }
+  ],
+  "note": "المبلغ السالب أول شيء على السطر: زوج mon-negative-hindi نفسه بلا بادئة «المبلغ: » — الفرق الوحيد هو موضع العلامة"
+}

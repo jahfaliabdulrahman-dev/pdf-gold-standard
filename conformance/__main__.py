@@ -28,6 +28,9 @@ def main(argv=None) -> int:
     r.add_argument("--readers", nargs="*", default=None, help="subset of reader names (default: all)")
     r.add_argument("--ratchet", action="store_true", help="compare the run to ratchet.json (exit 1 on a drop)")
     r.add_argument("--accept", action="store_true", help="record this run as the new floors (manual, per commit)")
+    r.add_argument("--force", action="store_true",
+                   help="with --accept/ratchet accept: write floors even where the run is below the recorded one "
+                        "(a deliberate rebase; not for a regression)")
     r.add_argument("--time-repeats", type=int, default=1, help="builds per case for the median time (E uses 3)")
     r.add_argument("--no-structure", action="store_true",
                    help="skip the structural checks and veraPDF (a quick text-metric run only)")
@@ -49,6 +52,8 @@ def main(argv=None) -> int:
     rt.add_argument("action", choices=["accept", "check"])
     rt.add_argument("--from", dest="source", required=True, help="the results.json of the run")
     rt.add_argument("--file", dest="path", default=None, help="the floors file (default conformance/ratchet.json)")
+    rt.add_argument("--force", action="store_true",
+                    help="write floors even where the run is below the recorded one (a deliberate rebase)")
 
     s = sub.add_parser("selftest", help="planted mutations: every check must be seen failing")
     s.add_argument("--engine", default="chrome", choices=["chrome", "chrome-raw", "typst", "weasyprint"])
