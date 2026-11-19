@@ -28,8 +28,10 @@ from collections import Counter
 BIDI = re.compile("[\u200e\u200f\u061c\u202a-\u202e\u2066-\u2069]")
 # Invisible format characters the producer inserts on purpose: `fix_text_layer` maps a drawn mark and a gap
 # glyph to U+200B / U+2060 (its own comment: «Preview, PDFium, MuPDF and poppler paste the invisible U+2060
-# inside those words»). They carry no text and no reader can be blamed for returning them, so `N` drops them
-# and they are counted instead — the count is the witness, not the failure.
+# inside those words»). The assignment's `N` removes direction controls and NOTHING else, so these are KEPT:
+# they are characters in the file, a copy-paste carries them, and the gate must not normalize away a
+# producer's own insertion. They are counted (`zero_width`) and the file-level check `invisible-format` names
+# them. (An earlier version dropped them in `N`; the review was right that it flattered the pipeline.)
 ZERO_WIDTH = re.compile("[\u200b\u200c\u200d\u2060]")
 # Arabic diacritics (harakat, tanween, shadda, sukun, superscript alef, and the Quranic marks).
 MARKS = re.compile("[\u0610-\u061a\u064b-\u065f\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed]")
@@ -44,7 +46,6 @@ def N(s: str) -> str:
     """The one normalization (documented above, and in docs/conformance/metrics.md)."""
     s = unicodedata.normalize("NFC", s or "")
     s = BIDI.sub("", s)
-    s = ZERO_WIDTH.sub("", s)
     return WS.sub(" ", s).strip()
 
 

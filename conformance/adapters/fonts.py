@@ -22,6 +22,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FULL_DIR = os.path.join(HERE, "..", "..", "fonts", "full")
 
 # Pinned to the commit that last changed each file in google/fonts, so the URL cannot move under us.
+#
+# DECLARED DEVIATION from the assignment's C1 («TTF/OTF كاملة من الإصدار الرسمي»): these two URLs are the
+# google/fonts OFL mirror, not IBM/plex and aliftype/amiri release assets. The reason is reproducibility, and
+# it is the only reason: google/fonts gives a commit-pinned raw URL for a single file, while the official
+# repositories publish their TTFs inside versioned releases (Amiri ships a zip, which would need unpacking and
+# a second hash for the archive). The bytes are OFL in both cases and the sha256 is recorded, so the
+# measurement is reproducible either way — but the provenance is a mirror, and the owner may prefer the
+# official release with a zip step. That decision is open.
 FONTS = {
     "plex": {
         "file": "IBMPlexSansArabic-Regular.ttf",

@@ -1,0 +1,32 @@
+{
+  "id": "tbl-explicit-width",
+  "category": "tables",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "جدول بعرض صريح"
+    },
+    {
+      "type": "table",
+      "width": "100%",
+      "header": [
+        "البند",
+        "المبلغ"
+      ],
+      "rows": [
+        [
+          "رسوم",
+          "١٠٠"
+        ],
+        [
+          "خدمات",
+          "٢٠٠"
+        ]
+      ]
+    }
+  ],
+  "note": "width:100% — the shape that makes Chrome paint a table as one run and PDFium reverse its rows (measured); kept as a case so the corpus measures the defect instead of avoiding it"
+}

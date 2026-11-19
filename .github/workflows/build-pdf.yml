@@ -22,6 +22,9 @@ jobs:
       # The baselines were measured on this validator. Homebrew ships whatever is current, so the pin is
       # enforced where it matters — at use, by name (the same choice as Chrome).
       VERAPDF_VERSION: "1.30.0"
+      # poppler ships from brew with no version switch; the check below refuses the wrong one by name, the
+      # same discipline as veraPDF (its bidi decoration count is what the limit is measured on).
+      POPPLER_VERSION: "26.07.0"
     steps:
       - uses: actions/checkout@v5
 
@@ -124,11 +127,17 @@ jobs:
           # The declared readers must be pinned readers: poppler comes from brew and is recorded in the
           # ratchet by version, so a brew bump is a decision (the same discipline as Chrome and veraPDF).
           brew install poppler
+          got="$(pdftotext -v 2>&1 | sed -n 's/.*pdftotext version \([^ ]*\).*/\1/p' | head -1)"
+          if [ "$got" != "$POPPLER_VERSION" ]; then
+            echo "poppler $got is installed; the floors were measured on $POPPLER_VERSION — refused by name"
+            exit 1
+          fi
           python3 -m conformance.adapters.fetch_fonts
           # Refuses a stale manifest or a category below its floor BEFORE building anything.
           python3 -m conformance manifest --check
           python3 -m conformance run --engine chrome --out /tmp/conf --ratchet
           python3 -m conformance selftest
+          python3 scripts/test_check_kinds.py
           # the guards of the corpus, the metrics, the isolation and the limits — each can fail
           python3 conformance/tests/test_corpus.py
           python3 conformance/tests/test_metrics.py

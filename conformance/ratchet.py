@@ -16,6 +16,10 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 FILE = os.path.join(HERE, "ratchet.json")
 TOL = 1e-9
+# Readers that ship with the operating system, not with a pinned package: their version IS the runner image.
+# A different OS means the floors are not comparable (measured: PDFKit reports the macOS version), so the
+# comparison is skipped FOR THAT READER and said out loud — never silently, and never for a pinned reader.
+OS_VERSIONED = {"pdfkit": "PDFKit ships with macOS; its version is the runner image, not a pin"}
 
 
 def load(path: str = FILE) -> dict:
@@ -55,12 +59,20 @@ def check(results: dict, path: str = FILE) -> tuple[list[str], list[str]]:
     bad, notes = [], []
     if not floors:
         return ["no ratchet.json — run with --accept to record the first floors"], notes
-    for reader, block in derive(results).items():
+    measured = derive(results)
+    for gone in sorted(set(floors) - set(measured)):
+        bad.append(f"{gone}: floors recorded but the reader did not run in this comparison "
+                   f"(a reader that disappears is a regression, not a skip)")
+    for reader, block in measured.items():
         base = floors.get(reader)
         if base is None:
             notes.append(f"{reader}: no floors recorded")
             continue
         if base.get("version") != block["version"]:
+            if reader in OS_VERSIONED:
+                notes.append(f"{reader}: {block['version']} vs floors on {base.get('version')} — "
+                             f"{OS_VERSIONED[reader]}; floors not compared")
+                continue
             bad.append(f"{reader}: version {block['version']} measured, floors recorded on {base.get('version')} "
                        f"— re-run with --accept after checking the changelog")
             continue

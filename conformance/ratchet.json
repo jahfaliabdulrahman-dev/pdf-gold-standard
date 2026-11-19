@@ -222,9 +222,9 @@
     },
     "digit_runs": 1.0,
     "exact": 0.0,
-    "order": 0.954545,
+    "order": 0.931818,
     "skeleton_exact": 0.0,
-    "word_f1": 0.954545
+    "word_f1": 0.931818
    },
    "kash-justify-tatweel": {
     "defects": {
@@ -342,9 +342,9 @@
     },
     "digit_runs": 1.0,
     "exact": 0.0,
-    "order": 0.692308,
+    "order": 0.615385,
     "skeleton_exact": 0.0,
-    "word_f1": 0.769231
+    "word_f1": 0.692308
    },
    "mix-parens": {
     "defects": {
@@ -676,6 +676,21 @@
     "skeleton_exact": 0.0,
     "word_f1": 0.888889
    },
+   "tbl-explicit-width": {
+    "defects": {
+     "bidi": 0,
+     "presentation_forms": 0,
+     "pua": 0,
+     "replacement": 0,
+     "tatweel_excess": 0,
+     "zero_width": 0
+    },
+    "digit_runs": 1.0,
+    "exact": 0.0,
+    "order": 0.777778,
+    "skeleton_exact": 0.0,
+    "word_f1": 0.777778
+   },
    "tbl-page-break": {
     "defects": {
      "bidi": 0,
@@ -762,9 +777,9 @@
     },
     "digit_runs": 1.0,
     "exact": 0.0,
-    "order": 0.733333,
+    "order": 0.666667,
     "skeleton_exact": 0.0,
-    "word_f1": 0.733333
+    "word_f1": 0.666667
    },
    "voc-shadda": {
     "defects": {
@@ -1036,10 +1051,10 @@
      "zero_width": 1
     },
     "digit_runs": 1.0,
-    "exact": 1.0,
-    "order": 1.0,
-    "skeleton_exact": 1.0,
-    "word_f1": 1.0
+    "exact": 0.0,
+    "order": 0.977273,
+    "skeleton_exact": 0.0,
+    "word_f1": 0.977273
    },
    "kash-justify-tatweel": {
     "defects": {
@@ -1156,10 +1171,10 @@
      "zero_width": 1
     },
     "digit_runs": 1.0,
-    "exact": 1.0,
-    "order": 1.0,
-    "skeleton_exact": 1.0,
-    "word_f1": 1.0
+    "exact": 0.0,
+    "order": 0.923077,
+    "skeleton_exact": 0.0,
+    "word_f1": 0.923077
    },
    "mix-parens": {
     "defects": {
@@ -1491,6 +1506,21 @@
     "skeleton_exact": 1.0,
     "word_f1": 1.0
    },
+   "tbl-explicit-width": {
+    "defects": {
+     "bidi": 0,
+     "presentation_forms": 0,
+     "pua": 0,
+     "replacement": 0,
+     "tatweel_excess": 0,
+     "zero_width": 0
+    },
+    "digit_runs": 1.0,
+    "exact": 1.0,
+    "order": 1.0,
+    "skeleton_exact": 1.0,
+    "word_f1": 1.0
+   },
    "tbl-page-break": {
     "defects": {
      "bidi": 0,
@@ -1577,9 +1607,9 @@
     },
     "digit_runs": 1.0,
     "exact": 0.0,
-    "order": 0.933333,
-    "skeleton_exact": 1.0,
-    "word_f1": 0.933333
+    "order": 0.866667,
+    "skeleton_exact": 0.0,
+    "word_f1": 0.866667
    },
    "voc-shadda": {
     "defects": {
@@ -1852,9 +1882,9 @@
     },
     "digit_runs": 1.0,
     "exact": 0.0,
-    "order": 0.954545,
+    "order": 0.931818,
     "skeleton_exact": 0.0,
-    "word_f1": 1.0
+    "word_f1": 0.977273
    },
    "kash-justify-tatweel": {
     "defects": {
@@ -1971,10 +2001,10 @@
      "zero_width": 1
     },
     "digit_runs": 1.0,
-    "exact": 1.0,
-    "order": 1.0,
-    "skeleton_exact": 1.0,
-    "word_f1": 1.0
+    "exact": 0.0,
+    "order": 0.923077,
+    "skeleton_exact": 0.0,
+    "word_f1": 0.923077
    },
    "mix-parens": {
     "defects": {
@@ -2306,6 +2336,21 @@
     "skeleton_exact": 1.0,
     "word_f1": 1.0
    },
+   "tbl-explicit-width": {
+    "defects": {
+     "bidi": 0,
+     "presentation_forms": 0,
+     "pua": 0,
+     "replacement": 0,
+     "tatweel_excess": 0,
+     "zero_width": 0
+    },
+    "digit_runs": 1.0,
+    "exact": 1.0,
+    "order": 1.0,
+    "skeleton_exact": 1.0,
+    "word_f1": 1.0
+   },
    "tbl-page-break": {
     "defects": {
      "bidi": 0,
@@ -2364,7 +2409,7 @@
     "exact": 0.0,
     "order": 0.571429,
     "skeleton_exact": 0.0,
-    "word_f1": 1.0
+    "word_f1": 0.933333
    },
    "voc-lam-alef-marks": {
     "defects": {
@@ -2392,9 +2437,9 @@
     },
     "digit_runs": 1.0,
     "exact": 0.0,
-    "order": 0.866667,
+    "order": 0.8,
     "skeleton_exact": 0.0,
-    "word_f1": 1.0
+    "word_f1": 0.933333
    },
    "voc-shadda": {
     "defects": {
@@ -2409,7 +2454,7 @@
     "exact": 0.0,
     "order": 0.625,
     "skeleton_exact": 0.0,
-    "word_f1": 1.0
+    "word_f1": 0.842105
    },
    "voc-shadda-tanween": {
     "defects": {
@@ -2424,7 +2469,7 @@
     "exact": 0.0,
     "order": 0.5,
     "skeleton_exact": 0.0,
-    "word_f1": 1.0
+    "word_f1": 0.857143
    },
    "voc-tanween": {
     "defects": {
@@ -2439,7 +2484,7 @@
     "exact": 0.0,
     "order": 0.8,
     "skeleton_exact": 0.0,
-    "word_f1": 1.0
+    "word_f1": 0.909091
    }
   },
   "version": "PDFKit 27.2.1"
@@ -2534,7 +2579,7 @@
     "exact": 0.0,
     "order": 0.043478,
     "skeleton_exact": 0.0,
-    "word_f1": 0.043478
+    "word_f1": 0.042553
    },
    "dig-percent": {
     "defects": {
@@ -2804,7 +2849,7 @@
     "exact": 0.0,
     "order": 0.111111,
     "skeleton_exact": 0.0,
-    "word_f1": 0.105263
+    "word_f1": 0.1
    },
    "mix-version": {
     "defects": {
@@ -3121,6 +3166,21 @@
     "skeleton_exact": 0.0,
     "word_f1": 0.111111
    },
+   "tbl-explicit-width": {
+    "defects": {
+     "bidi": 0,
+     "presentation_forms": 0,
+     "pua": 0,
+     "replacement": 0,
+     "tatweel_excess": 0,
+     "zero_width": 0
+    },
+    "digit_runs": 1.0,
+    "exact": 0.0,
+    "order": 0.222222,
+    "skeleton_exact": 0.0,
+    "word_f1": 0.222222
+   },
    "tbl-page-break": {
     "defects": {
      "bidi": 0,
@@ -3149,7 +3209,7 @@
     "exact": 0.0,
     "order": 0.181818,
     "skeleton_exact": 0.0,
-    "word_f1": 0.181818
+    "word_f1": 0.166667
    },
    "tbl-two-line-cell": {
     "defects": {
@@ -3263,7 +3323,7 @@
   "cases": {
    "dig-article": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3278,7 +3338,7 @@
    },
    "dig-date-hindi": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3293,7 +3353,7 @@
    },
    "dig-in-table": {
     "defects": {
-     "bidi": 22,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3308,7 +3368,7 @@
    },
    "dig-mixed-order": {
     "defects": {
-     "bidi": 12,
+     "bidi": 4,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3323,7 +3383,7 @@
    },
    "dig-mixed-scripts": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3338,7 +3398,7 @@
    },
    "dig-paren-eol": {
     "defects": {
-     "bidi": 10,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3353,7 +3413,7 @@
    },
    "dig-percent": {
     "defects": {
-     "bidi": 10,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3368,7 +3428,7 @@
    },
    "dig-phone": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3383,7 +3443,7 @@
    },
    "dig-year": {
     "defects": {
-     "bidi": 10,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3398,7 +3458,7 @@
    },
    "head-deep": {
     "defects": {
-     "bidi": 24,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3413,7 +3473,7 @@
    },
    "head-h1-h3": {
     "defects": {
-     "bidi": 18,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3428,7 +3488,7 @@
    },
    "head-latin": {
     "defects": {
-     "bidi": 16,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3443,7 +3503,7 @@
    },
    "head-numbered": {
     "defects": {
-     "bidi": 16,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3458,7 +3518,7 @@
    },
    "kash-explicit": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3473,7 +3533,7 @@
    },
    "kash-justify": {
     "defects": {
-     "bidi": 18,
+     "bidi": 6,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3482,13 +3542,13 @@
     },
     "digit_runs": 1.0,
     "exact": 0.0,
-    "order": 0.772727,
+    "order": 0.75,
     "skeleton_exact": 0.0,
-    "word_f1": 0.772727
+    "word_f1": 0.75
    },
    "kash-justify-tatweel": {
     "defects": {
-     "bidi": 14,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3503,7 +3563,7 @@
    },
    "lst-bullet": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3518,7 +3578,7 @@
    },
    "lst-ordered": {
     "defects": {
-     "bidi": 18,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3533,7 +3593,7 @@
    },
    "mix-acronym": {
     "defects": {
-     "bidi": 10,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3548,7 +3608,7 @@
    },
    "mix-email-url": {
     "defects": {
-     "bidi": 6,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3563,7 +3623,7 @@
    },
    "mix-latin-sentence": {
     "defects": {
-     "bidi": 10,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3578,7 +3638,7 @@
    },
    "mix-latin-word": {
     "defects": {
-     "bidi": 10,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3593,7 +3653,7 @@
    },
    "mix-numbers-ltr": {
     "defects": {
-     "bidi": 14,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3608,7 +3668,7 @@
    },
    "mix-parens": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3623,7 +3683,7 @@
    },
    "mix-version": {
     "defects": {
-     "bidi": 10,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3638,7 +3698,7 @@
    },
    "mon-decimal-table": {
     "defects": {
-     "bidi": 18,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3653,7 +3713,7 @@
    },
    "mon-iban": {
     "defects": {
-     "bidi": 2,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3668,7 +3728,7 @@
    },
    "mon-negative-hindi": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3683,7 +3743,7 @@
    },
    "mon-negative-table": {
     "defects": {
-     "bidi": 16,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3698,7 +3758,7 @@
    },
    "mon-riyal-sign": {
     "defects": {
-     "bidi": 12,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3713,7 +3773,7 @@
    },
    "mon-rs-abbrev": {
     "defects": {
-     "bidi": 10,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3728,7 +3788,7 @@
    },
    "mon-thousands": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3743,7 +3803,7 @@
    },
    "pun-comma": {
     "defects": {
-     "bidi": 10,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3758,7 +3818,7 @@
    },
    "pun-edge": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3773,7 +3833,7 @@
    },
    "pun-quotes": {
     "defects": {
-     "bidi": 12,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3788,7 +3848,7 @@
    },
    "pun-semicolon-question": {
     "defects": {
-     "bidi": 6,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3803,7 +3863,7 @@
    },
    "shp-allah": {
     "defects": {
-     "bidi": 18,
+     "bidi": 6,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3818,7 +3878,7 @@
    },
    "shp-allah-sentence": {
     "defects": {
-     "bidi": 14,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3833,7 +3893,7 @@
    },
    "shp-kaf-kitaba": {
     "defects": {
-     "bidi": 6,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3848,7 +3908,7 @@
    },
    "shp-lam-alef-forms": {
     "defects": {
-     "bidi": 28,
+     "bidi": 16,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3863,7 +3923,7 @@
    },
    "shp-nonjoining": {
     "defects": {
-     "bidi": 12,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3878,7 +3938,7 @@
    },
    "shp-single-letter": {
     "defects": {
-     "bidi": 14,
+     "bidi": 6,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3893,7 +3953,7 @@
    },
    "tbl-2col": {
     "defects": {
-     "bidi": 14,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3908,7 +3968,7 @@
    },
    "tbl-5col": {
     "defects": {
-     "bidi": 24,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3923,7 +3983,22 @@
    },
    "tbl-empty-cell": {
     "defects": {
-     "bidi": 16,
+     "bidi": 0,
+     "presentation_forms": 0,
+     "pua": 0,
+     "replacement": 0,
+     "tatweel_excess": 0,
+     "zero_width": 0
+    },
+    "digit_runs": 1.0,
+    "exact": 1.0,
+    "order": 1.0,
+    "skeleton_exact": 1.0,
+    "word_f1": 1.0
+   },
+   "tbl-explicit-width": {
+    "defects": {
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3938,7 +4013,7 @@
    },
    "tbl-page-break": {
     "defects": {
-     "bidi": 302,
+     "bidi": 54,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3953,7 +4028,7 @@
    },
    "tbl-two-header-rows": {
     "defects": {
-     "bidi": 20,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3968,7 +4043,7 @@
    },
    "tbl-two-line-cell": {
     "defects": {
-     "bidi": 6,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3983,7 +4058,7 @@
    },
    "voc-full": {
     "defects": {
-     "bidi": 6,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -3998,7 +4073,7 @@
    },
    "voc-lam-alef-marks": {
     "defects": {
-     "bidi": 12,
+     "bidi": 4,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -4013,7 +4088,7 @@
    },
    "voc-partial": {
     "defects": {
-     "bidi": 12,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -4028,7 +4103,7 @@
    },
    "voc-shadda": {
     "defects": {
-     "bidi": 8,
+     "bidi": 0,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -4043,7 +4118,7 @@
    },
    "voc-shadda-tanween": {
     "defects": {
-     "bidi": 10,
+     "bidi": 2,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,
@@ -4058,7 +4133,7 @@
    },
    "voc-tanween": {
     "defects": {
-     "bidi": 12,
+     "bidi": 4,
      "presentation_forms": 0,
      "pua": 0,
      "replacement": 0,

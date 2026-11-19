@@ -43,7 +43,7 @@ def preflight(ids=None) -> tuple[list[dict], list[str]]:
 
 
 def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=None,
-        time_repeats: int = 1, progress=print) -> dict:
+        time_repeats: int = 1, progress=print, run_structure: bool = True) -> dict:
     if engine not in ENGINES:
         raise SystemExit(f"engine {engine!r} is not built yet (this cycle: {sorted(ENGINES)})")
     chosen, problems = preflight(ids)
@@ -68,6 +68,13 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
                        "sha256": _sha256(pdf), "text_sha256": chrome.text_layer_sha256(pdf)})
         progress(f"built {case['id']:<28} {elapsed:5.2f}s {os.path.getsize(pdf):>7} B")
 
+    VP = {}
+    if run_structure:
+        from .checks import verapdf as verapdf_mod
+        paths_all = [b["pdf"] for b in builds]
+        progress("veraPDF: one batch per flavour over the corpus…")
+        for flavour in ("ua1", "3b"):
+            VP[flavour] = verapdf_mod.batch(paths_all, flavour)
     from .readers import available, text_many
     readers, missing = available()
     if reader_names:
@@ -87,14 +94,14 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
         for name in readers:
             from .readers import limitations
             version = readers[name].version()
-            limits, refused = limitations.usable(name, version, run_controls=False)
+            limits, refused, controls = limitations.usable(name, version)
             result = metrics.measure(texts[name][i], t, floor_bidi)
-            applied = [limitations.apply(lim, t, texts[name][i], result, limitations.control_data(lim))
-                       for lim in limits]
+            applied = [limitations.apply(lim, t, texts[name][i], result, control)
+                       for lim, control in zip(limits, controls)]
             result["limitations_applied"] = [a for a in applied if a["excused"]]
             result["limitations_refused"] = refused
             per_reader[name] = result
-        out_cases.append({
+        entry = {
             "id": case["id"], "category": case["category"], "font": case["font"],
             "pdf": os.path.basename(build["pdf"]), "bytes": build["bytes"], "sha256": build["sha256"],
             "text_sha256": build["text_sha256"], "median_seconds": build["median"],
@@ -102,7 +109,18 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
             "file": {"bidi": floor_bidi, "zero_width": metrics.zero_width_count(file_text),
                      "notdef": scan["notdef"], "codes": scan["codes"],
                      "untagged_chars": len("".join(v for k, v in scan["text"].items() if k[1] < 0))},
-        })
+        }
+        if run_structure:
+            from .checks import structure
+            checks = structure.evaluate(build["pdf"], case, build["producer"], run_verapdf=False)
+            for flavour, cid in (("ua1", "verapdf-ua1"), ("3b", "verapdf-pdfa3b")):
+                fails = VP.get(flavour, {}).get(os.path.realpath(build["pdf"]))
+                checks.append({"id": cid, "status": "fail" if fails else "pass",
+                               "reason": (f"{len(fails)} failing rule(s): " + ", ".join(k for k, _ in fails[:5]))
+                               if fails else "no failing rule"})
+            entry["checks"] = checks
+            entry["structural_ok"] = all(c["status"] != "fail" for c in checks)
+        out_cases.append(entry)
 
     results = {
         "schema": "conformance-run/1",
@@ -115,6 +133,7 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
                            "reason": missing.get(name)} for name in (reader_names or list(readers) + list(missing))},
         "cases": out_cases,
         "summary": summarize(out_cases, readers),
+        "checks": summarize_checks(out_cases),
     }
     return results
 
@@ -142,6 +161,30 @@ def summarize(out_cases: list[dict], readers: dict) -> dict:
                 }
         summary[name] = entry
     return summary
+
+
+def summarize_checks(out_cases: list[dict]) -> dict:
+    """Per check id: pass/fail/na across the corpus, and the cases whose structure is not clean.
+
+    This is the number E's baseline needs: how many cases this engine cannot certify at all, and by which
+    named check — not a blended «quality» score.
+    """
+    rows = [c for c in out_cases if "checks" in c]
+    if not rows:
+        return {}
+    ids = []
+    for c in rows:
+        for chk in c["checks"]:
+            if chk["id"] not in ids:
+                ids.append(chk["id"])
+    out = {"per_check": {}, "structural_failures": [c["id"] for c in rows if not c["structural_ok"]],
+           "clean_cases": sum(1 for c in rows if c["structural_ok"]), "cases": len(rows)}
+    for cid in ids:
+        got = [chk for c in rows for chk in c["checks"] if chk["id"] == cid]
+        out["per_check"][cid] = {"pass": sum(1 for g in got if g["status"] == "pass"),
+                                 "fail": sum(1 for g in got if g["status"] == "fail"),
+                                 "na": sum(1 for g in got if g["status"] == "na")}
+    return out
 
 
 def results_table(results: dict) -> str:
@@ -176,6 +219,14 @@ def write(results: dict, outdir: str) -> tuple[str, str]:
         fh.write(f"# conformance run — {results['engine']} {results['engine_version']}\n\n")
         fh.write(f"corpus {results['corpus']['cases']} cases · MANIFEST sha256 `{results['corpus']['manifest_sha256']}`\n\n")
         fh.write(results_table(results) + "\n\n")
+        if results.get("checks"):
+            c = results["checks"]
+            fh.write(f"## structural checks\n\n{c['clean_cases']}/{c['cases']} cases clean; "
+                     f"not clean: {', '.join(c['structural_failures']) or 'none'}\n\n")
+            fh.write("| check | pass | fail | na |\n|---|---|---|---|\n")
+            for cid, v in c["per_check"].items():
+                fh.write(f"| {cid} | {v['pass']} | {v['fail']} | {v['na']} |\n")
+            fh.write("\n")
         misses = [(c["id"], n) for c in results["cases"] for n, r in c["per_reader"].items()
                   if r["metrics"]["exact"] != 1.0]
         fh.write("## not exact, by case\n\n")

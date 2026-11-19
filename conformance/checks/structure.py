@@ -66,6 +66,14 @@ def read_tree(pdf) -> Node:
         for item in items:
             if isinstance(item, int):
                 node.mcids.append((page_no, int(item)))
+            elif isinstance(item, pikepdf.Dictionary) and str(item.get("/Type")) == "/MCR":
+                # a marked-content reference (Word, Acrobat): /MCID + /Pg, and no /S
+                mref = item.get("/Pg") or pg
+                mpage = page_of.get(mref.objgen) if mref is not None else page_no
+                if item.get("/MCID") is not None:
+                    node.mcids.append((mpage, int(item.get("/MCID"))))
+            elif isinstance(item, pikepdf.Dictionary) and str(item.get("/Type")) == "/OBJR":
+                continue                       # an object reference carries no text
             elif isinstance(item, pikepdf.Dictionary):
                 tag = str(item.get("/S", ""))
                 child = Node(tag)
@@ -97,7 +105,10 @@ def _token(token: str) -> str:
     those are stored in reading order inside the run. This is a property of reading the *file*, never a
     normalization of a reader's output (readers are compared with `metrics.N` untouched).
     """
-    token = unicodedata.normalize("NFKC", token)
+    # Invisible joiners are stripped FOR ATTRIBUTION ONLY: whether the producer inserted them is the separate
+    # check `invisible-format`, and counting the same defect twice would hide which one it is. `exact` keeps
+    # them (metrics.N is literal), so the product metric still prices them.
+    token = metrics.ZERO_WIDTH.sub("", unicodedata.normalize("NFKC", token))
     if ARABIC.search(token) and not LATIN_OR_DIGIT.search(token):
         # sorted characters, not a reversal: a vocalised token stores its marks beside the base letter in an
         # order a naive reversal would corrupt (measured on «الْحَمْدُ»). Within one token the characters are
@@ -113,6 +124,29 @@ def words_multi(text: str) -> Counter:
 
 def same_words(a: str, b: str) -> bool:
     return words_multi(a) == words_multi(b)
+
+
+def layer_seq(text: str) -> list[str]:
+    """The tokens of a LAYER text in reading order — a run stored in visual order is reversed as a sequence.
+
+    Only a layer is reversed; the truth is already logical, and reversing both sides would cancel the very
+    difference the check exists to see (measured: the heading check failed on a clean file because of it).
+    A run carrying Latin or digits is left alone: its order is the readers' metric, not this module's. Per-token
+    characters are sorted in `_token`, so a vocalised token whose marks sit beside the base letter survives.
+    """
+    norm = metrics.N(text)
+    tokens = [_token(t) for t in norm.split()]
+    if norm and not LATIN_OR_DIGIT.search(norm):
+        tokens = list(reversed(tokens))
+    return tokens
+
+
+def truth_seq(text: str) -> list[str]:
+    return [_token(t) for t in metrics.N(text).split()]
+
+
+def same_sequence(got_layer: str, want_truth: str) -> bool:
+    return layer_seq(got_layer) == truth_seq(want_truth)
 
 
 def _block_tags(case: dict) -> list[str]:
@@ -190,7 +224,7 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         got_texts = [_node_text(n, scan) for n in heads]
         levels_ok = got_levels == [lvl for lvl, _ in want_heads]
         text_ok = len(got_texts) == len(want_heads) and all(
-            same_words(g, w) for g, (_, w) in zip(got_texts, want_heads))
+            same_sequence(g, w) for g, (_, w) in zip(got_texts, want_heads))
         add("headings", levels_ok and text_ok,
             f"{len(heads)} heading element(s), levels {got_levels}"
             + ("" if levels_ok else f" — the case declares {[lvl for lvl, _ in want_heads]}")
@@ -216,7 +250,7 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
                 if r < _header_rows(block) and any(c.tag != "/TH" for c in cs):
                     table_problems.append(f"table {k+1} row {r+1}: header cells not /TH")
                 texts = [_node_text(c, scan) for c in cs]
-                if not all(same_words(t, w) for t, w in zip(texts, want)):
+                if not all(same_sequence(t, w) for t, w in zip(texts, want)):
                     table_problems.append(f"table {k+1} row {r+1}: cell text differs from the case")
         add("tables", not table_problems, "; ".join(table_problems[:3]) or
             f"{len(tables)} table(s) · TR/TH/TD match the case cell by cell")
@@ -226,9 +260,8 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         top = [c for c in (tree.children if tree is not None else [])]
         doc = next((c for c in top if c.tag == "/Document"), None)
         seq = [n.tag for n in (doc.children if doc is not None else top) if n.tag in BLOCK_TAGS]
-        add("block-order", _collapse(seq) == _collapse(expected),
-            f"top-level tags {_collapse(seq)}" + ("" if _collapse(seq) == _collapse(expected)
-                                                 else f" — the case declares {_collapse(expected)}"))
+        add("block-order", seq == expected,
+            f"top-level tags {seq}" + ("" if seq == expected else f" — the case declares {expected}"))
 
         # --- fonts: embedded, named ToUnicode, and only the family the case declares ----------------
         declared = _family(case["font"])
@@ -244,6 +277,11 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             f"{len(scan['fonts'])} font(s) used for text, all embedded with /ToUnicode")
         add("notdef", scan["notdef"] == 0,
             "no glyph 0 drawn" if scan["notdef"] == 0 else f"{scan['notdef']} .notdef glyph(s) drawn")
+        invisible = sum(1 for ch in file_text if 0x200B <= ord(ch) <= 0x200D or ord(ch) == 0x2060)
+        add("invisible-format", invisible == 0,
+            "no invisible joiner in the text layer" if invisible == 0 else
+            f"{invisible} U+200B/200C/200D/2060 in the layer — the producer inserted them and a copy-paste "
+            f"carries them")
         forms = sum(1 for ch in file_text
                     if 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF)
         add("presentation-forms", forms == 0,

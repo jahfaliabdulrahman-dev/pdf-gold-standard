@@ -15,6 +15,9 @@ profiles = ["web"]
 stage = 5
 profiles = ["web"]
 
-# `link-tagging` is NOT declared either, and the reason is a measured leak: `feature_link_tagging` loads the
-# document spec unconditionally (its label geometry is per-document), so declaring it pulled `nav_spec` into a
-# conformance build — caught by `test_isolation.py`. A case has no links to tag.
+# `link-tagging` is declared and honours the case spec: it used to load the document spec unconditionally —
+# a measured leak caught by `test_isolation.py` — and the fix was to give the feature the same override the
+# other two have, not to delete the feature. A case has no links, so it is a no-op that stays honest.
+[features.link-tagging]
+stage = 5
+profiles = ["web"]

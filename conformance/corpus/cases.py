@@ -90,6 +90,8 @@ def validate(case: dict, where: str = "<memory>") -> None:
                 for h in header:
                     if len(h) != width:
                         bad(f"block {i}: header rows differ in width")
+            if b.get("width") not in (None, "100%", "90%", "auto"):
+                bad(f"block {i}: width {b.get('width')!r} is not one of 100%|90%|auto")
             if not isinstance(rows, list) or not rows:
                 bad(f"block {i}: table without rows")
             for r, row in enumerate(rows):

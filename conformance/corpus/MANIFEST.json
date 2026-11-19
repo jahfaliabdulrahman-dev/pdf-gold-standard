@@ -316,6 +316,13 @@
       "sha256": "acc97471265c553e00aaafec9ba4fe4ede94c297fb89a6414c91a99dd0dec116"
     },
     {
+      "bytes": 681,
+      "category": "tables",
+      "file": "tbl-explicit-width.json",
+      "id": "tbl-explicit-width",
+      "sha256": "2e8d6a687b368c77c909655f3d5d3a552bf18f10d648872c5d3f5b3f67128c89"
+    },
+    {
       "bytes": 3774,
       "category": "tables",
       "file": "tbl-page-break.json",
@@ -388,9 +395,9 @@
     "money": 7,
     "punctuation": 4,
     "shaping": 6,
-    "tables": 6,
+    "tables": 7,
     "vocalisation": 6
   },
   "schema": "conformance-corpus/1",
-  "total": 54
+  "total": 55
 }

@@ -25,5 +25,9 @@ def text_many(paths: list[str]) -> list[str]:
     for path in paths:
         r = subprocess.run(["pdftotext", "-q", "-enc", "UTF-8", path, "-"],
                            capture_output=True, text=True, timeout=120)
+        if r.returncode != 0:
+            # A tool that failed on a file is not a reader that read zero characters: an exact 0 attributed to
+            # the reader would enter the ratchet as that reader's floor (review F9).
+            raise RuntimeError(f"pdftotext exited {r.returncode} on {path}: {(r.stderr or '').strip()[:160]}")
         out.append(r.stdout)
     return out

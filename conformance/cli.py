@@ -7,7 +7,8 @@ import sys
 def run_command(a) -> int:
     from . import ratchet, runner
     try:
-        results = runner.run(a.engine, a.cases, a.out, a.readers, getattr(a, "time_repeats", 1))
+        results = runner.run(a.engine, a.cases, a.out, a.readers, getattr(a, "time_repeats", 1),
+                             run_structure=not getattr(a, "no_structure", False))
     except SystemExit as exc:
         print(exc)
         return 2
@@ -31,9 +32,11 @@ def run_command(a) -> int:
 
 def certify_command(a) -> int:
     from . import certificate
+    from .corpus.cases import CaseError
+    from .readers.limitations import LimitRefused
     try:
         cert = certificate.certify(a.pdf, a.case, a.engine)
-    except certificate.CertError as exc:
+    except (certificate.CertError, CaseError, LimitRefused) as exc:
         print(f"REFUSED — {exc}")
         return 2
     with open(a.out, "w", encoding="utf-8") as fh:
