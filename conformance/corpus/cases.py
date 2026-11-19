@@ -57,9 +57,14 @@ def validate(case: dict, where: str = "<memory>") -> None:
         bad(f"font {case['font']!r} is not plex|amiri")
     if case["lang"] != "ar":
         bad(f"lang {case['lang']!r}: this corpus is Arabic; another language is another corpus")
+    if case.get("plain") not in (None, True, False):
+        bad(f"plain {case.get('plain')!r} must be true|false (true = the bare fragment a customer hands over: "
+            f"no @page, no line-height, no body reset)")
     if not isinstance(case["blocks"], list) or not case["blocks"]:
         bad("blocks is empty")
     for i, b in enumerate(case["blocks"]):
+        if b.get("bold") not in (None, True, False):
+            bad(f"block {i}: bold {b.get('bold')!r} must be true|false")
         t = b.get("type")
         if t not in BLOCK_TYPES:
             bad(f"block {i}: type {t!r} is not one of {sorted(BLOCK_TYPES)}")

@@ -1,0 +1,32 @@
+{
+  "id": "bld-th",
+  "category": "tables",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "رأس جدول عريض"
+    },
+    {
+      "type": "table",
+      "bold": true,
+      "header": [
+        "البند",
+        "المبلغ"
+      ],
+      "rows": [
+        [
+          "رسوم",
+          "١٠٠"
+        ],
+        [
+          "خدمات",
+          "٢٠٠"
+        ]
+      ]
+    }
+  ],
+  "note": "a bold header row: the TH cells carry weight 700, and the layer must stay in order"
+}
