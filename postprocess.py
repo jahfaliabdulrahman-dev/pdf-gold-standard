@@ -528,14 +528,13 @@ def feature_bidi_space(pdf) -> None:
     Measured on Najd: repairing two fonts moved one page's word order from 0.14 to 0.83.
 
     This is a mapping correction, not a text edit: no glyph, position or word changes — only what the glyph
-    is called. A bidi control a reader cannot see has no business owning a visible space's width.
+    is called. A bidi control a reader cannot see has no business owning a visible space's width, so the rule
+    is exactly that: a glyph that occupies width is a space, and a glyph our text layer published in
+    `/PLMarkCids` is never renamed (it is a mark we placed on purpose).
     """
     import re as _re
     seen, repaired = set(), 0
     for page in pdf.pages:
-        contents = ([page.obj.Contents] if isinstance(page.obj.Contents, pikepdf.Stream)
-                    else list(page.obj.Contents))
-        page_bytes = b"".join(cs.read_bytes() for cs in contents)
         for _key, font in (page.obj.get("/Resources", {}).get("/Font", {}) or {}).items():
             tu = font.get("/ToUnicode")
             if tu is None or font.objgen in seen:
@@ -543,44 +542,19 @@ def feature_bidi_space(pdf) -> None:
             seen.add(font.objgen)
             src = tu.read_bytes().decode("latin-1")
             widths = _cid_widths(font)
-            space_gid = _space_gid(font)   # the glyph the font ITSELF calls U+0020; None = cannot tell
 
-            # The reference advance of a real space IN THIS FONT: the glyph the cmap names, or — when the
-            # subset carries no cmap — the glyph whose own ToUnicode says U+0020. Without a reference we do not
-            # guess: a deliberate LRM that Chrome gave a space's advance is indistinguishable from a space
-            # misnamed as a control, and clobbering it reverses a correctly ordered amount in Preview
-            # (measured: `-6,006.965` became `6,006.965-` once this repair renamed the LRM glyph).
-            space_w = widths.get(space_gid) if (space_gid is not None and widths) else None
-            if space_w is None:
-                for m0 in _re.finditer(r"<([0-9A-Fa-f]{4})>\s*<0020>", src):
-                    ref = widths.get(int(m0.group(1), 16))
-                    if ref:
-                        space_w = ref
-                        break
-
-            # How often each candidate glyph is actually DRAWN on the page. A space is drawn between every
-            # word; a directional control that the template inserts (an isolate's edge) is drawn once per
-            # occurrence of that construct. Both can carry a space's advance, so width alone cannot tell them
-            # apart — usage can. Measured: renaming a deliberate LRM killed Preview's reading of
-            # `-6,006.965` (it read `6,006.965-` while the page printed the sign on the left), and with the
-            # rename skipped Preview read it correctly.
-            drawn = {}
-            for candidate in set(_re.findall(r"<([0-9A-Fa-f]{4})>\s*<200[EF]>", src)):
-                drawn[int(candidate, 16)] = len(_re.findall(("<%s>" % candidate).encode(), page_bytes))
-            WORD_SEPARATOR_MIN = 3                        # a glyph drawn once or twice is not a word separator
+            # The CIDs the text layer created for direction marks, published by it in `/PLMarkCids` (see
+            # fix_text_layer.FontState.finish). A mark is a decision, not an accident: it is never renamed.
+            ours = {int(c) for c in (font.get("/PLMarkCids") or [])}
 
             def _remap(m):
                 cid = int(m.group(2), 16)
-                repeats = drawn.get(cid, 0) >= WORD_SEPARATOR_MIN
-                # only a glyph that actually occupies a space's width AND is used as one is a space; a true
-                # bidi control has width 0 and must keep its own name, or a document that inserts RLM
-                # deliberately gains a phantom space
-                if space_gid is not None:              # the font itself names its space glyph
-                    is_space = cid == space_gid
-                elif space_w is not None:              # compare against the font's own space advance
-                    is_space = abs(widths.get(cid, 0) - space_w) < 1e-6 and repeats
-                else:                                   # no reference readable: leave the control alone
-                    is_space = False
+                if cid in ours:
+                    return m.group(3)                       # a mark we placed: not a space, whatever its width
+                # A glyph that occupies width is a space, whatever the ToUnicode calls it: a real bidi control
+                # has zero advance. This is the whole rule — no threshold, no reference glyph — so a page that
+                # draws the misnamed space ONCE is repaired too (measured: a single-word caption).
+                is_space = (widths or {}).get(cid, 0) > 0
                 return m.group(1) + ("<0020>" if is_space else m.group(3))
 
             dst = _re.sub(r"(<([0-9A-Fa-f]{4})>\s*)(<200[EF]>)", _remap, src)
