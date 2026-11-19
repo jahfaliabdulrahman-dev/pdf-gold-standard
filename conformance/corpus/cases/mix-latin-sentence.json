@@ -1,0 +1,22 @@
+{
+  "id": "mix-latin-sentence",
+  "category": "mixed",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "جملة لاتينية"
+    },
+    {
+      "type": "paragraph",
+      "text": "الفقرة التالية إنجليزية: Business Process Model and Notation is a standard."
+    },
+    {
+      "type": "paragraph",
+      "text": "ثم تعود العربية."
+    }
+  ],
+  "note": "جملة لاتينية كاملة داخل فقرة عربية — ترتيب الكلمات هو المقيس"
+}

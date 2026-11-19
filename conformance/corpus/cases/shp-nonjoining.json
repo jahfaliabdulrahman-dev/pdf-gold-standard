@@ -1,0 +1,22 @@
+{
+  "id": "shp-nonjoining",
+  "category": "shaping",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "حروف لا تتصل بما بعدها"
+    },
+    {
+      "type": "paragraph",
+      "text": "دار ذرة روز ورد وادي."
+    },
+    {
+      "type": "paragraph",
+      "text": "هذه الحروف: ا د ذ ر ز و."
+    }
+  ],
+  "note": "الحروف التي لا تتصل يسارًا: ا د ذ ر ز و"
+}

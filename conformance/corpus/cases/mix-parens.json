@@ -1,0 +1,18 @@
+{
+  "id": "mix-parens",
+  "category": "mixed",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "أقواس واتجاهها"
+    },
+    {
+      "type": "paragraph",
+      "text": "النص (Arabic) داخل قوسين، والنص (عربي) أيضًا."
+    }
+  ],
+  "note": "قوسان يحيطان بمحتوى لاتيني وآخر عربي"
+}

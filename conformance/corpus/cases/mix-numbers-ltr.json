@@ -1,0 +1,18 @@
+{
+  "id": "mix-numbers-ltr",
+  "category": "mixed",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "رقم في سياقين"
+    },
+    {
+      "type": "paragraph",
+      "text": "رقم 12 في نص عربي، ورقم ١٢ في السياق نفسه."
+    }
+  ],
+  "note": "الرقم الغربي والهندي في الجملة نفسها"
+}

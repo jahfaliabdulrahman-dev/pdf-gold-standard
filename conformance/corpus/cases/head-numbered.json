@@ -1,0 +1,27 @@
+{
+  "id": "head-numbered",
+  "category": "headings",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "١. المقدمة"
+    },
+    {
+      "type": "paragraph",
+      "text": "نص المقدمة."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "٢.١ النطاق"
+    },
+    {
+      "type": "paragraph",
+      "text": "نص النطاق."
+    }
+  ],
+  "note": "عنوان بأرقام هندية داخل نصّه"
+}

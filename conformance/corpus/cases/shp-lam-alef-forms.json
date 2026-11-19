@@ -1,0 +1,22 @@
+{
+  "id": "shp-lam-alef-forms",
+  "category": "shaping",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "أشكال لام-ألف"
+    },
+    {
+      "type": "paragraph",
+      "text": "الأشكال الأربعة في سياق واحد: لا، ولأ، ولإ، ولآ."
+    },
+    {
+      "type": "paragraph",
+      "text": "وتكتب في كلمات: ملأ، ولإ، ولا، ولآلئ."
+    }
+  ],
+  "note": "لام-ألف بأشكالها الأربعة (U+0644 + U+0627/0623/0625/0622)"
+}

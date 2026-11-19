@@ -1,0 +1,18 @@
+{
+  "id": "shp-kaf-kitaba",
+  "category": "shaping",
+  "lang": "ar",
+  "font": "amiri",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "الحرف في مواضعه"
+    },
+    {
+      "type": "paragraph",
+      "text": "كتب كاتب مكتوب كتابة."
+    }
+  ],
+  "note": "الكاف والتاء والباء في الموضع الأول والوسط والأخير"
+}

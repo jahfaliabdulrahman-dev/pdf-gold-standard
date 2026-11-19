@@ -1,0 +1,36 @@
+{
+  "id": "head-h1-h3",
+  "category": "headings",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "كشف الحساب"
+    },
+    {
+      "type": "paragraph",
+      "text": "مقدمة قصيرة تحت العنوان الأول."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "القسم الأول"
+    },
+    {
+      "type": "paragraph",
+      "text": "نص القسم الأول."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "الفرع الأول"
+    },
+    {
+      "type": "paragraph",
+      "text": "نص الفرع الأول."
+    }
+  ],
+  "note": "H1–H3 متداخلة — كل عنوان عنصر بنيته الخاصة"
+}

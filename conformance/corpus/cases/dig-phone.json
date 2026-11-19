@@ -1,0 +1,18 @@
+{
+  "id": "dig-phone",
+  "category": "digits",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "هاتف"
+    },
+    {
+      "type": "paragraph",
+      "text": "هاتف: ٠٥٥١٢٣٤٥٦٧، والدولي +966 55 123 4567."
+    }
+  ],
+  "note": "رقم هاتف محلي ودولي في سطر واحد"
+}

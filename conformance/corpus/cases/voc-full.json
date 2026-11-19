@@ -1,0 +1,18 @@
+{
+  "id": "voc-full",
+  "category": "vocalisation",
+  "lang": "ar",
+  "font": "amiri",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "نص مشكول كاملًا"
+    },
+    {
+      "type": "paragraph",
+      "text": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ."
+    }
+  ],
+  "note": "آية مشكولة كاملًا — كل حرف يحمل حركته"
+}

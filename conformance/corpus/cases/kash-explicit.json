@@ -1,0 +1,18 @@
+{
+  "id": "kash-explicit",
+  "category": "kashida",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "تطويل في المصدر"
+    },
+    {
+      "type": "paragraph",
+      "text": "الموافقة مـــن الإدارة، والطلب مـــرفوع."
+    }
+  ],
+  "note": "تطويل (U+0640) مكتوب في المصدر نفسه — يجب أن يبقى ولا يُضاف"
+}
