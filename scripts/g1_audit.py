@@ -2,10 +2,14 @@
 """Two facts about a directory of produced PDFs, read the same way the pipeline reads them.
 
   1. `/PL*` keys anywhere in the file. Our bookkeeping is consumed by the stage after the one that wrote it and
-     must not ship: a private key in a PDF/A-3b document is an unregistered entry in the customer's file.
+     must not ship: a private key in a PDF/A-3b document is an unregistered entry in the customer's file. The
+     reader is `pdfops.private_keys` — the same one both gates run; this tool only widens the SCOPE to a
+     directory. It is not a CI step: the certificate gate enforces the rule on any file, and a third red step
+     would not say which gate failed.
   2. Fonts with **neither** a readable `/W` nor a cmap that names U+0020. The space repair cannot judge those, so it
      leaves them alone; the number has to be known, because that silence is a behaviour, not a gap. (The review
      asked for it: before the width rule, a font with no readable widths was still repaired by the named space.)
+     This count is a DIAGNOSTIC, not a gate: a non-zero value is printed, never failed on.
 
 Usage: `python3 scripts/g1_audit.py DIR [DIR …]` — prints one line per file with a finding, then the totals.
 """
@@ -17,6 +21,7 @@ import pikepdf
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..")))
 
+import pdfops     # noqa: E402  (the one private-key reader)
 import postprocess  # noqa: E402  (the same readers the repair uses: one implementation, not a second opinion)
 
 
@@ -24,9 +29,7 @@ def audit(path: str) -> tuple[list[str], int, int]:
     """(house keys found, fonts read, fonts no rule can judge)."""
     keys, fonts, blind = set(), 0, 0
     with pikepdf.open(path) as pdf:
-        for obj in pdf.objects:
-            if isinstance(obj, pikepdf.Dictionary):
-                keys.update(str(k) for k in obj.keys() if str(k).startswith("/PL"))
+        keys = set(pdfops.private_keys(pdf))
         seen = set()
         for page in pdf.pages:
             for _k, font in (page.obj.get("/Resources", {}).get("/Font", {}) or {}).items():

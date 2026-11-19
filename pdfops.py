@@ -342,3 +342,46 @@ def model_stats(pdf):
 def model_boundary(pdf):
     """Every structure outside the declared model, by name. Empty means the file is inside the boundary."""
     return model_stats(pdf)[0]
+
+
+# ---------------------------------------------------------------- private keys (ISO 32000-1 Annex E)
+# Annex E (normative, "PDF Name Registry") is the registry for private data added to a PDF: a conforming writer
+# may add private keys, but only under a registered developer prefix (second class) or the reserved internal
+# prefix (third class). Our bookkeeping is neither — it is how one stage talks to the next, and it is consumed
+# before the file leaves. A PDF/A validator will NOT catch a leak: PDF Association TechNote 0010 (A009) puts
+# Annex E outside ISO 19005's validation scope (private data is legal; only its low-level syntax is checked).
+# So the file's own gate must, and the prefix is declared once so the writer and both gates cannot disagree.
+HOUSE_KEY_PREFIX = "/PL"
+MARK_CIDS_KEY = HOUSE_KEY_PREFIX + "MarkCids"
+
+
+def private_keys(pdf) -> list[str]:
+    """Every `/PL*` name in the file, read from every place a key can live.
+
+    `pdf.objects` reaches INDIRECT objects only, so the walk also reads the trailer and descends into direct
+    dictionaries and arrays: an inline `/Resources`, a structure-element attribute dictionary, or a stream's
+    own dictionary would otherwise be a hole in a rule stated as "any object". Indirect values are not
+    followed — `pdf.objects` already visits them.
+    """
+    found: set[str] = set()
+
+    def scan(obj) -> None:
+        kind = getattr(obj, "_type_code", None)          # pikepdf 10.18.1 (pinned): the public type enum
+        if kind == pikepdf.ObjectType.stream:
+            scan(obj.stream_dict)                        # a stream's keys are its stream dictionary
+        elif kind == pikepdf.ObjectType.dictionary:
+            for key in obj.keys():
+                if str(key).startswith(HOUSE_KEY_PREFIX):
+                    found.add(str(key))
+            for value in obj.values():
+                if isinstance(value, pikepdf.Object) and not value.is_indirect:
+                    scan(value)
+        elif kind == pikepdf.ObjectType.array:
+            for item in obj:
+                if isinstance(item, pikepdf.Object) and not item.is_indirect:
+                    scan(item)
+
+    for obj in pdf.objects:
+        scan(obj)
+    scan(pdf.trailer)                                    # not in pdf.objects, and not a place Annex E allows
+    return sorted(found)
