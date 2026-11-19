@@ -299,6 +299,9 @@ MARKS_ACTUAL = b"/Span <</ActualText <FEFF0009>>> BDC\n"
 OPEN, CLOSE = "([{", ")]}"
 
 
+SIGNS = set("+-−%")           # the characters that extend a number to the left (see `direction_marks`)
+
+
 def bidi_kind(txt):
     for ch in txt:
         t = unicodedata.bidirectional(ch)
@@ -331,6 +334,13 @@ def direction_marks(data, fontmap, st_of, stats):
     for line in lines.values():
         line.sort(key=lambda g: g[1])
         kinds = [bidi_kind(g[2]) if g[2].strip() else "S" for g in line]
+        # A SIGN ATTACHED TO A NUMBER IS PART OF THE NUMBER (UAX#9: ES/ET adjacent to EN resolves to EN).
+        # Without this, a leading `-` in an isolated LTR amount reads as a neutral at the line edge, the code
+        # puts an RLM in front of it, and the sign jumps to the end of the amount in every reader — measured on
+        # `mon-negative-table`: raw Chrome read `-6,006.965`, this function turned it into `6,006.965-`.
+        for i, g in enumerate(line):
+            if kinds[i] == "N" and g[2].strip() in SIGNS and i + 1 < len(line) and kinds[i + 1] == "L":
+                kinds[i] = "L"
         i, n = 0, len(line)
         while i < n:
             if kinds[i] != "L": i += 1; continue
@@ -347,6 +357,13 @@ def direction_marks(data, fontmap, st_of, stats):
             if right_attached: b += 1
             if left_attached: ins.append((line[a], 0, LRM))
             if right_attached: ins.append((line[b], 1, LRM))
+            # NO BOUNDARY MARK FOR A SIGNED NUMBER YET — measured, and it does not work at this level.
+            # Preview needs an LRM at the amount's edge to read `-6,006.965` (without it it reads `6,006.965-`
+            # on a page that prints the sign first). But a mark inside the amount's own `Tj` extends that run's
+            # bounding box, and PDFium then sorts the amount BEFORE the Arabic word in the row — measured:
+            # pdfium exact 1/0 flipped to 0/1 with the mark, at both edges. A correct fix must place the mark in
+            # a text object of its own (zero bbox, zero advance), not inside the run; until then Preview cannot
+            # certify a table amount and `mon-negative-table` stays at pdfium exact 1, Preview 0.
             if True:                                                  # punctuation between the run and the LEFT line edge
                 k = a - 1
                 while k >= 0 and kinds[k] in ("N", "S"): k -= 1
