@@ -16,10 +16,16 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 FILE = os.path.join(HERE, "ratchet.json")
 TOL = 1e-9
-# Readers that ship with the operating system, not with a pinned package: their version IS the runner image.
-# A different OS means the floors are not comparable (measured: PDFKit reports the macOS version), so the
-# comparison is skipped FOR THAT READER and said out loud — never silently, and never for a pinned reader.
-OS_VERSIONED = {"pdfkit": "PDFKit ships with macOS; its version is the runner image, not a pin"}
+# Readers whose version comes from the machine, not from a pin: PDFKit ships with macOS, and poppler ships from
+# brew with no version switch (the CI runner had 26.10.0 while the floors were measured on 26.07.0 — measured,
+# not assumed). Their floors are not comparable across machines, so the comparison is skipped FOR THAT READER
+# and said out loud. What keeps them honest instead: the writer's `limitations.json` control is re-run on every
+# `run`, so a limit that stopped reproducing on the installed version is refused by name. Never silent, and
+# never for a pip-pinned reader.
+UNPINNED = {
+    "pdfkit": "PDFKit ships with macOS; its version is the runner image, not a pin",
+    "poppler": "poppler ships from brew with no version switch; the floors are one machine's",
+}
 
 
 def load(path: str = FILE) -> dict:
@@ -69,9 +75,9 @@ def check(results: dict, path: str = FILE) -> tuple[list[str], list[str]]:
             notes.append(f"{reader}: no floors recorded")
             continue
         if base.get("version") != block["version"]:
-            if reader in OS_VERSIONED:
+            if reader in UNPINNED:
                 notes.append(f"{reader}: {block['version']} vs floors on {base.get('version')} — "
-                             f"{OS_VERSIONED[reader]}; floors not compared")
+                             f"{UNPINNED[reader]}; floors not compared")
                 continue
             bad.append(f"{reader}: version {block['version']} measured, floors recorded on {base.get('version')} "
                        f"— re-run with --accept after checking the changelog")
