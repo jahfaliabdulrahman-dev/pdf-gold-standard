@@ -355,13 +355,15 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         # systems. Separator STYLE (Arabic ٬/٫ vs ASCII ,/.) is not mixed here — the owner's decision names
         # numerals and identifiers, not separators; the corpus case `num-ids-latn-in-arab` covers identifiers.
         persian = [ch for ch in file_text if 0x06F0 <= ord(ch) <= 0x06F9]
-        add("numerals-persian", not persian,
-            "no U+06F0–U+06F9 digit in the layer" if not persian else
-            f"{len(persian)} Persian digit(s) in the layer — an ar file uses ٠-٩ or 0-9, never ۰-۹")
-        mixed = _mixed_numbers(file_text)
-        add("numerals-mixed", not mixed,
-            "no number mixes digit systems" if not mixed else
-            f"{len(mixed)} number(s) mix digit systems: " + ", ".join(mixed[:4]))
+        add("numerals-persian", bool(file_text) and not persian,
+            "no text layer to read" if not file_text else
+            ("no U+06F0–U+06F9 digit in the layer" if not persian else
+             f"{len(persian)} Persian digit(s) in the layer — an ar file uses ٠-٩ or 0-9, never ۰-۹"))
+        mixed = mixed_numbers(file_text)
+        add("numerals-mixed", bool(file_text) and not mixed,
+            "no text layer to read" if not file_text else
+            ("no number mixes digit systems" if not mixed else
+             f"{len(mixed)} number(s) mix digit systems: " + ", ".join(mixed[:4])))
 
         # --- the outline says what the headings say -------------------------------------------------
         import pymupdf
@@ -448,11 +450,15 @@ def _digit_system(ch: str) -> str:
     return "persian"
 
 
-def _mixed_numbers(text: str) -> list[str]:
-    """Tokens whose digits come from more than one system (ASCII / Arabic-Indic / Persian)."""
+def mixed_numbers(text: str) -> list[str]:
+    """Tokens whose digits come from more than one **displayed** system: ASCII and Arabic-Indic.
+
+    Persian digits are excluded on purpose: `numerals-persian` owns them, and one defect must not be reported
+    twice (the module's own rule). A Persian+ASCII token fails `numerals-persian` alone.
+    """
     out = []
     for m in _NUMERAL_TOKEN.finditer(text):
-        systems = {_digit_system(ch) for ch in m.group() if ch.isdigit()}
+        systems = {_digit_system(ch) for ch in m.group() if ch.isdigit()} & {"ascii", "arab"}
         if len(systems) > 1:
             out.append(m.group())
     return out

@@ -59,6 +59,12 @@ def main(argv=None) -> int:
     s.add_argument("--engine", default="chrome", choices=["chrome", "chrome-raw", "typst", "weasyprint"])
 
     a = ap.parse_args(argv)
+    if a.cmd == "run" and a.force and not a.accept:
+        ap.error("--force is only meaningful with --accept")
+    if a.cmd == "run" and a.accept and a.ratchet:
+        ap.error("--accept and --ratchet are alternatives: accept records the run, it does not check it")
+    if a.cmd == "ratchet" and a.force and a.action != "accept":
+        ap.error("--force is only meaningful with `ratchet accept`")
     if a.cmd == "manifest":
         from .corpus import manifest, coverage, cases
         if a.write:
