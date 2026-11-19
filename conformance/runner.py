@@ -27,7 +27,8 @@ ENGINES = {
     "chrome": (chrome, "chrome"),
     "chrome-raw": (chrome, "chrome-raw"),
     "typst": (typst, None),
-    "weasyprint": (weasyprint, None),
+    "weasyprint": (weasyprint, "weasyprint"),
+    "weasyprint+pp": (weasyprint, "weasyprint+pp"),
 }
 
 

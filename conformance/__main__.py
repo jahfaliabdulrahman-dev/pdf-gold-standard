@@ -22,7 +22,7 @@ def main(argv=None) -> int:
     m.add_argument("--check", action="store_true", help="exit 1 when the stored manifest is not derived")
 
     r = sub.add_parser("run", help="build the corpus with one engine and measure every declared reader")
-    r.add_argument("--engine", default="chrome", choices=["chrome", "chrome-raw", "typst", "weasyprint"])
+    r.add_argument("--engine", default="chrome", choices=["chrome", "chrome-raw", "typst", "weasyprint", "weasyprint+pp"])
     r.add_argument("--cases", nargs="*", default=["all"])
     r.add_argument("--out", default="/tmp/conformance")
     r.add_argument("--readers", nargs="*", default=None, help="subset of reader names (default: all)")
@@ -51,7 +51,7 @@ def main(argv=None) -> int:
     rt.add_argument("--file", dest="path", default=None, help="the floors file (default conformance/ratchet.json)")
 
     s = sub.add_parser("selftest", help="planted mutations: every check must be seen failing")
-    s.add_argument("--engine", default="chrome", choices=["chrome", "chrome-raw", "typst", "weasyprint"])
+    s.add_argument("--engine", default="chrome", choices=["chrome", "chrome-raw", "typst", "weasyprint", "weasyprint+pp"])
 
     a = ap.parse_args(argv)
     if a.cmd == "manifest":
