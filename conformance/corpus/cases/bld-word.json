@@ -1,0 +1,27 @@
+{
+  "id": "bld-word",
+  "category": "shaping",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "كلمة عريضة"
+    },
+    {
+      "type": "paragraph",
+      "text": "قبل "
+    },
+    {
+      "type": "paragraph",
+      "text": "المبلغ المستحق",
+      "bold": true
+    },
+    {
+      "type": "paragraph",
+      "text": "بعد الكلمة العريضة."
+    }
+  ],
+  "note": "bold is the real 700 face (both weights declared); asserts no Type3 font is produced"
+}

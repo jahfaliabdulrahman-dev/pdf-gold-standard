@@ -1,0 +1,19 @@
+{
+  "id": "bld-heading",
+  "category": "headings",
+  "lang": "ar",
+  "font": "amiri",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "عنوان عريض",
+      "bold": true
+    },
+    {
+      "type": "paragraph",
+      "text": "فقرة تحت العنوان العريض."
+    }
+  ],
+  "note": "an Outline title in the real bold face — the outline text must still match"
+}
