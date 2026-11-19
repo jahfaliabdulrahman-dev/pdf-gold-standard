@@ -1,0 +1,18 @@
+{
+  "id": "pun-semicolon-question",
+  "category": "punctuation",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "الفاصلة المنقوطة والاستفهام"
+    },
+    {
+      "type": "paragraph",
+      "text": "انتهى الاجتماع؛ وأُجّل القرار. هل نُكمل؟"
+    }
+  ],
+  "note": "«؛» و«؟» في جملة واحدة"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "dig-date-hindi",
+  "category": "digits",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "تاريخ"
+    },
+    {
+      "type": "paragraph",
+      "text": "التاريخ: ٢٠٢٦/١١/١٩، والموعد ١٩/١١/٢٠٢٦."
+    }
+  ],
+  "note": "تاريخ بالهندية — والترتيب هو ما يميّز ١٩ عن ١١"
+}

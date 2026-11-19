@@ -1,0 +1,18 @@
+{
+  "id": "dig-mixed-scripts",
+  "category": "digits",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "رقمان في جملة"
+    },
+    {
+      "type": "paragraph",
+      "text": "الفاتورة رقم ١٢٣٤ بتاريخ 2026/11/19."
+    }
+  ],
+  "note": "هندية وغربية في جملة عربية واحدة"
+}

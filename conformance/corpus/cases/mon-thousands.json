@@ -1,0 +1,18 @@
+{
+  "id": "mon-thousands",
+  "category": "money",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "فواصل الآلاف"
+    },
+    {
+      "type": "paragraph",
+      "text": "المبلغ ١٬٢٣٤٬٥٦٧٫٨٩ و 1,234,567.89."
+    }
+  ],
+  "note": "فاصل آلاف عربي (U+066C) وغربي في سطر"
+}

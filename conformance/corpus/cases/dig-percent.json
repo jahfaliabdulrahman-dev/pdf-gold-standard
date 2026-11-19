@@ -1,0 +1,18 @@
+{
+  "id": "dig-percent",
+  "category": "digits",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "نسبة"
+    },
+    {
+      "type": "paragraph",
+      "text": "نسبة الإنجاز ٩٥٫٧٪ مقابل 95.7% في التقرير السابق."
+    }
+  ],
+  "note": "نسبة بالفاصلة العشرية العربية (U+066B) والغربية"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "mix-email-url",
+  "category": "mixed",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "بريد ورابط"
+    },
+    {
+      "type": "paragraph",
+      "text": "البريد name@example.com والرابط https://example.com/a/b?c=1"
+    }
+  ],
+  "note": "بريد ورابط — محارف LTR في سياق RTL"
+}
