@@ -61,20 +61,29 @@ still count. Counted per run with a `Counter`, not «does this string appear som
 
 These are results, not opinions; each is reproducible with `python3 -m conformance run --cases <id>`.
 
-1. **A table with an explicit width is painted as one text run.** `table { width: 100% }` (also `90%`,
-   `min-width:100%`, `table-layout:fixed`) makes Chrome print the whole table as a single run, and PDFium then
-   returns the rows in reverse order — on a page that renders perfectly. With `width: auto` the same table is
-   correct. The corpus template therefore uses `width: auto`; the finding is recorded here because a customer
-   who sizes a table will hit it.
+1. **A `width:100%` table in a BARE fragment collapses into one text run.** Measured 3x2x2 on CfT 157: the
+   defect needs the CONJUNCTION of `width:100%`, no `@page` declaration, and no `line-height` — add either
+   `@page { size: A4; margin: 20mm }` OR `line-height: 1.7` and the same table reads in order. When the
+   conjunction holds, Chrome prints the table as one run and PDFium returns its rows reversed
+   (`خدمات ٢٠٠ رسوم ١٠٠`) with the heading shredded per glyph; `fix_text_layer` repairs it afterwards.
+   `tbl-plain-fragment` is the case that reproduces it (built with `chrome-raw`, asserted by
+   `tests/test_engine_behaviour.py`), and `tbl-width-100` is the harmless twin under a declared page box.
+   An earlier version of this file said `width:100%` alone did it — that was a confounded measurement and the
+   review was right to reject it.
 2. **Synthetic bold prints as Type3 and carries Presentation Forms.** `th` inherits `font-weight: bold` from
    the UA stylesheet; Chrome then synthesises the face, prints it as Type3, and its `/ToUnicode` names
-   U+FB50-block forms. Measured on a two-row table: three Type3 fonts and 9 presentation-form characters in
-   the layer, and the transfer's `pdfminer` output inherits them. The template now pins `font-weight: 400` on
-   `th`, `b`, `strong`; the case `tbl-*` family measures the result.
+   U+FB50-block forms. Measured on a two-row table: three Type3 fonts and 9 presentation-form characters in the
+   layer, and pdfminer inherits them. The answer was not to forbid bold: both real weights of each family are
+   declared (@font-face 400 and 700, sha256-pinned), so `bold: true` on a block is set in the real face and
+   `tests/test_engine_behaviour.py` asserts no Type3 font in `bld-word`, `bld-heading` and `bld-th`.
 3. **Chrome's print output for an RTL table is a separate paint pass.** With the two fixes above, the layer's
    structure (MCIDs, tag order, per-cell text) is correct — verified cell by cell by `tables`.
-4. **PDFium returns a single-line vocalised paragraph's words in reverse** when the paragraph has no heading
-   above it; with a heading the same text is exact. The corpus keeps the heading because a document has one.
+4. **A line-final haraka is displaced past the closing punctuation.** Measured: `voc-full` reads
+   `الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِين.َ` — the marks are all there, and the fatha of the final nūn sits AFTER
+   the full stop (same in `voc-partial`: `…وَسَلَّم.َ`). This is an ordering defect at line end, not missing
+   marks; an earlier report said the marks were absent and the review was right to reject it. The same text
+   with no period, or with a heading above it, reads `exact` — `voc-no-heading` measures the no-heading shape
+   and passes, which is why the corpus no longer claims the heading changes the outcome.
 5. **MuPDF moves sentence-final punctuation to the line start** on RTL lines (`.مقدمة …`), which is why its
    `exact` is near zero on Arabic prose while its `order` stays in the 0.6–0.7 range.
 6. **pdfminer.six returns visual order and presentation forms** for Chrome's CID fonts: `order` ≈ 0.1,
