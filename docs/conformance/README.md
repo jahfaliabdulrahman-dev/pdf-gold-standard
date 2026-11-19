@@ -52,10 +52,13 @@ that is the claim; the certificate says whether it holds.
 Versions are printed in every result and in every certificate. A reader that cannot run is `n/a` **with its
 reason**; it never prints `PASS`.
 
-One reader is **OS-versioned**: PDFKit ships with macOS, so its version is the runner image, not a pin. The
-ratchet records it and skips the floor comparison for PDFKit when the version differs (a note, not a silent
-pass), while every other reader — pdfium, mupdf, pdfminer from pip, poppler checked by version — is gated. A
-reader that disappears from a run is a **failure**, never a skip.
+Two readers are **unpinned** — their version comes from the machine, not from a pin: PDFKit ships with macOS,
+and poppler ships from brew with no version switch (measured: the CI runner had 26.10.0 while the floors were
+taken on 26.07.0). The ratchet records both and, when the version differs, **skips that reader's floors with a
+printed note** — never silently. What keeps an unpinned reader honest is the limit's control, which every `run`
+re-executes: a limit that stopped reproducing on the installed version is refused by name. The three pip readers
+(pdfium, mupdf, pdfminer) are gated unconditionally. A reader that disappears from a run is a **failure**,
+never a skip.
 
 ## The declared limits
 
