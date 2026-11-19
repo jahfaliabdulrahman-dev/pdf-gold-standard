@@ -21,6 +21,7 @@ from collections import Counter
 
 import pikepdf
 
+from ..adapters import fonts
 from . import mcid_text, verapdf as verapdf_mod
 from . import metrics
 
@@ -265,14 +266,22 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
 
         # --- fonts: embedded, named ToUnicode, and only the family the case declares ----------------
         declared = _family(case["font"])
+        # The declared last-resort face is allowed to draw what the case family cannot (U+20C1 is in neither
+        # corpus font). It is named in fonts.FONTS, pinned by sha256 and OFL — an embedded family outside
+        # {case family, declared fallback} is still a failure, which is the point of this check.
+        def norm(x: str) -> str:
+            return "".join(ch for ch in (x or "").lower() if ch.isalnum())
+
+        allowed = {norm(declared), norm(fonts.FONTS["riyal"]["family"])}
         bad_fonts = []
         for name, info in scan["fonts"].items():
             if not info["embedded"]:
                 bad_fonts.append(f"{info['family'] or name}: not embedded")
             if not info["tounicode"]:
                 bad_fonts.append(f"{info['family'] or name}: no /ToUnicode")
-            if not (info["family"] or "").startswith(declared.split()[0]):
-                bad_fonts.append(f"{info['family'] or name}: not the case's font ({declared})")
+            if not any(norm(info["family"]).startswith(a) for a in allowed if a):
+                bad_fonts.append(f"{info['family'] or name}: not the case's font ({declared}) nor the declared "
+                                 f"fallback")
         add("fonts", not bad_fonts, "; ".join(sorted(set(bad_fonts))[:4]) or
             f"{len(scan['fonts'])} font(s) used for text, all embedded with /ToUnicode")
         add("notdef", scan["notdef"] == 0,

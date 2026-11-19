@@ -1,6 +1,796 @@
 {
  "cases": [
   {
+   "bytes": 21660,
+   "category": "headings",
+   "checks": [
+    {
+     "id": "markinfo",
+     "reason": "/MarkInfo /Marked true",
+     "status": "pass"
+    },
+    {
+     "id": "lang",
+     "reason": "/Lang 'ar'",
+     "status": "pass"
+    },
+    {
+     "id": "all-text-tagged",
+     "reason": "every text show carries an MCID",
+     "status": "pass"
+    },
+    {
+     "id": "tagged-text",
+     "reason": "6 tagged words match the case",
+     "status": "pass"
+    },
+    {
+     "id": "headings",
+     "reason": "1 heading element(s), levels [1]",
+     "status": "pass"
+    },
+    {
+     "id": "tables",
+     "reason": "0 table(s) · TR/TH/TD match the case cell by cell",
+     "status": "pass"
+    },
+    {
+     "id": "block-order",
+     "reason": "top-level tags ['/H1', '/P']",
+     "status": "pass"
+    },
+    {
+     "id": "fonts",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
+     "status": "pass"
+    },
+    {
+     "id": "notdef",
+     "reason": "no glyph 0 drawn",
+     "status": "pass"
+    },
+    {
+     "id": "invisible-format",
+     "reason": "1 U+200B/200C/200D/2060 in the layer — the producer inserted them and a copy-paste carries them",
+     "status": "fail"
+    },
+    {
+     "id": "presentation-forms",
+     "reason": "no presentation form in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "tounicode-coverage",
+     "reason": "every drawn code has a Unicode value",
+     "status": "pass"
+    },
+    {
+     "id": "outline",
+     "reason": "1 entr(y/ies)",
+     "status": "pass"
+    },
+    {
+     "id": "model-boundary",
+     "reason": "inside the declared model",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-ua1",
+     "reason": "no failing rule",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-pdfa3b",
+     "reason": "no failing rule",
+     "status": "pass"
+    }
+   ],
+   "file": {
+    "bidi": 0,
+    "codes": 35,
+    "notdef": 0,
+    "untagged_chars": 0,
+    "zero_width": 1
+   },
+   "font": "amiri",
+   "id": "bld-heading",
+   "median_seconds": 0.6774159159976989,
+   "pdf": "bld-heading.pdf",
+   "per_reader": {
+    "mupdf": {
+     "chars": {
+      "out": 36,
+      "truth": 35
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 1
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.666667,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.666667
+     }
+    },
+    "pdfium": {
+     "chars": {
+      "out": 36,
+      "truth": 35
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 1
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.833333,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.833333
+     }
+    },
+    "pdfkit": {
+     "chars": {
+      "out": 36,
+      "truth": 35
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 1
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.833333,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.833333
+     }
+    },
+    "pdfminer": {
+     "chars": {
+      "out": 36,
+      "truth": 35
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 1
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.166667,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.166667
+     }
+    },
+    "poppler": {
+     "chars": {
+      "out": 36,
+      "truth": 35
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 1
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [
+      {
+       "detail": "6/6 control(s) excused at 4/line over 2 line(s)",
+       "excused": 6,
+       "id": "poppler-bidi-decorations",
+       "reader_version_measured": "26.07.0"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.833333,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.833333
+     }
+    }
+   },
+   "producer": {
+    "engine": "chrome",
+    "engine_version": "157.0.8103.78",
+    "markup_sha256": "d2a7058473603f84c92aaeed93f2a69c6450f478b18880590abbd98c30d9f893",
+    "outline": "1 entries",
+    "postprocess": true
+   },
+   "sha256": "355ec68eadfb630fbe6ebc4266a5f5290bd39263527df7f0c312a0579bc1ec8c",
+   "structural_ok": false,
+   "text_sha256": "47fbed0782574e5549c4d5212f7c218e3d1146073850e078f2af4a764842cbb7"
+  },
+  {
+   "bytes": 19099,
+   "category": "tables",
+   "checks": [
+    {
+     "id": "markinfo",
+     "reason": "/MarkInfo /Marked true",
+     "status": "pass"
+    },
+    {
+     "id": "lang",
+     "reason": "/Lang 'ar'",
+     "status": "pass"
+    },
+    {
+     "id": "all-text-tagged",
+     "reason": "every text show carries an MCID",
+     "status": "pass"
+    },
+    {
+     "id": "tagged-text",
+     "reason": "9 tagged words match the case",
+     "status": "pass"
+    },
+    {
+     "id": "headings",
+     "reason": "1 heading element(s), levels [1]",
+     "status": "pass"
+    },
+    {
+     "id": "tables",
+     "reason": "1 table(s) · TR/TH/TD match the case cell by cell",
+     "status": "pass"
+    },
+    {
+     "id": "block-order",
+     "reason": "top-level tags ['/H1', '/Table']",
+     "status": "pass"
+    },
+    {
+     "id": "fonts",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
+     "status": "pass"
+    },
+    {
+     "id": "notdef",
+     "reason": "no glyph 0 drawn",
+     "status": "pass"
+    },
+    {
+     "id": "invisible-format",
+     "reason": "no invisible joiner in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "presentation-forms",
+     "reason": "no presentation form in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "tounicode-coverage",
+     "reason": "every drawn code has a Unicode value",
+     "status": "pass"
+    },
+    {
+     "id": "outline",
+     "reason": "1 entr(y/ies)",
+     "status": "pass"
+    },
+    {
+     "id": "model-boundary",
+     "reason": "inside the declared model",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-ua1",
+     "reason": "no failing rule",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-pdfa3b",
+     "reason": "no failing rule",
+     "status": "pass"
+    }
+   ],
+   "file": {
+    "bidi": 0,
+    "codes": 39,
+    "notdef": 0,
+    "untagged_chars": 0,
+    "zero_width": 0
+   },
+   "font": "plex",
+   "id": "bld-th",
+   "median_seconds": 0.6565189169486985,
+   "pdf": "bld-th.pdf",
+   "per_reader": {
+    "mupdf": {
+     "chars": {
+      "out": 45,
+      "truth": 45
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "٠٠١",
+       "٠٠٢"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [
+      {
+       "detail": "2/2 missing run(s) are exact reversals",
+       "excused": 2,
+       "id": "mupdf-ar-digit-reversal",
+       "reader_version_measured": "2.1"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.777778,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.777778
+     }
+    },
+    "pdfium": {
+     "chars": {
+      "out": 45,
+      "truth": 45
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfkit": {
+     "chars": {
+      "out": 45,
+      "truth": 45
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfminer": {
+     "chars": {
+      "out": 45,
+      "truth": 45
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.222222,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.222222
+     }
+    },
+    "poppler": {
+     "chars": {
+      "out": 45,
+      "truth": 45
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [
+      {
+       "detail": "16/16 control(s) excused at 4/line over 6 line(s)",
+       "excused": 16,
+       "id": "poppler-bidi-decorations",
+       "reader_version_measured": "26.07.0"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    }
+   },
+   "producer": {
+    "engine": "chrome",
+    "engine_version": "157.0.8103.78",
+    "markup_sha256": "f56d37877c68c0f72ad12a38727b8e8ab1a632036e19f451874d4b9449fe46be",
+    "outline": "1 entries",
+    "postprocess": true
+   },
+   "sha256": "b0183bbac4ae132edf587b3fe3909e0b886c2f50a116a2140ee1e49c24421438",
+   "structural_ok": true,
+   "text_sha256": "0cbd6cf75c3f5ca91b7b1912202de9d1a62f8fd042d7a4f3acc803af2340b4ad"
+  },
+  {
+   "bytes": 17504,
+   "category": "shaping",
+   "checks": [
+    {
+     "id": "markinfo",
+     "reason": "/MarkInfo /Marked true",
+     "status": "pass"
+    },
+    {
+     "id": "lang",
+     "reason": "/Lang 'ar'",
+     "status": "pass"
+    },
+    {
+     "id": "all-text-tagged",
+     "reason": "every text show carries an MCID",
+     "status": "pass"
+    },
+    {
+     "id": "tagged-text",
+     "reason": "8 tagged words match the case",
+     "status": "pass"
+    },
+    {
+     "id": "headings",
+     "reason": "1 heading element(s), levels [1]",
+     "status": "pass"
+    },
+    {
+     "id": "tables",
+     "reason": "0 table(s) · TR/TH/TD match the case cell by cell",
+     "status": "pass"
+    },
+    {
+     "id": "block-order",
+     "reason": "top-level tags ['/H1', '/P', '/P', '/P']",
+     "status": "pass"
+    },
+    {
+     "id": "fonts",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
+     "status": "pass"
+    },
+    {
+     "id": "notdef",
+     "reason": "no glyph 0 drawn",
+     "status": "pass"
+    },
+    {
+     "id": "invisible-format",
+     "reason": "no invisible joiner in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "presentation-forms",
+     "reason": "no presentation form in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "tounicode-coverage",
+     "reason": "every drawn code has a Unicode value",
+     "status": "pass"
+    },
+    {
+     "id": "outline",
+     "reason": "1 entr(y/ies)",
+     "status": "pass"
+    },
+    {
+     "id": "model-boundary",
+     "reason": "inside the declared model",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-ua1",
+     "reason": "no failing rule",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-pdfa3b",
+     "reason": "no failing rule",
+     "status": "pass"
+    }
+   ],
+   "file": {
+    "bidi": 0,
+    "codes": 46,
+    "notdef": 0,
+    "untagged_chars": 0,
+    "zero_width": 0
+   },
+   "font": "plex",
+   "id": "bld-word",
+   "median_seconds": 0.6736221249448135,
+   "pdf": "bld-word.pdf",
+   "per_reader": {
+    "mupdf": {
+     "chars": {
+      "out": 49,
+      "truth": 49
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.75,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.75
+     }
+    },
+    "pdfium": {
+     "chars": {
+      "out": 49,
+      "truth": 49
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfkit": {
+     "chars": {
+      "out": 49,
+      "truth": 49
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfminer": {
+     "chars": {
+      "out": 49,
+      "truth": 49
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.0,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.0
+     }
+    },
+    "poppler": {
+     "chars": {
+      "out": 49,
+      "truth": 49
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [
+      {
+       "detail": "10/10 control(s) excused at 4/line over 4 line(s)",
+       "excused": 10,
+       "id": "poppler-bidi-decorations",
+       "reader_version_measured": "26.07.0"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    }
+   },
+   "producer": {
+    "engine": "chrome",
+    "engine_version": "157.0.8103.78",
+    "markup_sha256": "bdf8157fe05a594862102d933d1cd62f2e79ecc0a2d01b7f6c5c677a73b40a11",
+    "outline": "1 entries",
+    "postprocess": true
+   },
+   "sha256": "a359629ef12c6407ea55b9b90b4aa2e8a388521b905bd130c9158c500aaf942b",
+   "structural_ok": true,
+   "text_sha256": "a32d53305899d1554f73ffe9ffe3ee2ed0f97064c668dea2107a25cfd3c9fb01"
+  },
+  {
    "bytes": 16610,
    "category": "digits",
    "checks": [
@@ -94,7 +884,7 @@
    },
    "font": "plex",
    "id": "dig-article",
-   "median_seconds": 0.7863167079631239,
+   "median_seconds": 0.6286847500596195,
    "pdf": "dig-article.pdf",
    "per_reader": {
     "mupdf": {
@@ -270,11 +1060,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "5ea5e726124d5c8a17cfd88f74ef2b7081585a7ee4323f16d495cf0ce16d00de",
+    "markup_sha256": "02393321c0a10091ef05e1058455a92bca50c8e628160a60edcbdf033d441421",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "b6998945ec3b767a9e63a929dbbe1dd4a3b0daae56575dd21577c526ee045694",
+   "sha256": "ac25e1b4bdf874c025fd276343039517cf6eba0a4844d0cf08c8b2068e8ff416",
    "structural_ok": true,
    "text_sha256": "9bb6e9f133064cdf3ebc8cf94eabe8ee6090f72fd8e662ea5ed0760e2dc6da09"
   },
@@ -372,7 +1162,7 @@
    },
    "font": "plex",
    "id": "dig-date-hindi",
-   "median_seconds": 0.6424166669603437,
+   "median_seconds": 0.6392153339693323,
    "pdf": "dig-date-hindi.pdf",
    "per_reader": {
     "mupdf": {
@@ -598,16 +1388,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "3cbf5aeaa3903ccfdc02d30dc88ebf94224302d2f654513d4c99ebc8db75bd19",
+    "markup_sha256": "e293d2b3e3a61de41bea1ba7b9c8c000a6323842d555091e9f1037432ebeec62",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "d0a7071e79c81ddb5fce1cfb02405bb0a24e4d775d87bed73e69a6013fc901de",
+   "sha256": "3424c8b6cd973207abd2ca499c30e099a90023304e725e3effa1f21d7641a4b5",
    "structural_ok": true,
    "text_sha256": "53b0c83aebcd363e0cbb1606636d62a65b268e1e58aaf1ea0836f2421c7c0d38"
   },
   {
-   "bytes": 20468,
+   "bytes": 23566,
    "category": "digits",
    "checks": [
     {
@@ -647,7 +1437,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -700,7 +1490,7 @@
    },
    "font": "plex",
    "id": "dig-in-table",
-   "median_seconds": 0.6461503329919651,
+   "median_seconds": 0.6946296250680462,
    "pdf": "dig-in-table.pdf",
    "per_reader": {
     "mupdf": {
@@ -896,11 +1686,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "c88715c4f200c8a15979a17f6c545771b54fe338317758773819702d60445601",
+    "markup_sha256": "e78135ae1cb0e2577b71c9cf481b56e29a13ab146db4120034fadd43b33cafbf",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "1be8a37ec15da4f6a2c3e21ee8dfb9bd58f56bd7e6d09d6fd3096892baec895a",
+   "sha256": "b06203c252c3c048d4bba7c6c96c0eba6199118c7dfecaad86c358d9e701f217",
    "structural_ok": true,
    "text_sha256": "29e6238729ea6486a2e8d5ded9c4fe4ec7f9eda6b895678a9e51ecfb50b39921"
   },
@@ -998,7 +1788,7 @@
    },
    "font": "plex",
    "id": "dig-mixed-order",
-   "median_seconds": 0.6255456670187414,
+   "median_seconds": 0.6342030420200899,
    "pdf": "dig-mixed-order.pdf",
    "per_reader": {
     "mupdf": {
@@ -1204,11 +1994,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "b95b4e5fffed97618ba1ba860d39d0a3107db4235777291904356f81f539f531",
+    "markup_sha256": "3442853ecfa5329f770f053cd7fcb97a03bb750d8583753ea39a02950f0aa6b1",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "51e1490342ade8bf6605852d8328256dd5ccb3d8fbced32429517b2aeb941c54",
+   "sha256": "97cf185f1581ab1ccc52c36165f2583f63b67f95182281ad0e86fefaed881fa7",
    "structural_ok": false,
    "text_sha256": "8b31c02d8e3b9a1103c768c43828f2d3d097a72800786ec791fe9e54fbdd8b22"
   },
@@ -1306,7 +2096,7 @@
    },
    "font": "plex",
    "id": "dig-mixed-scripts",
-   "median_seconds": 0.6412434580270201,
+   "median_seconds": 0.6413991670124233,
    "pdf": "dig-mixed-scripts.pdf",
    "per_reader": {
     "mupdf": {
@@ -1512,11 +2302,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "e38132eb4b26b4f5379a1c08fe3883114885566a1ae8d3a9c740b391db2c3c33",
+    "markup_sha256": "ff82866fe38100f537c8d5e4da43f8925a7a7f69f5142b8b0fd54fc82ec2485b",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "c5aebb05954dea23b3b8b45daaf182eea8dcd13a30fa12a001094b8a0fa9a10a",
+   "sha256": "4c8c9651f41fa9ae76609c1d74b04c2738e144fe9161dc2340e2686ac315213a",
    "structural_ok": false,
    "text_sha256": "f143d9f107d04fdffa90556d9e70ebbf8731dd3980a7cef23bd1929518c20c8f"
   },
@@ -1614,7 +2404,7 @@
    },
    "font": "plex",
    "id": "dig-paren-eol",
-   "median_seconds": 0.8172885000240058,
+   "median_seconds": 0.81540245807264,
    "pdf": "dig-paren-eol.pdf",
    "per_reader": {
     "mupdf": {
@@ -1790,11 +2580,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "a543740552ce6a35f90d3c98fdcbbfceb4f3eb42720b135c7f1d9c4a7d20f371",
+    "markup_sha256": "fbddcf9dffcfea999b5e5f21cfad8a8964d68b88a4c9ffd202cc797d30d14e33",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "43d4a27beceaaad3cc1754c52915fb1ac5079b7a9ce61f1329e95e95f7d84f74",
+   "sha256": "a20c3aaa9cbbf7247e7ca9aac9f8f75f56af57f840d3d120dabe525407cd8c51",
    "structural_ok": false,
    "text_sha256": "14ab5f0c207484c7fa258c416b07dfe195f3efb76f2de1819eaa31d41bfe203b"
   },
@@ -1892,7 +2682,7 @@
    },
    "font": "plex",
    "id": "dig-percent",
-   "median_seconds": 0.6698407909134403,
+   "median_seconds": 0.6699722920311615,
    "pdf": "dig-percent.pdf",
    "per_reader": {
     "mupdf": {
@@ -2078,11 +2868,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "1bf8bbf2cdbe377f05479d3f786a178b7fea9c96c46868d0b0a0b3da3e460c4f",
+    "markup_sha256": "c01e25389c714b8b425628cdfc6791a2f62d2706f2d6ca5bf351e8a42259423c",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "afa06fc3ba08d213b15dc4ac12e46d767299249620df7b7f30de12a94bd311ff",
+   "sha256": "0ab8b61498c2b5856685b2571c698d9d3f759f35cd6ed9aa5710d549713be5ff",
    "structural_ok": false,
    "text_sha256": "d416e2827038b77790f2be3bcb678f9e8d45b6d99f60fa986edf1b0a5b101896"
   },
@@ -2180,7 +2970,7 @@
    },
    "font": "plex",
    "id": "dig-phone",
-   "median_seconds": 0.6195187499979511,
+   "median_seconds": 0.660063040908426,
    "pdf": "dig-phone.pdf",
    "per_reader": {
     "mupdf": {
@@ -2396,11 +3186,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "6206c73977bca4d496779f066c77a4491ca8a988cc3ce24256c49b84d8724f45",
+    "markup_sha256": "ccfb8dad280eb821f9b543307690dc9612b5f81286aae3ae8053e48ecbf58bc2",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "10e8d5e24add3dff45da2beb3f3f711dbd670d500e42f680bf4de8627e593594",
+   "sha256": "44c745240c3f7b4fae7fa98a8280ddd1f13d2d03f3c799e9101e1a8120ee560b",
    "structural_ok": false,
    "text_sha256": "24d47cd985b67fff46ef2d128781af9acbf1e61c07c3bc81f539f563a378613b"
   },
@@ -2498,7 +3288,7 @@
    },
    "font": "plex",
    "id": "dig-year",
-   "median_seconds": 0.6362393330782652,
+   "median_seconds": 0.6554395830025896,
    "pdf": "dig-year.pdf",
    "per_reader": {
     "mupdf": {
@@ -2684,11 +3474,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "cad41a08dd2b6c151c049ec7e09cf2e404a5832d203d5d9eb2fc3b5543bf88bd",
+    "markup_sha256": "826d02b6bf01104711b504f758fa4de24a4b1ba2b5547ce1ac5a2dd83b25aa4b",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "2a51c560b4b2f2bb0862f169e29ca20d79c7c38ea9cfb1600608aef9b9d53a34",
+   "sha256": "045a1673d013c153cefeb938ce36d85e62a33ed72b24a0ff33ed0324d7349b21",
    "structural_ok": false,
    "text_sha256": "90019ec1b84217415d0bc48380d87bfd9077a37b3ae723f32e6b37bd7c7ca0ad"
   },
@@ -2786,7 +3576,7 @@
    },
    "font": "amiri",
    "id": "head-deep",
-   "median_seconds": 0.829692916944623,
+   "median_seconds": 0.8322268329793587,
    "pdf": "head-deep.pdf",
    "per_reader": {
     "mupdf": {
@@ -2935,11 +3725,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "74aa264226923b577ea4b20ec1b966069de163ae5dc7f97bccd7860fa5ae0c1a",
+    "markup_sha256": "01473165bd31923f4ac0bbbde4f414b2f8fa7e518867a859e26af18467b60f53",
     "outline": "4 entries",
     "postprocess": true
    },
-   "sha256": "968a1f0c270d085c52fd376909a067a3776ac7635a66340400f610172b34ba0b",
+   "sha256": "114486bfe2f1ebe496c2cc59880715eb0908c447a0b33aefba8f966c9e97753a",
    "structural_ok": true,
    "text_sha256": "745cb6748a8887afc31d62058104a6e9725133971c1ebf436f8be2128af9d08c"
   },
@@ -3037,7 +3827,7 @@
    },
    "font": "plex",
    "id": "head-h1-h3",
-   "median_seconds": 0.6977746250340715,
+   "median_seconds": 0.7267473749816418,
    "pdf": "head-h1-h3.pdf",
    "per_reader": {
     "mupdf": {
@@ -3186,11 +3976,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "76833faa43aa21d8df2f5cc11f963cd9ad7c15416d06a9d7321ecf4b22d5984f",
+    "markup_sha256": "de1186e93eff55af294a47caff9210d6c0aaef244e276bb7c1195ce0ac2d5ba4",
     "outline": "3 entries",
     "postprocess": true
    },
-   "sha256": "b552319bd40650e50e756740342381d18910b9aa9c8cba1c8b17a026cfd52534",
+   "sha256": "cee373aae7eb7a73f68c2d1f2aba17cf3cd2dfb62e6479d78a7ad20172e16a93",
    "structural_ok": true,
    "text_sha256": "f0263df655084a48c0e24ddefb9c0254b0e155e1a892320b3e4a81347780f057"
   },
@@ -3288,7 +4078,7 @@
    },
    "font": "plex",
    "id": "head-latin",
-   "median_seconds": 0.6600505409296602,
+   "median_seconds": 0.6635729169938713,
    "pdf": "head-latin.pdf",
    "per_reader": {
     "mupdf": {
@@ -3437,11 +4227,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "cd68f5ca7aa88104ac8e1b50d29c1d3ea0f59f6f40f86b3a2a68cf5fdffd6932",
+    "markup_sha256": "0ff0b7b6fdc76e423f9552d2c0910fe30a48f387bf5f02cb53a270211d1c3a19",
     "outline": "2 entries",
     "postprocess": true
    },
-   "sha256": "5e3189cb6502cd22ee221eabd037b92d27b941b2c8d844d102ee8f84733cb60a",
+   "sha256": "6a4e9c7eabf8313eac8b3cd8fc8db9cc2ad1851ee0ede98e01e41977ab180c51",
    "structural_ok": true,
    "text_sha256": "2a32c1667dbcebc3d25b312a655bf67766a8e046f605764bb682001c5d10b223"
   },
@@ -3539,7 +4329,7 @@
    },
    "font": "plex",
    "id": "head-numbered",
-   "median_seconds": 0.6442874170606956,
+   "median_seconds": 0.664546416956,
    "pdf": "head-numbered.pdf",
    "per_reader": {
     "mupdf": {
@@ -3725,11 +4515,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "cccd91528f0431172f2e4295db8d4b591d274e35a14a1f9b072a8769951af1cc",
+    "markup_sha256": "e5497a7ef3bed6a8a7d3415aca6824094a7ca673721581895172f6fc0f9814cb",
     "outline": "2 entries",
     "postprocess": true
    },
-   "sha256": "b750201517097ab128536cdabed8174e73d8b3a448a9cedcb2579a57219b17ca",
+   "sha256": "fb1c9940707d3c01cea03b90b3b0656aa55c09f00e44bff657add0ca5a5d8645",
    "structural_ok": true,
    "text_sha256": "551c0af60ab27f87577a4c4bfe9c75fd19cd8feccac22e10c99fe73fa2f69722"
   },
@@ -3827,7 +4617,7 @@
    },
    "font": "plex",
    "id": "kash-explicit",
-   "median_seconds": 0.6324652909534052,
+   "median_seconds": 0.678032457944937,
    "pdf": "kash-explicit.pdf",
    "per_reader": {
     "mupdf": {
@@ -3976,11 +4766,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "5a0a01897118d0971d81dbded073281f8f0d477d42b9f0229c34ad67a9955b64",
+    "markup_sha256": "a64942f6d93f3ac8c1f1ff0fa744e602e57a84e4c364e7aa9a8832cd8f9d47b3",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "f71190facbbfbf5885ca0801e3a08ac26c7bec96df0f5c5315becbbc8fa44107",
+   "sha256": "4344c80ef97e7844c428aee7fcf400ee3dcfe99e97a89cda710eb017f7a76406",
    "structural_ok": true,
    "text_sha256": "982151a1d351501fa3e4b9f94a57856bfaaa4349a9eb7a573dd8516023dc04b9"
   },
@@ -4078,7 +4868,7 @@
    },
    "font": "plex",
    "id": "kash-justify-tatweel",
-   "median_seconds": 0.8527037079911679,
+   "median_seconds": 0.8321771670598537,
    "pdf": "kash-justify-tatweel.pdf",
    "per_reader": {
     "mupdf": {
@@ -4227,11 +5017,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "f62c7496160936e2662dde3800cde70c38086a7b69e58bc02057b8d5a2edbee7",
+    "markup_sha256": "6089f1712a7d7b33fd193708274b8c0be36e6ae258c56c43cf7bc0b8f9c24688",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "f1181c44ede9ca78a623469b5bb91168eb3381039a3e17c37f868c8f9621552d",
+   "sha256": "50437dc0e233b6b4456cf8c9309b91f319666d8a1cdd2bd1879a3eecb7d9a4d6",
    "structural_ok": false,
    "text_sha256": "199c7b454b62b67408551118998a6e6464bdcea56cb0199b2ecc8b65823f605d"
   },
@@ -4329,7 +5119,7 @@
    },
    "font": "amiri",
    "id": "kash-justify",
-   "median_seconds": 1.397937124944292,
+   "median_seconds": 1.3913983330130577,
    "pdf": "kash-justify.pdf",
    "per_reader": {
     "mupdf": {
@@ -4478,11 +5268,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "248b1eb7ac4433ea7060ca39a88a46a9947c7ab222c62f4108b127dd1ba39e76",
+    "markup_sha256": "439fe9103d56f43cc1809cbb89bdba7ff24135cc4e0360f23b189bf8cc0eb95b",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "9655e9071598a0e35243fed2186bc8a41270d4cf65c1e71399cd6f853f2aa61d",
+   "sha256": "2a7aefede1b2cee7e838262a4e84b2e2bc6bfca2fb6bcd0a342882f6d59d75cc",
    "structural_ok": false,
    "text_sha256": "4ee3e12db9911d395daddd8ebd9828db078c617edc4d4c278b671bf60b41f20b"
   },
@@ -4580,7 +5370,7 @@
    },
    "font": "plex",
    "id": "lst-bullet",
-   "median_seconds": 0.6239326250506565,
+   "median_seconds": 0.6834164999891073,
    "pdf": "lst-bullet.pdf",
    "per_reader": {
     "mupdf": {
@@ -4729,11 +5519,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "5fb95f3232d75e7d70a4a7e5174cae648c9f1bceafcf3094af4445195cd239db",
+    "markup_sha256": "6ded5ce63b49ec4a8d822ba99063a9f46e14906d128afd96fd102de5c16675d2",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "767231464844eb8b821c5e3b248c454cbd6a44ebabf48accbaa6a6a4139a56cd",
+   "sha256": "c3343b907cf89e6bb31891d9d3c32bdccb90cacb6281d1702299b9c302af40cc",
    "structural_ok": true,
    "text_sha256": "c2e6273c48d0891e7ae834b07af575cd3ad8b7d24b777e1025d675af4b2c0545"
   },
@@ -4831,7 +5621,7 @@
    },
    "font": "plex",
    "id": "lst-ordered",
-   "median_seconds": 0.7188775419490412,
+   "median_seconds": 0.719799792044796,
    "pdf": "lst-ordered.pdf",
    "per_reader": {
     "mupdf": {
@@ -5030,11 +5820,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "94b0acff9b536297296492702ac0358fe1c4ee0f915f21bdb11e41b2df4acaa1",
+    "markup_sha256": "102909f2efa24cdf945b25fa90c620e3b80a26562351c223d8ba493819c70edd",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "0a6a84194565865f2b432452aba0ea9b1bf7ddbacc4414bf922189c72e21f0cf",
+   "sha256": "72db2a867abcb5c95c9b0aa4d8de65d88bd8d617f59cecce6910da393c1189ed",
    "structural_ok": false,
    "text_sha256": "52c1d0e74da753066de5826235f74f22c512491fbaf7229dcaf0910f6f92680b"
   },
@@ -5132,7 +5922,7 @@
    },
    "font": "plex",
    "id": "mix-acronym",
-   "median_seconds": 0.624999540974386,
+   "median_seconds": 0.6197321671061218,
    "pdf": "mix-acronym.pdf",
    "per_reader": {
     "mupdf": {
@@ -5321,11 +6111,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "6a52617bfebc01a5e1ad5e052b1e7667d92774a5526b47f62a3a250218400d59",
+    "markup_sha256": "fd9a601c14685957feb4a5023bb9576f495e56898c9aec84280f16c0033b8c0e",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "2ee8b1078a91c856214370db5401fb09f3916bac54e81660130955204ee0b2f5",
+   "sha256": "0b05adcce0df0b8f33c78a00cc55e4605431d5613483a8386f694aef12240f44",
    "structural_ok": false,
    "text_sha256": "5d66e3ed1ea7af426a6429a698c424d7f7933f4b6c7be6db8640ea4d9954a9ee"
   },
@@ -5423,7 +6213,7 @@
    },
    "font": "plex",
    "id": "mix-email-url",
-   "median_seconds": 0.6683831249829382,
+   "median_seconds": 0.6612929159309715,
    "pdf": "mix-email-url.pdf",
    "per_reader": {
     "mupdf": {
@@ -5592,11 +6382,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "421c280864f983014a24657f09e107e7426d00623d3c49ea44d74d810dba6d44",
+    "markup_sha256": "dab24c9df484fcc7c8c1e2b7836b8aa9760ff987f9464338303ab091a3e749bd",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "c0ef63b92c544b8a388d4eb7ff6a8bc1a346cafe16b565fdfdc3f687f9b958f0",
+   "sha256": "d6ee406711304fad017178d20e4798a372681f6823c1b6f90706dfd53bab250d",
    "structural_ok": true,
    "text_sha256": "24c36c5c8d1c22081fd7806d47ea1b869fbc683610a33fac67d9826d0d8b629e"
   },
@@ -5694,7 +6484,7 @@
    },
    "font": "plex",
    "id": "mix-latin-sentence",
-   "median_seconds": 0.7461820000316948,
+   "median_seconds": 0.7306036669760942,
    "pdf": "mix-latin-sentence.pdf",
    "per_reader": {
     "mupdf": {
@@ -5843,11 +6633,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "b6f40edc7f12726f3afffa85662a1c36a6723ea7840988c95a354aad3222e14b",
+    "markup_sha256": "d2a78fa885ca8daa862a0b83488fdf8fc611c6feb3f8d456e37a7ad517b472ef",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "768b02ceb21a4ef4a621fd07da8b08e91928e16c3fc9a94cf2feb12957ab5552",
+   "sha256": "de65c8dcc193ccd9fa14faaf19b540833cfd67b038d621560e0a28f3bd012a0b",
    "structural_ok": false,
    "text_sha256": "959a896b33636cba83f5fbde23e8c703b2200a28861a89d881e2b8a20119bd1b"
   },
@@ -5945,7 +6735,7 @@
    },
    "font": "plex",
    "id": "mix-latin-word",
-   "median_seconds": 0.6698563339887187,
+   "median_seconds": 0.6855060410453007,
    "pdf": "mix-latin-word.pdf",
    "per_reader": {
     "mupdf": {
@@ -6094,11 +6884,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "ae6bc64de5a23beb6e0af83c79b47b32aa825c5fcc54867ea20e0a98822ab9bd",
+    "markup_sha256": "7ff4a6d4ca2ed9403cbeffa4a1c5af64b8745c6a0605d56ba11ec29a50fb77a0",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "b1bb4b526a921a602cd39c453fe2ba45e45350ac7da4d9fc258ebfec84bf8ae6",
+   "sha256": "0b7f297f58782ee1054da5fe2d8cb8b50871d8a1816ea542217f8dc7f34f613b",
    "structural_ok": true,
    "text_sha256": "254ad90cfcc593831e74628e12d183fcf57e76c81670072c899d08f620c767de"
   },
@@ -6196,7 +6986,7 @@
    },
    "font": "plex",
    "id": "mix-numbers-ltr",
-   "median_seconds": 0.6704147909767926,
+   "median_seconds": 0.6753737499238923,
    "pdf": "mix-numbers-ltr.pdf",
    "per_reader": {
     "mupdf": {
@@ -6382,11 +7172,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "d4c6c5aadb61c26f5ef7b8f3a2e5d0bf8665a2e5af6bd9816afc995da4ae6680",
+    "markup_sha256": "ac21b93c51f0e1517c8648bb872e7cb66eee41ecb47d48857cf863721a9d38a0",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "9e36d89ac59e8a513b6a74d3e544efe3d411e79e63a8f171b9c7f149e601bb78",
+   "sha256": "6bcb00ba790b82ef2d8722b39eeb113366a7de3c4408adcf650f85a3595295eb",
    "structural_ok": false,
    "text_sha256": "ac1df77d12014f0f452b2098120b67a8a1b594e2325d3426a4912c896c1b28a3"
   },
@@ -6484,7 +7274,7 @@
    },
    "font": "plex",
    "id": "mix-parens",
-   "median_seconds": 0.6480549169937149,
+   "median_seconds": 0.6835101250326261,
    "pdf": "mix-parens.pdf",
    "per_reader": {
     "mupdf": {
@@ -6633,11 +7423,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "1b92c91e65bbd7b2a9badd1bcd2528154a0b7338107c25fd9b25918b8387bdbd",
+    "markup_sha256": "b852483d62fe398c5d6374555496f64de21a3338af5c802be241eafaca773ab6",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "778e22709b10d63c1dfb4d38381cfa5c5ef92fce6561dca12ce274edad317b6f",
+   "sha256": "85c6c31ba74dae94d828f4b480e544c3f3fa4152df22952d226201dd3676397b",
    "structural_ok": false,
    "text_sha256": "3e058f9cf8d86e90e1d409411ea320db15a2ef4cc0f6626702c8f63a76bb308e"
   },
@@ -6735,7 +7525,7 @@
    },
    "font": "plex",
    "id": "mix-version",
-   "median_seconds": 0.656850624945946,
+   "median_seconds": 0.6562705830438063,
    "pdf": "mix-version.pdf",
    "per_reader": {
     "mupdf": {
@@ -6931,16 +7721,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "d56ff602094b8ffcfd18194447da55d2d7fb6ace85d3b50518d166a4e03a3911",
+    "markup_sha256": "38b24a030aab1edf8824cd4f2371552507c5edb9122caa94a0ebbbcf3862e6cd",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "2c043dae15b5f2b29de3b61cee71da4890f9dc4b2e6bf2aed78797b3b91932b9",
+   "sha256": "592a932ea69dee59c2fac65b675a4cdb0a50cd30a0447c9af7f3ec73a4e2fde8",
    "structural_ok": true,
    "text_sha256": "a7aac9d36f2a94acba6bc192bf32573231c42ec59bbb704e8c1672ab32f85a7b"
   },
   {
-   "bytes": 20789,
+   "bytes": 23798,
    "category": "money",
    "checks": [
     {
@@ -6980,7 +7770,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -7033,7 +7823,7 @@
    },
    "font": "plex",
    "id": "mon-decimal-table",
-   "median_seconds": 0.6969224580097944,
+   "median_seconds": 0.7008543750271201,
    "pdf": "mon-decimal-table.pdf",
    "per_reader": {
     "mupdf": {
@@ -7230,11 +8020,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "7c90f6ab84455db5dd292c47cb671e8d34c737e2a7ca5a190e86d0982e524ff4",
+    "markup_sha256": "41d2c3ca6eadf8df804cfb93a596ce92ad56ff59051e0a4f041284c502438249",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "87b27154d76c7075cf06274cae34289fc80e36d9f050f19b214cf2b42b67e622",
+   "sha256": "0a329ad983013328c4d9a2675c5d3c8d5bd923d9d3e9d75d81cc848cb06bdd6e",
    "structural_ok": true,
    "text_sha256": "43dc9655561c1f8b742f04b625eef17fddacbd5fcf1d26d130f46219a489d87d"
   },
@@ -7332,7 +8122,7 @@
    },
    "font": "plex",
    "id": "mon-iban",
-   "median_seconds": 0.6081173750571907,
+   "median_seconds": 0.5987647500587627,
    "pdf": "mon-iban.pdf",
    "per_reader": {
     "mupdf": {
@@ -7551,11 +8341,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "3f26b18b503100ea3daaf72f48adc85334df6416caa5b685fa31818cf97e203e",
+    "markup_sha256": "9f8c982847ba007cd59f4bf509628fec71bb356eb14d3f1296412c8c541d9084",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "04d6c01093f6f5b232e96e025756b39062bf067fb89d27948b97e1875892951b",
+   "sha256": "7f210226fc0f36765346b283bcafd910cf7dca2c85e0a93030c88f2b12018012",
    "structural_ok": true,
    "text_sha256": "4b0ca1a3b49e87a46f7ac89550f4ad58fdc6c68dda2fce0275339318cfbbfa75"
   },
@@ -7653,7 +8443,7 @@
    },
    "font": "plex",
    "id": "mon-negative-hindi",
-   "median_seconds": 0.6330120830098167,
+   "median_seconds": 0.6525964169995859,
    "pdf": "mon-negative-hindi.pdf",
    "per_reader": {
     "mupdf": {
@@ -7823,16 +8613,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "b22f1093ea34559a44cb3ecfa4bfebdd548a6231039c0a5c2636da0e7355b86c",
+    "markup_sha256": "17db7ebd1031645d3f8986f04c87fbb0708619c13ace39c2f3a589991fea7db0",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "fb3f7a18064a3dcd7dd363e7fbf8b8bf38d2a23d22d79644a0d5fdbfa0126b19",
+   "sha256": "fab153224b9545a1188b329ec8eadcfd1976e848316167aa429938c0684adedf",
    "structural_ok": true,
    "text_sha256": "4ea9e47b3c5c5f5d8891c9d964dea6241274797f5a4ff04471f47cfbc149194d"
   },
   {
-   "bytes": 16599,
+   "bytes": 19436,
    "category": "money",
    "checks": [
     {
@@ -7872,7 +8662,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -7925,7 +8715,7 @@
    },
    "font": "plex",
    "id": "mon-negative-table",
-   "median_seconds": 0.6416864159982651,
+   "median_seconds": 0.6625189579790458,
    "pdf": "mon-negative-table.pdf",
    "per_reader": {
     "mupdf": {
@@ -8104,16 +8894,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "5f1ee5a4a5fca6c981e34249a5b02b2398b38a2ecfcb2cc5cb8e6afd003a82bf",
+    "markup_sha256": "843de450018e2d014058eed5a6cf0dfe82cc0735451883e893dd54a5b82b1f6d",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "759e58197b15fb0da439aa72efa7472af76f499cc5e449440897d9841b87143b",
+   "sha256": "2c499893130dbc500b4b771fbd6361feb376d008a601ae02c9cadc4388217202",
    "structural_ok": false,
    "text_sha256": "fd9e03b1c5ec4200540725aca2d19e8fb99db6187a76360c822e606f2d45dfca"
   },
   {
-   "bytes": 15418,
+   "bytes": 15282,
    "category": "money",
    "checks": [
     {
@@ -8153,8 +8943,8 @@
     },
     {
      "id": "fonts",
-     "reason": ".SFCompact-Black: not the case's font (IBM Plex Sans Arabic)",
-     "status": "fail"
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
+     "status": "pass"
     },
     {
      "id": "notdef",
@@ -8206,7 +8996,7 @@
    },
    "font": "plex",
    "id": "mon-riyal-sign",
-   "median_seconds": 0.6429952079197392,
+   "median_seconds": 0.6683644580189139,
    "pdf": "mon-riyal-sign.pdf",
    "per_reader": {
     "mupdf": {
@@ -8318,7 +9108,7 @@
     },
     "pdfminer": {
      "chars": {
-      "out": 48,
+      "out": 46,
       "truth": 46
      },
      "defects": {
@@ -8346,12 +9136,12 @@
       "exact": 0.0,
       "order": 0.125,
       "skeleton_exact": 0.0,
-      "word_f1": 0.222222
+      "word_f1": 0.25
      }
     },
     "poppler": {
      "chars": {
-      "out": 47,
+      "out": 45,
       "truth": 46
      },
      "defects": {
@@ -8374,8 +9164,8 @@
      },
      "limitations_applied": [
       {
-       "detail": "12/12 control(s) excused at 4/line over 4 line(s)",
-       "excused": 12,
+       "detail": "8/8 control(s) excused at 4/line over 2 line(s)",
+       "excused": 8,
        "id": "poppler-bidi-decorations",
        "reader_version_measured": "26.07.0"
       }
@@ -8386,18 +9176,18 @@
       "exact": 0.0,
       "order": 0.5,
       "skeleton_exact": 0.0,
-      "word_f1": 0.470588
+      "word_f1": 0.533333
      }
     }
    },
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "3d72fbfa267504c6e2303d84b7f237774f27c7da6794e52b4b54790d2c0acf27",
+    "markup_sha256": "80a5dd166fcc669939d9db6de5efbc1c8bda79c6c23aa1ce0c1fe64d346396cb",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "60f5c171027b6aa32e66d85ad6d88985f267a7f92d0bb2a02adb00e87f847059",
+   "sha256": "754b08405e946cabfda6e0fb25f5fc30be79c3fbe1cd31e30abaed4f38bee339",
    "structural_ok": false,
    "text_sha256": "5285a53d7088d21dff85add02cff6e2eca0b411f4cd89ff3e38cb9ebd231d39f"
   },
@@ -8495,7 +9285,7 @@
    },
    "font": "plex",
    "id": "mon-rs-abbrev",
-   "median_seconds": 0.640781749971211,
+   "median_seconds": 0.6542156670475379,
    "pdf": "mon-rs-abbrev.pdf",
    "per_reader": {
     "mupdf": {
@@ -8672,11 +9462,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "785ef8cc9068dea6c017ac674538f3ee2512cbdbf81336c8e1b168def853e254",
+    "markup_sha256": "805e0a55fba0ff871be60997915de9238f544d0b4924f400bbe234c3f1314c51",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "beca57a56c48c1f00f21c9c933f4aba5082b2348e00269b687ab16cb37f8d558",
+   "sha256": "ffe6d7ded5e80577812c82d1ec497f081e9d4329732c6bd4736591c8c12bf084",
    "structural_ok": false,
    "text_sha256": "109d02ad7f6db819b4fd7f6db5cff5aff9f174f426c88bfa7efc107281832a76"
   },
@@ -8774,7 +9564,7 @@
    },
    "font": "plex",
    "id": "mon-thousands",
-   "median_seconds": 0.6610720000462607,
+   "median_seconds": 0.6558029999723658,
    "pdf": "mon-thousands.pdf",
    "per_reader": {
     "mupdf": {
@@ -8960,11 +9750,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "fa6e131c9ff5ec4cedea5df68ad8d95c831094988fccce6731a6b85bffa7ffa4",
+    "markup_sha256": "43c2d5e7d0e2ce3de04334409054c2b00dafc24f51cfe8db1721eed41339f2b9",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "ee41a4345cb4a8e612e4633af9ca70db9837c0dbd6bfa6dcde028c31b037e958",
+   "sha256": "58f9a67c3db4a606dc1ce20ae7665a6be94eebd230e684484e95726cb7eea5d9",
    "structural_ok": false,
    "text_sha256": "260a8b7d163682a028374efcc71ef7e39fdb01bf51e03a1af97f37d37eb9637a"
   },
@@ -9062,7 +9852,7 @@
    },
    "font": "plex",
    "id": "pun-comma",
-   "median_seconds": 0.6456489999545738,
+   "median_seconds": 0.651680540991947,
    "pdf": "pun-comma.pdf",
    "per_reader": {
     "mupdf": {
@@ -9211,11 +10001,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "3b215d350238a9cfb378fe56bc35af04a1c04dc7bdfee107f4f44153eb53f67a",
+    "markup_sha256": "624b7201445a3d2c020c273091a4a995063ec0b675e5fca4738d33c7d35a6f86",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "29dcc8f0b903e6e8ed7a05c894496d4eab3389f3a09f18753a59a237906c8b1b",
+   "sha256": "acd66c04fa0264e5e43fc109638686af5d8f7479b52afdfc97b674c43a8b5213",
    "structural_ok": false,
    "text_sha256": "98b2cea907202ae8f9b316c24b9caaf050740cbf23833cae7792dc3322ee1c86"
   },
@@ -9313,7 +10103,7 @@
    },
    "font": "plex",
    "id": "pun-edge",
-   "median_seconds": 0.8514533329289407,
+   "median_seconds": 0.8282248749164864,
    "pdf": "pun-edge.pdf",
    "per_reader": {
     "mupdf": {
@@ -9462,11 +10252,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "982b7aed2c32d9061ead4fa9805677a46142c1c9ffc185c9a35295ebdc4df9c0",
+    "markup_sha256": "252a6631297f298cd6fd680932974591206d3ce562922a205772d287cc02cff4",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "ae69a8e46fe29acf713189a6cc006e932e8063f50f5e29268e2908dbb1c671db",
+   "sha256": "2df9f103dd64456d5afcaffee31d0c4a775bdcbe88862cce58a88b293adc01a0",
    "structural_ok": false,
    "text_sha256": "11896f980b6821d7b2cc9b6d6b0d94f1023606b5af4cb252d0271c1118f37acc"
   },
@@ -9564,7 +10354,7 @@
    },
    "font": "plex",
    "id": "pun-quotes",
-   "median_seconds": 0.6544885000912473,
+   "median_seconds": 0.6445816250052303,
    "pdf": "pun-quotes.pdf",
    "per_reader": {
     "mupdf": {
@@ -9713,11 +10503,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "b9e1b66aa6b51058da214425077d88f6faf787d20e8f687510e5ec62818faf82",
+    "markup_sha256": "31ef83826933306aef89b9366d660a97da49a264464dae6523f2a0c0336a3dbd",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "c190c80c080cffae3ab2d748bf294ad6776aecf185b63a730b211b4dd68f7e9b",
+   "sha256": "acded9bd3668707252495afa6bd6f0dd9d1843914ff4628b2e0a642820afc249",
    "structural_ok": false,
    "text_sha256": "a20a175edb801730bda094b34e7c0c213ce9bfa8004eb72d559c47b8267b96cf"
   },
@@ -9815,7 +10605,7 @@
    },
    "font": "plex",
    "id": "pun-semicolon-question",
-   "median_seconds": 0.7234884999925271,
+   "median_seconds": 0.6810171249089763,
    "pdf": "pun-semicolon-question.pdf",
    "per_reader": {
     "mupdf": {
@@ -9964,11 +10754,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "c07acb17c06c90b3362013d7d59dda17420f74d3d0ce525d8dc272f41a0acdc1",
+    "markup_sha256": "36b3acf58fdc0b1a02762223775f07cc421a4cd5d1636ac1e05ffd983ca0f447",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "220a5077a5dc04447df91e7130bc681ba9fffeec80393959c8622308dff89ed4",
+   "sha256": "1ff73d84f57d300e3b6defa3d62102aa58f9ee73e69c8a9d976dcd86f744cab3",
    "structural_ok": false,
    "text_sha256": "6dab56543a76612647e8ff66b89b2e864dd3e198d507090b1b3692b036db9b86"
   },
@@ -10066,7 +10856,7 @@
    },
    "font": "plex",
    "id": "shp-allah-sentence",
-   "median_seconds": 0.7755914170993492,
+   "median_seconds": 0.783808209002018,
    "pdf": "shp-allah-sentence.pdf",
    "per_reader": {
     "mupdf": {
@@ -10215,11 +11005,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "920e42519fa12fe6e3ec0d213205763f5696561746737a4dba3b46eaedae1458",
+    "markup_sha256": "14ba97b2bcd63892473311c80731e6cf1bc0ea4c6a41c5beb3f223dc87fcde91",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "2182d5b01549a474a45de022219216e71d194203267cc015487e7f9591438a35",
+   "sha256": "13ab045fba2473025cba26a048bc133cbca64af60843e65f141d35f2a3ee9d2c",
    "structural_ok": true,
    "text_sha256": "a78bae317a1f9689c3a1fffda416caae29a6a7f7663f8b40686a38fc08844148"
   },
@@ -10317,7 +11107,7 @@
    },
    "font": "amiri",
    "id": "shp-allah",
-   "median_seconds": 0.8262478749966249,
+   "median_seconds": 0.8247485409956425,
    "pdf": "shp-allah.pdf",
    "per_reader": {
     "mupdf": {
@@ -10466,11 +11256,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "c4b568b6b0e5b5ff4ca010c3f1c50c75b39d3f40d0f8cf6f3829c30477f3e367",
+    "markup_sha256": "729613ded18866bc4c85166c9e194e663ee063d9a531d1784ec7a12a77952869",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "a999434a7fb89529f210febeb3644d88fc67b46cc178e62716e05e6313537a8c",
+   "sha256": "ce10b15bb538e69aa7e2f2646b4f8465147fec22e59d8b325a5c6c2963bd9777",
    "structural_ok": true,
    "text_sha256": "5bc5bebb1207d233a9d28003ec83ff295bf06db1d3d9482ed60f3b56a3588295"
   },
@@ -10568,7 +11358,7 @@
    },
    "font": "amiri",
    "id": "shp-kaf-kitaba",
-   "median_seconds": 0.7517264999914914,
+   "median_seconds": 0.6745834170142189,
    "pdf": "shp-kaf-kitaba.pdf",
    "per_reader": {
     "mupdf": {
@@ -10717,11 +11507,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "92ed6b718e6700be095563ce737d0fe634a32a19dd77aac619859cc954ec6e6a",
+    "markup_sha256": "117449def7f33757fab8726f35554e024ae94faedf347c2b1a2847ec88aba89e",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "cc8f1abb0a74399b2ba6278df2eb84e8745efc9362e6ae58011ac1430fc4f33f",
+   "sha256": "a3fccae9f4543582be8a284d5833ad2409ecaf09f6e927bc85ac80fe82c8c36a",
    "structural_ok": true,
    "text_sha256": "2833ea2fd0929c9c00a87ba9e0d5a1c4c6c955e8753f0ad06e200fd424d8cfe0"
   },
@@ -10819,7 +11609,7 @@
    },
    "font": "plex",
    "id": "shp-lam-alef-forms",
-   "median_seconds": 0.717257458018139,
+   "median_seconds": 0.7530955420807004,
    "pdf": "shp-lam-alef-forms.pdf",
    "per_reader": {
     "mupdf": {
@@ -10968,11 +11758,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "a1de55e501ca2ad1b198fb79353c08c32168b6f6533b218e39253b0908849981",
+    "markup_sha256": "6ae1d96e2b2d5c5ad7b2f3cd0665559301661ecfc0e077a6d9332b6031c8db78",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "395e1ed708c59f38daf55189006c34461a4c85549077d83a83646e6782750382",
+   "sha256": "6e2ce168edd56773b41a7b6946f8a1f74e52b3156671efb70fec1e65ce96baf8",
    "structural_ok": true,
    "text_sha256": "bb4a8ff817de9d3937556593ee6c80da0724b767db16f7d2e7c8379cb51f6957"
   },
@@ -11070,7 +11860,7 @@
    },
    "font": "plex",
    "id": "shp-nonjoining",
-   "median_seconds": 0.7006090419599786,
+   "median_seconds": 0.6422151250299066,
    "pdf": "shp-nonjoining.pdf",
    "per_reader": {
     "mupdf": {
@@ -11219,11 +12009,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "4c0960ea8f6a8dcb5f814d7097b691be8378d28082800358aa19c423538b7259",
+    "markup_sha256": "9fcf7cd924aebdc123e03df182761ee6d99de5895b00bc1194d3952c351f6ec7",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "47bad90a3be5dc065070bbd2950b6c5e841a5357acb531ba3ef6ed72a09f022e",
+   "sha256": "cb7a81c1e59d8af9f044751c86057a6e52e78be6db163911050c3889331f0ea3",
    "structural_ok": true,
    "text_sha256": "29ed161971f7c81a2216a54192405aaf9f6e2f4d01345dac043e8d6408edacfe"
   },
@@ -11321,7 +12111,7 @@
    },
    "font": "plex",
    "id": "shp-single-letter",
-   "median_seconds": 0.7083935419796035,
+   "median_seconds": 0.612686459091492,
    "pdf": "shp-single-letter.pdf",
    "per_reader": {
     "mupdf": {
@@ -11470,16 +12260,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "17015afa4f91373d90571b2c6011778d106abd0a302c00afe183841f24c6dc25",
+    "markup_sha256": "f880504b42074371e22365c0b4e99cfba4ef18778897caa85f6e66460f554999",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "013e731853d0d7483459113dd6c5498b758ed28cfdb2253693776fcaabffac6a",
+   "sha256": "d5acfa876bb42b38d7de40d9a2f66e9db0d0da68a767a1da9aef5d7e27618b13",
    "structural_ok": true,
    "text_sha256": "d8da56ea5dd0029bd8d88e808753198202474a39b70e5440a225d229499660f7"
   },
   {
-   "bytes": 18863,
+   "bytes": 21995,
    "category": "tables",
    "checks": [
     {
@@ -11519,7 +12309,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -11572,7 +12362,7 @@
    },
    "font": "plex",
    "id": "tbl-2col",
-   "median_seconds": 0.6656234170077369,
+   "median_seconds": 0.6707577910274267,
    "pdf": "tbl-2col.pdf",
    "per_reader": {
     "mupdf": {
@@ -11758,16 +12548,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "8a575e3715c9c948c9acc468fbc2ea9a7023d26542b4a65aa8dc002e628aa420",
+    "markup_sha256": "bc658835901bdc136da002e02ae1e89b418c68e4ceb3981c85d24e8276846c0a",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "18bd96ef09a90cd018b36db6aaed3eb7fa131edaa2306afa98bc9fd449baae54",
+   "sha256": "e669963f0ebc2a581391556692a91f0019ac0c239d8d097e528af16ad6eeb5d4",
    "structural_ok": true,
    "text_sha256": "b92a6620579f7bcbf8a28ff659c32fcc3b79ebf0a2149e4cb7bf5c17f57df288"
   },
   {
-   "bytes": 22821,
+   "bytes": 29099,
    "category": "tables",
    "checks": [
     {
@@ -11807,7 +12597,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -11860,7 +12650,7 @@
    },
    "font": "plex",
    "id": "tbl-5col",
-   "median_seconds": 0.7095160420285538,
+   "median_seconds": 0.714731666026637,
    "pdf": "tbl-5col.pdf",
    "per_reader": {
     "mupdf": {
@@ -12072,10 +12862,10 @@
        "١٠",
        "٢٥٠٫٠٠",
        "٢٥٫٠٠",
-       "٢",
        "٣",
        "٤٥٠٫٠٠",
-       "١٥٠٫٠٠"
+       "١٥٠٫٠٠",
+       "٢"
       ],
       "truth": [
        "١",
@@ -12090,8 +12880,8 @@
      },
      "limitations_applied": [
       {
-       "detail": "24/24 control(s) excused at 4/line over 6 line(s)",
-       "excused": 24,
+       "detail": "26/26 control(s) excused at 4/line over 7 line(s)",
+       "excused": 26,
        "id": "poppler-bidi-decorations",
        "reader_version_measured": "26.07.0"
       }
@@ -12109,16 +12899,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "0e178c613b5dece1fbe62db9449ba7f2c3ce905fe5e1c266cfea88cd898ca080",
+    "markup_sha256": "4af70f7762b8aa84d31989580088b59f984683ab1b6578bc6bb46da905471a1e",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "ddb06ab54aa995178caa64a6d8bdb6ef5ebf3e96447691bc72a780c3e7df6885",
+   "sha256": "e5fe566a11e0372e78c61378c31f3a6f1fc0171552eea6a26883f33f4b5c6882",
    "structural_ok": true,
    "text_sha256": "41a62dee72583a4f3c8ff18bd63a32ec3fc52dbabb41170b510801ac5f24fab3"
   },
   {
-   "bytes": 19255,
+   "bytes": 22599,
    "category": "tables",
    "checks": [
     {
@@ -12158,7 +12948,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -12211,7 +13001,7 @@
    },
    "font": "plex",
    "id": "tbl-empty-cell",
-   "median_seconds": 0.6872915409039706,
+   "median_seconds": 0.7194093749858439,
    "pdf": "tbl-empty-cell.pdf",
    "per_reader": {
     "mupdf": {
@@ -12387,304 +13177,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "36985d1e76566b5b6acb04ebbc4098e23a5d753cbe8e67cdbded11665ad9afad",
+    "markup_sha256": "9e092e8417ee29922936dab64421d1f55ea8eb3d3756f1b4138a3722152906f5",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "e7cd27bce2afe1d5683ae353f4bf65ce85b84b1b05a6d8dc5104d659ac0f13c3",
+   "sha256": "fe98f66b5df6b03fa078326c7a9fa3d08a3f9ebd57eaf3b142e9fd407bcd3b2c",
    "structural_ok": false,
    "text_sha256": "f0731ba5bd27c3156b6c83aa86580f0f3c907a8e14c24231ee81516880721b85"
   },
   {
-   "bytes": 18982,
-   "category": "tables",
-   "checks": [
-    {
-     "id": "markinfo",
-     "reason": "/MarkInfo /Marked true",
-     "status": "pass"
-    },
-    {
-     "id": "lang",
-     "reason": "/Lang 'ar'",
-     "status": "pass"
-    },
-    {
-     "id": "all-text-tagged",
-     "reason": "every text show carries an MCID",
-     "status": "pass"
-    },
-    {
-     "id": "tagged-text",
-     "reason": "9 tagged words match the case",
-     "status": "pass"
-    },
-    {
-     "id": "headings",
-     "reason": "1 heading element(s), levels [1]",
-     "status": "pass"
-    },
-    {
-     "id": "tables",
-     "reason": "1 table(s) · TR/TH/TD match the case cell by cell",
-     "status": "pass"
-    },
-    {
-     "id": "block-order",
-     "reason": "top-level tags ['/H1', '/Table']",
-     "status": "pass"
-    },
-    {
-     "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
-     "status": "pass"
-    },
-    {
-     "id": "notdef",
-     "reason": "no glyph 0 drawn",
-     "status": "pass"
-    },
-    {
-     "id": "invisible-format",
-     "reason": "no invisible joiner in the text layer",
-     "status": "pass"
-    },
-    {
-     "id": "presentation-forms",
-     "reason": "no presentation form in the text layer",
-     "status": "pass"
-    },
-    {
-     "id": "tounicode-coverage",
-     "reason": "every drawn code has a Unicode value",
-     "status": "pass"
-    },
-    {
-     "id": "outline",
-     "reason": "1 entr(y/ies)",
-     "status": "pass"
-    },
-    {
-     "id": "model-boundary",
-     "reason": "inside the declared model",
-     "status": "pass"
-    },
-    {
-     "id": "verapdf-ua1",
-     "reason": "no failing rule",
-     "status": "pass"
-    },
-    {
-     "id": "verapdf-pdfa3b",
-     "reason": "no failing rule",
-     "status": "pass"
-    }
-   ],
-   "file": {
-    "bidi": 0,
-    "codes": 40,
-    "notdef": 0,
-    "untagged_chars": 0,
-    "zero_width": 0
-   },
-   "font": "plex",
-   "id": "tbl-explicit-width",
-   "median_seconds": 0.6385642919922248,
-   "pdf": "tbl-explicit-width.pdf",
-   "per_reader": {
-    "mupdf": {
-     "chars": {
-      "out": 46,
-      "truth": 46
-     },
-     "defects": {
-      "bidi": 0,
-      "presentation_forms": 0,
-      "pua": 0,
-      "replacement": 0,
-      "tatweel_excess": 0,
-      "zero_width": 0
-     },
-     "digit_runs": {
-      "out": [
-       "٠٠١",
-       "٠٠٢"
-      ],
-      "truth": [
-       "١٠٠",
-       "٢٠٠"
-      ]
-     },
-     "limitations_applied": [
-      {
-       "detail": "2/2 missing run(s) are exact reversals",
-       "excused": 2,
-       "id": "mupdf-ar-digit-reversal",
-       "reader_version_measured": "2.1"
-      }
-     ],
-     "limitations_refused": [],
-     "metrics": {
-      "digit_runs": 1.0,
-      "exact": 0.0,
-      "order": 0.777778,
-      "skeleton_exact": 0.0,
-      "word_f1": 0.777778
-     }
-    },
-    "pdfium": {
-     "chars": {
-      "out": 46,
-      "truth": 46
-     },
-     "defects": {
-      "bidi": 0,
-      "presentation_forms": 0,
-      "pua": 0,
-      "replacement": 0,
-      "tatweel_excess": 0,
-      "zero_width": 0
-     },
-     "digit_runs": {
-      "out": [
-       "١٠٠",
-       "٢٠٠"
-      ],
-      "truth": [
-       "١٠٠",
-       "٢٠٠"
-      ]
-     },
-     "limitations_applied": [],
-     "limitations_refused": [],
-     "metrics": {
-      "digit_runs": 1.0,
-      "exact": 1.0,
-      "order": 1.0,
-      "skeleton_exact": 1.0,
-      "word_f1": 1.0
-     }
-    },
-    "pdfkit": {
-     "chars": {
-      "out": 46,
-      "truth": 46
-     },
-     "defects": {
-      "bidi": 0,
-      "presentation_forms": 0,
-      "pua": 0,
-      "replacement": 0,
-      "tatweel_excess": 0,
-      "zero_width": 0
-     },
-     "digit_runs": {
-      "out": [
-       "١٠٠",
-       "٢٠٠"
-      ],
-      "truth": [
-       "١٠٠",
-       "٢٠٠"
-      ]
-     },
-     "limitations_applied": [],
-     "limitations_refused": [],
-     "metrics": {
-      "digit_runs": 1.0,
-      "exact": 1.0,
-      "order": 1.0,
-      "skeleton_exact": 1.0,
-      "word_f1": 1.0
-     }
-    },
-    "pdfminer": {
-     "chars": {
-      "out": 46,
-      "truth": 46
-     },
-     "defects": {
-      "bidi": 0,
-      "presentation_forms": 0,
-      "pua": 0,
-      "replacement": 0,
-      "tatweel_excess": 0,
-      "zero_width": 0
-     },
-     "digit_runs": {
-      "out": [
-       "١٠٠",
-       "٢٠٠"
-      ],
-      "truth": [
-       "١٠٠",
-       "٢٠٠"
-      ]
-     },
-     "limitations_applied": [],
-     "limitations_refused": [],
-     "metrics": {
-      "digit_runs": 1.0,
-      "exact": 0.0,
-      "order": 0.222222,
-      "skeleton_exact": 0.0,
-      "word_f1": 0.222222
-     }
-    },
-    "poppler": {
-     "chars": {
-      "out": 46,
-      "truth": 46
-     },
-     "defects": {
-      "bidi": 0,
-      "presentation_forms": 0,
-      "pua": 0,
-      "replacement": 0,
-      "tatweel_excess": 0,
-      "zero_width": 0
-     },
-     "digit_runs": {
-      "out": [
-       "١٠٠",
-       "٢٠٠"
-      ],
-      "truth": [
-       "١٠٠",
-       "٢٠٠"
-      ]
-     },
-     "limitations_applied": [
-      {
-       "detail": "18/18 control(s) excused at 4/line over 7 line(s)",
-       "excused": 18,
-       "id": "poppler-bidi-decorations",
-       "reader_version_measured": "26.07.0"
-      }
-     ],
-     "limitations_refused": [],
-     "metrics": {
-      "digit_runs": 1.0,
-      "exact": 1.0,
-      "order": 1.0,
-      "skeleton_exact": 1.0,
-      "word_f1": 1.0
-     }
-    }
-   },
-   "producer": {
-    "engine": "chrome",
-    "engine_version": "157.0.8103.78",
-    "markup_sha256": "fe66ee2b5cb7c05be388fcd32bc2ff6e0f171f5afbee25223df5e5c77937f3fd",
-    "outline": "1 entries",
-    "postprocess": true
-   },
-   "sha256": "d508b98b24a0c5810def821e755e034265944fe738aa96531ee3dcfb07c6363e",
-   "structural_ok": true,
-   "text_sha256": "ae62933e8ff08a0ca2992f58dab0e4b9ffd5d047dc1e7ddf50d5419e702b276b"
-  },
-  {
-   "bytes": 57092,
+   "bytes": 60119,
    "category": "tables",
    "checks": [
     {
@@ -12724,7 +13226,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -12777,7 +13279,7 @@
    },
    "font": "plex",
    "id": "tbl-page-break",
-   "median_seconds": 1.6664186249254271,
+   "median_seconds": 1.7439189159777015,
    "pdf": "tbl-page-break.pdf",
    "per_reader": {
     "mupdf": {
@@ -14136,16 +14638,304 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "4f593420feaaa3eda1e5b05d9f1122de09af1484a9d0a0532b64b17154e843f0",
+    "markup_sha256": "a73d9c4e039233f40fc3692a2f3cb81d702cbe29b30fe0ac00b13870c421757d",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "1a979ce221af472d219a10dbd093e68a35772c004c3f876be4904a670aafa7fa",
+   "sha256": "2a5de56105f509da38bbdf74f2dd3dd8f5eb256aabbbab5e94c2da980789cd58",
    "structural_ok": false,
    "text_sha256": "64b0196ff4831378a09fc4490a42f65b50156d6ec57cb369f5d3d39e71325782"
   },
   {
-   "bytes": 20464,
+   "bytes": 21957,
+   "category": "tables",
+   "checks": [
+    {
+     "id": "markinfo",
+     "reason": "/MarkInfo /Marked true",
+     "status": "pass"
+    },
+    {
+     "id": "lang",
+     "reason": "/Lang 'ar'",
+     "status": "pass"
+    },
+    {
+     "id": "all-text-tagged",
+     "reason": "every text show carries an MCID",
+     "status": "pass"
+    },
+    {
+     "id": "tagged-text",
+     "reason": "10 tagged words match the case",
+     "status": "pass"
+    },
+    {
+     "id": "headings",
+     "reason": "1 heading element(s), levels [1]",
+     "status": "pass"
+    },
+    {
+     "id": "tables",
+     "reason": "1 table(s) · TR/TH/TD match the case cell by cell",
+     "status": "pass"
+    },
+    {
+     "id": "block-order",
+     "reason": "top-level tags ['/H1', '/Table']",
+     "status": "pass"
+    },
+    {
+     "id": "fonts",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
+     "status": "pass"
+    },
+    {
+     "id": "notdef",
+     "reason": "no glyph 0 drawn",
+     "status": "pass"
+    },
+    {
+     "id": "invisible-format",
+     "reason": "no invisible joiner in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "presentation-forms",
+     "reason": "no presentation form in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "tounicode-coverage",
+     "reason": "every drawn code has a Unicode value",
+     "status": "pass"
+    },
+    {
+     "id": "outline",
+     "reason": "1 entr(y/ies)",
+     "status": "pass"
+    },
+    {
+     "id": "model-boundary",
+     "reason": "inside the declared model",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-ua1",
+     "reason": "no failing rule",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-pdfa3b",
+     "reason": "no failing rule",
+     "status": "pass"
+    }
+   ],
+   "file": {
+    "bidi": 0,
+    "codes": 45,
+    "notdef": 0,
+    "untagged_chars": 0,
+    "zero_width": 0
+   },
+   "font": "plex",
+   "id": "tbl-plain-fragment",
+   "median_seconds": 0.6632739580236375,
+   "pdf": "tbl-plain-fragment.pdf",
+   "per_reader": {
+    "mupdf": {
+     "chars": {
+      "out": 51,
+      "truth": 51
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "٠٠١",
+       "٠٠٢"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [
+      {
+       "detail": "2/2 missing run(s) are exact reversals",
+       "excused": 2,
+       "id": "mupdf-ar-digit-reversal",
+       "reader_version_measured": "2.1"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.8,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.8
+     }
+    },
+    "pdfium": {
+     "chars": {
+      "out": 51,
+      "truth": 51
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfkit": {
+     "chars": {
+      "out": 51,
+      "truth": 51
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfminer": {
+     "chars": {
+      "out": 51,
+      "truth": 51
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.2,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.2
+     }
+    },
+    "poppler": {
+     "chars": {
+      "out": 51,
+      "truth": 51
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [
+      {
+       "detail": "18/18 control(s) excused at 4/line over 7 line(s)",
+       "excused": 18,
+       "id": "poppler-bidi-decorations",
+       "reader_version_measured": "26.07.0"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    }
+   },
+   "producer": {
+    "engine": "chrome",
+    "engine_version": "157.0.8103.78",
+    "markup_sha256": "15edab4532e6055036d5bce0f38bbbe64121c938ff04df4eac3b4bc46a58fd9c",
+    "outline": "1 entries",
+    "postprocess": true
+   },
+   "sha256": "e95eab0e3ec28355d57ba33bc5a425d2e2027f5916d9e31a2b27a54a690c2b07",
+   "structural_ok": true,
+   "text_sha256": "6b1be38e6a9b6cd2057cdf95ace498fa328290d1ef3cc5d3f700d555626460fe"
+  },
+  {
+   "bytes": 24058,
    "category": "tables",
    "checks": [
     {
@@ -14185,7 +14975,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -14238,7 +15028,7 @@
    },
    "font": "plex",
    "id": "tbl-two-header-rows",
-   "median_seconds": 0.7037742920219898,
+   "median_seconds": 0.6984097919194028,
    "pdf": "tbl-two-header-rows.pdf",
    "per_reader": {
     "mupdf": {
@@ -14424,16 +15214,16 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "e0d813ccd0a88909e4287445137bf5b90c9ed49e7c86e89c7773e6f7a7ba791f",
+    "markup_sha256": "86bcafa9e1287838f8217d9fbcfe16c5b3dcec1f09e13a448a903b0239b9a375",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "a95fa373f5e52f2bbf7a748a33c3e084144e2ecceecf47814e839a72e3afec22",
+   "sha256": "398d7796edc567dce1444d9a0648e242e87c012b58fdcc5153b43f3742b42556",
    "structural_ok": false,
    "text_sha256": "7bc81db77af9d94eacb57347d3003aab0de489969fabe985e9498fe2bc210929"
   },
   {
-   "bytes": 18792,
+   "bytes": 21810,
    "category": "tables",
    "checks": [
     {
@@ -14473,7 +15263,7 @@
     },
     {
      "id": "fonts",
-     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
      "status": "pass"
     },
     {
@@ -14526,7 +15316,7 @@
    },
    "font": "plex",
    "id": "tbl-two-line-cell",
-   "median_seconds": 0.6936810839688405,
+   "median_seconds": 0.7736741249682382,
    "pdf": "tbl-two-line-cell.pdf",
    "per_reader": {
     "mupdf": {
@@ -14675,13 +15465,301 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "5ae9c6e159f126f3df1fc114a6571f344b078e71f98cbff33d112831b65e1280",
+    "markup_sha256": "f23d1598f40a709cb6ac68f01aad5ddaf037964e517bfa6bd6e6dbf1771327f4",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "4ac9b50acd1ffbb190154bc6430c5364dfeed08c9004f1f667286bbff0be1de3",
+   "sha256": "eb54ba49a59b001ed764565d35577912c3e61609fd07525cb48afe3adc0fd8de",
    "structural_ok": false,
    "text_sha256": "cd6e01131b64a6fc81b56de68b0576c84deb1f058c60a13a14355c1f951b531c"
+  },
+  {
+   "bytes": 18913,
+   "category": "tables",
+   "checks": [
+    {
+     "id": "markinfo",
+     "reason": "/MarkInfo /Marked true",
+     "status": "pass"
+    },
+    {
+     "id": "lang",
+     "reason": "/Lang 'ar'",
+     "status": "pass"
+    },
+    {
+     "id": "all-text-tagged",
+     "reason": "every text show carries an MCID",
+     "status": "pass"
+    },
+    {
+     "id": "tagged-text",
+     "reason": "9 tagged words match the case",
+     "status": "pass"
+    },
+    {
+     "id": "headings",
+     "reason": "1 heading element(s), levels [1]",
+     "status": "pass"
+    },
+    {
+     "id": "tables",
+     "reason": "1 table(s) · TR/TH/TD match the case cell by cell",
+     "status": "pass"
+    },
+    {
+     "id": "block-order",
+     "reason": "top-level tags ['/H1', '/Table']",
+     "status": "pass"
+    },
+    {
+     "id": "fonts",
+     "reason": "2 font(s) used for text, all embedded with /ToUnicode",
+     "status": "pass"
+    },
+    {
+     "id": "notdef",
+     "reason": "no glyph 0 drawn",
+     "status": "pass"
+    },
+    {
+     "id": "invisible-format",
+     "reason": "no invisible joiner in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "presentation-forms",
+     "reason": "no presentation form in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "tounicode-coverage",
+     "reason": "every drawn code has a Unicode value",
+     "status": "pass"
+    },
+    {
+     "id": "outline",
+     "reason": "1 entr(y/ies)",
+     "status": "pass"
+    },
+    {
+     "id": "model-boundary",
+     "reason": "inside the declared model",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-ua1",
+     "reason": "no failing rule",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-pdfa3b",
+     "reason": "no failing rule",
+     "status": "pass"
+    }
+   ],
+   "file": {
+    "bidi": 0,
+    "codes": 40,
+    "notdef": 0,
+    "untagged_chars": 0,
+    "zero_width": 0
+   },
+   "font": "plex",
+   "id": "tbl-width-100",
+   "median_seconds": 0.6683615410001948,
+   "pdf": "tbl-width-100.pdf",
+   "per_reader": {
+    "mupdf": {
+     "chars": {
+      "out": 46,
+      "truth": 46
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "٠٠١",
+       "٠٠٢"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [
+      {
+       "detail": "2/2 missing run(s) are exact reversals",
+       "excused": 2,
+       "id": "mupdf-ar-digit-reversal",
+       "reader_version_measured": "2.1"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.777778,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.777778
+     }
+    },
+    "pdfium": {
+     "chars": {
+      "out": 46,
+      "truth": 46
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfkit": {
+     "chars": {
+      "out": 46,
+      "truth": 46
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfminer": {
+     "chars": {
+      "out": 46,
+      "truth": 46
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.222222,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.222222
+     }
+    },
+    "poppler": {
+     "chars": {
+      "out": 46,
+      "truth": 46
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [
+       "١٠٠",
+       "٢٠٠"
+      ],
+      "truth": [
+       "١٠٠",
+       "٢٠٠"
+      ]
+     },
+     "limitations_applied": [
+      {
+       "detail": "18/18 control(s) excused at 4/line over 7 line(s)",
+       "excused": 18,
+       "id": "poppler-bidi-decorations",
+       "reader_version_measured": "26.07.0"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    }
+   },
+   "producer": {
+    "engine": "chrome",
+    "engine_version": "157.0.8103.78",
+    "markup_sha256": "2834589cb1a47ead318d5944336dbb58ca3ff84869c8f76d784e62734462b1c9",
+    "outline": "1 entries",
+    "postprocess": true
+   },
+   "sha256": "00e8bf51deb51b634c93174a00b64526608b2493aa22aa3a08d88178aca5751d",
+   "structural_ok": true,
+   "text_sha256": "77e9a91e6b016f35e15d223bd1d6181fc99bc3a110c582829e854f59db3b7020"
   },
   {
    "bytes": 22419,
@@ -14777,7 +15855,7 @@
    },
    "font": "amiri",
    "id": "voc-full",
-   "median_seconds": 0.8027945409994572,
+   "median_seconds": 0.816826583002694,
    "pdf": "voc-full.pdf",
    "per_reader": {
     "mupdf": {
@@ -14926,11 +16004,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "2422e5015f92e961cfc954da86c24c8192c5c2d5a8730b5845eea06dbcc53305",
+    "markup_sha256": "29a708a1cd660535c776e6ae76862a5bad3d4c408c027c4dacf3c2f76cae5a19",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "12bd35b78def2d7c0498c54531d0f029d4f28502bcbfcc6d627e7b84169a5b80",
+   "sha256": "6186b6e671f84b1db4760b62d61eae5559298726a33a41506a2d61b5a0ab6620",
    "structural_ok": false,
    "text_sha256": "7e4155c7694e42e35f6684f58c582785f3cc7135500772e351658065181c521e"
   },
@@ -15028,7 +16106,7 @@
    },
    "font": "amiri",
    "id": "voc-lam-alef-marks",
-   "median_seconds": 0.9064978749956936,
+   "median_seconds": 0.9442039160057902,
    "pdf": "voc-lam-alef-marks.pdf",
    "per_reader": {
     "mupdf": {
@@ -15177,13 +16255,264 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "e8bac9df1706a16b574a61dc2931e93ee3155a5f850ddd667616e7512fb1ff04",
+    "markup_sha256": "f01b0d0f7069b8488c576e5abeb37a213fe81d5554f1768d6351ab2e69961189",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "cd3af3bbdc342c72b8eb94b9c7c7e4a2803d58cfc9b3d621dfebee968a7bf314",
+   "sha256": "9f0a262d9a5e216303eae4337f64985b74ffd81e9b88ab0a3a25dc2bcf9aba28",
    "structural_ok": false,
    "text_sha256": "ac69d48db9cf9972152804f4006972807faf045e4e9758a78cfbf41d91a795bf"
+  },
+  {
+   "bytes": 16036,
+   "category": "vocalisation",
+   "checks": [
+    {
+     "id": "markinfo",
+     "reason": "/MarkInfo /Marked true",
+     "status": "pass"
+    },
+    {
+     "id": "lang",
+     "reason": "/Lang 'ar'",
+     "status": "pass"
+    },
+    {
+     "id": "all-text-tagged",
+     "reason": "every text show carries an MCID",
+     "status": "pass"
+    },
+    {
+     "id": "tagged-text",
+     "reason": "4 tagged words match the case",
+     "status": "pass"
+    },
+    {
+     "id": "headings",
+     "reason": "0 heading element(s), levels []",
+     "status": "pass"
+    },
+    {
+     "id": "tables",
+     "reason": "0 table(s) · TR/TH/TD match the case cell by cell",
+     "status": "pass"
+    },
+    {
+     "id": "block-order",
+     "reason": "top-level tags ['/P']",
+     "status": "pass"
+    },
+    {
+     "id": "fonts",
+     "reason": "1 font(s) used for text, all embedded with /ToUnicode",
+     "status": "pass"
+    },
+    {
+     "id": "notdef",
+     "reason": "no glyph 0 drawn",
+     "status": "pass"
+    },
+    {
+     "id": "invisible-format",
+     "reason": "15 U+200B/200C/200D/2060 in the layer — the producer inserted them and a copy-paste carries them",
+     "status": "fail"
+    },
+    {
+     "id": "presentation-forms",
+     "reason": "no presentation form in the text layer",
+     "status": "pass"
+    },
+    {
+     "id": "tounicode-coverage",
+     "reason": "every drawn code has a Unicode value",
+     "status": "pass"
+    },
+    {
+     "id": "outline",
+     "reason": "0 entr(y/ies)",
+     "status": "pass"
+    },
+    {
+     "id": "model-boundary",
+     "reason": "inside the declared model",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-ua1",
+     "reason": "no failing rule",
+     "status": "pass"
+    },
+    {
+     "id": "verapdf-pdfa3b",
+     "reason": "no failing rule",
+     "status": "pass"
+    }
+   ],
+   "file": {
+    "bidi": 1,
+    "codes": 53,
+    "notdef": 0,
+    "untagged_chars": 0,
+    "zero_width": 15
+   },
+   "font": "plex",
+   "id": "voc-no-heading",
+   "median_seconds": 0.6327726660529152,
+   "pdf": "voc-no-heading.pdf",
+   "per_reader": {
+    "mupdf": {
+     "chars": {
+      "out": 37,
+      "truth": 37
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfium": {
+     "chars": {
+      "out": 37,
+      "truth": 37
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfkit": {
+     "chars": {
+      "out": 37,
+      "truth": 37
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    },
+    "pdfminer": {
+     "chars": {
+      "out": 65,
+      "truth": 37
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 15
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.0,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.0
+     }
+    },
+    "poppler": {
+     "chars": {
+      "out": 37,
+      "truth": 37
+     },
+     "defects": {
+      "bidi": 0,
+      "presentation_forms": 0,
+      "pua": 0,
+      "replacement": 0,
+      "tatweel_excess": 0,
+      "zero_width": 0
+     },
+     "digit_runs": {
+      "out": [],
+      "truth": []
+     },
+     "limitations_applied": [
+      {
+       "detail": "3/3 control(s) excused at 4/line over 1 line(s)",
+       "excused": 3,
+       "id": "poppler-bidi-decorations",
+       "reader_version_measured": "26.07.0"
+      }
+     ],
+     "limitations_refused": [],
+     "metrics": {
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     }
+    }
+   },
+   "producer": {
+    "engine": "chrome",
+    "engine_version": "157.0.8103.78",
+    "markup_sha256": "fa7acc1167e9f99062067ddf053ed3f8e50c39e45ba3c89e188c4690db9cf0ce",
+    "outline": "none (no headings)",
+    "postprocess": true
+   },
+   "sha256": "af3ca89a46e590eb897971fedbff82dea131c4c5b768722664d0c8973e860fd0",
+   "structural_ok": false,
+   "text_sha256": "f995df286a8595f3d0661e0a7f0f1c7f35bee862f953dbcf836e5f72eb635b58"
   },
   {
    "bytes": 19710,
@@ -15279,7 +16608,7 @@
    },
    "font": "plex",
    "id": "voc-partial",
-   "median_seconds": 0.7661656669806689,
+   "median_seconds": 0.7808464159024879,
    "pdf": "voc-partial.pdf",
    "per_reader": {
     "mupdf": {
@@ -15428,11 +16757,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "19c7ed120a581c507a6b3a4260420321804bf2d25dc469f25554bb266cce3e89",
+    "markup_sha256": "d0f5e565c7c9b960a01b4c39d32ea72438e06ac4108776b0a4353e99247d70e5",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "c8d612f9d885bb3765f5f3b6b9df3cb50655c8e7ae001694fc7c0814a9f68340",
+   "sha256": "1f2946e149038e22b729959ad684cd3d5e58c317674739a47f8b129f228c75ca",
    "structural_ok": false,
    "text_sha256": "477d24a825e4da7dc409a7e602c9c5405037539a358c9565b91473ed17ea08df"
   },
@@ -15530,7 +16859,7 @@
    },
    "font": "amiri",
    "id": "voc-shadda-tanween",
-   "median_seconds": 0.8812624999554828,
+   "median_seconds": 0.8543754999991506,
    "pdf": "voc-shadda-tanween.pdf",
    "per_reader": {
     "mupdf": {
@@ -15679,11 +17008,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "177c99c1740463daae6c2d7f162c3b7ce73c159ed14c0443b7d154ef474bc04e",
+    "markup_sha256": "abb545ec593f6b67eaf00fc915901227cb337ee432f416a8eae82b20e5043384",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "4ccfec01b29bc5b0b69c2eb759c5b551bff23f2b5748840c7bea820e0304a30c",
+   "sha256": "1fa7af5b73101553be91bc3c95f6451d93ff9045f7700dbe4b66431a55098296",
    "structural_ok": false,
    "text_sha256": "a2d09b965f7ecc287371662f5137cf12c1872e4889b1c04cc3a7e1df12ff3e19"
   },
@@ -15781,7 +17110,7 @@
    },
    "font": "amiri",
    "id": "voc-shadda",
-   "median_seconds": 0.9770322089316323,
+   "median_seconds": 0.9832984999520704,
    "pdf": "voc-shadda.pdf",
    "per_reader": {
     "mupdf": {
@@ -15930,11 +17259,11 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "dfaf1077df7a834d5495822cef789a70781538e3befcf08ec7e7aaed9c23676a",
+    "markup_sha256": "8982787865b18d9313be01296743bbc26cb9f7cbf2bcdc3369347cb1bd404fcb",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "91c893d412ddf6c88fbe66e4a836e1d17b8610fe8742c86ede7dd680e2743994",
+   "sha256": "ad56ed381457ed28331f0b61098439408d148a2b5c803b0224c988b6faba945d",
    "structural_ok": false,
    "text_sha256": "fb694b8ab2754b68bceead3115d8435cea569a97719484bd806033265fc7756f"
   },
@@ -16032,7 +17361,7 @@
    },
    "font": "amiri",
    "id": "voc-tanween",
-   "median_seconds": 0.777923958026804,
+   "median_seconds": 0.8004021670203656,
    "pdf": "voc-tanween.pdf",
    "per_reader": {
     "mupdf": {
@@ -16181,101 +17510,102 @@
    "producer": {
     "engine": "chrome",
     "engine_version": "157.0.8103.78",
-    "markup_sha256": "bdaa0653e8da7513c811ca2e42f8b8167a78bab14ce1917ac054cf022edf04e5",
+    "markup_sha256": "3f788a5b3cbc7dd6d63bf5ed0e61f2aa0e760078d49189f672e43eb1c00519ee",
     "outline": "1 entries",
     "postprocess": true
    },
-   "sha256": "825d2b06bc1571dc4893bdf89e78b84925af40c85f516058649b11c30050ffe7",
+   "sha256": "ac42dc50ef4d5d6ae6e8725ef59b4d6c0c43c6129a32df17384c7387d037a241",
    "structural_ok": false,
    "text_sha256": "8bba6f8d12e5b68604b61d3bafd4cca89ad16f3c812fc10daae125e7c9c08504"
   }
  ],
  "checks": {
-  "cases": 55,
-  "clean_cases": 24,
+  "cases": 60,
+  "clean_cases": 27,
   "per_check": {
    "all-text-tagged": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "block-order": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "fonts": {
-    "fail": 1,
+    "fail": 0,
     "na": 0,
-    "pass": 54
+    "pass": 60
    },
    "headings": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "invisible-format": {
-    "fail": 20,
+    "fail": 22,
     "na": 0,
-    "pass": 35
+    "pass": 38
    },
    "lang": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "markinfo": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "model-boundary": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "notdef": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "outline": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "presentation-forms": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "tables": {
     "fail": 3,
     "na": 0,
-    "pass": 52
+    "pass": 57
    },
    "tagged-text": {
     "fail": 14,
     "na": 0,
-    "pass": 41
+    "pass": 46
    },
    "tounicode-coverage": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "verapdf-pdfa3b": {
     "fail": 0,
     "na": 0,
-    "pass": 55
+    "pass": 60
    },
    "verapdf-ua1": {
     "fail": 1,
     "na": 0,
-    "pass": 54
+    "pass": 59
    }
   },
   "structural_failures": [
+   "bld-heading",
    "dig-mixed-order",
    "dig-mixed-scripts",
    "dig-paren-eol",
@@ -16303,6 +17633,7 @@
    "tbl-two-line-cell",
    "voc-full",
    "voc-lam-alef-marks",
+   "voc-no-heading",
    "voc-partial",
    "voc-shadda-tanween",
    "voc-shadda",
@@ -16310,20 +17641,20 @@
   ]
  },
  "corpus": {
-  "cases": 55,
+  "cases": 60,
   "counts": {
    "digits": 9,
-   "headings": 4,
+   "headings": 5,
    "kashida": 3,
    "lists": 2,
    "mixed": 7,
    "money": 7,
    "punctuation": 4,
-   "shaping": 6,
-   "tables": 7,
-   "vocalisation": 6
+   "shaping": 7,
+   "tables": 9,
+   "vocalisation": 7
   },
-  "manifest_sha256": "a36f1ac30d05dc30e5cd6cd6ca8529c2d55eda270793de640d56745cbc0fb26d"
+  "manifest_sha256": "98376692b796c02ae1473a473fab7b53c087612e55a356588f12316c8a8ee361"
  },
  "engine": "chrome",
  "engine_version": "157.0.8103.78",
@@ -16357,7 +17688,7 @@
  "schema": "conformance-run/1",
  "summary": {
   "mupdf": {
-   "cases": 55,
+   "cases": 60,
    "categories": {
     "digits": {
      "cases": 9,
@@ -16365,9 +17696,9 @@
      "order_mean": 0.5837
     },
     "headings": {
-     "cases": 4,
+     "cases": 5,
      "exact": 0,
-     "order_mean": 0.573
+     "order_mean": 0.5917
     },
     "kashida": {
      "cases": 3,
@@ -16395,19 +17726,19 @@
      "order_mean": 0.875
     },
     "shaping": {
-     "cases": 6,
+     "cases": 7,
      "exact": 0,
-     "order_mean": 0.7365
+     "order_mean": 0.7384
     },
     "tables": {
-     "cases": 7,
+     "cases": 9,
      "exact": 1,
-     "order_mean": 0.7796
+     "order_mean": 0.7817
     },
     "vocalisation": {
-     "cases": 6,
-     "exact": 0,
-     "order_mean": 0.6218
+     "cases": 7,
+     "exact": 1,
+     "order_mean": 0.6759
     }
    },
    "defects": {
@@ -16416,19 +17747,19 @@
     "pua": 0,
     "replacement": 0,
     "tatweel_excess": 0,
-    "zero_width": 3
+    "zero_width": 4
    },
-   "exact_cases": 5,
+   "exact_cases": 6,
    "mean": {
-    "digit_runs": 0.9048,
-    "exact": 0.0909,
-    "order": 0.6717,
-    "skeleton_exact": 0.0909,
-    "word_f1": 0.6961
+    "digit_runs": 0.9128,
+    "exact": 0.1,
+    "order": 0.6823,
+    "skeleton_exact": 0.1,
+    "word_f1": 0.7046
    }
   },
   "pdfium": {
-   "cases": 55,
+   "cases": 60,
    "categories": {
     "digits": {
      "cases": 9,
@@ -16436,9 +17767,9 @@
      "order_mean": 0.8687
     },
     "headings": {
-     "cases": 4,
+     "cases": 5,
      "exact": 3,
-     "order_mean": 0.9688
+     "order_mean": 0.9417
     },
     "kashida": {
      "cases": 3,
@@ -16466,19 +17797,19 @@
      "order_mean": 0.875
     },
     "shaping": {
-     "cases": 6,
-     "exact": 5,
-     "order_mean": 0.9907
-    },
-    "tables": {
      "cases": 7,
      "exact": 6,
-     "order_mean": 0.9857
+     "order_mean": 0.9921
+    },
+    "tables": {
+     "cases": 9,
+     "exact": 8,
+     "order_mean": 0.9889
     },
     "vocalisation": {
-     "cases": 6,
-     "exact": 1,
-     "order_mean": 0.7623
+     "cases": 7,
+     "exact": 2,
+     "order_mean": 0.7963
     }
    },
    "defects": {
@@ -16487,19 +17818,19 @@
     "pua": 0,
     "replacement": 0,
     "tatweel_excess": 0,
-    "zero_width": 3
+    "zero_width": 4
    },
-   "exact_cases": 31,
+   "exact_cases": 35,
    "mean": {
-    "digit_runs": 0.9267,
-    "exact": 0.5636,
-    "order": 0.8818,
-    "skeleton_exact": 0.6364,
-    "word_f1": 0.9011
+    "digit_runs": 0.9328,
+    "exact": 0.5833,
+    "order": 0.8889,
+    "skeleton_exact": 0.65,
+    "word_f1": 0.9065
    }
   },
   "pdfkit": {
-   "cases": 55,
+   "cases": 60,
    "categories": {
     "digits": {
      "cases": 9,
@@ -16507,9 +17838,9 @@
      "order_mean": 0.9807
     },
     "headings": {
-     "cases": 4,
+     "cases": 5,
      "exact": 4,
-     "order_mean": 1.0
+     "order_mean": 0.9667
     },
     "kashida": {
      "cases": 3,
@@ -16537,19 +17868,19 @@
      "order_mean": 0.75
     },
     "shaping": {
-     "cases": 6,
-     "exact": 6,
+     "cases": 7,
+     "exact": 7,
      "order_mean": 1.0
     },
     "tables": {
-     "cases": 7,
-     "exact": 5,
-     "order_mean": 0.9632
+     "cases": 9,
+     "exact": 7,
+     "order_mean": 0.9713
     },
     "vocalisation": {
-     "cases": 6,
-     "exact": 0,
-     "order_mean": 0.6327
+     "cases": 7,
+     "exact": 1,
+     "order_mean": 0.6852
     }
    },
    "defects": {
@@ -16558,19 +17889,19 @@
     "pua": 0,
     "replacement": 0,
     "tatweel_excess": 0,
-    "zero_width": 10
+    "zero_width": 11
    },
-   "exact_cases": 33,
+   "exact_cases": 37,
    "mean": {
-    "digit_runs": 0.9235,
-    "exact": 0.6,
-    "order": 0.8902,
-    "skeleton_exact": 0.6,
-    "word_f1": 0.9527
+    "digit_runs": 0.9299,
+    "exact": 0.6167,
+    "order": 0.8966,
+    "skeleton_exact": 0.6167,
+    "word_f1": 0.9538
    }
   },
   "pdfminer": {
-   "cases": 55,
+   "cases": 60,
    "categories": {
     "digits": {
      "cases": 9,
@@ -16578,9 +17909,9 @@
      "order_mean": 0.0911
     },
     "headings": {
-     "cases": 4,
+     "cases": 5,
      "exact": 0,
-     "order_mean": 0.1293
+     "order_mean": 0.1368
     },
     "kashida": {
      "cases": 3,
@@ -16608,17 +17939,17 @@
      "order_mean": 0.0
     },
     "shaping": {
-     "cases": 6,
-     "exact": 0,
-     "order_mean": 0.0093
-    },
-    "tables": {
      "cases": 7,
      "exact": 0,
-     "order_mean": 0.1783
+     "order_mean": 0.0079
+    },
+    "tables": {
+     "cases": 9,
+     "exact": 0,
+     "order_mean": 0.1856
     },
     "vocalisation": {
-     "cases": 6,
+     "cases": 7,
      "exact": 0,
      "order_mean": 0.0
     }
@@ -16629,19 +17960,19 @@
     "pua": 0,
     "replacement": 0,
     "tatweel_excess": 0,
-    "zero_width": 159
+    "zero_width": 175
    },
    "exact_cases": 0,
    "mean": {
-    "digit_runs": 0.8958,
+    "digit_runs": 0.9044,
     "exact": 0.0,
-    "order": 0.1004,
+    "order": 0.1018,
     "skeleton_exact": 0.0,
-    "word_f1": 0.1303
+    "word_f1": 0.1297
    }
   },
   "poppler": {
-   "cases": 55,
+   "cases": 60,
    "categories": {
     "digits": {
      "cases": 9,
@@ -16649,9 +17980,9 @@
      "order_mean": 0.5924
     },
     "headings": {
-     "cases": 4,
+     "cases": 5,
      "exact": 3,
-     "order_mean": 0.875
+     "order_mean": 0.8667
     },
     "kashida": {
      "cases": 3,
@@ -16679,19 +18010,19 @@
      "order_mean": 0.5911
     },
     "shaping": {
-     "cases": 6,
-     "exact": 1,
-     "order_mean": 0.6864
+     "cases": 7,
+     "exact": 2,
+     "order_mean": 0.7312
     },
     "tables": {
-     "cases": 7,
-     "exact": 5,
-     "order_mean": 0.8904
+     "cases": 9,
+     "exact": 7,
+     "order_mean": 0.9148
     },
     "vocalisation": {
-     "cases": 6,
-     "exact": 1,
-     "order_mean": 0.6361
+     "cases": 7,
+     "exact": 2,
+     "order_mean": 0.6881
     }
    },
    "defects": {
@@ -16700,15 +18031,15 @@
     "pua": 0,
     "replacement": 0,
     "tatweel_excess": 0,
-    "zero_width": 3
+    "zero_width": 4
    },
-   "exact_cases": 14,
+   "exact_cases": 18,
    "mean": {
-    "digit_runs": 0.8958,
-    "exact": 0.2545,
-    "order": 0.678,
-    "skeleton_exact": 0.2545,
-    "word_f1": 0.6978
+    "digit_runs": 0.9044,
+    "exact": 0.3,
+    "order": 0.7021,
+    "skeleton_exact": 0.3,
+    "word_f1": 0.7213
    }
   }
  }

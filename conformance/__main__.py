@@ -5,6 +5,8 @@
   python3 -m conformance certify FILE --case ID -o FILE.cert.json
   python3 -m conformance validate FILE.cert.json FILE.pdf
   python3 -m conformance selftest [--engine chrome]
+  python3 -m conformance ratchet accept --from results.json    # record one reader version's floors
+  python3 -m conformance ratchet check  --from results.json    # the same comparison `run --ratchet` makes
 """
 import argparse
 import sys
@@ -40,6 +42,13 @@ def main(argv=None) -> int:
     v = sub.add_parser("validate", help="validate a certificate against its file (schema, sha, verdict)")
     v.add_argument("cert")
     v.add_argument("pdf")
+    v.add_argument("--recheck", action="store_true",
+                   help="re-extract the file with the tier-1 readers and re-run every check")
+
+    rt = sub.add_parser("ratchet", help="record or check floors from a saved results.json (one file per run)")
+    rt.add_argument("action", choices=["accept", "check"])
+    rt.add_argument("--from", dest="source", required=True, help="the results.json of the run")
+    rt.add_argument("--file", dest="path", default=None, help="the floors file (default conformance/ratchet.json)")
 
     s = sub.add_parser("selftest", help="planted mutations: every check must be seen failing")
     s.add_argument("--engine", default="chrome", choices=["chrome", "chrome-raw", "typst", "weasyprint"])
@@ -54,7 +63,9 @@ def main(argv=None) -> int:
         drift = manifest.problems()
         print("MANIFEST DRIFT:\n  " + "\n  ".join(drift) if drift else "MANIFEST OK — exactly what the cases derive")
         return 1 if drift else 0
-    from .cli import run_command, certify_command, validate_command, selftest_command
+    from .cli import run_command, certify_command, validate_command, selftest_command, ratchet_command
+    if a.cmd == "ratchet":
+        return ratchet_command(a)
     if a.cmd == "run":
         return run_command(a)
     if a.cmd == "certify":

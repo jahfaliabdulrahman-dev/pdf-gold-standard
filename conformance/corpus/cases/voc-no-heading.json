@@ -1,0 +1,13 @@
+{
+  "id": "voc-no-heading",
+  "category": "vocalisation",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"
+    }
+  ],
+  "note": "a vocalised paragraph with no heading above it — the shape where PDFium displaces the final haraka past the stop"
+}

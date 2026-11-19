@@ -46,18 +46,30 @@ that is the claim; the certificate says whether it holds.
 | `pdfium` **tier-1** | `pypdfium2` (pinned in `requirements.txt`) | Chrome, Edge and every Chromium viewer; the primary metric P |
 | `pdfkit` **tier-1** | `PDFKit` through `swift` (macOS) | Preview, and the user's own copy-paste |
 | `mupdf` | `pymupdf` (pinned) | most RAG extractors and many Linux viewers |
-| `poppler` | `pdftotext` (brew) | the reference command-line extractor |
+| `poppler` | `pdftotext`, **pinned** to an exact conda-forge build (`POPPLER_VERSION`) | the reference command-line extractor |
 | `pdfminer` | `pdfplumber` / `pdfminer.six` | the pure-Python extractor inside many pipelines |
 
 Versions are printed in every result and in every certificate. A reader that cannot run is `n/a` **with its
 reason**; it never prints `PASS`.
 
-Two readers are **unpinned** — their version comes from the machine, not from a pin: PDFKit ships with macOS,
-and poppler ships from brew with no version switch (measured: the CI runner had 26.10.0 while the floors were
-taken on 26.07.0). The ratchet records both and, when the version differs, **skips that reader's floors with a
-printed note** — never silently. What keeps an unpinned reader honest is the limit's control, which every `run`
-re-executes: a limit that stopped reproducing on the installed version is refused by name. The three pip readers
-(pdfium, mupdf, pdfminer) are gated unconditionally. A reader that disappears from a run is a **failure**,
+**poppler is pinned, not inherited.** A reader's floors are recorded per version, so a package manager that
+ships whatever is current turns every upstream bump into a red `main` — it did: the runner moved 26.10.0 →
+26.11.0 between two runs an hour apart, and the gate failed by name on `main` (`no floors for this version`).
+The workflow now installs `poppler=$POPPLER_VERSION` from conda-forge and refuses any other build; the reader
+resolves the binary from `CONFORMANCE_PDFTOTEXT` when it is set, otherwise from PATH. Locally:
+
+```
+conda create -y -p ~/.cache/poppler-pin/26.11.0 -c conda-forge --override-channels "poppler=26.11.0"
+export CONFORMANCE_PDFTOTEXT=~/.cache/poppler-pin/26.11.0/bin/pdftotext
+```
+
+Measured: 26.11.0 reproduces 26.07.0's readings on all 60 cases (no metric differs), so the pin changed the
+SUPPLY of the reader, not its numbers.
+
+**PDFKit is the only reader whose version comes from the machine** (it ships with macOS, and the GitHub runner's
+macOS differs from the owner's). Its floors are recorded per version (27.2.1 and 15.8.2 today), and a machine
+with a third version fails by name until that version is accepted from its own run. The three pip readers
+(pdfium, mupdf, pdfminer) are gated unconditionally by `requirements.txt`. A reader that disappears from a run is a **failure**,
 never a skip.
 
 ## The declared limits

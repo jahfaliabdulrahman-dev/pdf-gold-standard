@@ -298,6 +298,35 @@ def m_drop_tounicode(src, dst):
     raise _NA("no font with /ToUnicode")
 
 
+def m_foreign_font(src, dst):
+    """Rename every embedded face to one that is not the case's font nor the declared fallback.
+
+    The `fonts` check is the gate's only defence against shipping an OEM face we have no licence to embed
+    (the review's P2-3: Apple's .SFCompact-Black was embedded in a distributable file). It was widened to allow
+    the declared OFL fallback — so it now needs a mutation that proves it still refuses a stranger.
+    """
+    renamed = 0
+    with pikepdf.open(src) as pdf:
+        for obj in pdf.objects:
+            if not isinstance(obj, pikepdf.Dictionary):
+                continue
+            if "/BaseFont" in obj and "/Subtype" in obj and "/ToUnicode" in obj or "/BaseFont" in obj:
+                try:
+                    obj["/BaseFont"] = pikepdf.Name("/AAAAAA+SFCompact-Black")
+                    renamed += 1
+                except Exception:
+                    continue
+            if "/FontName" in obj:
+                try:
+                    obj["/FontName"] = pikepdf.Name("/AAAAAA+SFCompact-Black")
+                    renamed += 1
+                except Exception:
+                    continue
+        pdf.save(dst)
+    if not renamed:
+        raise _NA("no font object to rename")
+
+
 # ---------------------------------------------------------------- harness
 def _build(fixture: str, outdir: str, engine: str) -> str:
     from .adapters import chrome
@@ -349,6 +378,8 @@ MUTATIONS = [
     ("drop-ToUnicode", "struct", m_drop_tounicode,
      "check tounicode-coverage", lambda b, m: b["checks"]["tounicode-coverage"] == "pass"
      and m["checks"]["tounicode-coverage"] == "fail"),
+    ("foreign-font", "struct", m_foreign_font,
+     "check fonts", lambda b, m: b["checks"]["fonts"] == "pass" and m["checks"]["fonts"] == "fail"),
     ("drop-one-haraka", "marked", m_drop_mark,
      "exact falls, skeleton stays", lambda b, m: m["metrics"]["exact"] == 0.0
      and m["metrics"]["skeleton_exact"] == 1.0 and b["metrics"]["exact"] == 1.0),

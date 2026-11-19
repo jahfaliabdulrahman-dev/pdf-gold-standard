@@ -1,6 +1,27 @@
 {
   "cases": [
     {
+      "bytes": 408,
+      "category": "headings",
+      "file": "bld-heading.json",
+      "id": "bld-heading",
+      "sha256": "f2ee077cd990fa9c8f4f8b478953b00e8b21f95d2ac25a742b7def2f5368400c"
+    },
+    {
+      "bytes": 567,
+      "category": "tables",
+      "file": "bld-th.json",
+      "id": "bld-th",
+      "sha256": "689f1449dec74a44fa627547894057899e490cdc94733efde8effe3e28609626"
+    },
+    {
+      "bytes": 550,
+      "category": "shaping",
+      "file": "bld-word.json",
+      "id": "bld-word",
+      "sha256": "2a69f643a1025f3103e5eb8ef611d0958e22d7772b7e766746ab3841a67c0a01"
+    },
+    {
       "bytes": 366,
       "category": "digits",
       "file": "dig-article.json",
@@ -316,18 +337,18 @@
       "sha256": "acc97471265c553e00aaafec9ba4fe4ede94c297fb89a6414c91a99dd0dec116"
     },
     {
-      "bytes": 681,
-      "category": "tables",
-      "file": "tbl-explicit-width.json",
-      "id": "tbl-explicit-width",
-      "sha256": "2e8d6a687b368c77c909655f3d5d3a552bf18f10d648872c5d3f5b3f67128c89"
-    },
-    {
       "bytes": 3774,
       "category": "tables",
       "file": "tbl-page-break.json",
       "id": "tbl-page-break",
       "sha256": "7a40faef3458d4668a178e7feee0cb2f18e949d904aa71903f37423cbb1c40eb"
+    },
+    {
+      "bytes": 686,
+      "category": "tables",
+      "file": "tbl-plain-fragment.json",
+      "id": "tbl-plain-fragment",
+      "sha256": "49fc997cbfec5a219589a9ef3d78142aee552081ba5ffd7d66e8dd44996f20d1"
     },
     {
       "bytes": 647,
@@ -344,6 +365,13 @@
       "sha256": "ca2c56f018b0af78a1cc03412cc870cd5fe72e759c8bf61229b6450cec5f9577"
     },
     {
+      "bytes": 581,
+      "category": "tables",
+      "file": "tbl-width-100.json",
+      "id": "tbl-width-100",
+      "sha256": "ac86314b9b94738df8ebf255dda9def4cff9c24cc9f87503646bb8df54f4fe53"
+    },
+    {
       "bytes": 418,
       "category": "vocalisation",
       "file": "voc-full.json",
@@ -356,6 +384,13 @@
       "file": "voc-lam-alef-marks.json",
       "id": "voc-lam-alef-marks",
       "sha256": "67843ec45e7d507823a1720d78639a0916c4167c4e226bbed4a6a6438c1762a2"
+    },
+    {
+      "bytes": 367,
+      "category": "vocalisation",
+      "file": "voc-no-heading.json",
+      "id": "voc-no-heading",
+      "sha256": "dbe92a8e4a37543481bee592ff750b31975279957a801e3efff927fa60ab4918"
     },
     {
       "bytes": 567,
@@ -388,16 +423,16 @@
   ],
   "counts": {
     "digits": 9,
-    "headings": 4,
+    "headings": 5,
     "kashida": 3,
     "lists": 2,
     "mixed": 7,
     "money": 7,
     "punctuation": 4,
-    "shaping": 6,
-    "tables": 7,
-    "vocalisation": 6
+    "shaping": 7,
+    "tables": 9,
+    "vocalisation": 7
   },
   "schema": "conformance-corpus/1",
-  "total": 55
+  "total": 60
 }
