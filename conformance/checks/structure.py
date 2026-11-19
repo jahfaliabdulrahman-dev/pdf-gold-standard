@@ -178,7 +178,30 @@ def _case_cells(block: dict) -> list[list[str]]:
     return [list(map(str, r)) for r in rows] + [list(map(str, r)) for r in block["rows"]]
 
 
-def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True) -> list[dict]:
+def a3b_target(producer: dict, pdf_path: str) -> str:
+    """The file that may be judged for PDF/A-3b — never a file the producer did not declare.
+
+    An engine that cannot put PDF/UA-1 and PDF/A-3b in one file writes two, and the claim lives in the second
+    one (WeasyPrint: `<id>.a3b.pdf`). Judging the UA-1 file for A-3b reported 60/60 failures on files veraPDF
+    passes. But a path alone is not a claim: it is honoured ONLY when the producer also declares the second
+    file by name, so a certificate cannot be handed a different document than the one it names.
+    """
+    second = (producer or {}).get("a3b_path")
+    if not second:
+        return pdf_path
+    declared = (producer.get("variants") or {}).get("also")
+    named = producer.get("second_file")
+    if declared != "pdf/a-3b" or not named or os.path.basename(second) != named:
+        raise ValueError(
+            "a3b_path without a declared second file — refusing to judge a document the producer did not name "
+            f"(declared also={declared!r}, second_file={named!r})")
+    if not os.path.exists(second):
+        raise ValueError(f"a3b_path {second!r} does not exist — a missing second file is a failed claim, not a pass")
+    return second
+
+
+def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True,
+             honour_second_file: bool = True) -> list[dict]:
     checks: list[dict] = []
 
     def add(cid: str, ok: bool | None, reason: str) -> None:
@@ -315,9 +338,13 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             f" — the case declares {[(l, t[:16]) for l, t in want_toc]}"))
 
     if run_verapdf:
+        # A CERTIFICATE judges the file it names: `certificate.py` passes honour_second_file=False, so the A-3b
+        # claim can never be satisfied by a different document than the certified one.
+        a3b_path = a3b_target(producer, pdf_path) if honour_second_file else pdf_path
         for flavour, cid in (("ua1", "verapdf-ua1"), ("3b", "verapdf-pdfa3b")):
+            target = a3b_path if flavour == "3b" else pdf_path
             try:
-                fails = verapdf_mod.failing(pdf_path, flavour)
+                fails = verapdf_mod.failing(target, flavour)
             except Exception as exc:
                 add(cid, False, f"veraPDF could not judge the file: {type(exc).__name__}: {exc}")
                 continue
