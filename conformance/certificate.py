@@ -119,7 +119,9 @@ def certify(pdf_path: str, case_id: str, engine: str = "unknown") -> dict:
         }
         _ = refused          # a refused limit never reaches the certificate; the run prints it
 
-    checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True)
+    # honour_second_file=False: a certificate names ONE file and judges that file. An engine that writes a
+    # separate PDF/A-3b file can be measured in a bakeoff (`a3b_path`), but never certified through it.
+    checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True, honour_second_file=False)
     verdict, detail = decide(checks, readers, unavailable, floors, case_id)
     cert = {
         "schema_version": "certificate/1",
