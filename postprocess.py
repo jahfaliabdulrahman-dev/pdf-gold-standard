@@ -533,9 +533,18 @@ def feature_bidi_space(pdf) -> None:
     `/PLMarkCids` is never renamed (it is a mark we placed on purpose).
     """
     import re as _re
-    seen, repaired = set(), 0
+    seen, repaired, blind = set(), 0, 0
     for page in pdf.pages:
         for _key, font in (page.obj.get("/Resources", {}).get("/Font", {}) or {}).items():
+            # The CIDs the text layer created for direction marks, published by it in `/PLMarkCids` (see
+            # fix_text_layer.FontState.finish). A mark is a decision, not an accident: it is never renamed.
+            ours = {int(c) for c in (font.get("/PLMarkCids") or [])}
+            # Consumed here, then removed: a house key is our bookkeeping, not the customer's document. It was
+            # shipping inside the delivered font dict (measured on mon-negative-table.pdf), and an unregistered
+            # private key does not belong in a PDF/A-3b file.
+            if "/PLMarkCids" in font:
+                del font["/PLMarkCids"]
+
             tu = font.get("/ToUnicode")
             if tu is None or font.objgen in seen:
                 continue
@@ -543,21 +552,28 @@ def feature_bidi_space(pdf) -> None:
             src = tu.read_bytes().decode("latin-1")
             widths = _cid_widths(font)
 
-            # The CIDs the text layer created for direction marks, published by it in `/PLMarkCids` (see
-            # fix_text_layer.FontState.finish). A mark is a decision, not an accident: it is never renamed.
-            ours = {int(c) for c in (font.get("/PLMarkCids") or [])}
+            # The glyph the FACE itself calls U+0020, read from its cmap. Needed as its own branch: a subset whose
+            # /W cannot be read still names its space, and before the width rule that was the case the repair
+            # still worked on (a silent change the review caught — the repair must not depend on ONE reading of
+            # the font when a second one is available).
+            space_gid = _space_gid(font)
 
             def _remap(m):
                 cid = int(m.group(2), 16)
                 if cid in ours:
                     return m.group(3)                       # a mark we placed: not a space, whatever its width
-                # A glyph that occupies width is a space, whatever the ToUnicode calls it: a real bidi control
-                # has zero advance. This is the whole rule — no threshold, no reference glyph — so a page that
-                # draws the misnamed space ONCE is repaired too (measured: a single-word caption).
-                is_space = (widths or {}).get(cid, 0) > 0
+                if space_gid is not None and cid == space_gid:
+                    is_space = True                         # this CID *is* the font's space, misnamed a control
+                else:
+                    # A glyph that occupies width is a space, whatever the ToUnicode calls it: a real bidi control
+                    # has zero advance. No threshold, no reference glyph — a page that draws the misnamed space
+                    # ONCE is repaired too (measured: a single-word caption).
+                    is_space = (widths or {}).get(cid, 0) > 0
                 return m.group(1) + ("<0020>" if is_space else m.group(3))
 
             dst = _re.sub(r"(<([0-9A-Fa-f]{4})>\s*)(<200[EF]>)", _remap, src)
+            if not widths and space_gid is None:
+                blind += 1                                  # neither reading available: no rule can be applied
             if dst != src:
                 # never install something that stopped being a CMap: a silent break here would pass every
                 # structural gate and only fail in the reader
@@ -568,6 +584,8 @@ def feature_bidi_space(pdf) -> None:
                     repaired += 1
     if repaired:
         print(f"      bidi-space: repaired the space mapping in {repaired} font(s)")
+    if blind:
+        print(f"      bidi-space: {blind} font(s) with no readable widths and no named space — left as they are")
 
 
 def feature_acroform(pdf, spec, ctx=None) -> None:
