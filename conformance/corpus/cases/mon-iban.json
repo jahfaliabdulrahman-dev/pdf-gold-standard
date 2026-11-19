@@ -1,0 +1,18 @@
+{
+  "id": "mon-iban",
+  "category": "money",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "آيبان"
+    },
+    {
+      "type": "paragraph",
+      "text": "IBAN: SA03 8000 0000 6080 1016 7519"
+    }
+  ],
+  "note": "IBAN سعودي بمسافات كل أربعة محارف — اتجاهه LTR داخل نص عربي"
+}

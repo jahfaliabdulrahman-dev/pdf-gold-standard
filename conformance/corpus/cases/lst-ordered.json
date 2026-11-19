@@ -1,0 +1,24 @@
+{
+  "id": "lst-ordered",
+  "category": "lists",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "قائمة مرقّمة"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "البند الأول",
+        "البند الثاني",
+        "البند الثالث",
+        "البند الرابع"
+      ]
+    }
+  ],
+  "note": "ترقيم بالهندية يضعه المحرّك — علامة تُرسم للنص"
+}

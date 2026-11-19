@@ -22,6 +22,9 @@ jobs:
       # The baselines were measured on this validator. Homebrew ships whatever is current, so the pin is
       # enforced where it matters — at use, by name (the same choice as Chrome).
       VERAPDF_VERSION: "1.30.0"
+      # poppler ships from brew with no version switch; the check below refuses the wrong one by name, the
+      # same discipline as veraPDF (its bidi decoration count is what the limit is measured on).
+      POPPLER_VERSION: "26.07.0"
     steps:
       - uses: actions/checkout@v5
 
@@ -117,6 +120,38 @@ jobs:
 
       - name: Vocalised paragraphs — raw Chrome output must fail, the rebuilt text layer must copy exactly
         run: python3 scripts/test_vocalised.py
+
+      - name: Conformance gate — the public corpus, every declared reader, the ratchet, and the mutations
+        id: conformance
+        run: |
+          # poppler comes from brew with no version switch; the ratchet holds one block per MEASURED version, so
+          # this image's poppler is accepted deliberately (see the artifact + accept step) and never skipped.
+          brew install poppler
+          got="$(pdftotext -v 2>&1 | sed -n 's/.*pdftotext version \([^ ]*\).*/\1/p' | head -1)"
+          echo "poppler $got (a version with no floors fails below, by name)"
+          python3 -m conformance.adapters.fetch_fonts
+          # Refuses a stale manifest or a category below its floor BEFORE building anything.
+          python3 -m conformance manifest --check
+          python3 -m conformance run --engine chrome --out /tmp/conf --ratchet
+          python3 -m conformance selftest
+          python3 scripts/test_check_kinds.py
+          # the guards of the corpus, the metrics, the isolation, the limits, the engine-behaviour claims
+          python3 conformance/tests/test_corpus.py
+          python3 conformance/tests/test_metrics.py
+          python3 conformance/tests/test_isolation.py
+          python3 conformance/tests/test_limits.py
+          python3 conformance/tests/test_certificate.py
+          python3 conformance/tests/test_engine_behaviour.py
+
+      # The run's raw numbers are what a floors acceptance is made from: a version with no floors fails the
+      # step above, and this artifact is the input to `conformance ratchet accept --from results.json`.
+      - name: Upload the conformance run
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: conformance-results
+          path: /tmp/conf/results.json
+          if-no-files-found: warn
 
       - name: Upload partial on failure (for inspection)
         if: failure()

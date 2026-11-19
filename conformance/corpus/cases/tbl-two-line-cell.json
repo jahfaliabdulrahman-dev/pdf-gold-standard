@@ -1,0 +1,27 @@
+{
+  "id": "tbl-two-line-cell",
+  "category": "tables",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "خلية من سطرين"
+    },
+    {
+      "type": "table",
+      "header": [
+        "البند",
+        "الوصف"
+      ],
+      "rows": [
+        [
+          "رسوم",
+          "رسوم إدارية\nتُحصّل سنويًّا"
+        ]
+      ]
+    }
+  ],
+  "note": "خلية تحوي سطرين — الترتيب بينهما هو المقيس"
+}

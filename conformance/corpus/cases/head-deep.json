@@ -1,0 +1,45 @@
+{
+  "id": "head-deep",
+  "category": "headings",
+  "lang": "ar",
+  "font": "amiri",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "المستوى الأول"
+    },
+    {
+      "type": "paragraph",
+      "text": "نص."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "المستوى الثاني"
+    },
+    {
+      "type": "paragraph",
+      "text": "نص."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "المستوى الثالث"
+    },
+    {
+      "type": "paragraph",
+      "text": "نص."
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "المستوى الأول مرة أخرى"
+    },
+    {
+      "type": "paragraph",
+      "text": "نص."
+    }
+  ],
+  "note": "تداخل H1–H3 مع عودة إلى H1"
+}

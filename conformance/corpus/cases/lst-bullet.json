@@ -1,0 +1,23 @@
+{
+  "id": "lst-bullet",
+  "category": "lists",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "قائمة نقطية"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "نقطة أولى",
+        "نقطة ثانية",
+        "نقطة ثالثة"
+      ]
+    }
+  ],
+  "note": "قائمة نقطية بلا أرقام"
+}

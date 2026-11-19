@@ -1,0 +1,31 @@
+{
+  "id": "mon-negative-table",
+  "category": "money",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "كشف الحساب"
+    },
+    {
+      "type": "table",
+      "header": [
+        "البند",
+        "المبلغ"
+      ],
+      "rows": [
+        [
+          "رسوم",
+          "-6,006.965"
+        ],
+        [
+          "خدمات",
+          "1,200.000"
+        ]
+      ]
+    }
+  ],
+  "note": "hermes-agent #157375: -6,006.965 في خلية جدول RTL"
+}

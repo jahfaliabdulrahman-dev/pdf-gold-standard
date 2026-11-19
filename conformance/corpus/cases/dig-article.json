@@ -1,0 +1,18 @@
+{
+  "id": "dig-article",
+  "category": "digits",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "مادة"
+    },
+    {
+      "type": "paragraph",
+      "text": "تنص مادة (٢٥) من النظام على وجوب النشر."
+    }
+  ],
+  "note": "رقم داخل قوسين داخل جملة"
+}

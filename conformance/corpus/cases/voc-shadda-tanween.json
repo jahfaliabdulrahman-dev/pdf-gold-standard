@@ -1,0 +1,18 @@
+{
+  "id": "voc-shadda-tanween",
+  "category": "vocalisation",
+  "lang": "ar",
+  "font": "amiri",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "شدّة وتنوين معًا"
+    },
+    {
+      "type": "paragraph",
+      "text": "مُحَمَّدًا، مُعَلِّمًا، مُعَلَّمًا."
+    }
+  ],
+  "note": "شدّة على الحرف وتنوين على آخره"
+}

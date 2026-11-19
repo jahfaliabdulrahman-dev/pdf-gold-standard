@@ -1,0 +1,23 @@
+# Stage-5 features a conformance case build applies. Deliberately short.
+#
+# `attachments` is NOT declared: it writes a manifest.json describing a *document* (source file, version,
+# page count) that a case does not have — `feature_attachments` refuses a build without ATTACHMENT_FILES,
+# and a case with a guide's manifest would be a green on the wrong data. `page-labels` and
+# `named-destinations` are the same kind of document furniture: not a case's.
+#
+# `pdfua` is not a feature here either: postprocess applies it unconditionally (MarkInfo, artifact
+# wrapping), which is what makes the structure checks meaningful.
+[features.xmp]
+stage = 5
+profiles = ["web"]
+
+[features.output-intent]
+stage = 5
+profiles = ["web"]
+
+# `link-tagging` is declared and honours the case spec: it used to load the document spec unconditionally —
+# a measured leak caught by `test_isolation.py` — and the fix was to give the feature the same override the
+# other two have, not to delete the feature. A case has no links, so it is a no-op that stays honest.
+[features.link-tagging]
+stage = 5
+profiles = ["web"]

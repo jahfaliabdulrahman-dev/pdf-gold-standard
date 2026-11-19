@@ -1,0 +1,27 @@
+{
+  "id": "head-latin",
+  "category": "headings",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Introduction"
+    },
+    {
+      "type": "paragraph",
+      "text": "فقرة عربية تحت عنوان لاتيني."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Scope"
+    },
+    {
+      "type": "paragraph",
+      "text": "فقرة ثانية."
+    }
+  ],
+  "note": "عنوان لاتيني كامل (H1 وH2) فوق نص عربي"
+}
