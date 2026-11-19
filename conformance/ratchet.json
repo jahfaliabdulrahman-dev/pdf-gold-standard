@@ -436,21 +436,6 @@
     "skeleton_exact": 0.0,
     "word_f1": 0.571429
    },
-   "mon-riyal-sign": {
-    "defects": {
-     "bidi": 0,
-     "presentation_forms": 0,
-     "pua": 0,
-     "replacement": 0,
-     "tatweel_excess": 0,
-     "zero_width": 0
-    },
-    "digit_runs": 1.0,
-    "exact": 0.0,
-    "order": 0.625,
-    "skeleton_exact": 0.0,
-    "word_f1": 0.625
-   },
    "mon-rs-abbrev": {
     "defects": {
      "bidi": 0,
@@ -1265,21 +1250,6 @@
     "order": 0.875,
     "skeleton_exact": 0.0,
     "word_f1": 0.875
-   },
-   "mon-riyal-sign": {
-    "defects": {
-     "bidi": 0,
-     "presentation_forms": 0,
-     "pua": 0,
-     "replacement": 0,
-     "tatweel_excess": 0,
-     "zero_width": 0
-    },
-    "digit_runs": 1.0,
-    "exact": 1.0,
-    "order": 1.0,
-    "skeleton_exact": 1.0,
-    "word_f1": 1.0
    },
    "mon-rs-abbrev": {
     "defects": {
@@ -2096,21 +2066,6 @@
     "skeleton_exact": 1.0,
     "word_f1": 1.0
    },
-   "mon-riyal-sign": {
-    "defects": {
-     "bidi": 0,
-     "presentation_forms": 0,
-     "pua": 0,
-     "replacement": 0,
-     "tatweel_excess": 0,
-     "zero_width": 0
-    },
-    "digit_runs": 0.5,
-    "exact": 0.0,
-    "order": 0.75,
-    "skeleton_exact": 0.0,
-    "word_f1": 0.823529
-   },
    "mon-rs-abbrev": {
     "defects": {
      "bidi": 0,
@@ -2926,21 +2881,6 @@
     "skeleton_exact": 0.0,
     "word_f1": 0.125
    },
-   "mon-riyal-sign": {
-    "defects": {
-     "bidi": 0,
-     "presentation_forms": 0,
-     "pua": 0,
-     "replacement": 0,
-     "tatweel_excess": 0,
-     "zero_width": 0
-    },
-    "digit_runs": 1.0,
-    "exact": 0.0,
-    "order": 0.125,
-    "skeleton_exact": 0.0,
-    "word_f1": 0.222222
-   },
    "mon-rs-abbrev": {
     "defects": {
      "bidi": 0,
@@ -3755,21 +3695,6 @@
     "order": 0.875,
     "skeleton_exact": 0.0,
     "word_f1": 0.875
-   },
-   "mon-riyal-sign": {
-    "defects": {
-     "bidi": 0,
-     "presentation_forms": 0,
-     "pua": 0,
-     "replacement": 0,
-     "tatweel_excess": 0,
-     "zero_width": 0
-    },
-    "digit_runs": 1.0,
-    "exact": 0.0,
-    "order": 0.5,
-    "skeleton_exact": 0.0,
-    "word_f1": 0.470588
    },
    "mon-rs-abbrev": {
     "defects": {
