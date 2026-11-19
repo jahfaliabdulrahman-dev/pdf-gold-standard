@@ -138,6 +138,9 @@ jobs:
           # The binary is resolved from the pinned env, not from PATH: the runner image also carries Homebrew's
           # poppler, and PATH order is not a contract.
           pdftext="$(micromamba run -n pinned sh -c 'command -v pdftotext')"
+          # `export`, not $GITHUB_ENV: the latter applies to LATER steps only, and this run happens in this one
+          # (measured the hard way — the gate failed with "poppler: floors recorded but the reader did not run").
+          export CONFORMANCE_PDFTOTEXT="$pdftext"
           echo "CONFORMANCE_PDFTOTEXT=$pdftext" >> "$GITHUB_ENV"
           got="$("$pdftext" -v 2>&1 | sed -n 's/.*pdftotext version \([^ ]*\).*/\1/p' | head -1)"
           if [ "$got" != "$POPPLER_VERSION" ]; then
