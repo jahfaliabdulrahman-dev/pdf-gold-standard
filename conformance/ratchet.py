@@ -55,43 +55,71 @@ def derive(results: dict) -> dict:
 def accept(results: dict, path: str = FILE, allow_lower: bool = False) -> dict:
     """Merge this run's floors for every reader version it measured; other versions keep their blocks.
 
-    A floor is a promise: `accept` refuses to lower one. A run that regressed must be fixed, not recorded —
-    otherwise the next comparison is against the regression and the gate forgets the defect. `allow_lower=True`
-    is the deliberate rebase (a reader whose *definition* changed), and it says so in the caller's flag.
+    A floor is a promise: `accept` refuses to lower one, drop one, or lose a defect kind. A run that regressed
+    must be fixed, not recorded — otherwise the next comparison is against the regression and the gate forgets
+    the defect. A **partial** run cannot certify the corpus: every case recorded for that reader/version must
+    appear in the run. `allow_lower=True` is the deliberate rebase (a reader whose definition changed, or a case
+    removed on purpose), and it prints what it lowered.
 
     A pre-version file cannot be merged (its block has no version key) and cannot be compared either, so this
-    run replaces it and says so — the file it replaces has never held more than one version per reader.
+    run replaces it and says so. A **mixed** file (some readers new-shape, some old) is refused by name: picking
+    one interpretation would silently drop the other readers.
     """
     try:
         floors = load(path)
     except SystemExit:
-        print(f"note: {path} was the pre-version shape — replaced by this run's per-version blocks")
-        floors = {}
-    lowered = []
+        if not os.path.exists(path):
+            floors = {}
+        else:
+            with open(path, encoding="utf-8") as fh:
+                raw = json.load(fh)
+            if raw and all(isinstance(b, dict) and "floors" not in b for b in raw.values()):
+                print(f"note: {path} was the pre-version shape — replaced by this run's per-version blocks")
+                floors = {}
+            else:
+                raise SystemExit(f"{path}: mixed shape — some readers carry `floors` and some do not; refusing "
+                                 f"to guess which block to drop. Fix the file by hand, then re-run.")
+    lowered, missing = [], []
     for reader, block in derive(results).items():
         entry = floors.setdefault(reader, {"floors": {}})
-        old = entry["floors"].get(block["version"], {}).get("cases", {})
+        old_cases = entry["floors"].get(block["version"], {}).get("cases", {})
         if not allow_lower:
+            gone = sorted(set(old_cases) - set(block["cases"]))
+            if gone:
+                missing.append(f"{reader} {block['version']}: {len(gone)} recorded case(s) absent from this run: "
+                               f"{', '.join(gone[:6])}")
             for case, values in block["cases"].items():
-                want = old.get(case)
+                want = old_cases.get(case)
                 if not want:
                     continue
                 for metric in METRICS:
                     if float(values.get(metric, 0.0)) + TOL < float(want.get(metric, 0.0)):
                         lowered.append(f"{reader} {block['version']}/{case}: {metric} "
                                        f"{values.get(metric):.4f} < floor {want.get(metric):.4f}")
+                old_defects = want.get("defects") or {}
+                gone_kinds = sorted(set(old_defects) - set(values.get("defects") or {}))
+                for kind in gone_kinds:
+                    missing.append(f"{reader} {block['version']}/{case}: defect kind {kind!r} absent from the run")
                 for kind, n in (values.get("defects") or {}).items():
-                    if n > (want.get("defects") or {}).get(kind, 0):
+                    if n > old_defects.get(kind, 0):
                         lowered.append(f"{reader} {block['version']}/{case}: defect {kind} {n} > floor "
-                                       f"{want.get('defects', {}).get(kind, 0)}")
+                                       f"{old_defects.get(kind, 0)}")
         entry["floors"].setdefault(block["version"], {})["cases"] = block["cases"]
-    if lowered:
+    if missing:
         raise SystemExit(
-            f"RATCHET REFUSED — this run lowers {len(lowered)} floor(s); fix the regression or pass --force "
-            f"for a deliberate rebase:\n  " + "\n  ".join(lowered[:12]))
-    with open(path, "w", encoding="utf-8") as fh:
+            f"RATCHET REFUSED — this run is missing {len(missing)} recorded floor(s); a partial run cannot "
+            f"certify the corpus (use --force only for a deliberate removal):\n  " + "\n  ".join(missing[:12]))
+    if lowered:
+        if not allow_lower:
+            raise SystemExit(
+                f"RATCHET REFUSED — this run lowers {len(lowered)} floor(s); fix the regression or pass --force "
+                f"for a deliberate rebase:\n  " + "\n  ".join(lowered[:12]))
+        print(f"REBASED — {len(lowered)} floor(s) lowered deliberately:\n  " + "\n  ".join(lowered[:12]))
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(floors, fh, ensure_ascii=False, indent=1, sort_keys=True)
         fh.write("\n")
+    os.replace(tmp, path)
     return floors
 
 

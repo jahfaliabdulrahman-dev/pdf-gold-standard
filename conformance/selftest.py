@@ -156,10 +156,24 @@ def _rewrite_tounicode(src: str, dst: str, to_hex: str) -> None:
 
 def m_persian_digit(src, dst):
     _rewrite_tounicode(src, dst, "06F1")
+    _require_claim(dst, lambda t: any(0x06F0 <= ord(c) <= 0x06F9 for c in t),
+                   "no Persian digit in the layer after the CMap rewrite")
 
 
 def m_mixed_digit(src, dst):
     _rewrite_tounicode(src, dst, "0661")
+    from .checks.mcid_text import scan
+    from .checks.structure import mixed_numbers
+    _require_claim(dst, lambda _t: bool(mixed_numbers("\n".join(scan(dst)["text"].values()))),
+                   "the mutated number has no second digit of another system — the mixed mutation is a no-op")
+
+
+def _require_claim(pdf: str, ok, why: str) -> None:
+    """A mutation that does not move the claimed quantity is a MISS, never a silent CAUGHT."""
+    from .checks.mcid_text import scan
+    text = "\n".join(scan(pdf)["text"].values())
+    if not ok(text):
+        raise _NA(why)
 
 
 def _swap_digits(instr, pdf):

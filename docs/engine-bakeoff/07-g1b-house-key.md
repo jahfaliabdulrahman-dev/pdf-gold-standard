@@ -1,8 +1,8 @@
 # G#1b/1 — the house key enters the certificate gate
 
 > **Historical round.** The counts below are this round's measured numbers (16 structural · 18 per
-> certificate · 15 mutations · 60 cases). After G#2/G#4 the live counts are **18 · 20 · 17 · 65** —
-> see `09-g2-g4.md`; this file is the record of G#1b and is not rewritten.
+> certificate · 15 mutations · 60 cases). For the live counts see `09-g2-g4.md`; this file is the record of G#1b
+> and is not rewritten.
 
 The G#1 round-2 report carried one P3: `private-keys` — the rule that no `/PL*` key may ship — lived in
 `scripts/verify_pdf.py` (the gate for the four documents this repository builds) and in `scripts/g1_audit.py`

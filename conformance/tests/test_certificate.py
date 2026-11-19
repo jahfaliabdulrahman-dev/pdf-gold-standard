@@ -178,9 +178,12 @@ for text, want, why in (
     ("SA0380000000608010167519", [], "an IBAN is ASCII digits"),
     ("+966 55 123 4567", [], "spaces split a phone into pure tokens"),
     ("۱۲۳", [], "Persian-only is not MIXED — numerals-persian is its check"),
+    ("۱۲3", [], "Persian+ASCII is not mixed either — numerals-persian owns Persian"),
 ):
-    got = gate_structure._mixed_numbers(text)
-    check(f"numerals-token:{text}", got == want, f"{got!r} != {want!r} — {why}")
+    got = gate_structure.mixed_numbers(text)
+    check(f"numerals-token:{text}", got == want, "" if got == want else f"{got!r} != {want!r} — {why}")
+
+check("checks:count", len(cert["checks"]) == 20, f"{len(cert['checks'])} checks in the certificate")
 
 shutil.rmtree(tmp, ignore_errors=True)
 print(f"\nCHECKS IN CERTIFICATE: {len(cert['checks'])} · READERS: {len(cert['readers'])} · "
