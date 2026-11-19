@@ -14,18 +14,37 @@ import os
 import statistics
 import time
 
-from .adapters import chrome
+from .adapters import chrome, typst, weasyprint
 from .checks import metrics
 from .corpus import cases as corpus_cases
 from .corpus import coverage, manifest
 from .corpus.truth import truth
 
-ENGINES = {"chrome": "chrome", "chrome-raw": "chrome-raw"}
+# engine -> (adapter, mode). `mode` is None for an adapter whose render_case takes (case, out_pdf) — the
+# competitors — and the chrome mode otherwise. A competitor's adapter is never given a mode: its own flags are
+# its own (assignment §E2: no invented flags, no post-processing on a competitor).
+ENGINES = {
+    "chrome": (chrome, "chrome"),
+    "chrome-raw": (chrome, "chrome-raw"),
+    "typst": (typst, None),
+    "weasyprint": (weasyprint, None),
+}
 
 
 def _sha256(path: str) -> str:
     with open(path, "rb") as fh:
         return hashlib.sha256(fh.read()).hexdigest()
+
+
+def _pdf_producer(path: str) -> str:
+    """`/Producer` straight from the file — the review asked for it before any cross-engine comparison."""
+    try:
+        import pikepdf
+        with pikepdf.open(path) as pdf:
+            info = pdf.docinfo
+            return str(info.get("/Producer", "")) if info else ""
+    except Exception:
+        return ""
 
 
 def preflight(ids=None) -> tuple[list[dict], list[str]]:
@@ -56,16 +75,18 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
     for case in chosen:
         pdf = os.path.join(outdir, f"{case['id']}.pdf")
         t0 = time.perf_counter()
-        producer = chrome.render_case(case, pdf, ENGINES[engine])
+        adapter, mode = ENGINES[engine]
+        producer = adapter.render_case(case, pdf) if mode is None else adapter.render_case(case, pdf, mode)
         elapsed = time.perf_counter() - t0
         timings = [elapsed]
         for _ in range(max(0, time_repeats - 1)):
             t0 = time.perf_counter()
-            chrome.render_case(case, pdf, ENGINES[engine])
+            adapter.render_case(case, pdf) if mode is None else adapter.render_case(case, pdf, mode)
             timings.append(time.perf_counter() - t0)
         builds.append({"case": case, "pdf": pdf, "producer": producer, "elapsed": elapsed,
                        "median": statistics.median(timings), "bytes": os.path.getsize(pdf),
-                       "sha256": _sha256(pdf), "text_sha256": chrome.text_layer_sha256(pdf)})
+                       "sha256": _sha256(pdf), "text_sha256": chrome.text_layer_sha256(pdf),
+                       "producer_pdf": _pdf_producer(pdf)})
         progress(f"built {case['id']:<28} {elapsed:5.2f}s {os.path.getsize(pdf):>7} B")
 
     VP = {}
@@ -74,7 +95,12 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
         paths_all = [b["pdf"] for b in builds]
         progress("veraPDF: one batch per flavour over the corpus…")
         for flavour in ("ua1", "3b"):
-            VP[flavour] = verapdf_mod.batch(paths_all, flavour)
+            # PDF/A-3b is judged on the file that CLAIMS it: an engine that cannot combine UA-1 and A-3b in one
+            # file names its second file, and the batch must read that one. Measured the hard way: WeasyPrint
+            # scored 0/60 A-3b while `verapdf --flavour 3b` passed the very file it wrote.
+            targets = [os.path.realpath((b["producer"] or {}).get("a3b_path") or b["pdf"]) if flavour == "3b"
+                       else os.path.realpath(b["pdf"]) for b in builds]
+            VP[flavour] = verapdf_mod.batch(targets, flavour)
     from .readers import available, text_many
     readers, missing = available()
     if reader_names:
@@ -114,7 +140,9 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
             from .checks import structure
             checks = structure.evaluate(build["pdf"], case, build["producer"], run_verapdf=False)
             for flavour, cid in (("ua1", "verapdf-ua1"), ("3b", "verapdf-pdfa3b")):
-                fails = VP.get(flavour, {}).get(os.path.realpath(build["pdf"]))
+                target = (os.path.realpath((build["producer"] or {}).get("a3b_path") or build["pdf"])
+                          if flavour == "3b" else os.path.realpath(build["pdf"]))
+                fails = VP.get(flavour, {}).get(target)
                 checks.append({"id": cid, "status": "fail" if fails else "pass",
                                "reason": (f"{len(fails)} failing rule(s): " + ", ".join(k for k, _ in fails[:5]))
                                if fails else "no failing rule"})
