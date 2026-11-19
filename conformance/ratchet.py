@@ -22,6 +22,15 @@ TOL = 1e-9
 # and said out loud. What keeps them honest instead: the writer's `limitations.json` control is re-run on every
 # `run`, so a limit that stopped reproducing on the installed version is refused by name. Never silent, and
 # never for a pip-pinned reader.
+# A case whose outcome depends on the MACHINE rather than on the engine: `mon-riyal-sign` draws U+20C1, which
+# neither declared font has, so the glyph comes from whatever system fallback the OS offers — a different font
+# on macOS 27.2 (pdfium exact 1.0) than on the CI image's 15.x (0.0). Measured, not assumed. The case stays in
+# the corpus and its numbers stay in every result; only its floors are withheld, because a floor that is one
+# machine's accident is not a floor. Fixing it is a font decision, and that is the owner's.
+MACHINE_DEPENDENT_CASES = {
+    "mon-riyal-sign": "U+20C1 is in neither declared font, so the fallback that draws it is the OS's — "
+                      "measured 1.0 on macOS 27.2 and 0.0 on the CI's 15.x",
+}
 UNPINNED = {
     "pdfkit": "PDFKit ships with macOS; its version is the runner image, not a pin",
     "poppler": "poppler ships from brew with no version switch; the floors are one machine's",
@@ -43,6 +52,8 @@ def derive(results: dict) -> dict:
             continue
         cases = {}
         for case in results["cases"]:
+            if case["id"] in MACHINE_DEPENDENT_CASES:
+                continue                 # a floor that is one machine's accident is not a floor
             r = case["per_reader"].get(reader)
             if not r:
                 continue
@@ -69,6 +80,9 @@ def check(results: dict, path: str = FILE) -> tuple[list[str], list[str]]:
     for gone in sorted(set(floors) - set(measured)):
         bad.append(f"{gone}: floors recorded but the reader did not run in this comparison "
                    f"(a reader that disappears is a regression, not a skip)")
+    for case_id in sorted(MACHINE_DEPENDENT_CASES):
+        if case_id in (results.get("cases") and {c["id"] for c in results["cases"]} or set()):
+            notes.append(f"{case_id}: floors withheld — {MACHINE_DEPENDENT_CASES[case_id]}")
     for reader, block in measured.items():
         base = floors.get(reader)
         if base is None:
@@ -83,6 +97,8 @@ def check(results: dict, path: str = FILE) -> tuple[list[str], list[str]]:
                        f"— re-run with --accept after checking the changelog")
             continue
         for case, mine in block["cases"].items():
+            if case in MACHINE_DEPENDENT_CASES:
+                continue                     # measured and reported, never floored — see the note above
             if case not in base["cases"]:
                 notes.append(f"{reader}/{case}: new case, no floor yet")
                 continue
