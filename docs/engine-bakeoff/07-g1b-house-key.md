@@ -90,8 +90,7 @@ no floors for that version; that is the pin doing its job, not this change.)
 ## Commands (every number above)
 
 ```bash
-export CHROME_PATH=~/.cache/cft/chrome/mac_arm-157.0.8103.78/chrome-mac-arm64/\
-"Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
+export CHROME_PATH="$HOME/.cache/cft/chrome/mac_arm-157.0.8103.78/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
 
 .venv/bin/python -m conformance selftest                       # 15 mutations, 0 missed
 .venv/bin/python conformance/tests/test_private_keys.py        # reader: 7 controls
