@@ -53,6 +53,7 @@ directions (no missing row, no extra row, no drifting name). Row count is derive
 | 36 | `vocalised` | calibrated | `NS.BASMALA`, `NS.VOCALISED`, `NS.VOCALISED_CLAIM`. |
 | 37 | `page-words` | calibrated | `NS.PAGE_WORDS` per page + `NS.PAGE_WORDS_TOL`. |
 | 38 | `gate-claims` | calibrated | `NS.GATE_CHECKS`, `NS.GATE_MUTATIONS` as printed in this document. |
+| 39 | `private-keys` | generic | No `/PL*` key anywhere in the file: house bookkeeping is consumed by the stage after the one that wrote it and never ships. |
 
 ## Candidates to move into the public gate
 
