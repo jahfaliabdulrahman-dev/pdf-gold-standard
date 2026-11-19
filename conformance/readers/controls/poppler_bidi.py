@@ -23,6 +23,7 @@ import pypdfium2
 
 from conformance.adapters import fonts
 from conformance.checks import metrics
+from conformance.readers import poppler as poppler_reader
 
 LINE = "سطر عربي واحد بلا محارف اتجاه في المصدر."
 
@@ -36,14 +37,20 @@ def main() -> int:
     page.insert_text((72, 120), LINE, fontname="Amiri", fontfile=font, fontsize=14)
     doc.save(pdf)
     doc.close()
-    out = subprocess.run(["pdftotext", "-q", "-enc", "UTF-8", pdf, "-"],
-                         capture_output=True, text=True, timeout=120).stdout
+    binary = poppler_reader.binary()      # the pinned build, exactly as the reader resolves it
+    r = subprocess.run([binary, "-q", "-enc", "UTF-8", pdf, "-"],
+                       capture_output=True, text=True, timeout=120)
+    if r.returncode != 0:
+        print(json.dumps({"reproduces": False, "detail": {"error": f"{binary} exited {r.returncode}",
+                                                          "stderr": (r.stderr or "").strip()[:200]}}))
+        return 0
+    out = r.stdout
     ref_doc = pypdfium2.PdfDocument(pdf)
     ref = ref_doc[0].get_textpage().get_text_range()
     ref_doc.close()
     lines = max(1, len([ln for ln in out.splitlines() if ln.strip()]))
     per_line = metrics.bidi_count(out) // lines
-    detail = {"producer": f"PyMuPDF {pymupdf.__version__}", "per_line": per_line,
+    detail = {"producer": f"PyMuPDF {pymupdf.__version__}", "binary": binary, "per_line": per_line,
               "pdftotext_total": metrics.bidi_count(out), "pdfium_total": metrics.bidi_count(ref),
               "lines": lines, "text": out}
     reproduces = per_line >= 1 and metrics.bidi_count(ref) == 0
