@@ -42,7 +42,13 @@ def version() -> str:
     return (r.stdout or r.stderr).strip().replace("WeasyPrint version ", "")
 
 
-def render_case(case: dict, out_pdf: str) -> dict:
+def render_case(case: dict, out_pdf: str, mode: str = "weasyprint") -> dict:
+    """`mode="weasyprint"` is the raw engine; `mode="weasyprint+pp"` is E3b's candidate: the SAME shipping
+    stages Chrome gets (`fix_text_layer(strict_widths=True)` -> provenance stamp -> `postprocess.apply` ->
+    outline), with no change to any of them. The preregistration (03-e3b-preregistration.md) defines the
+    candidate and the six conditions it must meet; this function only wires the input."""
+    if mode not in ("weasyprint", "weasyprint+pp"):
+        raise BuildError(f"mode {mode!r} is not built by this adapter")
     fonts.path(case["font"])
     work = tempfile.mkdtemp(prefix="weasy-case-")
     try:
@@ -51,16 +57,29 @@ def render_case(case: dict, out_pdf: str) -> dict:
         with open(src, "w", encoding="utf-8") as fh:
             fh.write(markup)
         a3b = out_pdf[:-4] + ".a3b.pdf"
-        for variant, target in (("pdf/ua-1", out_pdf), ("pdf/a-3b", a3b)):
+        # The measured file: in pp mode the engine writes into the workdir and the pipeline writes `out_pdf`,
+        # so the raw engine output is never overwritten by its own post-processing.
+        ua = out_pdf if mode == "weasyprint" else os.path.join(work, "ua.pdf")
+        for variant, target in (("pdf/ua-1", ua), ("pdf/a-3b", a3b)):
             r = subprocess.run([binary(), "--pdf-variant", variant, "--pdf-tags",
                                 "--pdf-identifier", case["id"], src, target],
                                capture_output=True, text=True, timeout=300, env=_env())
             if r.returncode != 0 or not os.path.exists(target):
                 raise BuildError(f"weasyprint {variant} failed for {case['id']}: "
                                  f"{(r.stderr or r.stdout).strip()[-300:]}")
-        return {"engine": "weasyprint", "engine_version": version(), "postprocess": False,
-                "source_sha256": hashlib.sha256(markup.encode("utf-8")).hexdigest(),
-                "second_file": os.path.basename(a3b), "a3b_path": a3b,
-                "variants": {"measured": "pdf/ua-1", "also": "pdf/a-3b"}}
+        producer = {"engine": "weasyprint", "engine_version": version(), "postprocess": False,
+                    "markup_sha256": hashlib.sha256(markup.encode("utf-8")).hexdigest(),
+                    "source_sha256": hashlib.sha256(markup.encode("utf-8")).hexdigest(),
+                    "second_file": os.path.basename(a3b), "a3b_path": a3b,
+                    "variants": {"measured": "pdf/ua-1", "also": "pdf/a-3b"}}
+        if mode == "weasyprint+pp":
+            # No try/except and no fallback on purpose: if the layer refuses WeasyPrint's output, that exception
+            # IS the E3b result (the prereg says so), and it must reach the report as an exception, not a zero.
+            from fix_text_layer import process as fix_text_layer
+            from . import _pipeline
+            fixed = os.path.join(work, "fixed.pdf")
+            fix_text_layer(ua, fixed, strict_widths=True)
+            _pipeline.finish(fixed, out_pdf, case, producer, work)
+        return producer
     finally:
         shutil.rmtree(work, ignore_errors=True)

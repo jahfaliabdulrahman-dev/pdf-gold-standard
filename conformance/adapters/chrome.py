@@ -100,19 +100,8 @@ def render_case(case: dict, out_pdf: str, engine: str = "chrome") -> dict:
                 fix_text_layer(raw, fixed, strict_widths=True)
         else:
             fix_text_layer(raw, fixed, strict_widths=True)
-        # Provenance exactly as build.py sets it: the markup hash the build handed the engine. postprocess
-        # copies it into XMP (xmpMM:DocumentID) and removes the raw keys, so every case gets its own id.
-        stamped = os.path.join(work, "stamped.pdf")
-        with pikepdf.open(fixed) as pdf:
-            pdf.docinfo["/SourceFile"] = f"{case['id']}.html"
-            pdf.docinfo["/SourceSHA256"] = producer["markup_sha256"]
-            pdf.save(stamped)
-        import postprocess
-        postprocess.apply(stamped, out_pdf, profile="web", features_path=FEATURES,
-                          rendered_sha=producer["markup_sha256"], chrome_version=version,
-                          doc_spec=case_spec.make(case))
-        producer["postprocess"] = True
-        producer["outline"] = set_outline(out_pdf, case)
+        from . import _pipeline                              # the stages after fix_text_layer, defined once
+        _pipeline.finish(fixed, out_pdf, case, producer, work)
         return producer
     finally:
         shutil.rmtree(work, ignore_errors=True)
