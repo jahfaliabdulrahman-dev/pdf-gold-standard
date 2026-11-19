@@ -118,6 +118,24 @@ jobs:
       - name: Vocalised paragraphs — raw Chrome output must fail, the rebuilt text layer must copy exactly
         run: python3 scripts/test_vocalised.py
 
+      - name: Conformance gate — the public corpus, every declared reader, the ratchet, and the mutations
+        id: conformance
+        run: |
+          # The declared readers must be pinned readers: poppler comes from brew and is recorded in the
+          # ratchet by version, so a brew bump is a decision (the same discipline as Chrome and veraPDF).
+          brew install poppler
+          python3 -m conformance.adapters.fetch_fonts
+          # Refuses a stale manifest or a category below its floor BEFORE building anything.
+          python3 -m conformance manifest --check
+          python3 -m conformance run --engine chrome --out /tmp/conf --ratchet
+          python3 -m conformance selftest
+          # the guards of the corpus, the metrics, the isolation and the limits — each can fail
+          python3 conformance/tests/test_corpus.py
+          python3 conformance/tests/test_metrics.py
+          python3 conformance/tests/test_isolation.py
+          python3 conformance/tests/test_limits.py
+          python3 conformance/tests/test_certificate.py
+
       - name: Upload partial on failure (for inspection)
         if: failure()
         uses: actions/upload-artifact@v5

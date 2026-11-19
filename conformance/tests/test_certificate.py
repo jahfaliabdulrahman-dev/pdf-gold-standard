@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""C5 guard: a certificate is valid only when its file, its schema and its verdict all agree.
+
+Controls:
+  1. A freshly issued certificate validates.
+  2. A wrong file sha256 is refused by name.
+  3. A verdict flipped to PASS is refused, and the refusal names the recomputed verdict.
+  4. A missing required field is refused by the schema.
+  5. `validate` does not run a control script (a certificate must be checkable without producing facts).
+"""
+import json
+import os
+import subprocess
+import sys
+import tempfile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
+sys.path.insert(0, REPO)
+os.chdir(REPO)
+
+from conformance import certificate
+from conformance.adapters import chrome
+from conformance.corpus import cases as corpus_cases
+
+fails = []
+
+
+def check(name, ok, detail):
+    print(("PASS " if ok else "FAIL ") + name + " - " + detail)
+    if not ok:
+        fails.append(name)
+
+
+tmp = tempfile.mkdtemp(prefix="conf-cert-")
+pdf = os.path.join(tmp, "head-h1-h3.pdf")
+case = corpus_cases.by_id(["head-h1-h3"])[0]
+chrome.render_case(case, pdf, "chrome")
+cert = certificate.certify(pdf, "head-h1-h3", engine="chrome")
+good = os.path.join(tmp, "good.cert.json")
+json.dump(cert, open(good, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+problems = certificate.validate(good, pdf)
+check("valid-certificate", not problems, "; ".join(problems[:3]) or f"verdict {cert['verdict']} accepted")
+check("verdict-is-pass", cert["verdict"] == "PASS", f"{cert['verdict']} — {cert['verdict_detail'][:80]}")
+
+# --- 2 · wrong sha ----------------------------------------------------------
+bad = json.loads(json.dumps(cert))
+bad["file"]["sha256"] = "0" * 64
+path = os.path.join(tmp, "bad-sha.json")
+json.dump(bad, open(path, "w"), ensure_ascii=False)
+problems = certificate.validate(path, pdf)
+check("wrong-sha-refused", any("sha256" in p for p in problems), "; ".join(problems[:2]))
+
+# --- 3 · verdict flipped ----------------------------------------------------
+bad = json.loads(json.dumps(cert))
+bad["verdict"] = "FAIL" if cert["verdict"] == "PASS" else "PASS"
+path = os.path.join(tmp, "bad-verdict.json")
+json.dump(bad, open(path, "w"), ensure_ascii=False)
+problems = certificate.validate(path, pdf)
+check("flipped-verdict-refused", any("recomputed" in p for p in problems), "; ".join(problems[:2]))
+
+# --- 4 · missing field ------------------------------------------------------
+bad = json.loads(json.dumps(cert))
+del bad["not_checked"]
+path = os.path.join(tmp, "missing.json")
+json.dump(bad, open(path, "w"), ensure_ascii=False)
+problems = certificate.validate(path, pdf)
+check("missing-field-refused", any(p.startswith("schema:") for p in problems), "; ".join(problems[:2]))
+
+# --- 5 · no control runs at validate time ----------------------------------
+site = os.path.join(tmp, "sitecustomize.py")
+open(site, "w").write(
+    "import builtins, pathlib\n"
+    "def _hook(event, args):\n"
+    "    if event == 'subprocess.Popen' and args and 'controls' in str(args[0]):\n"
+    "        raise RuntimeError('a control script ran inside validate')\n"
+    "import sys\n"
+    "sys.addaudithook(_hook)\n")
+env = {**os.environ, "PYTHONPATH": tmp + os.pathsep + os.environ.get("PYTHONPATH", "")}
+r = subprocess.run([sys.executable, "-m", "conformance", "validate", good, pdf],
+                   capture_output=True, text=True, env=env, timeout=300, cwd=REPO)
+check("no-control-in-validate", r.returncode == 0 and "control script ran" not in (r.stderr + r.stdout),
+      (r.stdout + r.stderr).strip().splitlines()[-1][:120])
+
+print(f"\nCHECKS IN CERTIFICATE: {len(cert['checks'])} · READERS: {len(cert['readers'])} · "
+      f"TIER-1 UNAVAILABLE: {len(cert['tier1_unavailable'])}")
+if fails:
+    print(f"TEST FAILED — {fails}")
+    raise SystemExit(1)
+print("CERTIFICATE GUARD PASSED")

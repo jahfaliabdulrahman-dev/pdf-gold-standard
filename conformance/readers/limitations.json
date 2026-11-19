@@ -1,0 +1,24 @@
+[
+  {
+    "id": "mupdf-ar-digit-reversal",
+    "reader": "mupdf",
+    "metric": "digit_runs",
+    "pattern": "reversed_truth_run",
+    "claim": "An Arabic-Indic digit run in an RTL context is returned reversed by MuPDF, including on a file MuPDF itself wrote. Measured on the pinned version; the reversal is the reader's, not the file's, because PDFium reads the same file's run correctly.",
+    "reader_version_measured": "2.1",
+    "control_script": "controls/mupdf_digits.py",
+    "control_evidence": "python3 -m conformance.readers.controls.mupdf_digits → writes the file with PyMuPDF itself (insert_text, Amiri), reads it back with MuPDF and with PDFium: MuPDF ٦٢٠٢ · PDFium ٢٠٢٦ · reproduces=true",
+    "narrowing": "Excuses ONLY a truth digit run whose exact reverse is present in the output, and only for MuPDF. A run that is neither present nor reversed stays a defect. The other metrics are untouched."
+  },
+  {
+    "id": "poppler-bidi-decorations",
+    "reader": "poppler",
+    "metric": "defects.bidi",
+    "pattern": "reader_bidi_decorations",
+    "claim": "pdftotext wraps every RTL line in U+202A/U+202B … U+202C embedding marks. They are the extractor's own decorations, not characters the file carries: the same file read by PDFium has none.",
+    "reader_version_measured": "26.07.0",
+    "control_script": "controls/poppler_bidi.py",
+    "control_evidence": "python3 -m conformance.readers.controls.poppler_bidi → a Chrome-raw file (the engine's own output, not this pipeline's) with one Arabic paragraph: pdftotext returns 5 bidi controls, PDFium 0, reproduces=true",
+    "narrowing": "Excuses bidi controls in pdftotext's output only, and only up to the number the control shows it adds per line. Presentation Forms, PUA, U+FFFD and tatweel excess stay counted."
+  }
+]
