@@ -11,6 +11,7 @@ a reliable search key, and a wrong outline page would be a silent lie. If the tr
 H-element per heading, in order, the build refuses: that is a real finding about the engine, not something
 to paper over.
 """
+import contextlib
 import hashlib
 import os
 import shutil
@@ -49,6 +50,17 @@ def chrome_bin() -> tuple[str, str]:
     return path, version
 
 
+@contextlib.contextmanager
+def _patch(module, name: str, value):
+    """Set a module attribute for the duration of a build (the joiner A/B only)."""
+    old = getattr(module, name)
+    setattr(module, name, value)
+    try:
+        yield
+    finally:
+        setattr(module, name, old)
+
+
 def render_case(case: dict, out_pdf: str, engine: str = "chrome") -> dict:
     """Build one case. Returns the producer facts the certificate needs (no timings, no paths)."""
     if engine not in ("chrome", "chrome-raw"):
@@ -76,7 +88,18 @@ def render_case(case: dict, out_pdf: str, engine: str = "chrome") -> dict:
             return producer
         from fix_text_layer import process as fix_text_layer       # scripts/ is on sys.path via cli.py
         fixed = os.path.join(work, "fixed.pdf")
-        fix_text_layer(raw, fixed, strict_widths=True)
+        # `CONFORMANCE_NO_JOINERS=1` measures what the invisible U+200B/U+2060 cost: the review asked for an
+        # A/B, not a preference. Nothing in the shipping pipeline reads this — it is the measurement switch, and
+        # the flag exists in the adapter (never in `fix_text_layer`), so production behaviour cannot drift by it.
+        if os.environ.get("CONFORMANCE_NO_JOINERS") == "1":
+            import contextlib
+            import fix_text_layer as _ftl
+            with contextlib.ExitStack() as stack:
+                stack.enter_context(_patch(_ftl, "WJ", ""))
+                stack.enter_context(_patch(_ftl, "GAP_JOINER", ""))
+                fix_text_layer(raw, fixed, strict_widths=True)
+        else:
+            fix_text_layer(raw, fixed, strict_widths=True)
         # Provenance exactly as build.py sets it: the markup hash the build handed the engine. postprocess
         # copies it into XMP (xmpMM:DocumentID) and removes the raw keys, so every case gets its own id.
         stamped = os.path.join(work, "stamped.pdf")
