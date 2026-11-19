@@ -73,8 +73,14 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
         from .checks import verapdf as verapdf_mod
         paths_all = [b["pdf"] for b in builds]
         progress("veraPDF: one batch per flavour over the corpus…")
+        from .checks import structure
         for flavour in ("ua1", "3b"):
-            VP[flavour] = verapdf_mod.batch(paths_all, flavour)
+            # PDF/A-3b is judged on the file that CLAIMS it: an adapter may name a second file, and the batch
+            # must read that one. Measured the hard way — WeasyPrint scored 60/60 A-3b failures against its UA-1
+            # file while `verapdf --flavour 3b` passed the file it actually wrote.
+            targets = [os.path.realpath(structure.a3b_target(b["producer"], b["pdf"])) if flavour == "3b"
+                       else os.path.realpath(b["pdf"]) for b in builds]
+            VP[flavour] = verapdf_mod.batch(targets, flavour)
     from .readers import available, text_many
     readers, missing = available()
     if reader_names:
@@ -114,7 +120,9 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
             from .checks import structure
             checks = structure.evaluate(build["pdf"], case, build["producer"], run_verapdf=False)
             for flavour, cid in (("ua1", "verapdf-ua1"), ("3b", "verapdf-pdfa3b")):
-                fails = VP.get(flavour, {}).get(os.path.realpath(build["pdf"]))
+                target = (os.path.realpath(structure.a3b_target(build["producer"], build["pdf"]))
+                          if flavour == "3b" else os.path.realpath(build["pdf"]))
+                fails = VP.get(flavour, {}).get(target)
                 checks.append({"id": cid, "status": "fail" if fails else "pass",
                                "reason": (f"{len(fails)} failing rule(s): " + ", ".join(k for k, _ in fails[:5]))
                                if fails else "no failing rule"})
