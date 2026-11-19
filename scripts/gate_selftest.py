@@ -833,6 +833,15 @@ def rotated_artifact_text(doc):
     return _pikemutate(doc, fn)
 
 
+def private_key_leak(doc):
+    """A house key left in the delivered file: `/PL*` is how one stage talks to the next, never the customer's."""
+    def fn(p):
+        fonts = p.pages[0]["/Resources"]["/Font"]
+        font = next(iter(fonts.values()))
+        font["/PLMarkCids"] = pikepdf.Array([1])
+    return _pikemutate(doc, fn)
+
+
 # (mutation, expected check, must_stay_green)
 MUTATIONS = [
     (swap_next_prev, "nav-buttons", False),
@@ -892,6 +901,7 @@ MUTATIONS = [
     (nested_form, "pdf-model", False),
     (unresolved_do_in_form, "pdf-model", False),
     (text_rise, "pdf-model", False),
+    (private_key_leak, "private-keys", False),
     (rotated_artifact_text, "pdf-model", False),
     (missing_rendered_hash, "provenance", False),
     (rendered_mismatch, "provenance", False),

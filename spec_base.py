@@ -66,10 +66,10 @@ CHECK_NAMES = frozenset({
     "line-order", "link-tagging", "named-destinations", "nav-buttons",
     "no-blank-pages", "outline", "output-intent", "page-images",
     "page-ink", "page-labels", "page-words", "pages",
-    "pdf-model", "pdfua", "provenance", "ref-links",
+    "pdf-model", "pdfua", "private-keys", "provenance", "ref-links",
     "render", "rtl-direction", "single-page", "tagged",
     "tagged-structure", "text-layer", "title", "version-consistency",
     "vocalised", "xmp",
 })
 
-MUTATION_SUITE_SIZE = 62      # every mutation the suite carries; a spec declares how many apply to it
+MUTATION_SUITE_SIZE = 63      # every mutation the suite carries; a spec declares how many apply to it
