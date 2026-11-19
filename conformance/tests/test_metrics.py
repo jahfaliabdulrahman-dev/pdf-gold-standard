@@ -55,7 +55,12 @@ check("N:bidi+ws", M.N("أ\u200f\nب\t\tج") == "أ ب ج", repr(M.N("أ\u200f\n
 check("N:keeps-tatweel", M.N("مـــال") == "مـــال", "U+0640 survives the normalization")
 check("N:keeps-marks", M.N("الْحَمْدُ") == "الْحَمْدُ", "harakat survive")
 check("N:keeps-digit-script", M.N("٢٠٢٦") != M.N("2026"), "no digit mapping")
-check("N:drops-zero-width", M.N("تطوي\u2060ل\u200b") == "تطويل", "U+2060/U+200B are invisible format characters")
+# The assignment's `N` removes direction controls and nothing else. The joiners `fix_text_layer`
+# inserts stay: they are in the file, a copy-paste carries them, and dropping them in `N` was measured
+# to flatter the pipeline (review S6). `zero_width` counts them; `invisible-format` fails the file.
+check("N:keeps-zero-width", M.N("تطوي\u2060ل\u200b") == "تطوي\u2060ل\u200b",
+      "the producer's joiners stay in N — the count is the metric, not a silent removal")
+check("zero_width:counts", M.zero_width_count("أ\u200bب\u2060ج") == 2, "two joiners, two counted")
 
 # defects: each counter has an input that trips it
 d = M.defects("\uFB50", "")                      # presentation form

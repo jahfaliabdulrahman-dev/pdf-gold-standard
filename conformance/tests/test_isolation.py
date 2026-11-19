@@ -46,7 +46,7 @@ check("no-static-spec-import", not hits, "; ".join(hits[:4]) or f"no import of {
 
 # --- 2 · runtime ------------------------------------------------------------
 PROBE = r'''
-import os, sys, json
+import os, sys, json, tempfile
 sys.path.insert(0, %r)
 os.chdir(%r)
 from conformance.adapters import chrome
