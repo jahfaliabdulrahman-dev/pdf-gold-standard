@@ -60,6 +60,7 @@ def render_case(case: dict, out_pdf: str) -> dict:
                                  f"{(r.stderr or r.stdout).strip()[-300:]}")
         return {"engine": "weasyprint", "engine_version": version(), "postprocess": False,
                 "source_sha256": hashlib.sha256(markup.encode("utf-8")).hexdigest(),
-                "second_file": os.path.basename(a3b), "variants": {"measured": "pdf/ua-1", "also": "pdf/a-3b"}}
+                "second_file": os.path.basename(a3b), "a3b_path": a3b,
+                "variants": {"measured": "pdf/ua-1", "also": "pdf/a-3b"}}
     finally:
         shutil.rmtree(work, ignore_errors=True)

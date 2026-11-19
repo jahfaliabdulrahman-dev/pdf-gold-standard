@@ -315,9 +315,15 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             f" — the case declares {[(l, t[:16]) for l, t in want_toc]}"))
 
     if run_verapdf:
+        # An engine that cannot combine PDF/UA-1 and PDF/A-3b in one file produces TWO files, and each flavour
+        # must be judged on the file that claims it (the producer names it). Measuring the UA-1 file for A-3b
+        # would report a defect of our measurement, not of the engine — WeasyPrint scored 60/60 A-3b failures
+        # that way while its `.a3b.pdf` passed.
+        a3b_path = (producer or {}).get("a3b_path") or pdf_path
         for flavour, cid in (("ua1", "verapdf-ua1"), ("3b", "verapdf-pdfa3b")):
+            target = a3b_path if flavour == "3b" else pdf_path
             try:
-                fails = verapdf_mod.failing(pdf_path, flavour)
+                fails = verapdf_mod.failing(target, flavour)
             except Exception as exc:
                 add(cid, False, f"veraPDF could not judge the file: {type(exc).__name__}: {exc}")
                 continue
