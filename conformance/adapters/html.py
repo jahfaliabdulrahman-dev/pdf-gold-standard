@@ -108,7 +108,15 @@ def _inline(text: str) -> str:
 
 
 def _cell(text: str) -> str:
-    """A table cell: a NEGATIVE amount is isolated whole; anything else is escaped text."""
+    """A table cell: an empty one keeps its cell with ONE non-breaking space.
+
+    Chrome drops a `<td></td>` with no content from the structure tree (measured: the table's rows become
+    3,2,2 and veraPDF UA-1 fails 7.2-43 "rows span different number of columns"). U+00A0 is whitespace:
+    `metrics.N` collapses it, so it adds no word, and the grader still sees three cells. A cell with only
+    spaces loses its `/TD` the same way, so the test is `not text.strip()`.
+    """
+    if not text.strip():
+        return "&#160;"
     if _CELL_AMOUNT.match(text) and re.match(r"^\s*[-\u2212]", text):
         return _ltr(esc(text.strip()))
     return _inline(text)

@@ -1,0 +1,18 @@
+{
+  "id": "num-negative-arab",
+  "category": "money",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "مبلغ سالب بالأرقام العربية الهندية"
+    },
+    {
+      "type": "paragraph",
+      "text": "المبلغ: -١٬٢٠٠٫٠٠ ريال."
+    }
+  ],
+  "note": "سالب بأرقام عربية هندية وفواصل عربية في منتصف السطر — الحالة التي يفشل فيها Preview عند الفاصل (G#1b)"
+}

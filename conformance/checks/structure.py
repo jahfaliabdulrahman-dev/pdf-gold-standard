@@ -348,6 +348,21 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             "every drawn code has a Unicode value" if _tu_gaps(scan) == 0 else
             f"{_tu_gaps(scan)} code(s) with no /ToUnicode entry (readers would invent U+<glyph id>)")
 
+        # --- numerals: one system per number, and never the Persian one ------------------------------
+        # Owner decision (19 Nov 2026): Western digits default; Arabic-Indic (٠-٩) is an explicit per-document
+        # choice; identifiers stay Western. The gate can judge the two universal rules without knowing the
+        # choice: a Persian digit (۰-۹) is never an Arabic document's digit, and one number never mixes the
+        # systems. Separator STYLE (Arabic ٬/٫ vs ASCII ,/.) is not mixed here — the owner's decision names
+        # numerals and identifiers, not separators; the corpus case `num-ids-latn-in-arab` covers identifiers.
+        persian = [ch for ch in file_text if 0x06F0 <= ord(ch) <= 0x06F9]
+        add("numerals-persian", not persian,
+            "no U+06F0–U+06F9 digit in the layer" if not persian else
+            f"{len(persian)} Persian digit(s) in the layer — an ar file uses ٠-٩ or 0-9, never ۰-۹")
+        mixed = _mixed_numbers(file_text)
+        add("numerals-mixed", not mixed,
+            "no number mixes digit systems" if not mixed else
+            f"{len(mixed)} number(s) mix digit systems: " + ", ".join(mixed[:4]))
+
         # --- the outline says what the headings say -------------------------------------------------
         import pymupdf
         doc_ = pymupdf.open(pdf_path)
@@ -415,3 +430,29 @@ def _extra(got: str, want: str) -> str:
 def _tu_gaps(scan: dict) -> int:
     """Codes drawn with no ToUnicode entry — the ones a reader turns into U+<glyph id> (measured behaviour)."""
     return int(scan.get("missing_unicode", 0))
+
+
+# A number, as the gate reads it: digits plus the separators that bind one number together (ASCII and Arabic
+# decimal/thousands marks). A hyphen, slash or space ends the token: `2026-11-19` is three numbers, and a phone
+# written with spaces is several — judging those as one number would invent a rule the owner did not set.
+_NUMERAL_TOKEN = re.compile(
+    r"[0-9\u0660-\u0669\u06F0-\u06F9]+(?:[.,\u066B\u066C][0-9\u0660-\u0669\u06F0-\u06F9]+)*")
+
+
+def _digit_system(ch: str) -> str:
+    o = ord(ch)
+    if o < 0x80:
+        return "ascii"
+    if 0x0660 <= o <= 0x0669:
+        return "arab"
+    return "persian"
+
+
+def _mixed_numbers(text: str) -> list[str]:
+    """Tokens whose digits come from more than one system (ASCII / Arabic-Indic / Persian)."""
+    out = []
+    for m in _NUMERAL_TOKEN.finditer(text):
+        systems = {_digit_system(ch) for ch in m.group() if ch.isdigit()}
+        if len(systems) > 1:
+            out.append(m.group())
+    return out

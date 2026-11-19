@@ -468,6 +468,21 @@
       "skeleton_exact": 0.0,
       "word_f1": 0.4
      },
+     "mon-negative-line-start": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 0.0,
+      "exact": 0.0,
+      "order": 0.714286,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.714286
+     },
      "mon-negative-table": {
       "defects": {
        "bidi": 0,
@@ -477,7 +492,7 @@
        "tatweel_excess": 0,
        "zero_width": 0
       },
-      "digit_runs": 0.5,
+      "digit_runs": 1.0,
       "exact": 0.0,
       "order": 0.5,
       "skeleton_exact": 0.0,
@@ -527,6 +542,66 @@
       "order": 0.666667,
       "skeleton_exact": 0.0,
       "word_f1": 0.666667
+     },
+     "num-ids-latn-in-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.368421,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.473684
+     },
+     "num-invoice-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.625,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.625
+     },
+     "num-invoice-latn": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.352941,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.470588
+     },
+     "num-negative-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 0.0,
+      "exact": 0.0,
+      "order": 0.625,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.625
      },
      "pun-comma": {
       "defects": {
@@ -1370,11 +1445,26 @@
        "tatweel_excess": 0,
        "zero_width": 0
       },
-      "digit_runs": 0.0,
-      "exact": 0.0,
-      "order": 0.8,
-      "skeleton_exact": 0.0,
-      "word_f1": 0.8
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     },
+     "mon-negative-line-start": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
      },
      "mon-negative-table": {
       "defects": {
@@ -1385,11 +1475,11 @@
        "tatweel_excess": 0,
        "zero_width": 0
       },
-      "digit_runs": 0.5,
-      "exact": 0.0,
-      "order": 0.875,
-      "skeleton_exact": 0.0,
-      "word_f1": 0.875
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
      },
      "mon-riyal-sign": {
       "defects": {
@@ -1422,6 +1512,66 @@
       "word_f1": 1.0
      },
      "mon-thousands": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     },
+     "num-ids-latn-in-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.894737,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.894737
+     },
+     "num-invoice-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
+     },
+     "num-invoice-latn": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.941176,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.941176
+     },
+     "num-negative-arab": {
       "defects": {
        "bidi": 0,
        "presentation_forms": 0,
@@ -3188,6 +3338,21 @@
       "skeleton_exact": 0.0,
       "word_f1": 0.727273
      },
+     "mon-negative-line-start": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 0.0,
+      "exact": 0.0,
+      "order": 0.857143,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.8
+     },
      "mon-negative-table": {
       "defects": {
        "bidi": 0,
@@ -3247,6 +3412,66 @@
       "order": 1.0,
       "skeleton_exact": 1.0,
       "word_f1": 1.0
+     },
+     "num-ids-latn-in-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 0.777778,
+      "exact": 0.0,
+      "order": 0.842105,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.85
+     },
+     "num-invoice-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 0.0,
+      "exact": 0.0,
+      "order": 0.75,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.777778
+     },
+     "num-invoice-latn": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 0.8,
+      "exact": 0.0,
+      "order": 0.941176,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.941176
+     },
+     "num-negative-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 0.0,
+      "exact": 0.0,
+      "order": 0.75,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.777778
      },
      "pun-comma": {
       "defects": {
@@ -4090,11 +4315,26 @@
        "tatweel_excess": 0,
        "zero_width": 0
       },
-      "digit_runs": 0.0,
+      "digit_runs": 1.0,
       "exact": 0.0,
-      "order": 0.0,
+      "order": 0.2,
       "skeleton_exact": 0.0,
-      "word_f1": 0.0
+      "word_f1": 0.2
+     },
+     "mon-negative-line-start": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.142857,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.142857
      },
      "mon-negative-table": {
       "defects": {
@@ -4105,11 +4345,11 @@
        "tatweel_excess": 0,
        "zero_width": 0
       },
-      "digit_runs": 0.5,
+      "digit_runs": 1.0,
       "exact": 0.0,
-      "order": 0.125,
+      "order": 0.25,
       "skeleton_exact": 0.0,
-      "word_f1": 0.125
+      "word_f1": 0.25
      },
      "mon-riyal-sign": {
       "defects": {
@@ -4155,6 +4395,66 @@
       "order": 0.166667,
       "skeleton_exact": 0.0,
       "word_f1": 0.333333
+     },
+     "num-ids-latn-in-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.315789,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.421053
+     },
+     "num-invoice-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.25,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.25
+     },
+     "num-invoice-latn": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.294118,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.411765
+     },
+     "num-negative-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.125,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.125
      },
      "pun-comma": {
       "defects": {
@@ -4998,11 +5298,26 @@
        "tatweel_excess": 0,
        "zero_width": 0
       },
-      "digit_runs": 0.0,
+      "digit_runs": 1.0,
       "exact": 0.0,
-      "order": 0.4,
+      "order": 0.6,
       "skeleton_exact": 0.0,
-      "word_f1": 0.4
+      "word_f1": 0.6
+     },
+     "mon-negative-line-start": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.714286,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.769231
      },
      "mon-negative-table": {
       "defects": {
@@ -5013,11 +5328,11 @@
        "tatweel_excess": 0,
        "zero_width": 0
       },
-      "digit_runs": 0.5,
-      "exact": 0.0,
-      "order": 0.875,
-      "skeleton_exact": 0.0,
-      "word_f1": 0.875
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
      },
      "mon-riyal-sign": {
       "defects": {
@@ -5063,6 +5378,66 @@
       "order": 0.5,
       "skeleton_exact": 0.0,
       "word_f1": 0.545455
+     },
+     "num-ids-latn-in-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.315789,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.368421
+     },
+     "num-invoice-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.75,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.75
+     },
+     "num-invoice-latn": {
+      "defects": {
+       "bidi": 4,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.529412,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.588235
+     },
+     "num-negative-arab": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.75,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.75
      },
      "pun-comma": {
       "defects": {

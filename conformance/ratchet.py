@@ -52,8 +52,12 @@ def derive(results: dict) -> dict:
     return out
 
 
-def accept(results: dict, path: str = FILE) -> dict:
+def accept(results: dict, path: str = FILE, allow_lower: bool = False) -> dict:
     """Merge this run's floors for every reader version it measured; other versions keep their blocks.
+
+    A floor is a promise: `accept` refuses to lower one. A run that regressed must be fixed, not recorded —
+    otherwise the next comparison is against the regression and the gate forgets the defect. `allow_lower=True`
+    is the deliberate rebase (a reader whose *definition* changed), and it says so in the caller's flag.
 
     A pre-version file cannot be merged (its block has no version key) and cannot be compared either, so this
     run replaces it and says so — the file it replaces has never held more than one version per reader.
@@ -63,9 +67,28 @@ def accept(results: dict, path: str = FILE) -> dict:
     except SystemExit:
         print(f"note: {path} was the pre-version shape — replaced by this run's per-version blocks")
         floors = {}
+    lowered = []
     for reader, block in derive(results).items():
         entry = floors.setdefault(reader, {"floors": {}})
+        old = entry["floors"].get(block["version"], {}).get("cases", {})
+        if not allow_lower:
+            for case, values in block["cases"].items():
+                want = old.get(case)
+                if not want:
+                    continue
+                for metric in METRICS:
+                    if float(values.get(metric, 0.0)) + TOL < float(want.get(metric, 0.0)):
+                        lowered.append(f"{reader} {block['version']}/{case}: {metric} "
+                                       f"{values.get(metric):.4f} < floor {want.get(metric):.4f}")
+                for kind, n in (values.get("defects") or {}).items():
+                    if n > (want.get("defects") or {}).get(kind, 0):
+                        lowered.append(f"{reader} {block['version']}/{case}: defect {kind} {n} > floor "
+                                       f"{want.get('defects', {}).get(kind, 0)}")
         entry["floors"].setdefault(block["version"], {})["cases"] = block["cases"]
+    if lowered:
+        raise SystemExit(
+            f"RATCHET REFUSED — this run lowers {len(lowered)} floor(s); fix the regression or pass --force "
+            f"for a deliberate rebase:\n  " + "\n  ".join(lowered[:12]))
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(floors, fh, ensure_ascii=False, indent=1, sort_keys=True)
         fh.write("\n")
