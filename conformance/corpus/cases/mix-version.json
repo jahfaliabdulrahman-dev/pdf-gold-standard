@@ -1,0 +1,18 @@
+{
+  "id": "mix-version",
+  "category": "mixed",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "إصدار"
+    },
+    {
+      "type": "paragraph",
+      "text": "الإصدار v2.3.6 بتاريخ ١٩ نوفمبر ٢٠٢٦."
+    }
+  ],
+  "note": "رقم إصدار لاتيني بين نص عربي وتاريخ هندي"
+}

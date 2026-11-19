@@ -1,0 +1,18 @@
+{
+  "id": "voc-shadda",
+  "category": "vocalisation",
+  "lang": "ar",
+  "font": "amiri",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "شدّة مع حركة"
+    },
+    {
+      "type": "paragraph",
+      "text": "مُحَمَّدٌ عَظِيمٌ، وَعَلَّمَ آدَمَ الأَسْمَاءَ."
+    }
+  ],
+  "note": "الشدّة مع حركة واحدة على الحرف نفسه"
+}

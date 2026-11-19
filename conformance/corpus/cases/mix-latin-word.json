@@ -1,0 +1,18 @@
+{
+  "id": "mix-latin-word",
+  "category": "mixed",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "كلمة لاتينية"
+    },
+    {
+      "type": "paragraph",
+      "text": "نستخدم PDF في المكتب، ونصدر منه نسخة مطبوعة."
+    }
+  ],
+  "note": "كلمة لاتينية وسط جملة عربية"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "voc-tanween",
+  "category": "vocalisation",
+  "lang": "ar",
+  "font": "amiri",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "تنوين"
+    },
+    {
+      "type": "paragraph",
+      "text": "كِتَابًا، رَحْمَةٍ، قَوْلٌ، عِلْمًا."
+    }
+  ],
+  "note": "التنوين بثلاث صوره: ضمًّا وفتحًا وكسرًا"
+}

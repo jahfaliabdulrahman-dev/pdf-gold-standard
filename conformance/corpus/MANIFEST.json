@@ -1,0 +1,438 @@
+{
+  "cases": [
+    {
+      "bytes": 408,
+      "category": "headings",
+      "file": "bld-heading.json",
+      "id": "bld-heading",
+      "sha256": "f2ee077cd990fa9c8f4f8b478953b00e8b21f95d2ac25a742b7def2f5368400c"
+    },
+    {
+      "bytes": 567,
+      "category": "tables",
+      "file": "bld-th.json",
+      "id": "bld-th",
+      "sha256": "689f1449dec74a44fa627547894057899e490cdc94733efde8effe3e28609626"
+    },
+    {
+      "bytes": 550,
+      "category": "shaping",
+      "file": "bld-word.json",
+      "id": "bld-word",
+      "sha256": "2a69f643a1025f3103e5eb8ef611d0958e22d7772b7e766746ab3841a67c0a01"
+    },
+    {
+      "bytes": 366,
+      "category": "digits",
+      "file": "dig-article.json",
+      "id": "dig-article",
+      "sha256": "453efcbafcb9d264a917c3a46b4af3069268d1e6dd6333717d91d6687e610f3c"
+    },
+    {
+      "bytes": 414,
+      "category": "digits",
+      "file": "dig-date-hindi.json",
+      "id": "dig-date-hindi",
+      "sha256": "8c73fada7b56e7d50b89126e3bb87e6b71eec72054b74dca6acc33464229d41d"
+    },
+    {
+      "bytes": 594,
+      "category": "digits",
+      "file": "dig-in-table.json",
+      "id": "dig-in-table",
+      "sha256": "740db088679ed0dd5b757c86a6f900a6b27e0021971df8d179f827f6c7979859"
+    },
+    {
+      "bytes": 393,
+      "category": "digits",
+      "file": "dig-mixed-order.json",
+      "id": "dig-mixed-order",
+      "sha256": "1fe5444aaaeb32f008ce6d627c610d0d6a31a1a1b08057eef725ec7db4b50714"
+    },
+    {
+      "bytes": 392,
+      "category": "digits",
+      "file": "dig-mixed-scripts.json",
+      "id": "dig-mixed-scripts",
+      "sha256": "117adf7d84bfbea008551d331c3b77b61438fc4193426bbc1ddf8053d948001a"
+    },
+    {
+      "bytes": 576,
+      "category": "digits",
+      "file": "dig-paren-eol.json",
+      "id": "dig-paren-eol",
+      "sha256": "6e754d588058a58ac526f78bbe1a31e3f2c0ae36e9efea7caf2b73b6ec765d98"
+    },
+    {
+      "bytes": 420,
+      "category": "digits",
+      "file": "dig-percent.json",
+      "id": "dig-percent",
+      "sha256": "b4e58444edb4e4124842c462dc88d9a139f37fcfc5c2f12bd06f60969cbdd4d1"
+    },
+    {
+      "bytes": 373,
+      "category": "digits",
+      "file": "dig-phone.json",
+      "id": "dig-phone",
+      "sha256": "cccd4ad95e71f2bc4e20460f12c0dcd81342ff1d912e556198ce35eaa69852d5"
+    },
+    {
+      "bytes": 373,
+      "category": "digits",
+      "file": "dig-year.json",
+      "id": "dig-year",
+      "sha256": "9a950e91ff0e41a548442245155d95857c73bddf5974fbb9c830815db791c826"
+    },
+    {
+      "bytes": 819,
+      "category": "headings",
+      "file": "head-deep.json",
+      "id": "head-deep",
+      "sha256": "5270b5a861a0a14a3dff4cbb4294f9b2d00d244ff40f43130bd2d476e85236a1"
+    },
+    {
+      "bytes": 752,
+      "category": "headings",
+      "file": "head-h1-h3.json",
+      "id": "head-h1-h3",
+      "sha256": "bf9d18a104400e80cb7d93b9fe2bedabf6837b785f9343110f0e39e8c1cff5a1"
+    },
+    {
+      "bytes": 528,
+      "category": "headings",
+      "file": "head-latin.json",
+      "id": "head-latin",
+      "sha256": "413eef131db58f18d5e321172920771e4071daa86fb30d81cf0a2ea1729dac40"
+    },
+    {
+      "bytes": 506,
+      "category": "headings",
+      "file": "head-numbered.json",
+      "id": "head-numbered",
+      "sha256": "69db53ee52ff854fb11494623cf1f4bd89b8a53ee64f36b830dd0bce0eb83b30"
+    },
+    {
+      "bytes": 452,
+      "category": "kashida",
+      "file": "kash-explicit.json",
+      "id": "kash-explicit",
+      "sha256": "c7d1a0a79ec5e7ebd02dd8f722a3ed16a9e8673879ebd51c486516541854d693"
+    },
+    {
+      "bytes": 776,
+      "category": "kashida",
+      "file": "kash-justify.json",
+      "id": "kash-justify",
+      "sha256": "2fb669f7517a720d50308fe4998cf9f8fb5ecc1e4597b3f5f553c24b31c606d0"
+    },
+    {
+      "bytes": 654,
+      "category": "kashida",
+      "file": "kash-justify-tatweel.json",
+      "id": "kash-justify-tatweel",
+      "sha256": "44620864b45226f261abbf5c23bd46a6a33511720e189ed291b1f6735ac60e56"
+    },
+    {
+      "bytes": 421,
+      "category": "lists",
+      "file": "lst-bullet.json",
+      "id": "lst-bullet",
+      "sha256": "5a4a55697aa0562bc998d9f2f2dd1fcc916a5ba8a9c48f6fa8782da74b26c6c8"
+    },
+    {
+      "bytes": 517,
+      "category": "lists",
+      "file": "lst-ordered.json",
+      "id": "lst-ordered",
+      "sha256": "0701443e331707509da004c8157ecde9620c972180597bd119a9c9fc1e6e1518"
+    },
+    {
+      "bytes": 377,
+      "category": "mixed",
+      "file": "mix-acronym.json",
+      "id": "mix-acronym",
+      "sha256": "da8f944838488c46d36b7f283310622200028a0ba60a3713fd2b53b6b3eec221"
+    },
+    {
+      "bytes": 394,
+      "category": "mixed",
+      "file": "mix-email-url.json",
+      "id": "mix-email-url",
+      "sha256": "a15cda9e8090a36cd9353e55167411abfa39e5dc9710c4117635028e58131d4e"
+    },
+    {
+      "bytes": 568,
+      "category": "mixed",
+      "file": "mix-latin-sentence.json",
+      "id": "mix-latin-sentence",
+      "sha256": "74d111d8bb8147dd1c0c5ed28da798f1841f7c0efa303c797f103388c5ce2be0"
+    },
+    {
+      "bytes": 398,
+      "category": "mixed",
+      "file": "mix-latin-word.json",
+      "id": "mix-latin-word",
+      "sha256": "4dc80b108fe0403c6bba10daeb7c79e34018012530f6e3b47b6beac4df2b4fa2"
+    },
+    {
+      "bytes": 412,
+      "category": "mixed",
+      "file": "mix-numbers-ltr.json",
+      "id": "mix-numbers-ltr",
+      "sha256": "09eb6f7ff72f5064d9de46bb8f0bbf359264e53949db01094e0e5eccb2ca548a"
+    },
+    {
+      "bytes": 411,
+      "category": "mixed",
+      "file": "mix-parens.json",
+      "id": "mix-parens",
+      "sha256": "dc27815dbc4fca3a8452b66ba8d5dfb5ba8d661e60f8cf93c7bff2018e014f68"
+    },
+    {
+      "bytes": 390,
+      "category": "mixed",
+      "file": "mix-version.json",
+      "id": "mix-version",
+      "sha256": "cfd7171b524f7cfbf1f9b12ba99b4cf4f996ca7aa97fc11b90c1383a15543b88"
+    },
+    {
+      "bytes": 625,
+      "category": "money",
+      "file": "mon-decimal-table.json",
+      "id": "mon-decimal-table",
+      "sha256": "7a65c99fbe1eaf86130acf92f952f686844135995c8baf28a4b16a5ffc8650cb"
+    },
+    {
+      "bytes": 388,
+      "category": "money",
+      "file": "mon-iban.json",
+      "id": "mon-iban",
+      "sha256": "ebe8e0ed9bff9b0615c62382ce5c0b7c6aa289baa587f06441d277c92313bd32"
+    },
+    {
+      "bytes": 410,
+      "category": "money",
+      "file": "mon-negative-hindi.json",
+      "id": "mon-negative-hindi",
+      "sha256": "ea7f1e82002ef69550b3b1ac4e2ff9aaac140d586764d54cee6af13878f39291"
+    },
+    {
+      "bytes": 537,
+      "category": "money",
+      "file": "mon-negative-table.json",
+      "id": "mon-negative-table",
+      "sha256": "ac49bc25432bd5155eee5abe6d8b6d491099ac2f5f4d9c971b860d433c773919"
+    },
+    {
+      "bytes": 438,
+      "category": "money",
+      "file": "mon-riyal-sign.json",
+      "id": "mon-riyal-sign",
+      "sha256": "99a75533fd68a7f99ec21530cabd5a7253c04e51cf5b565948b5bd382669b020"
+    },
+    {
+      "bytes": 372,
+      "category": "money",
+      "file": "mon-rs-abbrev.json",
+      "id": "mon-rs-abbrev",
+      "sha256": "28070db280caa4b4acd5722490878db65df3b00de30fed1da1b7e3a1f73531cd"
+    },
+    {
+      "bytes": 382,
+      "category": "money",
+      "file": "mon-thousands.json",
+      "id": "mon-thousands",
+      "sha256": "f227c4212dec92004920c0318db0db369c0d57aedc4679d2c24a8fc0f2fc3593"
+    },
+    {
+      "bytes": 407,
+      "category": "punctuation",
+      "file": "pun-comma.json",
+      "id": "pun-comma",
+      "sha256": "a1164dd3f13985433ac95d3fc59a5718adea2663eff13ece86753bcb0c2a2897"
+    },
+    {
+      "bytes": 577,
+      "category": "punctuation",
+      "file": "pun-edge.json",
+      "id": "pun-edge",
+      "sha256": "3c0001b775fc4bf2537645eae0a43df7bd0f476e3ddf12848d48087ddcb713c3"
+    },
+    {
+      "bytes": 364,
+      "category": "punctuation",
+      "file": "pun-quotes.json",
+      "id": "pun-quotes",
+      "sha256": "a69aaab781e6382b627ef694eaa990f89084ae6d495ee85acb59b14cb7000e5c"
+    },
+    {
+      "bytes": 428,
+      "category": "punctuation",
+      "file": "pun-semicolon-question.json",
+      "id": "pun-semicolon-question",
+      "sha256": "ae37f0e16f0440ffa184501a59b5f82b827abf88efa6c4898a7a992a0f1d0180"
+    },
+    {
+      "bytes": 470,
+      "category": "shaping",
+      "file": "shp-allah.json",
+      "id": "shp-allah",
+      "sha256": "ee45c758df3bc396bf839d051cb419f86cd94e207f2b1f6281ee5ebdc20d5520"
+    },
+    {
+      "bytes": 593,
+      "category": "shaping",
+      "file": "shp-allah-sentence.json",
+      "id": "shp-allah-sentence",
+      "sha256": "7dd8d88d9e66110f1f83fcbeea8e90f43c89d41f219bce5494bd0f0559e3d0d7"
+    },
+    {
+      "bytes": 410,
+      "category": "shaping",
+      "file": "shp-kaf-kitaba.json",
+      "id": "shp-kaf-kitaba",
+      "sha256": "772be1dd46fc35d78c5d9bfff9a3807f901c1b39a8abe7cbfdb7d739a4fc385f"
+    },
+    {
+      "bytes": 565,
+      "category": "shaping",
+      "file": "shp-lam-alef-forms.json",
+      "id": "shp-lam-alef-forms",
+      "sha256": "a9b217be766d13653ad3187f1eba08a078930ac26353d2b252432e94296a883d"
+    },
+    {
+      "bytes": 490,
+      "category": "shaping",
+      "file": "shp-nonjoining.json",
+      "id": "shp-nonjoining",
+      "sha256": "be86a4a8f3a7536078c2f84056c532841383e3504c9822d00349c56515fe2434"
+    },
+    {
+      "bytes": 399,
+      "category": "shaping",
+      "file": "shp-single-letter.json",
+      "id": "shp-single-letter",
+      "sha256": "a994329f5e927887644b2d00680c54039b21a848d0cf741ab2ff9adf45f15fc4"
+    },
+    {
+      "bytes": 564,
+      "category": "tables",
+      "file": "tbl-2col.json",
+      "id": "tbl-2col",
+      "sha256": "f5b788796cd2947d41252dfd94628c17e52ff8106d613d45716149d06ff445ee"
+    },
+    {
+      "bytes": 688,
+      "category": "tables",
+      "file": "tbl-5col.json",
+      "id": "tbl-5col",
+      "sha256": "c90673ea2a6b5342b8a8d53f5ae8df85a9f95de5db73183bcc7b14ee2490d1a9"
+    },
+    {
+      "bytes": 597,
+      "category": "tables",
+      "file": "tbl-empty-cell.json",
+      "id": "tbl-empty-cell",
+      "sha256": "acc97471265c553e00aaafec9ba4fe4ede94c297fb89a6414c91a99dd0dec116"
+    },
+    {
+      "bytes": 3774,
+      "category": "tables",
+      "file": "tbl-page-break.json",
+      "id": "tbl-page-break",
+      "sha256": "7a40faef3458d4668a178e7feee0cb2f18e949d904aa71903f37423cbb1c40eb"
+    },
+    {
+      "bytes": 686,
+      "category": "tables",
+      "file": "tbl-plain-fragment.json",
+      "id": "tbl-plain-fragment",
+      "sha256": "49fc997cbfec5a219589a9ef3d78142aee552081ba5ffd7d66e8dd44996f20d1"
+    },
+    {
+      "bytes": 647,
+      "category": "tables",
+      "file": "tbl-two-header-rows.json",
+      "id": "tbl-two-header-rows",
+      "sha256": "823b4b8c635b43215d5cfca81d6e5e444add2a6cb2f48a7b9c877340da9d2f9f"
+    },
+    {
+      "bytes": 532,
+      "category": "tables",
+      "file": "tbl-two-line-cell.json",
+      "id": "tbl-two-line-cell",
+      "sha256": "ca2c56f018b0af78a1cc03412cc870cd5fe72e759c8bf61229b6450cec5f9577"
+    },
+    {
+      "bytes": 581,
+      "category": "tables",
+      "file": "tbl-width-100.json",
+      "id": "tbl-width-100",
+      "sha256": "ac86314b9b94738df8ebf255dda9def4cff9c24cc9f87503646bb8df54f4fe53"
+    },
+    {
+      "bytes": 418,
+      "category": "vocalisation",
+      "file": "voc-full.json",
+      "id": "voc-full",
+      "sha256": "6b43ac20eb1dfea164b388bf1747dd6ac7e4f35516cb67103d2bcb61ec0ccef5"
+    },
+    {
+      "bytes": 454,
+      "category": "vocalisation",
+      "file": "voc-lam-alef-marks.json",
+      "id": "voc-lam-alef-marks",
+      "sha256": "67843ec45e7d507823a1720d78639a0916c4167c4e226bbed4a6a6438c1762a2"
+    },
+    {
+      "bytes": 367,
+      "category": "vocalisation",
+      "file": "voc-no-heading.json",
+      "id": "voc-no-heading",
+      "sha256": "dbe92a8e4a37543481bee592ff750b31975279957a801e3efff927fa60ab4918"
+    },
+    {
+      "bytes": 567,
+      "category": "vocalisation",
+      "file": "voc-partial.json",
+      "id": "voc-partial",
+      "sha256": "a5c20c6f63d892afec15f7eb230f7b6c0ef2573e10b6e6b1015ce2e451cf0730"
+    },
+    {
+      "bytes": 427,
+      "category": "vocalisation",
+      "file": "voc-shadda.json",
+      "id": "voc-shadda",
+      "sha256": "59a8308a31bfcc6cae9019785d44b190d223ad954b2002ad1500cc9bbad55795"
+    },
+    {
+      "bytes": 412,
+      "category": "vocalisation",
+      "file": "voc-shadda-tanween.json",
+      "id": "voc-shadda-tanween",
+      "sha256": "aed946d9a0cd90e52245093abf82d60cea51a60ca79e0d6c0904b14d8a1022c2"
+    },
+    {
+      "bytes": 403,
+      "category": "vocalisation",
+      "file": "voc-tanween.json",
+      "id": "voc-tanween",
+      "sha256": "d8b549a625d3853e7817bbd6c0e3305b9d82439dee590584c56bb7ffecc2ff1b"
+    }
+  ],
+  "counts": {
+    "digits": 9,
+    "headings": 5,
+    "kashida": 3,
+    "lists": 2,
+    "mixed": 7,
+    "money": 7,
+    "punctuation": 4,
+    "shaping": 7,
+    "tables": 9,
+    "vocalisation": 7
+  },
+  "schema": "conformance-corpus/1",
+  "total": 60
+}

@@ -1,0 +1,18 @@
+{
+  "id": "pun-comma",
+  "category": "punctuation",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "الفاصلة العربية"
+    },
+    {
+      "type": "paragraph",
+      "text": "اشترينا ورقًا، وحبرًا، وأقلامًا."
+    }
+  ],
+  "note": "الفاصلة العربية U+060C بين عناصر متتابعة"
+}

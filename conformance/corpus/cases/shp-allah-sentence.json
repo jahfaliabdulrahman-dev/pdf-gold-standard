@@ -1,0 +1,22 @@
+{
+  "id": "shp-allah-sentence",
+  "category": "shaping",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "جملة متصلة"
+    },
+    {
+      "type": "paragraph",
+      "text": "وقال رسول الله صلى الله عليه وسلم: إنما الأعمال بالنيات."
+    },
+    {
+      "type": "paragraph",
+      "text": "سلسلة متصلة: يستعملها المستخدمون في المستشفى."
+    }
+  ],
+  "note": "سلسلة كلمات متصلة داخل جملة، مع اسم الجلالة"
+}

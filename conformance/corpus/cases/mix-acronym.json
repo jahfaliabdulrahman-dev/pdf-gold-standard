@@ -1,0 +1,18 @@
+{
+  "id": "mix-acronym",
+  "category": "mixed",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "اختصارات"
+    },
+    {
+      "type": "paragraph",
+      "text": "معيار PDF/UA-1 و PDF/A-3، ومعهما PDF 2.0."
+    }
+  ],
+  "note": "اختصار فيه شرطة مائلة داخل نص عربي"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "tbl-plain-fragment",
+  "category": "tables",
+  "lang": "ar",
+  "font": "plex",
+  "plain": true,
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "جدول بلا صفحة معلنة"
+    },
+    {
+      "type": "table",
+      "width": "100%",
+      "header": [
+        "البند",
+        "المبلغ"
+      ],
+      "rows": [
+        [
+          "رسوم",
+          "١٠٠"
+        ],
+        [
+          "خدمات",
+          "٢٠٠"
+        ]
+      ]
+    }
+  ],
+  "note": "the bare fragment a customer hands over: no @page, no line-height, no body reset — the shape that collapses a 100% table into one run (measured conjunction)"
+}

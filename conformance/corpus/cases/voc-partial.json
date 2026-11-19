@@ -1,0 +1,22 @@
+{
+  "id": "voc-partial",
+  "category": "vocalisation",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "مشكول جزئيًّا"
+    },
+    {
+      "type": "paragraph",
+      "text": "قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ."
+    },
+    {
+      "type": "paragraph",
+      "text": "ثم سكت، وأكمل الحديث دون تشكيل."
+    }
+  ],
+  "note": "نص مشكول ثم نص غير مشكول في الفقرة نفسها"
+}

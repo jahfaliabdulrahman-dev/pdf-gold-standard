@@ -1,0 +1,22 @@
+{
+  "id": "shp-allah",
+  "category": "shaping",
+  "lang": "ar",
+  "font": "amiri",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "لفظ الجلالة"
+    },
+    {
+      "type": "paragraph",
+      "text": "الله، وبالله، والله، ولله، اللهم."
+    },
+    {
+      "type": "paragraph",
+      "text": "الحمد لله رب العالمين."
+    }
+  ],
+  "note": "تركيب «الله» بلامين وهاء"
+}

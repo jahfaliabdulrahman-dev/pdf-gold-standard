@@ -1,0 +1,32 @@
+{
+  "id": "tbl-width-100",
+  "category": "tables",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "جدول بعرض كامل"
+    },
+    {
+      "type": "table",
+      "width": "100%",
+      "header": [
+        "البند",
+        "المبلغ"
+      ],
+      "rows": [
+        [
+          "رسوم",
+          "١٠٠"
+        ],
+        [
+          "خدمات",
+          "٢٠٠"
+        ]
+      ]
+    }
+  ],
+  "note": "width:100% UNDER a declared @page — measured harmless; the twin of tbl-no-page-box"
+}

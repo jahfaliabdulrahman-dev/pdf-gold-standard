@@ -6,3 +6,9 @@ pikepdf==10.18.1
 pillow==13.0.0
 segno==1.6.6
 fonttools==4.68.0
+# Conformance gate (conformance/): a declared reader must be a pinned reader, or the matrix measures a
+# different library on every machine. pdfplumber is the pdfminer.six reader AND the structure-tree source;
+# jsonschema validates the certificate — a maintained validator beats a hand-rolled one.
+pdfplumber==0.11.10
+pdfminer.six==20260107
+jsonschema==4.26.0

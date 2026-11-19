@@ -1,0 +1,18 @@
+{
+  "id": "dig-mixed-order",
+  "category": "digits",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "أرقام متجاورة"
+    },
+    {
+      "type": "paragraph",
+      "text": "الأرقام: ٣ و12 و٤٥٦ و789."
+    }
+  ],
+  "note": "تبديل اتجاه بين رقم هندي ورقم غربي متجاورين"
+}

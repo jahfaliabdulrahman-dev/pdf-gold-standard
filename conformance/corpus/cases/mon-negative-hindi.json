@@ -1,0 +1,18 @@
+{
+  "id": "mon-negative-hindi",
+  "category": "money",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "مبلغ سالب"
+    },
+    {
+      "type": "paragraph",
+      "text": "المبلغ: -٦٬٠٠٦٫٩٦٥ ريال."
+    }
+  ],
+  "note": "مبلغ سالب بالأرقام الهندية مع فاصل الآلاف العربي (U+066C)"
+}

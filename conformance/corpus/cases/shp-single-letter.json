@@ -1,0 +1,18 @@
+{
+  "id": "shp-single-letter",
+  "category": "shaping",
+  "lang": "ar",
+  "font": "plex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "كلمة من حرف واحد"
+    },
+    {
+      "type": "paragraph",
+      "text": "حرف واحد: و، ثم ب، ثم ك، ثم ف."
+    }
+  ],
+  "note": "كلمة من حرف واحد — شكل منفرد بلا جوار"
+}

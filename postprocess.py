@@ -642,7 +642,8 @@ def feature_link_tagging(pdf, spec, ctx=None) -> None:
     A screen reader announces the label; without it the link is silent. Geometry comes from the document's spec.
     """
     import spec_loader
-    NS = spec_loader.load()
+    import types
+    NS = spec if isinstance(spec, types.ModuleType) else spec_loader.load()
     st = pdf.Root.StructTreeRoot
     n = int(st.get("/ParentTreeNextKey", 0))
     pt = st["/ParentTree"]
@@ -723,13 +724,21 @@ def normalise(pdf) -> None:
 
 
 def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
-          rendered_sha: str | None = None, chrome_version: str | None = None) -> list[str]:
+          rendered_sha: str | None = None, chrome_version: str | None = None,
+          doc_spec=None) -> list[str]:
     """Apply every declared stage-5 feature allowed in `profile`; returns the names applied, in order.
 
     `rendered_sha` is the hash of the markup this build handed to Chrome. The producer passes it; the
     manifest carries it, and the gate recomputes it from the same spec and source. This file is never
     read back from disk, so no copy beside the output can go stale.
+
+    `doc_spec` is a module-like object that replaces the loaded document spec. The conformance gate
+    (`conformance/`) has no document spec — its cases are the document — so it passes a case spec instead
+    of letting the default load a calibrated one. `None` is the pipeline's own path, unchanged.
     """
+    if doc_spec is not None and not isinstance(doc_spec, __import__("types").ModuleType):
+        raise SystemExit("postprocess: doc_spec must be a module object — anything else would fall back to the "
+                         "loaded document spec silently, which is the leak this parameter exists to close")
     if profile not in SUPPORTED_PROFILES:
         raise SystemExit(f"postprocess: profile {profile!r} is not implemented (supported: {sorted(SUPPORTED_PROFILES)})")
     spec = tomllib.load(open(features_path or os.path.join(PROJ, "features.toml"), "rb"))
@@ -748,7 +757,7 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
             if name not in STAGE5:
                 raise SystemExit(f"postprocess: feature {name!r} is declared but has no implementation")
             # One signature for every feature; only `attachments` reads the build context.
-            STAGE5[name](pdf, f, {"rendered_sha": rendered_sha, "chrome_version": chrome_version})
+            STAGE5[name](pdf, doc_spec or f, {"rendered_sha": rendered_sha, "chrome_version": chrome_version})
             applied.append(name)
         for k in ("/SourceFile", "/SourceSHA256"):
             if k in pdf.docinfo:
@@ -756,7 +765,7 @@ def apply(src: str, dst: str, profile: str = "web", features_path: str = None,
         assert "/SourceFile" not in pdf.docinfo and "/SourceSHA256" not in pdf.docinfo
         normalise(pdf)
         feature_bidi_space(pdf)
-        feature_pdfua(pdf)
+        feature_pdfua(pdf, doc_spec)
         pdf.save(dst)
     return applied
 
