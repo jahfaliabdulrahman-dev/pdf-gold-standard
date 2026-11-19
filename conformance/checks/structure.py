@@ -21,6 +21,7 @@ from collections import Counter
 
 import pikepdf
 
+import pdfops
 from ..adapters import fonts
 from . import mcid_text, verapdf as verapdf_mod
 from . import metrics
@@ -219,6 +220,17 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         lang = str(pdf.Root.get("/Lang", "")).strip("()")
         add("lang", lang.lower().startswith("ar"), f"/Lang {lang!r}" if lang else "no /Lang")
 
+        # --- no house key in the delivered file -----------------------------------------------------
+        # PDF/A does not forbid private data and no validator judges it (TechNote 0010, A009: Annex E is
+        # outside ISO 19005's scope), so a leaked `/PL*` key has to fail HERE — the gate that issues the
+        # certificate — not only in the document-specific gate. A file whose objects cannot be read is a
+        # FAIL, never a pass by default.
+        try:
+            keys = pdfops.private_keys(pdf)
+            add("private-keys", not keys, ", ".join(keys[:6]) or "no /PL* key anywhere in the file")
+        except Exception as exc:
+            add("private-keys", False, f"cannot read the objects: {exc}")
+
         try:
             tree = read_tree(pdf)
         except ValueError as exc:
@@ -353,7 +365,7 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
 
     if producer.get("postprocess"):
         with pikepdf.open(pdf_path) as pdf:
-            problems = __import__("pdfops").model_boundary(pdf)
+            problems = pdfops.model_boundary(pdf)
         add("model-boundary", not problems, "; ".join(problems[:3]) or "inside the declared model")
     else:
         add("model-boundary", None, "n/a — our post-processing did not run, and the boundary is its guard")

@@ -7,6 +7,9 @@ Controls:
   3. A verdict flipped to PASS is refused, and the refusal names the recomputed verdict.
   4. A missing required field is refused by the schema.
   5. `validate` does not run a control script (a certificate must be checkable without producing facts).
+  6. A certificate for a failing file is valid, and its verdict says FAIL.
+  7. `--recheck` refuses a forged reading, in both directions.
+  8. `--recheck` refuses a certificate that predates a check the gate now runs (it must be re-issued).
 """
 import json
 import os
@@ -130,6 +133,17 @@ with open(os.path.join(tmp, "forged-down.json"), "w", encoding="utf-8") as fh:
     json.dump(forged_down, fh, ensure_ascii=False, indent=1)
 problems = certificate.validate(os.path.join(tmp, "forged-down.json"), pdf, do_recheck=True)
 check("recheck:forged-fail-refused", any("exact" in p for p in problems), "; ".join(problems[:2]))
+
+# --- 8 · a certificate issued before a gate check existed ---------------------
+# `recheck` re-runs the gate on the file. A check the gate now runs but the certificate does not list is a
+# claim gap, not a pass: the honest answer is "re-issue", and it is named so the reader does not have to guess.
+old = json.loads(json.dumps(cert))
+old["checks"] = [c for c in old["checks"] if c["id"] != "private-keys"]
+path = os.path.join(tmp, "old-cert.json")
+with open(path, "w", encoding="utf-8") as fh:
+    json.dump(old, fh, ensure_ascii=False, indent=1)
+problems = certificate.validate(path, pdf, do_recheck=True)
+check("recheck:missing-check-refused", any("private-keys" in p for p in problems), "; ".join(problems[:2]))
 
 shutil.rmtree(tmp, ignore_errors=True)
 print(f"\nCHECKS IN CERTIFICATE: {len(cert['checks'])} · READERS: {len(cert['readers'])} · "

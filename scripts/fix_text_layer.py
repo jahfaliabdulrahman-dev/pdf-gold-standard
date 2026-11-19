@@ -27,7 +27,10 @@ Usage: fix_text_layer.py in.pdf out.pdf
 Measured on guide v2.1 (word sequence vs source): Preview 80.8→98.8%, PDFium 37.0→95.7%, poppler 78.3→95.1%,
 MuPDF 13.5→80.0%, pdf.js 12.3→58.7%.
 """
-import collections, io, re, sys, unicodedata
+import collections, io, os, re, sys, unicodedata
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pdfops  # noqa: E402  (the house-key name is declared once, where both gates read it)
 import pikepdf
 from fontTools.ttLib import TTFont
 
@@ -160,7 +163,7 @@ class FontState:
         # not inference.
         marks = sorted(self.signed_marks)
         if marks:
-            self.F["/PLMarkCids"] = pikepdf.Array(marks)
+            self.F[pdfops.MARK_CIDS_KEY] = pikepdf.Array(marks)
         for cid, s in self.old.items():                 # glyphs never seen inside a span keep a folded default
             self.map.setdefault(cid, self.base(cid) or s)
         self.F.ToUnicode = pdf.make_stream(write_tu({c: s for c, s in self.map.items() if s and s != "\x00"}))

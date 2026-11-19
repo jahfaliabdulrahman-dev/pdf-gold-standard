@@ -22,8 +22,12 @@ import pikepdf
 import pymupdf
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if REPO not in sys.path:
+    sys.path.insert(0, REPO)
 if os.path.join(REPO, "scripts") not in sys.path:
     sys.path.insert(0, os.path.join(REPO, "scripts"))
+
+import pdfops
 
 
 class _NA(Exception):
@@ -327,6 +331,37 @@ def m_foreign_font(src, dst):
         raise _NA("no font object to rename")
 
 
+# ---------------------------------------------------------------- house keys (the private-key rule)
+def m_private_key(src, dst):
+    """The incident: the text layer's own key left on a delivered font dictionary."""
+    with pikepdf.open(src) as pdf:
+        for obj in pdf.objects:
+            if isinstance(obj, pikepdf.Dictionary) and obj.get("/Subtype") == "/Type0":
+                obj[pdfops.MARK_CIDS_KEY] = pikepdf.Array([1])
+                pdf.save(dst)
+                return
+    raise _NA("no Type0 font to carry the key")
+
+
+def m_private_key_stream(src, dst):
+    """The edge the old filter missed: a key on a STREAM dictionary (pikepdf reports it as Object, not Dictionary)."""
+    with pikepdf.open(src) as pdf:
+        contents = pdf.pages[0].Contents
+        if isinstance(contents, pikepdf.Array):        # a page may carry an array of content streams
+            contents = contents[0] if contents else None
+        if contents is None or not hasattr(contents, "stream_dict"):
+            raise _NA("page 1 has no content stream")
+        contents.stream_dict[pdfops.HOUSE_KEY_PREFIX + "Probe"] = pikepdf.String("probe")
+        pdf.save(dst)
+
+
+def m_private_key_direct(src, dst):
+    """The other edge: a key on a DIRECT dictionary nested in the catalog — `pdf.objects` never lists it."""
+    with pikepdf.open(src) as pdf:
+        pdf.Root["/ProbeHolder"] = pikepdf.Dictionary({pdfops.HOUSE_KEY_PREFIX + "Direct": 1})
+        pdf.save(dst)
+
+
 # ---------------------------------------------------------------- harness
 def _build(fixture: str, outdir: str, engine: str) -> str:
     from .adapters import chrome
@@ -383,6 +418,17 @@ MUTATIONS = [
     ("drop-one-haraka", "marked", m_drop_mark,
      "exact falls, skeleton stays", lambda b, m: m["metrics"]["exact"] == 0.0
      and m["metrics"]["skeleton_exact"] == 1.0 and b["metrics"]["exact"] == 1.0),
+    # One per place a key can live. The rule says "any object"; each mutation is the witness for one clause
+    # of that claim (indirect dictionary · stream dictionary · direct dictionary).
+    ("private-key-leak", "struct", m_private_key,
+     "check private-keys", lambda b, m: b["checks"]["private-keys"] == "pass"
+     and m["checks"]["private-keys"] == "fail"),
+    ("private-key-on-stream", "struct", m_private_key_stream,
+     "check private-keys", lambda b, m: b["checks"]["private-keys"] == "pass"
+     and m["checks"]["private-keys"] == "fail"),
+    ("private-key-direct", "struct", m_private_key_direct,
+     "check private-keys", lambda b, m: b["checks"]["private-keys"] == "pass"
+     and m["checks"]["private-keys"] == "fail"),
 ]
 
 
