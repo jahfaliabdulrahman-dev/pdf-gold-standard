@@ -93,6 +93,7 @@ class FontState:
         self.map = {}                       # cid -> final text (1 code point, or marks only)
         self.gid = {}                       # alias cid -> gid
         self.alias = {}                     # (gid, text) -> cid
+        self.signed_marks = set()           # mark CIDs that close a signed amount: published, never renamed
         self.next = max(self.nglyphs, max(self.old, default=0) + 1)
         self.neww = {}
 
@@ -136,16 +137,30 @@ class FontState:
         pool = sorted((g for g in self.inked if g != gid), key=lambda g: (abs(self.inked[g][0] - lo) + abs(self.inked[g][1] - hi), g)) or [gid]
         return pool[(k - 2) % len(pool)]
 
-    def mark_cid(self, text):
-        """A zero-width blank glyph mapped to an invisible direction mark (None if the subset has no empty glyph)."""
+    def mark_cid(self, text, signed=False):
+        """A zero-width blank glyph mapped to an invisible direction mark (None if the subset has no empty glyph).
+
+        `signed=True` registers the CID as one the later stages must NOT rename: it closes a signed amount, and
+        a space instead of an LRM reverses that amount in Preview. Other marks keep the old behaviour — the
+        space repair still normalises them, which existing cases were measured on.
+        """
         if self.blank is None: return None
         key = ("mark", text)
         if key not in self.alias:
             c = self.next; self.next += 1
             self.alias[key] = c; self.gid[c] = self.blank; self.map[c] = text; self.neww[c] = 0.0
+        if signed:
+            self.signed_marks.add(self.alias[key])
         return self.alias[key]
 
     def finish(self, pdf):
+        # Publish the CIDs this layer created for direction marks, by name, so the later stages do not have to
+        # guess: postprocess's space repair must never rename a mark we placed (it would turn a deliberate LRM
+        # into U+0020 and reverse a correctly ordered amount in Preview — measured). The list is provenance,
+        # not inference.
+        marks = sorted(self.signed_marks)
+        if marks:
+            self.F["/PLMarkCids"] = pikepdf.Array(marks)
         for cid, s in self.old.items():                 # glyphs never seen inside a span keep a folded default
             self.map.setdefault(cid, self.base(cid) or s)
         self.F.ToUnicode = pdf.make_stream(write_tu({c: s for c, s in self.map.items() if s and s != "\x00"}))
@@ -299,6 +314,12 @@ MARKS_ACTUAL = b"/Span <</ActualText <FEFF0009>>> BDC\n"
 OPEN, CLOSE = "([{", ")]}"
 
 
+# A sign extends a number to the left (UAX#9: ES adjacent to EN). `%` is deliberately NOT here: it is ET,
+# and treating it as a sign marked `dig-percent` as a signed amount and cost Preview's reading
+# (measured: pdfkit exact 1.0 -> 0.0, and the mark landed where the percent glyph was).
+SIGNS = set("+-\u2212")
+
+
 def bidi_kind(txt):
     for ch in txt:
         t = unicodedata.bidirectional(ch)
@@ -313,9 +334,11 @@ def direction_marks(data, fontmap, st_of, stats):
     marks where the isolate's edges were: LRM outside a bracket that belongs to the Latin run, RLM outside
     sentence punctuation that sits between the run and the line edge. No ink, no advance."""
     st = None; x = y = 0.0; ox = oy = 0.0; glyphs = []            # (y, x, text, st, hex_start, index)
+    fname, size = None, 0.0                                        # the active font resource and its size
     for t in POS.finditer(data):
         if t.group(1):
-            F = fontmap.get(t.group(1).decode()); st = st_of(F) if F is not None and F.get("/Subtype") == "/Type0" else None
+            fname, size = t.group(1).decode(), float(t.group(2))
+            F = fontmap.get(fname); st = st_of(F) if F is not None and F.get("/Subtype") == "/Type0" else None
         elif t.group(3): ox, oy = float(t.group(3)), float(t.group(4)); x = y = 0.0
         elif t.group(5): x += float(t.group(5)); y += float(t.group(6))
         elif t.group(7):
@@ -323,14 +346,23 @@ def direction_marks(data, fontmap, st_of, stats):
             h = t.group(7).decode(); px = x
             for i in range(0, len(h), 4):
                 c = int(h[i:i + 4], 16)
-                glyphs.append((round(oy - y, 1), ox + px, st.map.get(c) or st.base(c) or "", st, t.start(7), i // 4, len(h) // 4, t.end()))
+                glyphs.append((round(oy - y, 1), ox + px, st.map.get(c) or st.base(c) or "", st, t.start(7),
+                               i // 4, len(h) // 4, t.end(), fname, size))
                 px += st.neww.get(c, st.width.get(c, st.dw)) / 1000      # only ordering matters here
     lines = {}
     for g in glyphs: lines.setdefault(g[0], []).append(g)
     ins = []                                               # (hex_start, glyph index to insert before, st, mark)
+    objs = []                                              # (byte position, st) — a mark drawn as its own show
     for line in lines.values():
         line.sort(key=lambda g: g[1])
         kinds = [bidi_kind(g[2]) if g[2].strip() else "S" for g in line]
+        # A SIGN ATTACHED TO A NUMBER IS PART OF THE NUMBER (UAX#9: ES/ET adjacent to EN resolves to EN).
+        # Without this, a leading `-` in an isolated LTR amount reads as a neutral at the line edge, the code
+        # puts an RLM in front of it, and the sign jumps to the end of the amount in every reader — measured on
+        # `mon-negative-table`: raw Chrome read `-6,006.965`, this function turned it into `6,006.965-`.
+        for i, g in enumerate(line):
+            if kinds[i] == "N" and g[2].strip() in SIGNS and i + 1 < len(line) and kinds[i + 1] == "L":
+                kinds[i] = "L"
         i, n = 0, len(line)
         while i < n:
             if kinds[i] != "L": i += 1; continue
@@ -347,6 +379,21 @@ def direction_marks(data, fontmap, st_of, stats):
             if right_attached: b += 1
             if left_attached: ins.append((line[a], 0, LRM))
             if right_attached: ins.append((line[b], 1, LRM))
+            # A SIGNED NUMBER closes with an LRM drawn in a TEXT OBJECT OF ITS OWN (see `objs`).
+            # Measured four ways: an LRM inside the amount's own `Tj` extends that run's bounding box, and
+            # PDFium then sorts the amount BEFORE the Arabic word in the row (pdfium/pdfkit exact flip
+            # 1/0 <-> 0/1 with the mark at either edge). Preview, meanwhile, needs the mark to read
+            # `-6,006.965` instead of `6,006.965-` on the page that prints the sign first.
+            if (not right_attached and line[a][2].strip() in SIGNS
+                    and any(kinds[m] == "L" for m in range(a, b + 1))):
+                # Both edges when the amount stands mid-line (a paragraph): the left edge separates it from the
+                # Arabic before it, the right edge from the Arabic after it. At the line's own left edge there is
+                # nothing to separate from — and a mark there moved PDFium's run boundary in the table.
+                if a > 0:
+                    # `line[a][4]` is the first hex digit INSIDE `<...>`; inserting there would corrupt the
+                    # show. The object goes before the whole show, i.e. at the `<`.
+                    objs.append((max(0, line[a][4] - 1), line[a][3], True))
+                objs.append((line[b][7], line[b][3], True))        # after the last digit's show
             if True:                                                  # punctuation between the run and the LEFT line edge
                 k = a - 1
                 while k >= 0 and kinds[k] in ("N", "S"): k -= 1
@@ -366,6 +413,15 @@ def direction_marks(data, fontmap, st_of, stats):
         cids = [h[i:i + 4] for i in range(0, len(h), 4)]
         for idx, c in sorted(edits[start], reverse=True): cids.insert(idx, "%04X" % c)
         out[start:end] = "".join(cids).encode()
+    # The separate objects go at the END of the stream: a zero-advance, zero-bbox glyph has no paint, and text
+    # order in every reader is decided by position, not by stream order. Nothing inside the number's own `Tj`
+    # is touched, so its bounding box — and PDFium's ordering of the row — does not move.
+    for pos, st, signed in sorted(objs, key=lambda t: t[0], reverse=True):
+        c = st.mark_cid(LRM, signed=signed)
+        if c is None:
+            continue
+        out[pos:pos] = b" <%04X> Tj" % c            # a show of its own, inside the amount's own text object
+        stats["dir_marks"] += 1
     return bytes(out)
 
 

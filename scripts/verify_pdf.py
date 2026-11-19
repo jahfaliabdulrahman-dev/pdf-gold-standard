@@ -52,7 +52,7 @@ CHECK_KIND = {
     "contents-links": "calibrated", "contents-numbers": "calibrated", "footer-numbers": "calibrated",
     "page-labels": "calibrated", "named-destinations": "calibrated", "xmp": "calibrated",
     "output-intent": "generic", "attachments": "calibrated", "art-dpi": "calibrated",
-    "pdfua": "calibrated", "acroform": "calibrated", "link-tagging": "calibrated",
+    "pdfua": "calibrated", "acroform": "calibrated", "link-tagging": "calibrated", "private-keys": "generic",
     "ref-links": "calibrated", "fonts": "calibrated", "title": "calibrated",
     "version-consistency": "calibrated", "provenance": "calibrated", "chrome-version": "generic",
     "tagged-structure": "generic", "no-blank-pages": "calibrated", "tagged": "calibrated",
@@ -1229,6 +1229,23 @@ def gate(doc) -> list[str]:
     check("pdf-model", not model_bad,
           "; ".join(model_bad[:4]) or
           f"{mstats.get('forms', 0)} form(s) at depth 1 · no text inside · no nesting · no Ts · no rotated artifact text")
+
+    # 9b. no house key in the delivered file. Our bookkeeping (`/PLMarkCids`, and any `/PL*` after it) is how one
+    #     stage talks to the next; it is consumed and removed before the file leaves. A private key in a PDF/A-3b
+    #     document is an unregistered entry in somebody else's file, and it ships silently — found by reading a
+    #     delivered font dict, so the rule is stated for every object, not for the one key that was found.
+    try:
+        xp = pikepdf_open(doc)
+        try:
+            leaked = sorted({str(k) for obj in xp.objects if isinstance(obj, pikepdf.Dictionary)
+                             for k in obj.keys() if str(k).startswith("/PL")})
+        finally:
+            xp.close()
+    except GateInput:
+        raise
+    except Exception as exc:
+        leaked = [f"cannot read the objects: {exc}"]
+    check("private-keys", not leaked, ", ".join(leaked[:6]) or "no /PL* key anywhere in the file")
 
     # 10. text layer: every glyph carries ONE base code point (scripts/fix_text_layer.py). Presentation Forms or
     #     multi-letter entries are what makes readers reverse letters inside ligatures (لأ→ال، في→يف).

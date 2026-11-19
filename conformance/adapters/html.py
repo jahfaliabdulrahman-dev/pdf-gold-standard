@@ -30,6 +30,7 @@ adds kashida that is not in the source — `kash-justify`), `bold` on a block, a
 (the HTML a customer writes when they hand over a plain fragment with no page declaration).
 """
 import html as htmllib
+import re
 
 from ..corpus.truth import arabic_indic
 from . import fonts
@@ -74,6 +75,45 @@ def _cls(block: dict, extra: str = "") -> str:
     return f' class="{" ".join(parts)}"' if parts else ""
 
 
+# ---- money, and why it is isolated ---------------------------------------------------------------
+# Incident #157375: in an RTL paragraph or cell, the minus sign of `-6,006.965` takes the run's direction and
+# the amount prints as `6,006.965-`. The digits themselves are fine — UAX#9 gives a number LTR direction — but a
+# LEADING SIGN in an RTL run does not inherit it. So the amount is isolated as one LTR run and the sign becomes
+# its leftmost character, in display and in every reader. Owner decision, 19 Nov 2026: the sign goes on the
+# left (`-6,006.965`); acceptance is a PASS certificate on `mon-negative-table` and `mon-negative-hindi` and the
+# sign on the left on the page. Isolation applies to (a) a cell that is nothing but an amount and (b) an inline
+# token that begins with a sign — the two places the defect exists; a bare positive number is already LTR.
+_AMOUNT = r"[0-9\u0660-\u0669\u06f0-\u06f9][0-9\u0660-\u0669\u06f0-\u06f9,./%\u066b\u066c]*"
+_SIGNED = re.compile(r"(?<![^\s(])([-\u2212]\s?" + _AMOUNT + r")")
+# Only a NEGATIVE amount is isolated: a positive number already reads left-to-right (UAX#9 gives digits
+# EN direction), so isolating it changes a case that was never broken — measured on `dig-phone`, whose `+966`
+# lost word_f1 1.0 -> 0.875 the moment it was wrapped.
+_CELL_AMOUNT = re.compile(r"^\s*[-\u2212]\s?" + _AMOUNT + r"\s*$|^\s*" + _AMOUNT + r"\s*$")
+
+
+def _ltr(inner: str) -> str:
+    """One isolated LTR run (`bdi` + `unicode-bidi:isolate`)."""
+    return f'<bdi dir="ltr" style="unicode-bidi:isolate">{inner}</bdi>' 
+
+
+def _inline(text: str) -> str:
+    """Escape a paragraph's text, isolating any signed amount inside it."""
+    out, last = [], 0
+    for m in _SIGNED.finditer(text):
+        out.append(esc(text[last:m.start()]))
+        out.append(_ltr(esc(m.group(1))))
+        last = m.end()
+    out.append(esc(text[last:]))
+    return "".join(out)
+
+
+def _cell(text: str) -> str:
+    """A table cell: a NEGATIVE amount is isolated whole; anything else is escaped text."""
+    if _CELL_AMOUNT.match(text) and re.match(r"^\s*[-\u2212]", text):
+        return _ltr(esc(text.strip()))
+    return _inline(text)
+
+
 def render(case: dict) -> str:
     body = []
     for block in case["blocks"]:
@@ -83,17 +123,17 @@ def render(case: dict) -> str:
             body.append(f"<h{level}{_cls(block)}>{esc(block['text'])}</h{level}>")
         elif kind == "paragraph":
             body.append(f"<p{_cls(block, 'j' if block.get('align') == 'justify' else '')}>"
-                        f"{esc(block['text'])}</p>")
+                        f"{_inline(block['text'])}</p>")
         elif kind == "list":
             tag = "ol" if block["ordered"] else "ul"
-            items = "".join(f"<li>{esc(i)}</li>" for i in block["items"])
+            items = "".join(f"<li>{_inline(i)}</li>" for i in block["items"])
             body.append(f"<{tag}>{items}</{tag}>")
         elif kind == "table":
             header = block["header"]
             rows = [header] if header and not isinstance(header[0], list) else list(header)
             attr = ' class="b"' if block.get("bold") else ""
-            head = "".join("<tr>" + "".join(f"<th{attr}>{esc(c)}</th>" for c in r) + "</tr>" for r in rows)
-            body_rows = "".join("<tr>" + "".join(f"<td>{esc(c)}</td>" for c in r) + "</tr>"
+            head = "".join("<tr>" + "".join(f"<th{attr}>{_cell(c)}</th>" for c in r) + "</tr>" for r in rows)
+            body_rows = "".join("<tr>" + "".join(f"<td>{_cell(c)}</td>" for c in r) + "</tr>"
                                 for r in block["rows"])
             style = f' style="width: {esc(block["width"])}"' if block.get("width") else ""
             body.append(f"<table{style}><thead>{head}</thead><tbody>{body_rows}</tbody></table>")
