@@ -82,9 +82,9 @@ The gate's full run is the **CI run on this branch** (65 cases, the runner's pin
 
 - Run `44701553653` (on `7cf7aa9`, before the accept) printed `pdfkit PDFKit 15.8.2: 60 cases compared` plus
   five `new case, no floor yet` notes; the accept added exactly those five.
-- The G#5 run on the **final pushed commit** prints `pdfkit PDFKit 15.8.2: 65 cases compared` and
-  `RATCHET HELD`; its raw output is `docs/conformance/results/2026-11-20-g5-chrome.{md,json}`. (The earlier
-  `44723719935` on `24146d2` was green for the pre-review rule; the final run replaces it with this rule.)
+- Run `44727329809` on `5011905` (the final pushed commit) prints `pdfkit PDFKit 15.8.2: 65 cases compared` and
+  `RATCHET HELD`; its raw output is committed as `docs/conformance/results/2026-11-20-g5-chrome.{md,json}`. The
+  earlier `44723719935` on `24146d2` was green for the pre-review rule.
 
 **No floor is changed in this round.**
 
