@@ -71,8 +71,9 @@ in both readers. `ENGINE_BEHAVIOURS` has the matching entry (`identifier-own-lin
 
 The gate's full run is the **CI run on this branch** (65 cases, the runner's pinned Chrome/poppler, PDFKit
 15.8.2), not this Mac's `.venv`. The previous CI artifact (run `44701553653` on `7cf7aa9`) prints
-`pdfkit PDFKit 15.8.2: 65 cases compared` after the five new floors were accepted; the G#5 run must print the
-same with the new layout. **No floor is changed in this round.**
+`pdfkit PDFKit 15.8.2: 65 cases compared` after the five new floors were accepted; the G#5 run prints the
+same with the new layout (run `44723719935` on `24146d2`). The run's raw output is committed as
+`docs/conformance/results/2026-11-20-g5-chrome.{md,json}`. **No floor is changed in this round.**
 
 Local note (not a floor change): this Mac's `.venv` PyMuPDF 2.1 reads `mix-version`'s Arabic-Indic date as
 `... ٦٢٠٢ ... ٩١ ...` (digit_runs 0.333), while the CI runner's PyMuPDF 2.1 reads 0.667 — the recorded floor
