@@ -59,9 +59,12 @@ recorded floors (verified before the full run).
 The `num-ids` amount was Arabic-Indic in G#4; it is now `1,200.00` for the same one-variable reason. The
 Arabic-Indic separator class remains recorded in `num-invoice-arab` (G#1b) and is not claimed here.
 
-**Witness:** `conformance/tests/test_identifier_isolation.py` builds both layouts: with the rule, PDFium and
-PDFKit exact 1.0; with `html._ARABIC` made never-matching (the rule disabled, the same source), exact 0.0 in
-both. `ENGINE_BEHAVIOURS` has the matching entry (`identifier-own-line`, 5 declared behaviours), and
+**Witness:** `conformance/tests/test_identifier_isolation.py` builds both layouts: with the rule, PDFium exact
+1.0 on every runner and PDFKit exact 1.0 on **27.2.1** (the owner's installed reader); the CI runner's PDFKit
+**15.8.2** does not read the split layout exactly (exact 0, order 0.88, measured in run `44721190390`), so the
+test prints a named `NOTE` for that version instead of asserting its exact value — a declared reader-version
+limit, not a silent skip. With `html._ARABIC` made never-matching (the rule disabled, the same source), exact 0.0
+in both readers. `ENGINE_BEHAVIOURS` has the matching entry (`identifier-own-line`, 5 declared behaviours), and
 `test_engine_behaviour.py` asserts both halves.
 
 ## 5 · The full run and the reader floors
@@ -92,6 +95,10 @@ export CONFORMANCE_PDFTOTEXT="$HOME/.cache/poppler-pin/26.11.0/bin/pdftotext"
 
 - The **inline** label+identifier layout still fails in PDFium and PDFKit; the producer rule avoids it, and the
   test fails if a reader ever accepts it (so the rule can be revisited), but the inline failure is not fixed.
+- **PDFKit 15.8.2** (the CI runner) reads the split layout with exact 0 and order 0.88; the PASS certificate is
+  on **27.2.1**, the owner's installed reader. The 15.8.2 floors are the old inline values and are not changed;
+  the test asserts PDFium's exact 1.0 on every runner, PDFKit's exact only on 27.2.1+, and prints a named NOTE
+  otherwise. This is a reader-version limit, declared — not a hidden pass.
 - A **spaced phone** (`055 123 4567`) read alone on a line flips: PDFium breaks it bare, PDFKit breaks it with
   isolation; with its Arabic label on the same line it reads correctly, and that is the case's layout.
 - The source `<bdi>` alone is not a fix (measured in §2); the separate display line is.
