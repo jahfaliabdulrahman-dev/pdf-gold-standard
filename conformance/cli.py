@@ -16,7 +16,7 @@ def run_command(a) -> int:
     print("\n" + runner.results_table(results))
     print(f"\nwritten: {js}\n         {md}")
     if getattr(a, "accept", False):
-        ratchet.accept(results)
+        ratchet.accept(results, allow_lower=getattr(a, "force", False))
         print("RATCHET ACCEPTED — floors rewritten from this run")
         return 0
     if a.ratchet:
@@ -39,7 +39,7 @@ def ratchet_command(a) -> int:
         results = json.load(fh)
     path = a.path or ratchet.FILE
     if a.action == "accept":
-        ratchet.accept(results, path)
+        ratchet.accept(results, path, allow_lower=getattr(a, "force", False))
         print(f"RATCHET ACCEPTED — {path}")
         return 0
     bad, notes = ratchet.check(results, path)

@@ -14,6 +14,7 @@ a hole in the gate, not a disagreement about the text. `N/A` is declared and pri
 counts as a catch.
 """
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -125,6 +126,54 @@ def _swap_runs(instr, pdf):
 
 def m_swap_digits(src, dst):
     _rewrite(src, dst, _swap_digits)
+
+
+def _rewrite_tounicode(src: str, dst: str, to_hex: str) -> None:
+    """Map one DRAWN digit to another Unicode digit in the font's ToUnicode (the drawn glyph is unchanged).
+
+    A mutation of the CMap, not of the content stream: the page still draws «6060», but the layer now says a
+    Persian digit (or one Arabic-Indic digit among ASCII ones). The witness is the numeral check, not the
+    glyph count — measured on the `digits` fixture (codes <0047>→0 and <004F>→6).
+    """
+    with pikepdf.open(src) as pdf:
+        drawn = _drawn_codes(pdf)
+        for name, font in (pdf.pages[0].get("/Resources", {}).get("/Font", {}) or {}).items():
+            tu = font.get("/ToUnicode")
+            if tu is None:
+                continue
+            text = tu.read_bytes().decode("latin-1")
+            for block in re.findall(r"beginbfchar(.*?)endbfchar", text, re.S):
+                for m in re.finditer(r"<([0-9A-Fa-f]{4})>\s*<([0-9A-Fa-f]{4})>", block):
+                    code, uni = int(m.group(1), 16), int(m.group(2), 16)
+                    if code in drawn and 0x30 <= uni <= 0x39:
+                        old = m.group(0)
+                        new = text.replace(old, f"<{m.group(1)}> <{to_hex}>", 1)
+                        font.ToUnicode = pdf.make_stream(new.encode("latin-1"))
+                        pdf.save(dst)
+                        return
+    raise _NA("no drawn digit with a bfchar ToUnicode entry on page 1")
+
+
+def m_persian_digit(src, dst):
+    _rewrite_tounicode(src, dst, "06F1")
+    _require_claim(dst, lambda t: any(0x06F0 <= ord(c) <= 0x06F9 for c in t),
+                   "no Persian digit in the layer after the CMap rewrite")
+
+
+def m_mixed_digit(src, dst):
+    _rewrite_tounicode(src, dst, "0661")
+    from .checks.mcid_text import scan
+    from .checks.structure import mixed_numbers
+    _require_claim(dst, lambda _t: bool(mixed_numbers("\n".join(scan(dst)["text"].values()))),
+                   "the mutated number has no second digit of another system — the mixed mutation is a no-op")
+
+
+def _require_claim(pdf: str, ok, why: str) -> None:
+    """A mutation that does not move the claimed quantity is a MISS, never a silent CAUGHT."""
+    from .checks.mcid_text import scan
+    text = "\n".join(scan(pdf)["text"].values())
+    if not ok(text):
+        raise _NA(why)
 
 
 def _swap_digits(instr, pdf):
@@ -453,6 +502,13 @@ MUTATIONS = [
     ("private-key-in-trailer", "struct", m_private_key_trailer,
      "check private-keys", lambda b, m: b["checks"]["private-keys"] == "pass"
      and m["checks"]["private-keys"] == "fail"),
+    # Numerals: the CMap changes, the drawn glyphs do not. One mutation per rule, each witnessed by name.
+    ("persian-digit", "digits", m_persian_digit,
+     "check numerals-persian", lambda b, m: b["checks"]["numerals-persian"] == "pass"
+     and m["checks"]["numerals-persian"] == "fail"),
+    ("mixed-digit", "digits", m_mixed_digit,
+     "check numerals-mixed", lambda b, m: b["checks"]["numerals-mixed"] == "pass"
+     and m["checks"]["numerals-mixed"] == "fail"),
 ]
 
 
