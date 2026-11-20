@@ -66,6 +66,15 @@ ENGINE_BEHAVIOURS = [
         "expect": "rows lose a cell when the producer writes no space",
     },
     {
+        "id": "identifier-own-line",
+        "rule": "a composite identifier after Arabic starts on its own display line (`<br>`)",
+        "claim": "the same text inline is read `-2026-0042INV` by PDFium and `0042-2026-INV` by PDFKit; the "
+                 "line break makes both exact 1.0 and leaves the logical text (and the floors) unchanged",
+        "case": "num-invoice-latn",
+        "engine": "chrome",
+        "expect": "the identifier is not in reading order when the break is absent",
+    },
+    {
         "id": "no-synthetic-bold",
         "rule": "both real weights declared per family",
         "claim": "a block asked for bold is set in the real 700 face, so no Type3 font appears",
@@ -94,7 +103,20 @@ def _cls(block: dict, extra: str = "") -> str:
 # sign on the left on the page. Isolation applies to (a) a cell that is nothing but an amount and (b) an inline
 # token that begins with a sign — the two places the defect exists; a bare positive number is already LTR.
 _AMOUNT = r"[0-9\u0660-\u0669\u06f0-\u06f9][0-9\u0660-\u0669\u06f0-\u06f9,./%\u066b\u066c]*"
-_SIGNED = re.compile(r"(?<![^\s(])([-\u2212]\s?" + _AMOUNT + r")")
+# A composite identifier — the owner's invoice/IBAN class — is either an UPPERCASE **hyphen-separated** token with
+# a digit (`INV-2026-0042`) or an IBAN-like uppercase prefix with six or more digits (`SA0380…`). The hyphen (not
+# slash) is required: `PDF/UA-1` and `PDF/A-3` are standard names, not identifiers, and must not take a line of
+# their own (measured: the slash form matched them in `mix-acronym`). In an RTL paragraph the readers reorder the
+# identifier (PDFium `-2026-0042INV`, PDFKit `0042-2026-INV`); isolation in the source (`bdi`/`span`/LRM) did not
+# fix both. The producer starts it on its own display line (a `<br>` before it) while the case's logical text stays
+# the source text — both tier-1 readers exact 1.0, and the line break is whitespace to `metrics.N`, so the truth
+# and the other readers' floors are unchanged. Lowercase versions (`v2.3.6`, `mix-version`) and pure digits
+# (VAT/CR/phone) are NOT matched: they read correctly and a break changes a case that was never broken (measured:
+# mix-version digit_runs 0.67 -> 0.33 with the broad form).
+_IDENT = re.compile(r"(?<![A-Za-z0-9/-])(?=[A-Z0-9-]*\d)(?:[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+|[A-Z]{2}\d{6,})"
+                    r"(?![A-Za-z0-9/-])")
+_INLINE = re.compile(rf"(?P<sign>(?<![^\s(])[-−]\s?{_AMOUNT})|(?P<ident>{_IDENT.pattern})")
+_ARABIC = re.compile(r"[\u0600-\u06FF]")
 # Only a NEGATIVE amount is isolated: a positive number already reads left-to-right (UAX#9 gives digits
 # EN direction), so isolating it changes a case that was never broken — measured on `dig-phone`, whose `+966`
 # lost word_f1 1.0 -> 0.875 the moment it was wrapped.
@@ -107,11 +129,14 @@ def _ltr(inner: str) -> str:
 
 
 def _inline(text: str) -> str:
-    """Escape a paragraph's text, isolating any signed amount inside it."""
+    """Escape a paragraph, isolating a signed amount and starting a composite identifier on its own line."""
     out, last = [], 0
-    for m in _SIGNED.finditer(text):
-        out.append(esc(text[last:m.start()]))
-        out.append(_ltr(esc(m.group(1))))
+    for m in _INLINE.finditer(text):
+        prefix = text[last:m.start()]
+        out.append(esc(prefix))
+        if m.group("ident") is not None and _ARABIC.search(prefix):
+            out.append("<br>")
+        out.append(_ltr(esc(m.group(0))))
         last = m.end()
     out.append(esc(text[last:]))
     return "".join(out)
