@@ -218,6 +218,13 @@
       "sha256": "ea7f1e82002ef69550b3b1ac4e2ff9aaac140d586764d54cee6af13878f39291"
     },
     {
+      "bytes": 689,
+      "category": "money",
+      "file": "mon-negative-line-start.json",
+      "id": "mon-negative-line-start",
+      "sha256": "e5d516cf15cef0dc0609d9559f0bdfb8db725308341700f2366e170d1e9dd25a"
+    },
+    {
       "bytes": 537,
       "category": "money",
       "file": "mon-negative-table.json",
@@ -244,6 +251,34 @@
       "file": "mon-thousands.json",
       "id": "mon-thousands",
       "sha256": "f227c4212dec92004920c0318db0db369c0d57aedc4679d2c24a8fc0f2fc3593"
+    },
+    {
+      "bytes": 1113,
+      "category": "mixed",
+      "file": "num-ids-latn-in-arab.json",
+      "id": "num-ids-latn-in-arab",
+      "sha256": "a967d3f90d0088065013e85a76846d143f93a1e9d83822b969ef2301c5b59601"
+    },
+    {
+      "bytes": 497,
+      "category": "money",
+      "file": "num-invoice-arab.json",
+      "id": "num-invoice-arab",
+      "sha256": "a1cb57fc71f8498bef3ee40218c79c703a442b51f6f17c2fd25695332c6f9deb"
+    },
+    {
+      "bytes": 813,
+      "category": "money",
+      "file": "num-invoice-latn.json",
+      "id": "num-invoice-latn",
+      "sha256": "371b5536004346330dc21092ed467da1144bf31bf645b63679976d32d73121c9"
+    },
+    {
+      "bytes": 529,
+      "category": "money",
+      "file": "num-negative-arab.json",
+      "id": "num-negative-arab",
+      "sha256": "ec1fd61288bfcd5d4185da377914c8863acef7e184333380f2d0f075eefc9953"
     },
     {
       "bytes": 407,
@@ -330,11 +365,11 @@
       "sha256": "c90673ea2a6b5342b8a8d53f5ae8df85a9f95de5db73183bcc7b14ee2490d1a9"
     },
     {
-      "bytes": 597,
+      "bytes": 815,
       "category": "tables",
       "file": "tbl-empty-cell.json",
       "id": "tbl-empty-cell",
-      "sha256": "acc97471265c553e00aaafec9ba4fe4ede94c297fb89a6414c91a99dd0dec116"
+      "sha256": "8ed0980af78857e7df25e8dd5266154713402a591d46863d8185ef9a62cfaac4"
     },
     {
       "bytes": 3774,
@@ -426,13 +461,13 @@
     "headings": 5,
     "kashida": 3,
     "lists": 2,
-    "mixed": 7,
-    "money": 7,
+    "mixed": 8,
+    "money": 11,
     "punctuation": 4,
     "shaping": 7,
     "tables": 9,
     "vocalisation": 7
   },
   "schema": "conformance-corpus/1",
-  "total": 60
+  "total": 65
 }

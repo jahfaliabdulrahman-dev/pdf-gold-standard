@@ -31,6 +31,7 @@ adds kashida that is not in the source — `kash-justify`), `bold` on a block, a
 """
 import html as htmllib
 import re
+import unicodedata
 
 from ..corpus.truth import arabic_indic
 from . import fonts
@@ -54,6 +55,15 @@ ENGINE_BEHAVIOURS = [
         "case": "tbl-width-100",
         "engine": "chrome-raw",
         "expect": "the case's rows ARE in reading order",
+    },
+    {
+        "id": "empty-cell-dropped",
+        "rule": "an empty cell is written as one `&#160;`, never as `<td></td>`",
+        "claim": "a cell with no content is dropped from the structure tree; the table's rows lose a column and "
+                 "veraPDF UA-1 fails 7.2-43",
+        "case": "tbl-empty-cell",
+        "engine": "chrome",
+        "expect": "rows lose a cell when the producer writes no space",
     },
     {
         "id": "no-synthetic-bold",
@@ -108,10 +118,24 @@ def _inline(text: str) -> str:
 
 
 def _cell(text: str) -> str:
-    """A table cell: a NEGATIVE amount is isolated whole; anything else is escaped text."""
+    """A table cell: an empty one keeps its cell with ONE non-breaking space.
+
+    Chrome drops a `<td></td>` with no content from the structure tree (measured: the table's rows become
+    3,2,2 and veraPDF UA-1 fails 7.2-43 "rows span different number of columns"). U+00A0 is whitespace:
+    `metrics.N` collapses it, so it adds no word, and the grader still sees three cells. A cell holding only
+    spaces or only format characters (RLM/LRM/ZWSP/ZWNJ/ZWJ/WJ) loses its `/TD` the same way, so the test is
+    "no character of substance", not `text.strip()`.
+    """
+    if _no_substance(text):
+        return "&#160;"
     if _CELL_AMOUNT.match(text) and re.match(r"^\s*[-\u2212]", text):
         return _ltr(esc(text.strip()))
     return _inline(text)
+
+
+def _no_substance(text: str) -> bool:
+    """True when every character is whitespace, a format control, or a control char (nothing a reader shows)."""
+    return all(unicodedata.category(ch) in ("Zs", "Zl", "Zp", "Cf", "Cc") for ch in text)
 
 
 def render(case: dict) -> str:

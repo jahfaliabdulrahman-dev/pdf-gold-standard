@@ -162,6 +162,29 @@ with open(path, "w", encoding="utf-8") as fh:
 problems = certificate.validate(path, pdf, do_recheck=True)
 check("recheck:removed-check-refused", any("no longer runs" in p for p in problems), "; ".join(problems[:2]))
 
+# --- 11 · the numeral tokenizer: what is one number, and what is a mix ---------
+# The checks in `structure.evaluate` are witnessed by the two selftest mutations; this control pins the
+# tokenizer's edges, including the separators that do NOT make a number mixed (the owner's decision names
+# numerals and identifiers, not separator style).
+from conformance.checks import structure as gate_structure
+
+for text, want, why in (
+    ("1,200.00", [], "ASCII digits + ASCII separators"),
+    ("١٬٢٠٠٫٠٠", [], "Arabic-Indic digits + Arabic separators"),
+    ("١٢3", ["١٢3"], "one number, two digit systems"),
+    ("1,٢٣٤", ["1,٢٣٤"], "mixed across a separator"),
+    ("1٬200", [], "separator style alone is not a mixed number"),
+    ("2026-11-19", [], "a hyphen ends the token: three numbers"),
+    ("SA0380000000608010167519", [], "an IBAN is ASCII digits"),
+    ("+966 55 123 4567", [], "spaces split a phone into pure tokens"),
+    ("۱۲۳", [], "Persian-only is not MIXED — numerals-persian is its check"),
+    ("۱۲3", [], "Persian+ASCII is not mixed either — numerals-persian owns Persian"),
+):
+    got = gate_structure.mixed_numbers(text)
+    check(f"numerals-token:{text}", got == want, "" if got == want else f"{got!r} != {want!r} — {why}")
+
+check("checks:count", len(cert["checks"]) == 20, f"{len(cert['checks'])} checks in the certificate")
+
 shutil.rmtree(tmp, ignore_errors=True)
 print(f"\nCHECKS IN CERTIFICATE: {len(cert['checks'])} · READERS: {len(cert['readers'])} · "
       f"TIER-1 UNAVAILABLE: {len(cert['tier1_unavailable'])}")

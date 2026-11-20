@@ -63,8 +63,9 @@ conda create -y -p ~/.cache/poppler-pin/26.11.0 -c conda-forge --override-channe
 export CONFORMANCE_PDFTOTEXT=~/.cache/poppler-pin/26.11.0/bin/pdftotext
 ```
 
-Measured: 26.11.0 reproduces 26.07.0's readings on all 60 cases (no metric differs), so the pin changed the
-SUPPLY of the reader, not its numbers.
+The pin exists so the reader's **supply** is not the machine's: its floors are recorded per version, and an
+upgrade is accepted deliberately with its numbers (the two committed runs are not identical — they also differ
+in gate code — so compare per reader before drawing a conclusion).
 
 **PDFKit is the only reader whose version comes from the machine** (it ships with macOS, and the GitHub runner's
 macOS differs from the owner's). Its floors are recorded per version (27.2.1 and 15.8.2 today), and a machine

@@ -63,6 +63,31 @@ def main() -> int:
             continue
         check(f"{row['id']}:case-exists", True, cid)
         out = os.path.join(tmp, f"{row['id']}.pdf")
+
+        # The defect half: render with the pre-fix `_cell` (empty cells return "") and show that Chrome drops
+        # the cell. Without this branch the rule's cause would be prose; the fixed half alone cannot fail if
+        # Chrome ever stops dropping cells.
+        if row["id"] == "empty-cell-dropped":
+            from conformance.checks import structure as gate_structure
+            original = html._cell
+            html._cell = lambda t: "" if html._no_substance(t) else original(t)
+            try:
+                chrome.render_case(corpus[cid], out, engine)
+            finally:
+                html._cell = original
+            with pikepdf.open(out) as pdf:
+                table = next(n for n in gate_structure.read_tree(pdf).walk() if n.tag == "/Table")
+                rows = [len([c for c in r.children if c.tag in ("/TD", "/TH")])
+                        for r in table.children if r.tag == "/TR"]
+            checks = {c["id"]: c for c in gate_structure.evaluate(
+                out, corpus[cid], {"postprocess": True}, run_verapdf=True)}
+            check(f"{row['id']}:reproduces", rows == [3, 2, 2],
+                  f"rows {rows}" + ("" if rows == [3, 2, 2] else " — the dropped cell is no longer reproducible"))
+            check(f"{row['id']}:tables-fail", checks["tables"]["status"] == "fail", checks["tables"]["reason"])
+            check(f"{row['id']}:ua1-fail", checks["verapdf-ua1"]["status"] == "fail",
+                  checks["verapdf-ua1"]["reason"])
+            continue
+
         chrome.render_case(corpus[cid], out, engine)
         text = layer(out)
 
@@ -89,6 +114,35 @@ def main() -> int:
         chrome.render_case(corpus[cid], out, "chrome")
         found = type3_fonts(out)
         check(f"{cid}:no-type3", not found, "no Type3" if not found else str(found))
+
+    # --- the empty cell keeps its cell -------------------------------------------------------------
+    # Chrome drops a cell with no content from the structure tree; veraPDF UA-1 then fails 7.2-43. The
+    # producer writes one non-breaking space (`metrics.N` collapses it, so it adds no word). This control
+    # fails if that space is removed: the rows go back to 3,2,2.
+    from conformance.checks import structure as gate_structure
+
+    check("empty-cell:html", html._cell("") == "&#160;" and html._cell("  ") == "&#160;"
+          and html._cell("\u200f") == "&#160;" and html._cell("\u200b\u200f") == "&#160;",
+          "an empty, whitespace-only or format-only cell is one &#160;")
+    cid = "tbl-empty-cell"
+    if cid not in corpus:
+        check("empty-cell:case-exists", False, "the case is missing from the corpus")
+    else:
+        out = os.path.join(tmp, "tbl-empty-cell.pdf")
+        chrome.render_case(corpus[cid], out, "chrome")
+        with pikepdf.open(out) as pdf:
+            table = next(n for n in gate_structure.read_tree(pdf).walk() if n.tag == "/Table")
+            rows = [len([c for c in r.children if c.tag in ("/TD", "/TH")])
+                    for r in table.children if r.tag == "/TR"]
+        check("empty-cell:rows", rows == [3, 3, 3], f"rows {rows}")
+        checks = {c["id"]: c for c in gate_structure.evaluate(
+            out, corpus[cid], {"postprocess": True}, run_verapdf=True)}
+        check("empty-cell:tables", checks["tables"]["status"] == "pass", checks["tables"]["reason"])
+        check("empty-cell:ua1", checks["verapdf-ua1"]["status"] == "pass", checks["verapdf-ua1"]["reason"])
+        check("empty-cell:tagged-text", checks["tagged-text"]["status"] == "pass",
+              checks["tagged-text"]["reason"])
+        check("empty-cell:all-text-tagged", checks["all-text-tagged"]["status"] == "pass",
+              checks["all-text-tagged"]["reason"])
 
     print(f"\nDECLARED BEHAVIOURS: {len(html.ENGINE_BEHAVIOURS)}")
     if FAILED:
