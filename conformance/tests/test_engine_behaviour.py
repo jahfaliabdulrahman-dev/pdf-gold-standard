@@ -9,6 +9,7 @@ does not carry it. A claim whose case is missing from the corpus fails here too.
 Runs: `python3 conformance/tests/test_engine_behaviour.py` (needs CHROME_PATH for the two build rows).
 """
 import os
+import re
 import sys
 import tempfile
 
@@ -63,6 +64,26 @@ def main() -> int:
             continue
         check(f"{row['id']}:case-exists", True, cid)
         out = os.path.join(tmp, f"{row['id']}.pdf")
+
+        # The defect half: the same case with the identifier break disabled (`_inline` still isolates the
+        # amount). Without this branch the rule's cause would be prose; the fixed half alone cannot fail if a
+        # reader ever accepts the inline layout.
+        if row["id"] == "identifier-own-line":
+            chrome.render_case(corpus[cid], out, engine)
+            fixed = layer(out)
+            check(f"{row['id']}:fixed", "INV-2026-0042" in fixed,
+                  "" if "INV-2026-0042" in fixed else repr(fixed[-120:]))
+            out2 = os.path.join(tmp, f"{row['id']}-inline.pdf")
+            arabic = html._ARABIC
+            html._ARABIC = re.compile(r"(?!x)x")
+            try:
+                chrome.render_case(corpus[cid], out2, engine)
+            finally:
+                html._ARABIC = arabic
+            broken = layer(out2)
+            check(f"{row['id']}:reproduces", "INV-2026-0042" not in broken,
+                  "" if "INV-2026-0042" not in broken else "the inline layout no longer reproduces the defect")
+            continue
 
         # The defect half: render with the pre-fix `_cell` (empty cells return "") and show that Chrome drops
         # the cell. Without this branch the rule's cause would be prose; the fixed half alone cannot fail if

@@ -253,11 +253,11 @@
       "sha256": "f227c4212dec92004920c0318db0db369c0d57aedc4679d2c24a8fc0f2fc3593"
     },
     {
-      "bytes": 1113,
+      "bytes": 1303,
       "category": "mixed",
       "file": "num-ids-latn-in-arab.json",
       "id": "num-ids-latn-in-arab",
-      "sha256": "a967d3f90d0088065013e85a76846d143f93a1e9d83822b969ef2301c5b59601"
+      "sha256": "647cb331aad47e2be9aa33d98a5ec638e28b2a31c375363c2b312555bfc1d486"
     },
     {
       "bytes": 497,
@@ -267,11 +267,11 @@
       "sha256": "a1cb57fc71f8498bef3ee40218c79c703a442b51f6f17c2fd25695332c6f9deb"
     },
     {
-      "bytes": 813,
+      "bytes": 994,
       "category": "money",
       "file": "num-invoice-latn.json",
       "id": "num-invoice-latn",
-      "sha256": "371b5536004346330dc21092ed467da1144bf31bf645b63679976d32d73121c9"
+      "sha256": "6e8a89c95a230cad310847583b86b527efeb745e50508fccba9965b13caacc64"
     },
     {
       "bytes": 529,
