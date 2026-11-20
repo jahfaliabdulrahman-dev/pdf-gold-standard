@@ -66,23 +66,35 @@ def main() -> int:
         out = os.path.join(tmp, f"{row['id']}.pdf")
 
         # The defect half: the same case with the identifier break disabled (`_inline` still isolates the
-        # amount). Without this branch the rule's cause would be prose; the fixed half alone cannot fail if a
-        # reader ever accepts the inline layout.
-        if row["id"] == "identifier-own-line":
+        # amount). The fixed half measures both tier-1 readers; the declared PDFKit 15.8.2 limit is a NOTE.
+        if row["expect"] == "the identifier is not in reading order when the break is absent":
+            from conformance.checks import metrics, structure
+            from conformance.readers import text_many, version_of
             chrome.render_case(corpus[cid], out, engine)
+            truth = structure._truth_text(corpus[cid])
             fixed = layer(out)
-            check(f"{row['id']}:fixed", "INV-2026-0042" in fixed,
-                  "" if "INV-2026-0042" in fixed else repr(fixed[-120:]))
+            ok = metrics.measure(fixed, truth)["metrics"]["exact"] == 1.0
+            check(f"{row['id']}:fixed:pdfium", ok, "" if ok else fixed[-120:])
+            kit_ver = version_of("pdfkit")
+            nums = [int(n) for n in re.findall(r"\d+", kit_ver)[:2]]
+            kit_fixed = text_many("pdfkit", [out])[0]
+            if len(nums) >= 2 and tuple(nums) >= (27, 2):
+                ok = metrics.measure(kit_fixed, truth)["metrics"]["exact"] == 1.0
+                check(f"{row['id']}:fixed:pdfkit", ok, "" if ok else kit_fixed[-120:])
+            else:
+                print(f"NOTE {row['id']}:fixed:pdfkit - {kit_ver} < 27.2.1: declared older-reader limit; "
+                      f"the exact is not asserted")
             out2 = os.path.join(tmp, f"{row['id']}-inline.pdf")
-            arabic = html._ARABIC
-            html._ARABIC = re.compile(r"(?!x)x")
+            was = html.BREAK_IDENTIFIERS
+            html.BREAK_IDENTIFIERS = False
             try:
                 chrome.render_case(corpus[cid], out2, engine)
             finally:
-                html._ARABIC = arabic
+                html.BREAK_IDENTIFIERS = was
             broken = layer(out2)
-            check(f"{row['id']}:reproduces", "INV-2026-0042" not in broken,
-                  "" if "INV-2026-0042" not in broken else "the inline layout no longer reproduces the defect")
+            broken_kit = text_many("pdfkit", [out2])[0]
+            ok = bool(broken.strip()) and "-2026-0042INV" in broken and "0042-2026-INV" in broken_kit
+            check(f"{row['id']}:reproduces", ok, "" if ok else (broken + broken_kit)[-160:])
             continue
 
         # The defect half: render with the pre-fix `_cell` (empty cells return "") and show that Chrome drops
