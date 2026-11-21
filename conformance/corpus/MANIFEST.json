@@ -267,6 +267,13 @@
       "sha256": "a1cb57fc71f8498bef3ee40218c79c703a442b51f6f17c2fd25695332c6f9deb"
     },
     {
+      "bytes": 1667,
+      "category": "money",
+      "file": "num-invoice-kv-table.json",
+      "id": "num-invoice-kv-table",
+      "sha256": "818c426817fb93214793cd9b7d7bf3655891cf6438c3df029c7468cee031ae7a"
+    },
+    {
       "bytes": 813,
       "category": "money",
       "file": "num-invoice-latn.json",
@@ -462,12 +469,12 @@
     "kashida": 3,
     "lists": 2,
     "mixed": 8,
-    "money": 11,
+    "money": 12,
     "punctuation": 4,
     "shaping": 7,
     "tables": 9,
     "vocalisation": 7
   },
   "schema": "conformance-corpus/1",
-  "total": 65
+  "total": 66
 }
