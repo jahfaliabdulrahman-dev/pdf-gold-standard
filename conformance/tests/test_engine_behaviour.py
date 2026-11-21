@@ -9,7 +9,6 @@ does not carry it. A claim whose case is missing from the corpus fails here too.
 Runs: `python3 conformance/tests/test_engine_behaviour.py` (needs CHROME_PATH for the two build rows).
 """
 import os
-import re
 import sys
 import tempfile
 
@@ -64,38 +63,6 @@ def main() -> int:
             continue
         check(f"{row['id']}:case-exists", True, cid)
         out = os.path.join(tmp, f"{row['id']}.pdf")
-
-        # The defect half: the same case with the identifier break disabled (`_inline` still isolates the
-        # amount). The fixed half measures both tier-1 readers; the declared PDFKit 15.8.2 limit is a NOTE.
-        if row["expect"] == "the identifier is not in reading order when the break is absent":
-            from conformance.checks import metrics, structure
-            from conformance.readers import text_many, version_of
-            chrome.render_case(corpus[cid], out, engine)
-            truth = structure._truth_text(corpus[cid])
-            fixed = layer(out)
-            ok = metrics.measure(fixed, truth)["metrics"]["exact"] == 1.0
-            check(f"{row['id']}:fixed:pdfium", ok, "" if ok else fixed[-120:])
-            kit_ver = version_of("pdfkit")
-            nums = [int(n) for n in re.findall(r"\d+", kit_ver)[:2]]
-            kit_fixed = text_many("pdfkit", [out])[0]
-            if len(nums) >= 2 and tuple(nums) >= (27, 2):
-                ok = metrics.measure(kit_fixed, truth)["metrics"]["exact"] == 1.0
-                check(f"{row['id']}:fixed:pdfkit", ok, "" if ok else kit_fixed[-120:])
-            else:
-                print(f"NOTE {row['id']}:fixed:pdfkit - {kit_ver} < 27.2.1: declared older-reader limit; "
-                      f"the exact is not asserted")
-            out2 = os.path.join(tmp, f"{row['id']}-inline.pdf")
-            was = html.BREAK_IDENTIFIERS
-            html.BREAK_IDENTIFIERS = False
-            try:
-                chrome.render_case(corpus[cid], out2, engine)
-            finally:
-                html.BREAK_IDENTIFIERS = was
-            broken = layer(out2)
-            broken_kit = text_many("pdfkit", [out2])[0]
-            ok = bool(broken.strip()) and "-2026-0042INV" in broken and "0042-2026-INV" in broken_kit
-            check(f"{row['id']}:reproduces", ok, "" if ok else (broken + broken_kit)[-160:])
-            continue
 
         # The defect half: render with the pre-fix `_cell` (empty cells return "") and show that Chrome drops
         # the cell. Without this branch the rule's cause would be prose; the fixed half alone cannot fail if
@@ -176,6 +143,31 @@ def main() -> int:
               checks["tagged-text"]["reason"])
         check("empty-cell:all-text-tagged", checks["all-text-tagged"]["status"] == "pass",
               checks["all-text-tagged"]["reason"])
+
+    # --- inline content never takes a line of its own (review P2, 2026-11-21) -------------------------
+    # The producer may not change the document's design to pass a metric: a paragraph/list/cell keeps the lines
+    # its text draws, and `_inline` must not add `<br>` or `display:block`. The mutation below re-adds a break
+    # and the same guard must catch it.
+    inline_texts = []
+    for case in corpus.values():
+        for block in case["blocks"]:
+            if block["type"] in ("paragraph", "heading"):
+                inline_texts.append(block["text"])
+            elif block["type"] == "list":
+                inline_texts.extend(block["items"])
+            elif block["type"] == "table":
+                header = block["header"]
+                rows = [header] if header and not isinstance(header[0], list) else list(header)
+                for row in rows + block["rows"]:
+                    inline_texts.extend(row)
+
+    def layout_breaks(fn) -> list[str]:
+        return [t for t in inline_texts if "<br" in fn(t) or "display:block" in fn(t)]
+
+    ok = not layout_breaks(html._inline)
+    check("layout:no-break", ok, "" if ok else str(layout_breaks(html._inline)[:3]))
+    ok = bool(layout_breaks(lambda t: html._inline(t) + "<br>"))
+    check("layout:mutation-caught", ok, "" if ok else "the guard did not catch a re-added break")
 
     print(f"\nDECLARED BEHAVIOURS: {len(html.ENGINE_BEHAVIOURS)}")
     if FAILED:
