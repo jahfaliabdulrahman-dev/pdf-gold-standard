@@ -31,7 +31,10 @@ def check_command(a) -> int:
     if not a.out and not a.md:
         print(text)
     else:
-        print(f"خطر النسخ: {report['risk']['level']} · الثقة: {report['risk']['confidence']} · "
+        # The file's verdict first, the highest reader risk second: a reader's known behaviour is not the
+        # file's grade (the assignment's «تُعلَن ولا تُحسب على الملف»). One line, two different claims.
+        print(f"حكم الملف: {report['risk']['file']['level']} · الثقة: {report['risk']['file']['confidence']} · "
+              f"أعلى خطر لدى قارئ: {report['risk']['level']} · "
               f"القرّاء: {', '.join(report['readers'])}")
         if a.out:
             print(f"JSON: {a.out}")
