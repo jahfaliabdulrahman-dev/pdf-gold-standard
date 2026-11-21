@@ -20,12 +20,13 @@ def _cell(text) -> str:
 
 def render_blind(report: dict) -> str:
     risk = report["risk"]
+    reader_top = max(list(risk["readers"].values()) + ["low"], key=lambda lv: {"low": 0, "medium": 1, "high": 2}[lv])
     lines = [f"# فحص النسخ العربي — تقرير تشخيصي",
              "",
              f"**الملف:** `{report['file']['sha256'][:16]}…` · {report['file']['bytes']:,} بايت · "
              f"{report['file']['pages']} صفحة",
              f"**حكم الملف:** {LEVEL_AR[risk['file']['level']]} · **الثقة:** {CONF_AR[risk['file']['confidence']]}",
-             (f"**أعلى خطر لدى قارئ:** {LEVEL_AR[risk['level']]}"
+             (f"**أعلى خطر لدى قارئ:** {LEVEL_AR[reader_top]}"
               + (" · السبب: " + " و".join("الملف" if c == "file" else "قارئ" for c in risk["causes"])
                  if risk["causes"] else "")),
              ("" if risk["file"]["level"] == "high"
@@ -84,19 +85,29 @@ def render_reference(cert: dict) -> str:
              f"**الحكم:** {cert['verdict']} — {cert['verdict_detail']}",
              f"**الملف:** `{cert['file']['sha256'][:16]}…` · {cert['file']['pages']} صفحة"]
     if source.get("kind") == "truth":
-        lines.append(f"**النصّ المرجعي:** `{source['text_sha256'][:16]}…` · {source['chars']} محرفًا"
+        lines.append(f"**النصّ المرجعي:** `{str(source.get('text_sha256') or source.get('sha256'))[:16]}…` · "
+                     f"{source['chars']} محرفًا"
                      + (f" · {source['name']}" if source.get("name") else ""))
     else:
         lines.append(f"**الحالة:** {source.get('case')} ({source.get('category')})")
     lines += ["", "## القرّاء", "",
-              "| القارئ | الإصدار | مطابقة تامة | word_f1 | الترتيب | الأرقام | بلا تشكيل |",
-              "|---|---|---|---|---|---|---|"]
+              "| القارئ | الإصدار | مطابقة تامة | word_f1 | الترتيب | الأرقام | بلا تشكيل | الثقة |",
+              "|---|---|---|---|---|---|---|---|"]
     for name, r in cert["readers"].items():
         lines.append(f"| {name} | {_cell(r['version'])} | {r['exact']:.0f} | {r['word_f1']:.3f} | "
-                     f"{r['order']:.3f} | {r['digit_runs']:.3f} | {r['skeleton_exact']:.0f} |")
+                     f"{r['order']:.3f} | {r['digit_runs']:.3f} | {r['skeleton_exact']:.0f} | "
+                     f"{CONF_AR.get(r.get('confidence'), '—')} |")
     if cert["tier1_unavailable"]:
         lines += ["", "**قارئ أساسي غائب:** " + "؛ ".join(f"{u['reader']}: {u['reason'][:80]}"
                                                          for u in cert["tier1_unavailable"])]
+    missing = cert.get("missing_readers") or {}
+    if missing:
+        lines += ["", "**قرّاء لم يعملوا:** " + "؛ ".join(f"`{n}`: {why[:80]}" for n, why in missing.items())]
+    examples = [(n, r) for n, r in cert["readers"].items() if r.get("examples")]
+    if examples:
+        lines += ["", "**أمثلة (حتى 5 لكل قارئ · الصفحة null لأن النصّ الحرّ بلا بنية صفحات):**"]
+        for name, r in examples:
+            lines.append(f"- `{name}`: " + " · ".join(f"«{ex['text']}»" for ex in r["examples"]))
     lines += ["", "## الفحوص", "", "| الفحص | الحالة | البيان |", "|---|---|---|"]
     for c in cert["checks"]:
         lines.append(f"| `{c['id']}` | {c['status']} | {_cell(c['reason'][:160])} |")

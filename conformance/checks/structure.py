@@ -92,7 +92,7 @@ def read_tree(pdf) -> Node:
     return top
 
 
-ARABIC = re.compile("[\u0600-\u06FF\u0750-\u077F]")
+ARABIC = metrics.ARABIC
 LATIN_OR_DIGIT = re.compile("[A-Za-z0-9]")
 
 
@@ -444,13 +444,16 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         for name, info in scan["fonts"].items():
             if not info["embedded"]:
                 bad_fonts.append(f"{info['family'] or name}: not embedded")
-            if not info["tounicode"]:
-                bad_fonts.append(f"{info['family'] or name}: no /ToUnicode")
+            # The Matterhorn 31-027 exception, in ONE place for the gate too: a simple font without
+            # /ToUnicode is allowed when its encoding or glyph names carry the mapping (font_verdicts owns
+            # the rule); a composite font with no /ToUnicode is a failure.
+            if not info["tounicode"] and info["two_byte"]:
+                bad_fonts.append(f"{info['family'] or name}: composite font with no /ToUnicode")
             if not any(norm(info["family"]).startswith(a) for a in allowed if a):
                 bad_fonts.append(f"{info['family'] or name}: not the case's font ({declared}) nor the declared "
                                  f"fallback")
         add("fonts", not bad_fonts, "; ".join(sorted(set(bad_fonts))[:4]) or
-            f"{len(scan['fonts'])} font(s) used for text, all embedded with /ToUnicode")
+            f"{len(scan['fonts'])} font(s) used for text, all embedded; every composite font has /ToUnicode")
 
         # --- the outline says what the headings say -------------------------------------------------
         import pymupdf

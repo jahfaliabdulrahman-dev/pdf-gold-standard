@@ -39,6 +39,26 @@ WS = re.compile(r"\s+")
 DIGIT = "0-9\u0660-\u0669\u06f0-\u06f9"
 RUN = re.compile(f"[+-]?[{DIGIT}][{DIGIT},.\u066b\u066c]*")
 PRESENTATION_FORM = (0xFB50, 0xFDFF, 0xFE70, 0xFEFF)      # the two Arabic presentation-forms blocks
+ARABIC = re.compile("[\u0600-\u06FF\u0750-\u077F]")        # the base Arabic letters (not the forms)
+
+
+def is_presentation_form(ch: str) -> bool:
+    cp = ord(ch)
+    return PRESENTATION_FORM[0] <= cp <= PRESENTATION_FORM[1] or PRESENTATION_FORM[2] <= cp <= PRESENTATION_FORM[3]
+
+
+def pf_count(s: str) -> int:
+    return sum(1 for ch in (s or "") if is_presentation_form(ch))
+
+
+def arabic_count(s: str) -> int:
+    return len(ARABIC.findall(s or ""))
+
+
+def pf_share(s: str) -> float:
+    """Presentation forms over the Arabic characters that could be base letters (a layer of only forms = 1)."""
+    arabic, forms = arabic_count(s), pf_count(s)
+    return forms / (arabic + forms) if (arabic + forms) else 0.0
 PUA = (0xE000, 0xF8FF)
 
 

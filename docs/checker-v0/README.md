@@ -21,8 +21,8 @@
 ```bash
 export CHROME_PATH="…/Google Chrome for Testing"
 export CONFORMANCE_PDFTOTEXT="$HOME/.cache/poppler-pin/26.11.0/bin/pdftotext"
-python3 scripts/checker_measure.py                     # كل الأرقام والعتبات
-python3 scripts/checker_measure.py --skip-owner        # بلا مجلد المالك (ما يشغّله CI)
+python3 scripts/checker_measure.py --write           # كل الأرقام والعتبات (اكتب بعد المراجعة)
+python3 scripts/checker_measure.py --skip-owner      # بلا مجلد المالك (ما يشغّله CI: يقارن ولا يكتب)
 python3 -m conformance run --engine chrome --out /tmp/conf --ratchet
 python3 -m conformance selftest
 python3 -m arabic_pdf_check check some.pdf -o report.json --md report.md

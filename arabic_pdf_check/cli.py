@@ -33,8 +33,10 @@ def check_command(a) -> int:
     else:
         # The file's verdict first, the highest reader risk second: a reader's known behaviour is not the
         # file's grade (the assignment's «تُعلَن ولا تُحسب على الملف»). One line, two different claims.
+        reader_top = max(list(report["risk"]["readers"].values()) + ["low"],
+                         key=lambda lv: {"low": 0, "medium": 1, "high": 2}[lv])
         print(f"حكم الملف: {report['risk']['file']['level']} · الثقة: {report['risk']['file']['confidence']} · "
-              f"أعلى خطر لدى قارئ: {report['risk']['level']} · "
+              f"أعلى خطر لدى قارئ: {reader_top} · "
               f"القرّاء: {', '.join(report['readers'])}")
         if a.out:
             print(f"JSON: {a.out}")
@@ -98,8 +100,10 @@ def manifest_command(a) -> int:
 
 
 def main(argv=None) -> int:
+    from . import __version__
     ap = argparse.ArgumentParser(prog="arabic-pdf-check", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--version", action="version", version=f"arabic-pdf-check {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("check", help="blind: named signals and a risk level, no source text")
     c.add_argument("pdf")

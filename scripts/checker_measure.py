@@ -30,7 +30,7 @@ import itertools                                    # noqa: E402
 from arabic_pdf_check import blind                  # noqa: E402
 from conformance import reference                    # noqa: E402
 from conformance.checks import mcid_text, metrics, structure, visual_order   # noqa: E402
-from conformance.readers import MATRIX, available, pages_many              # noqa: E402
+from conformance.readers import MATRIX, available, pages_many, text_many   # noqa: E402
 from conformance.corpus import cases as corpus_cases                          # noqa: E402
 import checker_fixtures                                                       # noqa: E402
 
@@ -64,26 +64,30 @@ def _now() -> str:
 def raw(path: str) -> dict:
     """Everything the thresholds are derived from, measured once per file."""
     ok, _missing = available()
-    pages = {name: (pages_many(name, [path]) or [[]])[0] for name in ok}
-    texts = {name: "\n".join(pages[name]) for name in ok}
+    pages, texts = {}, {}
+    for name in ok:
+        got = pages_many(name, [path])
+        if got is None or got[0] is None:      # the reader reads but cannot name its pages
+            pages[name] = []
+            texts[name] = text_many(name, [path])[0]
+        else:
+            pages[name] = got[0]
+            texts[name] = "\n".join(pages[name])
     scan = mcid_text.scan(path)
     file_text = "\n".join(scan["text"].values())
-    arabic = blind.arabic_count(file_text)
-    forms = blind.pf_count(file_text)
+    arabic = metrics.arabic_count(file_text)
+    forms = metrics.pf_count(file_text)
     values = json.load(open(THRESHOLDS, encoding="utf-8"))["values"]
     orders = blind.visual_orders(texts, values)
     pairs = [content_f1(texts[a], texts[b]) for a, b in itertools.combinations(sorted(texts), 2)]
-    gap_max = 0.0
-    for row in scan["fonts"].values():
-        if row["tounicode"] and row["codes"]:
-            gap_max = max(gap_max, row["missing_unicode"] / row["codes"])
+    gap_max = max((v["gap_ratio"] for v in structure.font_verdicts(scan, 1.0)), default=0.0)
     empty_pages = {n: v for n, v in blind.empty_pages_for(pages, list(ok)).items() if v}
     return {
-        "pf_ratio": blind.pf_share(file_text),
+        "pf_ratio": metrics.pf_share(file_text),
         "gap_ratio_max": gap_max,
         "forms": forms,
         "arabic": arabic,
-        "visual_share": len([n for n, o in orders.items() if o["visual"]]) / len(ok),
+        "visual_share": len([n for n, o in orders.items() if o["visual"]]) / len(MATRIX),
         "visual_readers": [n for n, o in orders.items() if o["visual"]],
         "pair_min": min(pairs) if pairs else 1.0,
         "empty_pages": {n: v for n, v in empty_pages.items() if v},
@@ -174,7 +178,7 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
                 failures.append(f"{name}: presentation-forms does not separate "
                                 f"(planted {row['pf_ratio']:.3f} vs clean {clean_pf:.3f})")
         elif expected == "visual-order":
-            need = len(MATRIX) // 2 + 1
+            need = blind.majority_needed()
             gap = row["visual_share"] - clean_share
             if gap < 0.20 or row["visual_share"] * len(MATRIX) < need:
                 failures.append(f"{name}: orientation majority does not separate "
@@ -193,6 +197,8 @@ def main() -> int:
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--owner-dir", default=OWNER_DIR)
     ap.add_argument("--skip-owner", action="store_true")
+    ap.add_argument("--write", action="store_true",
+                    help="write the derived thresholds into arabic_pdf_check/thresholds.json (review first)")
     ap.add_argument("--owner-only", action="store_true",
                     help="measure only the owner's corpus against the committed thresholds")
     a = ap.parse_args()
@@ -228,9 +234,17 @@ def main() -> int:
     with open(THRESHOLDS, encoding="utf-8") as fh:
         base = json.load(fh)
     derived, failures = derive(clean_rows, planted_raw, base)
-    with open(THRESHOLDS, "w", encoding="utf-8") as fh:
-        json.dump(derived, fh, ensure_ascii=False, indent=2)
-        fh.write("\n")
+    derived["command"] = (f"python3 scripts/checker_measure.py" + (" --write" if a.write else "")
+                          + (" --skip-owner" if a.skip_owner else ""))
+    if derived["values"] != base["values"] and not a.write:
+        print("THRESHOLDS DIFFER — the measurement does not match the shipped manifest; "
+              "review it, then re-run with --write")
+        return 1
+    if a.write:
+        with open(THRESHOLDS, "w", encoding="utf-8") as fh:
+            json.dump(derived, fh, ensure_ascii=False, indent=2)
+            fh.write("\n")
+        print(f"written: {THRESHOLDS}")
     print("   " + json.dumps(derived["observed"], ensure_ascii=False)[:400])
 
     print("== acceptance: the four planted files")

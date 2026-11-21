@@ -3,7 +3,8 @@
 
 For each available reader: joining its pages with a newline must give a text that `N` treats as identical to
 `text()` — otherwise the examples would carry page numbers from a different reading, which is worse than no
-page number at all. A reader without `pages_many` is a failure, not a fallback.
+page number at all. A reader without `pages_many` is DECLARED `pages: unsupported` by the report (it still
+reads through `text_many`; `test_blind` proves that branch); it is never reported as a reading of zero.
 """
 import os
 import sys

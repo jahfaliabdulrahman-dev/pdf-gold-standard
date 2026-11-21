@@ -26,12 +26,12 @@ def file_block(scan: dict) -> dict:
             "untagged_chars": len("".join(v for k, v in scan["text"].items() if k[1] < 0))}
 
 
-def measure_readings(scan: dict, readings: dict, truth_text: str | None, missing: dict) -> dict:
+def measure_readings(scan: dict, readings: dict, truth_text: str, missing: dict) -> dict:
     """The single per-reader loop: metrics, limits applied, limits refused.
 
     `readings` is `{reader_name: extracted_text}` for ONE file — batched by the caller when it measures many
-    files. `truth_text=None` measures the reader's output alone (no comparison); the corpus runner passes the
-    case's truth, so a new metric or a new limit is added here once for the certificate and the floors.
+    files. `truth_text` is REQUIRED: a measurement without a truth is `exact 0` by construction, and a
+    function that silently produced that would be a trap for the next caller.
     """
     from .readers import limitations, load
 
@@ -40,9 +40,9 @@ def measure_readings(scan: dict, readings: dict, truth_text: str | None, missing
         mod = load(name)
         version = mod.version()
         limits, refused, controls = limitations.usable(name, version)
-        result = metrics.measure(reading, truth_text or "",
+        result = metrics.measure(reading, truth_text,
                                  metrics.bidi_count("\n".join(scan["text"].values())))
-        applied = [limitations.apply(lim, truth_text or "", reading, result, control)
+        applied = [limitations.apply(lim, truth_text, reading, result, control)
                    for lim, control in zip(limits, controls)]
         block[name] = {
             "version": version,
@@ -87,7 +87,7 @@ def mismatch_examples(truth_text: str, reading: str, limit: int = 5) -> list[dic
     return out
 
 
-def measure_text(pdf_path: str, truth_text: str | None, reader_names=None) -> dict:
+def measure_text(pdf_path: str, truth_text: str, reader_names=None) -> dict:
     """Measure every available reader on one file against one truth text.
 
     Returns `{"readers": {...}, "readings": {...}, "missing": {...}, "file": {...}, "scan": {...}}`.

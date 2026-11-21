@@ -50,8 +50,14 @@ check("visual-order-matches-arafix",
       f"manifest {th['values']['visual_order']['value']} arafix {vo.THRESHOLD}")
 
 blind_src = open(os.path.join(REPO, "arabic_pdf_check", "blind.py"), encoding="utf-8").read()
-unread = [k for k in th["values"] if f'th["{k}"]' not in blind_src]
-check("every-threshold-is-read", not unread, f"never read by blind.py: {unread}")
+import ast                                                            # noqa: E402
+tree = ast.parse(blind_src)
+subscripts = {node.slice.value for node in ast.walk(tree)
+              if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name)
+              and node.value.id == "th" and isinstance(node.slice, ast.Constant)}
+unread = [k for k in th["values"] if k not in subscripts]
+check("every-threshold-is-read", not unread,
+      f"never subscripted as th['<key>'] in blind.py: {unread}")
 
 check("no-disagreement-threshold", not any(k.startswith("disagreement") for k in th["values"]),
       str(sorted(th["values"])))

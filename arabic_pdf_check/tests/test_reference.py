@@ -67,6 +67,22 @@ json.dump(by_case, open(path, "w", encoding="utf-8"), ensure_ascii=False)
 problems = certificate.validate(path, pdf)
 check("case-certificate-valid", not problems, "; ".join(problems[:3]))
 
+# `results.json` / `ratchet.json` published the metrics NESTED under `metrics`; a certificate stores them
+# flat. The adapter is the only place the shapes meet, and this is the regression the corpus run caught:
+# consumers read `per_reader[name].metrics.exact`, not `per_reader[name].exact`.
+from conformance import reference                          # noqa: E402
+flat = {"pdfium": {"version": "9.9", "exact": 1.0, "word_f1": 1.0, "order": 1.0, "digit_runs": 1.0,
+                   "skeleton_exact": 1.0, "defects": {"pua": 0}, "limitations_applied": []}}
+shaped = reference.as_results(flat)
+check("results-shape", shaped["pdfium"]["metrics"]["exact"] == 1.0
+      and "exact" not in shaped["pdfium"], str(shaped)[:160])
+
+# The corpus SUMMARIZER (and the ratchet) read the nested shape; a test that built the nested dict by hand
+# stayed green over a broken runner. This passes the adapter's own output through the real summarizer.
+from conformance import runner                            # noqa: E402
+summary = runner.summarize([{"id": "probe", "category": "shape", "per_reader": shaped}], {"pdfium": None})
+check("results-shape-summarize", summary["pdfium"]["exact_cases"] == 1, str(summary)[:200])
+
 print()
 if FAILS:
     print(f"REFERENCE ACCEPTANCE FAILED — {FAILS}")

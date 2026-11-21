@@ -1,6 +1,6 @@
 {
   "schema_version": "arabic-pdf-check-thresholds/1",
-  "command": "python3 scripts/checker_measure.py --out docs/checker-v0/measurements",
+  "command": "python3 scripts/checker_measure.py --write",
   "measured_at": "2026-11-21T21:54:44Z",
   "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
   "values": {
@@ -17,7 +17,7 @@
     "min_arabic_chars": {
       "value": 8,
       "declared": 8,
-      "source": "arafix DEFAULT_THRESHOLDS[\"min_arabic_chars\"] (MIT) — below it the orientation is not judged"
+      "source": "arafix DEFAULT_THRESHOLDS[\"min_arabic_chars\"] (MIT). Used twice, declared: (a) arafix does not judge orientation on a text with fewer Arabic characters, (b) the report asks «is this an Arabic document?» below it (a low finding, not a high one)"
     },
     "tounicode_gap_ratio": {
       "value": 0.01,
