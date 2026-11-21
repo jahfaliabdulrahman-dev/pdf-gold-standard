@@ -46,6 +46,36 @@ The **value alone in its cell fixes the identifier** in both tier-1 readers (no 
 `-2026-0042INV`/`0042-2026-INV`); what remains for PDFium is the **table row order** — a reader/table defect,
 not the identifier. The table is the shape F uses; it is not a corpus trick.
 
+## 3b · G#5b — the PDFium table row (the owner's 2 h)
+
+**The hypothesis (supported).** Three one-row key/value tables, printed per reader:
+
+| value | starts with | PDFium | Preview 27.2.1 |
+|---|---|---|---|
+| `INV-2026-0042` | Latin letter | `INV-2026-0042 :الفاتورة` (value first) | `الفاتورة:` / `INV-2026-0042` (label first) |
+| `SA0380000000608010167519` | Latin letter | `SA03… :الآيبان` (value first) | `الآيبان:` / `SA03…` (label first) |
+| `2026-0042` | digit | `الرقم: 2026-0042` (label first) | `الرقم:` / `2026-0042` (label first) |
+
+**The first letter distinguishes the three**: the two Latin-first values flip the row in PDFium, the
+digit-first does not. The hypothesis holds; the fix was attempted in the **text layer**, not the template.
+
+**The marks tried** (the G#1 mechanism: a zero-advance mark in a show of its own at the value cell's edge):
+
+| mark | PDFium | Preview 27.2.1 |
+|---|---|---|
+| LRM at the value's left edge | row unchanged | **breaks** (label and value merge) |
+| LRM at the value's right edge | row unchanged (0.0) | exact 1.0 (a zero-width `\u200e` at the value's end) |
+| RLM at the left edge | row unchanged | breaks (merges) |
+| RLM at the right edge | row unchanged | **breaks** (`2026-0042-INV`) |
+| LRI/PDI around the value | row unchanged | breaks (merges) |
+
+**No mark fixed PDFium's row order**, and the marks that touch the left edge break Preview's cell separation.
+The shape never changed (zero advance, no ink); the document's pixels are identical.
+
+**The declared limit:** *PDFium reads an RTL table row whose value starts with a Latin letter
+value-before-label; the identifier itself is intact.* The case's certificate is FAIL on that row (PDFium
+exact 0, Preview exact 1); the shape is not changed for it.
+
 ## 4 · The owner's choice (the comparison)
 
 | | source layout (label+value on one line) | key/value table |
