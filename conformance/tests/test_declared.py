@@ -45,6 +45,12 @@ if held:
     check("control-sees-value-first", detail.get("value_before_label") is True, str(detail))
     check("control-version-matches", held[0]["reader_version_measured"] == pdfium.version(),
           f"{held[0]['reader_version_measured']} vs {pdfium.version()}")
+    # The report prints the LIVE version and the version the behaviour was measured on; a declaration from an
+    # older install must not be printed as if it were measured now.
+    check("live-version-recorded", held[0].get("reader_version_now") == pdfium.version(),
+          f"{held[0].get('reader_version_now')} vs {pdfium.version()}")
+    check("version-mismatch-flag", held[0].get("version_mismatch") is False,
+          str(held[0].get("version_mismatch")))
 
 print()
 if fails:

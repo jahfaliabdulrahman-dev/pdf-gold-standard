@@ -18,13 +18,17 @@ VERSION = ARAFIX_VERSION
 SIGNALS = ("final_only_letters", "joining_forms", "definite_article")
 
 
-def inspect(text: str) -> dict:
+def inspect(text: str, thresholds: dict | None = None) -> dict:
     """{'score', 'visual', 'confidence', 'evidence'} for one extracted text.
+
+    `thresholds` is the caller's declared map (the checker's `thresholds.json`); arafix's published default is
+    used only when the caller has none. Passing it here is what makes the manifest's number the number that
+    judged the report.
 
     `score` is arafix's own number in [−1, 1]: +1 certainly reversed, −1 certainly logical, 0 no evidence.
     It is evidence, not a quality ratio — the report never renders it as a percentage.
     """
-    d = diagnose(text or "")
+    d = diagnose(text or "", thresholds=thresholds)
     score = d.metrics.get("order_score")
     evidence = [{"signal": e.name, "value": round(float(e.value), 3), "detail": e.detail}
                 for e in d.evidence if e.name in SIGNALS]

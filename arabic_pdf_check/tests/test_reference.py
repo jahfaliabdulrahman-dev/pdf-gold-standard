@@ -41,7 +41,7 @@ by_truth = certificate.certify(pdf, truth_text=truth, truth_name="case.txt")
 check("same-file", by_case["file"]["sha256"] == by_truth["file"]["sha256"], "")
 check("schema-v2", by_case["schema_version"] == "certificate/2" == by_truth["schema_version"], "")
 check("source-kinds", by_case["source"]["kind"] == "case" and by_truth["source"]["kind"] == "truth", "")
-check("truth-hash", by_truth["source"]["sha256"] == __import__("hashlib").sha256(truth.encode()).hexdigest(), "")
+check("truth-hash", by_truth["source"]["text_sha256"] == __import__("hashlib").sha256(truth.encode()).hexdigest(), "")
 check("same-readers", set(by_case["readers"]) == set(by_truth["readers"]), "")
 
 diffs = []

@@ -15,15 +15,15 @@ same as for limits (and stricter where it matters):
 """
 import json
 import os
-import subprocess
-import sys
+
+from .controls_runner import ControlRefused, control_data as _control_data, run_control as _run_control
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DECLARED = os.path.join(HERE, "declared.json")
 CONTROLS = os.path.join(HERE, "controls")
 
 
-class DeclaredRefused(RuntimeError):
+class DeclaredRefused(ControlRefused):
     """A behaviour without a working control is an anecdote — refused by name."""
 
 
@@ -33,42 +33,35 @@ def load() -> list[dict]:
 
 
 def run_control(entry: dict) -> dict:
-    script = entry.get("control_script") or ""
-    path = os.path.join(CONTROLS, os.path.basename(script))
-    if not script or not os.path.exists(path):
-        raise DeclaredRefused(f"{entry['id']}: control script {script!r} does not exist")
-    r = subprocess.run([sys.executable, path], capture_output=True, text=True, timeout=600,
-                       cwd=os.path.dirname(HERE))
-    if r.returncode != 0:
-        raise DeclaredRefused(f"{entry['id']}: control failed — {(r.stderr or r.stdout).strip()[:300]}")
     try:
-        out = json.loads(r.stdout.strip().splitlines()[-1])
-    except json.JSONDecodeError as exc:
-        raise DeclaredRefused(f"{entry['id']}: control printed no JSON ({exc}): {r.stdout[:200]!r}") from None
-    if not out.get("reproduces"):
-        raise DeclaredRefused(f"{entry['id']}: the control no longer reproduces the behaviour on this reader "
-                              f"({out.get('detail')}) — the declaration is stale and must not be printed")
-    out.setdefault("detail", {})
-    return out
-
-
-_CACHE: dict[str, dict] = {}
+        return _run_control(entry, CONTROLS)
+    except ControlRefused as exc:
+        raise DeclaredRefused(str(exc)) from None
 
 
 def control_data(entry: dict) -> dict:
-    if entry["id"] not in _CACHE:
-        _CACHE[entry["id"]] = run_control(entry)
-    return _CACHE[entry["id"]]
+    try:
+        return _control_data(entry, CONTROLS)
+    except ControlRefused as exc:
+        raise DeclaredRefused(str(exc)) from None
 
 
 def usable(reader_name: str, reader_version: str) -> tuple[list[dict], list[str], list[dict]]:
-    """(declarations that hold, named refusals, the control measurements they rest on)."""
+    """(declarations that hold, named refusals, the control measurements they rest on).
+
+    The version in the file is the version the behaviour was MEASURED on; the installed reader's version is
+    attached to every entry as `reader_version_now`, and a mismatch is marked. The control decides whether the
+    declaration still holds — printing the old version as if it were measured now is what this field prevents.
+    """
     ok, refused, controls = [], [], []
     for entry in load():
         if entry.get("reader") != reader_name:
             continue
         try:
             control = control_data(entry)
+            entry = dict(entry)
+            entry["reader_version_now"] = reader_version
+            entry["version_mismatch"] = entry.get("reader_version_measured") != reader_version
             ok.append(entry)
             controls.append(control)
         except DeclaredRefused as exc:

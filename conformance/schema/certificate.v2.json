@@ -73,34 +73,6 @@
         }
       }
     },
-    "corpus": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "case",
-        "category",
-        "manifest_sha256",
-        "cases"
-      ],
-      "properties": {
-        "case": {
-          "type": "string",
-          "minLength": 1
-        },
-        "category": {
-          "type": "string",
-          "minLength": 1
-        },
-        "manifest_sha256": {
-          "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
-        },
-        "cases": {
-          "type": "integer",
-          "minimum": 1
-        }
-      }
-    },
     "ratchet_sha256": {
       "type": [
         "string",
@@ -218,7 +190,9 @@
           "skeleton_exact",
           "defects",
           "limitations_applied",
-          "ratcheted"
+          "ratcheted",
+          "confidence",
+          "examples"
         ],
         "properties": {
           "version": {
@@ -320,6 +294,38 @@
           },
           "ratcheted": {
             "type": "boolean"
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "examples": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "page",
+                "text"
+              ],
+              "properties": {
+                "page": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 80
+                }
+              }
+            }
           }
         }
       }
@@ -427,16 +433,12 @@
           "additionalProperties": false,
           "required": [
             "kind",
-            "sha256",
+            "text_sha256",
             "chars"
           ],
           "properties": {
             "kind": {
               "const": "truth"
-            },
-            "sha256": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
             },
             "chars": {
               "type": "integer",
@@ -447,6 +449,10 @@
                 "string",
                 "null"
               ]
+            },
+            "text_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
             }
           }
         }

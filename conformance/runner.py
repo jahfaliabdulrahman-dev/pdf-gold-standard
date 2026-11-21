@@ -88,37 +88,27 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
     paths = [b["pdf"] for b in builds]
     texts = {name: text_many(name, paths) for name in readers}
 
+    from .checks import mcid_text
+    from .reference import file_block, measure_readings
     out_cases = []
     for i, build in enumerate(builds):
         case = build["case"]
         t = truth(case)
-        from .checks import mcid_text
         scan = mcid_text.scan(build["pdf"])
-        file_text = "\n".join(scan["text"].values())
-        floor_bidi = metrics.bidi_count(file_text)
-        per_reader = {}
-        for name in readers:
-            from .readers import limitations
-            version = readers[name].version()
-            limits, refused, controls = limitations.usable(name, version)
-            result = metrics.measure(texts[name][i], t, floor_bidi)
-            applied = [limitations.apply(lim, t, texts[name][i], result, control)
-                       for lim, control in zip(limits, controls)]
-            result["limitations_applied"] = [a for a in applied if a["excused"]]
-            result["limitations_refused"] = refused
-            per_reader[name] = result
+        # The SAME per-reader loop the certificate and the checker use (reference.measure_readings): the
+        # corpus floors and a customer's certificate cannot be measured by two different loops.
+        per_reader = measure_readings(scan, {name: texts[name][i] for name in readers}, t, missing)
         entry = {
             "id": case["id"], "category": case["category"], "font": case["font"],
             "pdf": os.path.basename(build["pdf"]), "bytes": build["bytes"], "sha256": build["sha256"],
             "text_sha256": build["text_sha256"], "median_seconds": build["median"],
             "producer": build["producer"], "per_reader": per_reader,
-            "file": {"bidi": floor_bidi, "zero_width": metrics.zero_width_count(file_text),
-                     "notdef": scan["notdef"], "codes": scan["codes"],
-                     "untagged_chars": len("".join(v for k, v in scan["text"].items() if k[1] < 0))},
+            "file": file_block(scan),
         }
         if run_structure:
             from .checks import structure
-            checks = structure.evaluate(build["pdf"], case, build["producer"], run_verapdf=False)
+            checks = structure.evaluate(build["pdf"], case, build["producer"], run_verapdf=False,
+                                        scan=scan)
             for flavour, cid in (("ua1", "verapdf-ua1"), ("3b", "verapdf-pdfa3b")):
                 target = (os.path.realpath(structure.a3b_target(build["producer"], build["pdf"]))
                           if flavour == "3b" else os.path.realpath(build["pdf"]))

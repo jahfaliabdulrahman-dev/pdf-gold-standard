@@ -96,7 +96,8 @@
           "risk",
           "confidence",
           "signals",
-          "examples"
+          "examples",
+          "pages"
         ],
         "properties": {
           "version": {
@@ -154,6 +155,12 @@
                 }
               }
             }
+          },
+          "pages": {
+            "enum": [
+              "per-page",
+              "unsupported"
+            ]
           }
         }
       }
@@ -358,6 +365,10 @@
           },
           "applies": {
             "type": "boolean"
+          },
+          "measured_on": {
+            "type": "string",
+            "minLength": 1
           }
         }
       }

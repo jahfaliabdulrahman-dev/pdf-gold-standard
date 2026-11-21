@@ -24,10 +24,11 @@ def render_blind(report: dict) -> str:
              "",
              f"**الملف:** `{report['file']['sha256'][:16]}…` · {report['file']['bytes']:,} بايت · "
              f"{report['file']['pages']} صفحة",
-             f"**خطر النسخ:** {LEVEL_AR[risk['level']]} · **الثقة:** {CONF_AR[risk['confidence']]}"
-             + (" · السبب: " + " و".join("الملف" if c == "file" else "قارئ" for c in risk["causes"])
-                if risk["causes"] else ""),
-             (f"**حكم الملف نفسه:** {LEVEL_AR[risk['file']['level']]}"
+             f"**حكم الملف:** {LEVEL_AR[risk['file']['level']]} · **الثقة:** {CONF_AR[risk['file']['confidence']]}",
+             (f"**أعلى خطر لدى قارئ:** {LEVEL_AR[risk['level']]}"
+              + (" · السبب: " + " و".join("الملف" if c == "file" else "قارئ" for c in risk["causes"])
+                 if risk["causes"] else "")),
+             (f"خطر الملف نفسه: {LEVEL_AR[risk['file']['level']]}"
               + ("" if risk["file"]["level"] == "high"
                  else " — إشارات القرّاء أدناه لا تُحسب على الملف")),
              ""]
@@ -36,6 +37,10 @@ def render_blind(report: dict) -> str:
         ids = "، ".join(sorted({s["id"] for s in r["signals"]})) or "—"
         lines.append(f"| {name} | {_cell(r['version'])} | {LEVEL_AR[r['risk']]} | "
                      f"{CONF_AR[r['confidence']]} | {ids} |")
+    nos = [n for n, r in report["readers"].items() if r.get("pages") == "unsupported"]
+    if nos:
+        lines += ["", "**بلا رقم صفحة:** " + "، ".join(f"`{n}`" for n in nos)
+                  + " — يقرأ النص لكنه لا يسمّي صفحاته، فأمثلته بلا رقم صفحة."]
     if report["missing_readers"]:
         lines += ["", "**لم يعمل:** " + "؛ ".join(f"`{n}`: {why}" for n, why in report["missing_readers"].items())]
     lines += ["", "## إشارات الملف", ""]
@@ -61,8 +66,10 @@ def render_blind(report: dict) -> str:
     lines += ["## حدود قرّاء معلنة (تُعلَن ولا تُحسب على الملف)", ""]
     if report["known_limits"]:
         for lim in report["known_limits"]:
-            state = "ينطبق" if lim["applies"] else "مرفوض"
-            lines.append(f"- `{lim['id']}` — {lim['reader']} {lim['version']} ({state}): {lim['statement']}")
+            state = ("ينطبق" if lim["kind"] == "limit" else "مُعاد إنتاجه") if lim["applies"] else "مرفوض"
+            on = (f" · مُثبت على {lim['measured_on']}" if lim.get("measured_on")
+                  and lim["measured_on"] != lim["version"] else "")
+            lines.append(f"- `{lim['id']}` — {lim['reader']} {lim['version']} ({state}){on}: {lim['statement']}")
     else:
         lines.append("- لا حدّ معلن ينطبق على هذه البيئة.")
     lines += ["", "## ما لا يعنيه هذا التقرير", ""]
@@ -78,7 +85,7 @@ def render_reference(cert: dict) -> str:
              f"**الحكم:** {cert['verdict']} — {cert['verdict_detail']}",
              f"**الملف:** `{cert['file']['sha256'][:16]}…` · {cert['file']['pages']} صفحة"]
     if source.get("kind") == "truth":
-        lines.append(f"**النصّ المرجعي:** `{source['sha256'][:16]}…` · {source['chars']} محرفًا"
+        lines.append(f"**النصّ المرجعي:** `{source['text_sha256'][:16]}…` · {source['chars']} محرفًا"
                      + (f" · {source['name']}" if source.get("name") else ""))
     else:
         lines.append(f"**الحالة:** {source.get('case')} ({source.get('category')})")

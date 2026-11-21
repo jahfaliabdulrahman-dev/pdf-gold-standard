@@ -61,7 +61,9 @@ def certify_command(a) -> int:
     truth_text = None
     if getattr(a, "truth", None):
         try:
-            truth_text = open(a.truth, encoding="utf-8").read()
+            # utf-8-sig: a BOM is a byte-order mark, not a character of the customer's text. Keeping it
+            # turns a clean file into `exact 0` — the first character of the truth is one nobody typed.
+            truth_text = open(a.truth, encoding="utf-8-sig").read()
         except OSError as exc:
             print(f"REFUSED — the truth file cannot be read: {exc}")
             return 2
