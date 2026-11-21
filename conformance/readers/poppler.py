@@ -38,6 +38,18 @@ def text(path: str) -> str:
     return text_many([path])[0]
 
 
+def pages_many(paths: list[str]) -> list[list[str]]:
+    """The same reading, one string per page: pdftotext separates pages with U+000C, and `N` treats it as
+    whitespace — so joining these pages with a newline is the same text the reader returned."""
+    out = []
+    for text in text_many(paths):
+        pages = text.split("\f")
+        if pages and pages[-1] == "":
+            pages.pop()
+        out.append(pages)
+    return out
+
+
 def text_many(paths: list[str]) -> list[str]:
     out = []
     for path in paths:

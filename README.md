@@ -25,6 +25,7 @@
 | `report-v1.html` + `report_spec.py` | **الوثيقة الثانية**: «الحرف المقلوب» — ١٧ صفحة، مواصفتها وحدها (`PDF_SPEC=report_spec`)، تُبنى بنفس البوابة والاختبار الذاتي |
 | `spec_loader.py` + `<name>_spec.py` | **المواصفة لكل مستند**: `PDF_SPEC` يختار الملف، والبناء والبوابة والاختبار الذاتي يقرؤون منه واحدًا (لا مواصفة مكرّرة في الكود) |
 | `postprocess.py` + `pdfops.py` | **المرحلة ٥**: تسميات الصفحات، المنافذ المسمّاة، XMP، OutputIntent، المرفقات (`manifest.json` و`features.toml` وأساس veraPDF — بلا مرفق مصدر)، وسم الروابط — وعمليات الرسم المشتركة بين المنتِج والبوابة |
+| `arabic_pdf_check/` | **فاحص النسخ العربي v0**: أداة CLI تقول أين ينكسر نسخ العربية ولكل قارئ — وضع أعمى (إشارات ومستوى خطر) ووضع مرجعي (`certificate/2` بنصّ حرّ). طبقة رقيقة فوق `conformance/`: [README](arabic_pdf_check/README.md) · [الأدلة](docs/checker-v0/) |
 | `features.toml` + `verapdf-baseline*.toml` | **الميزان**: كل ميزة معلنة يُفحص وجودها · وأساس veraPDF لكل مستند (‏`-report`، `-najd`) |
 | `pdfium-shaping/` + `artifacts/` | **أرشيف البحث**: لقطة `hb_probe` (ليست الترقيع) · وصور أدلة الاستخراج |
 | `gen_art.py` | توليد فن الأغلفة (OpenRouter Image API — `gemini-3-pro-image`) |

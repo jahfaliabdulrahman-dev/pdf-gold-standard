@@ -19,9 +19,14 @@ def text(path: str) -> str:
     return text_many([path])[0]
 
 
-def text_many(paths: list[str]) -> list[str]:
+def pages_many(paths: list[str]) -> list[list[str]]:
+    """The same reading, one string per page (see `pdfium.pages_many`)."""
     out = []
     for path in paths:
         with pdfplumber.open(path) as pdf:
-            out.append("\n".join((page.extract_text() or "") for page in pdf.pages))
+            out.append([(page.extract_text() or "") for page in pdf.pages])
     return out
+
+
+def text_many(paths: list[str]) -> list[str]:
+    return ["\n".join(pages) for pages in pages_many(paths)]

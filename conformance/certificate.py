@@ -22,6 +22,8 @@ import json
 import os
 import subprocess
 
+import pikepdf
+
 MATTERHORN = {
     "source": "Matterhorn Protocol 1.1 (PDF Association, CC BY 4.0, 2021), «Matterhorn Protocol Checkpoints»",
     "conditions_total": 136,
@@ -35,6 +37,7 @@ MATTERHORN = {
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCHEMA = os.path.join(HERE, "schema", "certificate.v1.json")
+SCHEMA_V2 = os.path.join(HERE, "schema", "certificate.v2.json")
 REPO = os.path.abspath(os.path.join(HERE, ".."))
 
 
@@ -69,18 +72,39 @@ def _pages(path: str) -> int:
         doc.close()
 
 
-def certify(pdf_path: str, case_id: str, engine: str = "unknown") -> dict:
-    from . import ratchet
+def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
+            truth_text: str | None = None, truth_name: str | None = None) -> dict:
+    """Issue a certificate for a corpus case OR for a free text — one rule, one measurement path.
+
+    The second form is the generalization the checker needs: the same certificate, with `source` naming the
+    truth text instead of a corpus case. The checks that need a case (headings, tables, block order, outline,
+    the case's font family) cannot run against free text and are ABSENT from `checks` there — a reader of the
+    certificate sees exactly what ran, and `not_checked` says what a machine cannot claim at all.
+    """
+    from . import ratchet, reference
     from .checks import structure
     from .corpus import cases as corpus_cases, manifest
-    from .readers import available, limitations, text_many
-    from .checks import metrics
+    from .readers import TIER1
 
-    drift = manifest.problems()
-    if drift:
-        raise CertError("the corpus manifest is not what the cases derive — refusing to certify against an "
-                        "unknown corpus: " + "; ".join(drift[:3]))
-    case = corpus_cases.by_id([case_id])[0]
+    if (case_id is None) == (truth_text is None):
+        raise CertError("certify takes exactly one of a corpus case and a truth text — "
+                        "neither a guess nor both")
+
+    case = None
+    if case_id is not None:
+        drift = manifest.problems()
+        if drift:
+            raise CertError("the corpus manifest is not what the cases derive — refusing to certify against an "
+                            "unknown corpus: " + "; ".join(drift[:3]))
+        case = corpus_cases.by_id([case_id])[0]
+        truth = structure._truth_text(case)
+        source = {"kind": "case", "case": case_id, "category": case["category"],
+                  "manifest_sha256": _sha256(manifest.MANIFEST), "cases": manifest.derive()["total"]}
+    else:
+        assert truth_text is not None                     # guaranteed by the exactly-one rule above
+        truth = truth_text
+        source = {"kind": "truth", "sha256": hashlib.sha256(truth_text.encode("utf-8")).hexdigest(),
+                  "chars": len(truth_text), "name": truth_name}
     # Provenance is DECLARED, never guessed: the file's own /Producer key is a claim, not a measurement, and
     # a certificate that invented an engine would be certifying its own assumption. `unknown` is a value.
     declared = {"chrome": ("conformance chrome adapter", True), "chrome-raw": ("Chrome for Testing (raw)", False)}
@@ -88,60 +112,54 @@ def certify(pdf_path: str, case_id: str, engine: str = "unknown") -> dict:
     producer = {"engine": engine_name, "engine_version": version_of_engine(engine),
                 "postprocess": postprocessed}
     commit, dirty = pipeline_commit()
-    readings, readers, unavailable = {}, {}, []
-    readers_ok, missing = available()
-    for name, mod in readers_ok.items():
-        readings[name] = text_many(name, [pdf_path])[0]
-    for name, reason in missing.items():
-        from .readers import TIER1
-        if name in TIER1:
-            unavailable.append({"reader": name, "reason": reason})
-
-    from .checks import mcid_text
-    scan = mcid_text.scan(pdf_path)
-    file_bidi = metrics.bidi_count("\n".join(scan["text"].values()))
+    # One measurement path (`conformance/reference.py`): the checker measures a free text with the same
+    # function, so a corpus case and a customer's file cannot be scored by two different loops.
+    measured = reference.measure_text(pdf_path, truth)
+    readers = measured["readers"]
+    unavailable = [{"reader": name, "reason": reason}
+                   for name, reason in measured["missing"].items() if name in TIER1]
 
     floors = ratchet.load()
-    for name in readings:
-        version = readers_ok[name].version()
-        limits, refused, controls = limitations.usable(name, version)
-        result = metrics.measure(readings[name], structure._truth_text(case), file_bidi)
-        applied = [limitations.apply(lim, structure._truth_text(case), readings[name], result, control)
-                   for lim, control in zip(limits, controls)]
-        floor = (((floors.get(name) or {}).get("floors") or {}).get(version) or {}).get(
+    for name, block in readers.items():
+        floor = (((floors.get(name) or {}).get("floors") or {}).get(block["version"]) or {}).get(
             "cases", {}).get(case_id)
-        readers[name] = {
-            "version": version,
-            **result["metrics"],
-            "defects": result["defects"],
-            "limitations_applied": [a for a in applied if a["excused"]],
-            "ratcheted": floor is not None,
-        }
-        _ = refused          # a refused limit never reaches the certificate; the run prints it
+        block["ratcheted"] = floor is not None
+        block.pop("limitations_refused", None)   # a refused limit never reaches the certificate; the run prints it
 
     # honour_second_file=False: a certificate names ONE file and judges that file. An engine that writes a
     # separate PDF/A-3b file can be measured in a bakeoff (`a3b_path`), but never certified through it.
-    checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True, honour_second_file=False)
+    if case is not None:
+        checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True, honour_second_file=False)
+        claims = {"pdfua": "1", "pdfa": "3b"}
+    else:
+        # A free text declares no PDF/UA or PDF/A claim, so veraPDF is not run and `claims` is null: a
+        # machine verdict that invented a claim would be judging a document nobody made.
+        with pikepdf.open(pdf_path) as pdf:
+            checks, _tree = structure.file_checks(pdf, pdf_path, measured["scan"], producer)
+        claims = None
     verdict, detail = decide(checks, readers, unavailable, floors, case_id)
     cert = {
-        "schema_version": "certificate/1",
+        "schema_version": "certificate/2",
         "file": {"sha256": _sha256(pdf_path), "bytes": os.path.getsize(pdf_path), "pages": _pages(pdf_path)},
         "producer": {"engine": producer["engine"], "engine_version": str(producer["engine_version"]),
                      "pipeline_commit": commit, "postprocess": bool(producer["postprocess"])},
-        "corpus": {"case": case_id, "category": case["category"],
-                   "manifest_sha256": _sha256(manifest.MANIFEST), "cases": manifest.derive()["total"]},
+        "source": source,
         # The floors in force when this certificate was issued: a later --accept makes the record visible
         # instead of silently re-judging an old certificate against new floors.
         "ratchet_sha256": _sha256(ratchet.FILE) if os.path.exists(ratchet.FILE) else None,
-        "tools": {"verapdf": _verapdf_version(), **{n: (readers_ok[n].version() if n in readers_ok else None)
-                                                    for n in ("pdfium", "mupdf", "poppler", "pdfminer", "pdfkit")}},
-        "claims": {"pdfua": "1", "pdfa": "3b"},
+        "tools": {"verapdf": _verapdf_version(),
+                  **{n: (readers[n]["version"] if n in readers else None)
+                     for n in ("pdfium", "mupdf", "poppler", "pdfminer", "pdfkit")}},
+        "claims": claims,
         "checks": checks,
         "readers": readers,
         "tier1_unavailable": unavailable,
         "not_checked": MATTERHORN,
         "verdict": verdict,
-        "verdict_detail": detail + (" · pipeline tree dirty" if dirty else ""),
+        "verdict_detail": detail + (" · pipeline tree dirty" if dirty else "")
+                          + ("" if case is not None else
+                             " · free text: the case-only checks (headings, tables, block order, outline, "
+                             "font family) did not run, and no PDF/UA or PDF/A claim is judged"),
     }
     return cert
 
@@ -165,7 +183,8 @@ def _verapdf_version() -> str:
         return f"unavailable ({type(exc).__name__})"
 
 
-def decide(checks: list[dict], readers: dict, unavailable: list[dict], floors: dict, case_id: str) -> tuple[str, str]:
+def decide(checks: list[dict], readers: dict, unavailable: list[dict], floors: dict,
+           case_id: str | None) -> tuple[str, str]:
     """The one rule. Re-derived by `validate`; never taken from the file being checked."""
     failed = [c["id"] for c in checks if c["status"] == "fail"]
     if failed:
@@ -193,46 +212,61 @@ def decide(checks: list[dict], readers: dict, unavailable: list[dict], floors: d
     return "PASS", "PASS (both tier-1 readers exact, every check passed)"
 
 
-def recheck(pdf_path: str, cert: dict) -> list[str]:
+def recheck(pdf_path: str, cert: dict, truth_text: str | None = None) -> list[str]:
     """Re-measure the file and compare with what the certificate claims. A forged reading has no place to hide.
 
-    This is the answer to the one hole the review would not let stand as a declared limit: a certificate is
-    unsigned JSON, so `readers` could be edited. Re-extracting with the tier-1 readers and re-running the
-    structural checks costs seconds for one file and needs no trust in the file being checked. What it cannot
-    do is prove the *producer* — that is what the pipeline commit and the markup hash are for.
+    Works for both sources: a corpus case (its truth is derived here) and a free text (the caller must pass
+    the same text — a certificate cannot re-measure a truth it does not carry, and inventing one would be the
+    defect this function exists to catch).
     """
-    from .checks import metrics, structure
+    from . import ratchet, reference
+    from .checks import metrics as metrics_mod
+    from .checks import structure
     from .corpus import cases as corpus_cases
-    from .readers import available, text_many, version_of
+    from .readers import available
+
     problems = []
-    case_id = cert["corpus"]["case"]
-    case = next((c for c in corpus_cases.load_all() if c["id"] == case_id), None)
-    if case is None:
-        return [f"the case {case_id!r} named in the certificate is not in this corpus"]
+    source = cert.get("source") or {"kind": "case", "case": cert["corpus"]["case"]}
+    case = None
+    if source["kind"] == "truth":
+        if truth_text is None:
+            return ["this certificate judges a free text: pass the same text (--truth FILE) to re-measure it"]
+        got = hashlib.sha256(truth_text.encode("utf-8")).hexdigest()
+        if got != source["sha256"]:
+            return [f"the truth text hashes to {got[:12]}, the certificate names {source['sha256'][:12]}"]
+        truth, case_id = truth_text, None
+    else:
+        case_id = source["case"]
+        case = next((c for c in corpus_cases.load_all() if c["id"] == case_id), None)
+        if case is None:
+            return [f"the case {case_id!r} named in the certificate is not in this corpus"]
+        truth = structure._truth_text(case)
+
     ok, _missing = available()
     names = [n for n in ("pdfium", "pdfkit") if n in ok]
-    readings = {n: text_many(n, [pdf_path])[0] for n in names}
-    versions = {n: version_of(n) for n in names}
-    file_bidi = metrics.bidi_count("\n".join(structure.mcid_text.scan(pdf_path)["text"].values()))
-    for name, reading in readings.items():
-        live = metrics.measure(reading, structure._truth_text(case), file_bidi)
+    measured = reference.measure_text(pdf_path, truth, reader_names=names)
+    for name, live in measured["readers"].items():
         stored = cert["readers"].get(name)
         if stored is None:
             problems.append(f"{name}: the file was re-read but the certificate has no block for it")
             continue
-        for metric in ("exact", "word_f1", "order", "digit_runs", "skeleton_exact"):
-            if abs(float(live["metrics"][metric]) - float(stored[metric])) > 1e-9:
-                problems.append(f"{name}.{metric}: re-read {live['metrics'][metric]:.4f} but the certificate "
+        for metric in metrics_mod.METRICS:
+            if abs(float(live[metric]) - float(stored[metric])) > 1e-9:
+                problems.append(f"{name}.{metric}: re-read {live[metric]:.4f} but the certificate "
                                 f"says {stored[metric]:.4f}")
         for kind, n in live["defects"].items():
             if int(n) != int(stored.get("defects", {}).get(kind, 0)):
                 problems.append(f"{name}.defect {kind}: re-read {n}, certificate says "
                                 f"{stored.get('defects', {}).get(kind, 0)}")
-        if versions.get(name) and stored.get("version") != versions[name]:
-            problems.append(f"{name}: the installed reader is {versions[name]}, the certificate names "
+        if live["version"] and stored.get("version") != live["version"]:
+            problems.append(f"{name}: the installed reader is {live['version']}, the certificate names "
                             f"{stored.get('version')} — re-issue it")
-    live_checks = structure.evaluate(pdf_path, case, {"postprocess": cert["producer"].get("postprocess")},
-                                     run_verapdf=True)
+    producer = {"postprocess": cert["producer"].get("postprocess")}
+    if case is not None:
+        live_checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True)
+    else:
+        with pikepdf.open(pdf_path) as pdf:
+            live_checks, _tree = structure.file_checks(pdf, pdf_path, measured["scan"], producer)
     stored_checks = {c["id"]: c["status"] for c in cert["checks"]}
     live_ids = {c["id"] for c in live_checks}
     for chk in live_checks:
@@ -245,8 +279,7 @@ def recheck(pdf_path: str, cert: dict) -> list[str]:
         problems.append(f"check {cid}: the certificate names it and the gate no longer runs it — re-issue")
     if problems:
         return problems
-    from . import ratchet
-    verdict, detail = decide(live_checks, {k: cert["readers"][k] for k in readings},
+    verdict, detail = decide(live_checks, {k: cert["readers"][k] for k in measured["readers"]},
                              cert["tier1_unavailable"], ratchet.load(), case_id)
     if verdict != cert["verdict"]:
         problems.append(f"verdict {cert['verdict']} does not follow from the re-measured file "
@@ -254,15 +287,25 @@ def recheck(pdf_path: str, cert: dict) -> list[str]:
     return problems
 
 
-def validate(cert_path: str, pdf_path: str, do_recheck: bool = False) -> list[str]:
-    """[] means valid. Every refusal names its reason — schema, file hash, verdict, or a limit's evidence."""
+def validate(cert_path: str, pdf_path: str, do_recheck: bool = False,
+             truth_path: str | None = None) -> list[str]:
+    """[] means valid. Every refusal names its reason — schema, file hash, verdict, or a limit's evidence.
+
+    `certificate/1` (corpus only) and `certificate/2` (case or free text) are both accepted: an issued
+    certificate keeps the schema it was issued with, and re-writing old files to fit a new shape would erase
+    the history of what was claimed.
+    """
     import jsonschema
     try:
         cert = json.load(open(cert_path, encoding="utf-8"))
     except Exception as exc:
         return [f"{os.path.basename(cert_path)} is not JSON: {exc}"]
-    schema = json.load(open(SCHEMA, encoding="utf-8"))
-    problems = []
+    version = cert.get("schema_version")
+    schema_path = {"certificate/1": SCHEMA, "certificate/2": SCHEMA_V2}.get(version)
+    if schema_path is None:
+        return [f"unknown schema_version {version!r} — a certificate names its own shape"]
+    schema = json.load(open(schema_path, encoding="utf-8"))
+    problems: list[str] = []
     try:
         jsonschema.validate(cert, schema)
     except jsonschema.ValidationError as exc:
@@ -277,13 +320,19 @@ def validate(cert_path: str, pdf_path: str, do_recheck: bool = False) -> list[st
         problems.append(f"file size {os.path.getsize(pdf_path)} is not the certified {cert['file']['bytes']}")
     from . import ratchet
     floors = ratchet.load()
-    case_id = cert["corpus"]["case"]
+    source = cert.get("source") or cert.get("corpus") or {}
+    case_id = source.get("case")                      # None for a free text: no floors apply
     verdict, detail = decide(cert["checks"], cert["readers"], cert["tier1_unavailable"], floors, case_id)
     if verdict != cert["verdict"]:
         problems.append(f"verdict {cert['verdict']} does not follow from the checks and readers (recomputed "
                         f"{verdict}: {detail})")
     if do_recheck:
-        problems.extend(recheck(pdf_path, cert))
+        truth_text = None
+        if truth_path:
+            if not os.path.exists(truth_path):
+                return problems + [f"the truth file is missing: {truth_path}"]
+            truth_text = open(truth_path, encoding="utf-8").read()
+        problems.extend(recheck(pdf_path, cert, truth_text))
     # A limit must name an evidence-carrying entry for this reader, at the version the control was measured on.
     from .readers import limitations
     known = {lim["id"]: lim for lim in limitations.load()}
@@ -304,10 +353,16 @@ def validate(cert_path: str, pdf_path: str, do_recheck: bool = False) -> list[st
 
 
 def human_summary(cert: dict) -> str:
+    source = cert.get("source") or {}
+    if source.get("kind") == "truth":
+        src = f"truth: sha256 {source['sha256'][:12]} · {source['chars']} chars"
+    else:
+        src = (f"corpus: {source.get('case', (cert.get('corpus') or {}).get('case'))} "
+               f"({source.get('category', (cert.get('corpus') or {}).get('category'))}) · "
+               f"MANIFEST {str(source.get('manifest_sha256', ''))[:12]}")
     lines = [f"verdict: {cert['verdict']} — {cert['verdict_detail']}",
              f"file: {cert['file']['sha256'][:12]} · {cert['file']['bytes']} B · {cert['file']['pages']} page(s)",
-             f"corpus: {cert['corpus']['case']} ({cert['corpus']['category']}) · "
-             f"MANIFEST {cert['corpus']['manifest_sha256'][:12]}",
+             src,
              "checks:"]
     for c in cert["checks"]:
         lines.append(f"  [{c['status']:<4}] {c['id']}: {c['reason'][:120]}")

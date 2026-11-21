@@ -58,8 +58,18 @@ def certify_command(a) -> int:
     from . import certificate
     from .corpus.cases import CaseError
     from .readers.limitations import LimitRefused
+    truth_text = None
+    if getattr(a, "truth", None):
+        try:
+            truth_text = open(a.truth, encoding="utf-8").read()
+        except OSError as exc:
+            print(f"REFUSED — the truth file cannot be read: {exc}")
+            return 2
     try:
-        cert = certificate.certify(a.pdf, a.case, a.engine)
+        cert = certificate.certify(a.pdf, getattr(a, "case", None), a.engine,
+                                   truth_text=truth_text,
+                                   truth_name=(getattr(a, "truth_name", None)
+                                               or (os.path.basename(a.truth) if truth_text is not None else None)))
     except (certificate.CertError, CaseError, LimitRefused) as exc:
         print(f"REFUSED — {exc}")
         return 2
@@ -76,7 +86,8 @@ def validate_command(a) -> int:
     # `--recheck` re-measures the file (tier-1 readers + every structural check); without it, a certificate
     # is checked against itself. The flag existed in the parser but was never passed here — a command that
     # re-validates without re-measuring is not the control its name promises.
-    problems = certificate.validate(a.cert, a.pdf, do_recheck=getattr(a, "recheck", False))
+    problems = certificate.validate(a.cert, a.pdf, do_recheck=getattr(a, "recheck", False),
+                                    truth_path=getattr(a, "truth", None))
     if problems:
         print("INVALID CERTIFICATE:\n  " + "\n  ".join(problems))
         return 1

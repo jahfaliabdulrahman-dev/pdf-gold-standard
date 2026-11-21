@@ -170,6 +170,21 @@ jobs:
           python3 conformance/tests/test_a3b_claim.py
           python3 conformance/tests/test_private_keys.py
 
+      - name: The checker — isolation, schema, thresholds, pages, privacy, reference and blind acceptance
+        run: |
+          # The checker is a thin layer over conformance/: these steps prove it defines no reader, no metric,
+          # no normalization and no second measurement path — and that the four planted files are high with
+          # their named signal while no clean file is (docs/checker-v0/).
+          python3 conformance/tests/test_declared.py
+          python3 arabic_pdf_check/tests/test_isolation.py
+          python3 arabic_pdf_check/tests/test_fonts.py
+          python3 arabic_pdf_check/tests/test_schema.py
+          python3 arabic_pdf_check/tests/test_thresholds.py
+          python3 arabic_pdf_check/tests/test_pages.py
+          python3 arabic_pdf_check/tests/test_privacy.py
+          python3 arabic_pdf_check/tests/test_reference.py
+          python3 arabic_pdf_check/tests/test_blind.py
+
       # The run's raw numbers are what a floors acceptance is made from: a version with no floors fails the
       # step above, and this artifact is the input to `conformance ratchet accept --from results.json`.
       - name: Upload the conformance run
