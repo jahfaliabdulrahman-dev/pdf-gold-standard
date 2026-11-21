@@ -128,6 +128,24 @@ def same_words(a: str, b: str) -> bool:
     return words_multi(a) == words_multi(b)
 
 
+def content_f1(a: str, b: str) -> float:
+    """F1 of the two word multisets under `_token` — order- and digit-reversal-blind.
+
+    `metrics.word_f1` is the product metric, and it keeps a token's characters as the reader returned them:
+    a reversed word and a reversed digit run are different tokens there, by design. This function exists for
+    ATTRIBUTION only: two readings that differ solely in order, or in a digit run whose reverse is present,
+    are not a content disagreement, and counting them as one would report the reader's own defect twice.
+    """
+    ca, cb = words_multi(a), words_multi(b)
+    if not ca and not cb:
+        return 1.0
+    overlap = sum((ca & cb).values())
+    if not overlap:
+        return 0.0
+    precision, recall = overlap / sum(ca.values()), overlap / sum(cb.values())
+    return 2 * precision * recall / (precision + recall)
+
+
 def layer_seq(text: str) -> list[str]:
     """The tokens of a LAYER text in reading order — a run stored in visual order is reversed as a sequence.
 
@@ -201,6 +219,115 @@ def a3b_target(producer: dict, pdf_path: str) -> str:
     return second
 
 
+def file_checks(pdf, pdf_path: str, scan: dict, producer: dict | None = None,
+                honour_second_file: bool = True) -> tuple[list[dict], Node | None]:
+    """The half of `evaluate` that needs only the file — and therefore also applies to a free text.
+
+    `pdf` is an OPEN pikepdf document (one parse per certificate), `scan` is `mcid_text.scan` of the same
+    file. Returns the checks and the structure tree (or None) so `evaluate` can continue with the case-only
+    checks without reading the tree twice. `evaluate` and the checker's reference mode both call THIS
+    function: a check that exists in two places can disagree with itself.
+
+    What is here: tagging, language, the house key, every-character-tagged, fonts drawn, .notdef,
+    invisible format characters, presentation forms, ToUnicode coverage, and the two numeral rules.
+    What is not: anything that compares the file to a document's expected text (headings, tables, block
+    order, outline, the case's font family) — those need a case and stay in `evaluate`.
+    """
+    checks: list[dict] = []
+
+    def add(cid: str, ok: bool | None, reason: str) -> None:
+        checks.append({"id": cid, "status": "na" if ok is None else ("pass" if ok else "fail"), "reason": reason})
+
+    # Joined with a NEWLINE: MCID boundaries are line/element boundaries, and gluing them with "" merges the
+    # last word of one element with the first of the next (measured: «ةمدقملوألا»). N collapses it to a space.
+    file_text = "\n".join(scan["text"].values())
+
+    mark = pdf.Root.get("/MarkInfo")
+    marked = bool(mark is not None and mark.get("/Marked") is True)
+    add("markinfo", marked, "/MarkInfo /Marked true" if marked else "no /MarkInfo with /Marked true")
+    lang = str(pdf.Root.get("/Lang", "")).strip("()")
+    add("lang", lang.lower().startswith("ar"), f"/Lang {lang!r}" if lang else "no /Lang")
+
+    # --- no house key in the delivered file ---------------------------------------------------------
+    # PDF/A does not forbid private data and no validator judges it (TechNote 0010, A009: Annex E is
+    # outside ISO 19005's scope), so a leaked `/PL*` key has to fail HERE — the gate that issues the
+    # certificate — not only in the document-specific gate. A file whose objects cannot be read is a
+    # FAIL, never a pass by default.
+    try:
+        keys = pdfops.private_keys(pdf)
+        if honour_second_file and (producer or {}).get("a3b_path"):
+            # A bake-off may judge the A-3b claim on a second file; the key rule follows the claim.
+            # An undeclared or missing second file is refused by the veraPDF check, by name.
+            try:
+                second = a3b_target(producer, pdf_path)
+            except ValueError:
+                second = None
+            if second and os.path.realpath(second) != os.path.realpath(pdf_path):
+                with pikepdf.open(second) as second_pdf:
+                    keys += [f"{os.path.basename(second)}: {k}" for k in pdfops.private_keys(second_pdf)]
+        add("private-keys", not keys, ", ".join(keys[:6]) or "no /PL* key in the object graph")
+    except Exception as exc:
+        add("private-keys", False, f"cannot read the objects: {exc}")
+
+    try:
+        tree = read_tree(pdf)
+    except ValueError as exc:
+        add("tagged", False, str(exc))
+        tree = None
+    else:
+        add("tagged", True, "structure tree present and readable")
+
+    # --- every character is tagged (no text outside any MCID) ---------------------------------------
+    untagged = {k: v for k, v in scan["text"].items() if k[1] < 0}
+    untagged_words = sum(len(metrics.N(v).split()) for v in untagged.values())
+    add("all-text-tagged", untagged_words == 0,
+        "every text show carries an MCID" if untagged_words == 0 else
+        f"{untagged_words} word(s) sit outside every marked-content sequence")
+
+    add("notdef", scan["notdef"] == 0,
+        "no glyph 0 drawn" if scan["notdef"] == 0 else f"{scan['notdef']} .notdef glyph(s) drawn")
+    invisible = sum(1 for ch in file_text if 0x200B <= ord(ch) <= 0x200D or ord(ch) == 0x2060)
+    add("invisible-format", invisible == 0,
+        "no invisible joiner in the text layer" if invisible == 0 else
+        f"{invisible} U+200B/200C/200D/2060 in the layer — the producer inserted them and a copy-paste "
+        f"carries them")
+    forms = sum(1 for ch in file_text
+                if 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF)
+    add("presentation-forms", forms == 0,
+        "no presentation form in the text layer" if forms == 0 else
+        f"{forms} presentation-form character(s) in the layer — a reader that trusts the CMap shows a glyph "
+        f"name, not a letter")
+    add("tounicode-coverage", _tu_gaps(scan) == 0,
+        "every drawn code has a Unicode value" if _tu_gaps(scan) == 0 else
+        f"{_tu_gaps(scan)} code(s) with no /ToUnicode entry (readers would invent U+<glyph id>)")
+
+    # --- numerals: one system per number, and never the Persian one ---------------------------------
+    # Owner decision (19 Nov 2026): Western digits default; Arabic-Indic (٠-٩) is an explicit per-document
+    # choice; identifiers stay Western. The gate can judge the two universal rules without knowing the
+    # choice: a Persian digit (۰-۹) is never an Arabic document's digit, and one number never mixes the
+    # systems. Separator STYLE (Arabic ٬/٫ vs ASCII ,/.) is not mixed here — the owner's decision names
+    # numerals and identifiers, not separators; the corpus case `num-ids-latn-in-arab` covers identifiers.
+    persian = persian_digits(file_text)
+    add("numerals-persian", bool(file_text) and not persian,
+        "no text layer to read" if not file_text else
+        ("no U+06F0–U+06F9 digit in the layer" if not persian else
+         f"{len(persian)} Persian digit(s) in the layer — an ar file uses ٠-٩ or 0-9, never ۰-۹"))
+    mixed = mixed_numbers(file_text)
+    add("numerals-mixed", bool(file_text) and not mixed,
+        "no text layer to read" if not file_text else
+        ("no number mixes digit systems" if not mixed else
+         f"{len(mixed)} number(s) mix digit systems: " + ", ".join(mixed[:4])))
+
+    # --- the declared model, read from the same open file (one parse per certificate) ---------------
+    if (producer or {}).get("postprocess"):
+        problems = pdfops.model_boundary(pdf)
+        add("model-boundary", not problems, "; ".join(problems[:3]) or "inside the declared model")
+    else:
+        add("model-boundary", None, "n/a — our post-processing did not run, and the boundary is its guard")
+
+    return checks, tree
+
+
 def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True,
              honour_second_file: bool = True) -> list[dict]:
     checks: list[dict] = []
@@ -209,53 +336,12 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         checks.append({"id": cid, "status": "na" if ok is None else ("pass" if ok else "fail"), "reason": reason})
 
     scan = mcid_text.scan(pdf_path)
-    # Joined with a NEWLINE: MCID boundaries are line/element boundaries, and gluing them with "" merges the
-    # last word of one element with the first of the next (measured: «ةمدقملوألا»). N collapses it to a space.
     file_text = "\n".join(scan["text"].values())
 
     with pikepdf.open(pdf_path) as pdf:
-        mark = pdf.Root.get("/MarkInfo")
-        marked = bool(mark is not None and mark.get("/Marked") is True)
-        add("markinfo", marked, "/MarkInfo /Marked true" if marked else "no /MarkInfo with /Marked true")
-        lang = str(pdf.Root.get("/Lang", "")).strip("()")
-        add("lang", lang.lower().startswith("ar"), f"/Lang {lang!r}" if lang else "no /Lang")
-
-        # --- no house key in the delivered file -----------------------------------------------------
-        # PDF/A does not forbid private data and no validator judges it (TechNote 0010, A009: Annex E is
-        # outside ISO 19005's scope), so a leaked `/PL*` key has to fail HERE — the gate that issues the
-        # certificate — not only in the document-specific gate. A file whose objects cannot be read is a
-        # FAIL, never a pass by default.
-        try:
-            keys = pdfops.private_keys(pdf)
-            if honour_second_file and (producer or {}).get("a3b_path"):
-                # A bake-off may judge the A-3b claim on a second file; the key rule follows the claim.
-                # An undeclared or missing second file is refused by the veraPDF check below, by name.
-                try:
-                    second = a3b_target(producer, pdf_path)
-                except ValueError:
-                    second = None
-                if second and os.path.realpath(second) != os.path.realpath(pdf_path):
-                    with pikepdf.open(second) as second_pdf:
-                        keys += [f"{os.path.basename(second)}: {k}" for k in pdfops.private_keys(second_pdf)]
-            add("private-keys", not keys, ", ".join(keys[:6]) or "no /PL* key in the object graph")
-        except Exception as exc:
-            add("private-keys", False, f"cannot read the objects: {exc}")
-
-        try:
-            tree = read_tree(pdf)
-        except ValueError as exc:
-            add("tagged", False, str(exc))
-            tree = None
-        else:
-            add("tagged", True, "structure tree present and readable")
+        file_part, tree = file_checks(pdf, pdf_path, scan, producer, honour_second_file)
+        checks.extend(file_part)
         nodes = list(tree.walk()) if tree is not None else []
-
-        # --- every character is tagged (no text outside any MCID) -----------------------------------
-        untagged = {k: v for k, v in scan["text"].items() if k[1] < 0}
-        untagged_words = sum(len(metrics.N(v).split()) for v in untagged.values())
-        add("all-text-tagged", untagged_words == 0,
-            "every text show carries an MCID" if untagged_words == 0 else
-            f"{untagged_words} word(s) sit outside every marked-content sequence")
 
         # --- the tagged words are the case's words (attribution, not order) -------------------------
         want_text = _truth_text(case)
@@ -331,39 +417,6 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
                                  f"fallback")
         add("fonts", not bad_fonts, "; ".join(sorted(set(bad_fonts))[:4]) or
             f"{len(scan['fonts'])} font(s) used for text, all embedded with /ToUnicode")
-        add("notdef", scan["notdef"] == 0,
-            "no glyph 0 drawn" if scan["notdef"] == 0 else f"{scan['notdef']} .notdef glyph(s) drawn")
-        invisible = sum(1 for ch in file_text if 0x200B <= ord(ch) <= 0x200D or ord(ch) == 0x2060)
-        add("invisible-format", invisible == 0,
-            "no invisible joiner in the text layer" if invisible == 0 else
-            f"{invisible} U+200B/200C/200D/2060 in the layer — the producer inserted them and a copy-paste "
-            f"carries them")
-        forms = sum(1 for ch in file_text
-                    if 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF)
-        add("presentation-forms", forms == 0,
-            "no presentation form in the text layer" if forms == 0 else
-            f"{forms} presentation-form character(s) in the layer — a reader that trusts the CMap shows a glyph "
-            f"name, not a letter")
-        add("tounicode-coverage", _tu_gaps(scan) == 0,
-            "every drawn code has a Unicode value" if _tu_gaps(scan) == 0 else
-            f"{_tu_gaps(scan)} code(s) with no /ToUnicode entry (readers would invent U+<glyph id>)")
-
-        # --- numerals: one system per number, and never the Persian one ------------------------------
-        # Owner decision (19 Nov 2026): Western digits default; Arabic-Indic (٠-٩) is an explicit per-document
-        # choice; identifiers stay Western. The gate can judge the two universal rules without knowing the
-        # choice: a Persian digit (۰-۹) is never an Arabic document's digit, and one number never mixes the
-        # systems. Separator STYLE (Arabic ٬/٫ vs ASCII ,/.) is not mixed here — the owner's decision names
-        # numerals and identifiers, not separators; the corpus case `num-ids-latn-in-arab` covers identifiers.
-        persian = [ch for ch in file_text if 0x06F0 <= ord(ch) <= 0x06F9]
-        add("numerals-persian", bool(file_text) and not persian,
-            "no text layer to read" if not file_text else
-            ("no U+06F0–U+06F9 digit in the layer" if not persian else
-             f"{len(persian)} Persian digit(s) in the layer — an ar file uses ٠-٩ or 0-9, never ۰-۹"))
-        mixed = mixed_numbers(file_text)
-        add("numerals-mixed", bool(file_text) and not mixed,
-            "no text layer to read" if not file_text else
-            ("no number mixes digit systems" if not mixed else
-             f"{len(mixed)} number(s) mix digit systems: " + ", ".join(mixed[:4])))
 
         # --- the outline says what the headings say -------------------------------------------------
         import pymupdf
@@ -378,17 +431,10 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         add("outline", ok_toc, f"{len(toc)} entr(y/ies)" + ("" if ok_toc else
             f" — the case declares {[(l, t[:16]) for l, t in want_toc]}"))
 
-        # --- the declared model, read from the same open file (one parse per certificate) ------------
-        if producer.get("postprocess"):
-            problems = pdfops.model_boundary(pdf)
-            add("model-boundary", not problems, "; ".join(problems[:3]) or "inside the declared model")
-        else:
-            add("model-boundary", None, "n/a — our post-processing did not run, and the boundary is its guard")
-
     if run_verapdf:
         # A CERTIFICATE judges the file it names: `certificate.py` passes honour_second_file=False, so the A-3b
         # claim can never be satisfied by a different document than the certified one.
-        a3b_path = a3b_target(producer, pdf_path) if honour_second_file else pdf_path
+        a3b_path = a3b_target(producer or {}, pdf_path) if honour_second_file else pdf_path
         for flavour, cid in (("ua1", "verapdf-ua1"), ("3b", "verapdf-pdfa3b")):
             target = a3b_path if flavour == "3b" else pdf_path
             try:
@@ -462,3 +508,12 @@ def mixed_numbers(text: str) -> list[str]:
         if len(systems) > 1:
             out.append(m.group())
     return out
+
+
+def persian_digits(text: str) -> list[str]:
+    """The Persian digits (U+06F0–U+06F9) in a text.
+
+    One rule, one function: the gate (`evaluate`), the checker's blind mode and any future consumer read the
+    same predicate, so a document cannot pass one and fail the other on the same characters.
+    """
+    return [ch for ch in (text or "") if 0x06F0 <= ord(ch) <= 0x06F9]

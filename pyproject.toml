@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arabic-pdf-check"
+version = "0.1.0"
+description = "Where does Arabic copy-paste break in a PDF, and in which reader? A thin layer over conformance/."
+readme = "arabic_pdf_check/README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+# The dependency list is requirements.txt, one file, the one CI installs. This table stays empty on purpose:
+# a second list would be a second truth about what the tool runs on.
+dependencies = []
+
+[project.scripts]
+arabic-pdf-check = "arabic_pdf_check.cli:main"
+
+[tool.setuptools]
+# `conformance.mcid_text` imports `scripts/fix_text_layer.py` through sys.path, and `conformance.checks.structure`
+# imports `pdfops` from the repository root: the tool runs from a CHECKOUT (`pip install -e .`), which is what
+# the README documents. A wheel from this tree would need those two paths re-thought — out of scope for v0.
+py-modules = ["pdfops"]
+
+[tool.setuptools.packages.find]
+include = ["arabic_pdf_check*", "conformance*"]
+
+[tool.setuptools.package-data]
+arabic_pdf_check = ["thresholds.json", "schema/*.json"]
+conformance = ["ratchet.json", "corpus/MANIFEST.json", "corpus/cases/*.json", "schema/*.json",
+               "readers/*.json"]

@@ -1,0 +1,73 @@
+{
+  "schema_version": "arabic-pdf-check-thresholds/1",
+  "command": "python3 scripts/checker_measure.py --out docs/checker-v0/measurements",
+  "measured_at": "2026-11-21T20:40:55Z",
+  "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
+  "values": {
+    "presentation_forms": {
+      "value": 0.02,
+      "declared": 0.02,
+      "source": "arafix DEFAULT_THRESHOLDS[\"presentation_forms\"] (MIT)"
+    },
+    "visual_order": {
+      "value": 0.3,
+      "declared": 0.3,
+      "source": "arafix DEFAULT_THRESHOLDS[\"visual_order\"] (MIT)"
+    },
+    "visual_order_majority": {
+      "value": 0.5,
+      "declared": 0.5,
+      "source": "more than half of the available readers: the cause of a file-wide orientation is a majority, not one reader"
+    },
+    "min_arabic_chars": {
+      "value": 8,
+      "declared": 8,
+      "source": "arafix DEFAULT_THRESHOLDS[\"min_arabic_chars\"] (MIT) — below it the orientation is not judged"
+    },
+    "tounicode_gap_ratio": {
+      "value": 0.01,
+      "declared": 0.01,
+      "source": "declared policy: one unmapped drawn code in a hundred is a high risk; the clean set measures 0, so value = max(0.01, clean maximum)"
+    }
+  },
+  "observed": {
+    "clean_max_presentation_forms": 0.0,
+    "clean_max_visual_share": 0.2,
+    "clean_max_gap_ratio": 0.0,
+    "clean_min_pair_f1": 0.0,
+    "clean_files": 70,
+    "refused": {
+      "reader-disagreement-metric": "content_f1 reaches 0.000 between clean readers (single-word and digit-only cases): any threshold above zero misses, and a threshold at zero fires on clean files — no value separates, so the metric form is not shipped; the page-empty form is deterministic and ships"
+    },
+    "planted": {
+      "planted-mupdf-logical": {
+        "forms": 0,
+        "arabic": 44,
+        "visual_share": 0.8,
+        "pair_min": 0.6667,
+        "missing_unicode": 0
+      },
+      "planted-chrome-raw": {
+        "forms": 39,
+        "arabic": 17,
+        "visual_share": 0.2,
+        "pair_min": 0.4,
+        "missing_unicode": 0
+      },
+      "planted-presentation-forms": {
+        "forms": 40,
+        "arabic": 4,
+        "visual_share": 0.8,
+        "pair_min": 0.5556,
+        "missing_unicode": 0
+      },
+      "planted-no-tounicode": {
+        "forms": 0,
+        "arabic": 0,
+        "visual_share": 0.2,
+        "pair_min": 0.0,
+        "missing_unicode": 128
+      }
+    }
+  }
+}

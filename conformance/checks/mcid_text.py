@@ -63,19 +63,41 @@ class _Font:
             except Exception:
                 self.map = {}
 
-    def decode(self, raw: bytes) -> tuple[str, int, int]:
-        """(text, notdef_codes, codes_without_a_unicode_value). A code with no entry decodes to '' and is
-        never invented — the count is what the font check reports."""
+    def decode(self, raw: bytes) -> tuple[str, dict]:
+        """(text, counts) — `counts` is per DRAWING of this string, keyed for aggregation.
+
+        A code with no entry decodes to '' and is never invented — the count is what the font check
+        reports. The mapped value is inspected character by character: a valid CMap can still map a code to
+        the private use area (a glyph name, not a letter), to U+FFFD, to U+0000 (Matterhorn 31-028) or to
+        U+FEFF/U+FFFE (31-029), and the reader then shows exactly that. Counting them here is the only place
+        that sees the mapping itself rather than a reader's interpretation of it.
+        """
         width = 2 if self.two_byte else 1
-        out, notdef, missing = [], 0, 0
+        out = []
+        counts = {"codes": 0, "notdef": 0, "missing_unicode": 0, "pua": 0, "replacement": 0,
+                  "zero_value": 0, "bom": 0}
         for i in range(0, len(raw) - width + 1, width):
             code = int.from_bytes(raw[i:i + width], "big")
+            counts["codes"] += 1
             if code == 0:
-                notdef += 1
-            elif code not in self.map:
-                missing += 1
-            out.append(self.map.get(code, ""))
-        return "".join(out), notdef, missing
+                counts["notdef"] += 1
+                continue
+            if code not in self.map:
+                counts["missing_unicode"] += 1
+                continue
+            value = self.map[code]
+            out.append(value)
+            for ch in value:
+                cp = ord(ch)
+                if 0xE000 <= cp <= 0xF8FF:
+                    counts["pua"] += 1
+                elif cp == 0xFFFD:
+                    counts["replacement"] += 1
+                elif cp == 0:
+                    counts["zero_value"] += 1
+                elif cp in (0xFEFF, 0xFFFE):
+                    counts["bom"] += 1
+        return "".join(out), counts
 
 
 def _string_bytes(obj) -> bytes:
@@ -138,15 +160,22 @@ def _walk(instructions, resources, page_no, out: dict, stats: dict, depth=0, pro
             for o in (items if op == "TJ" else operands[:1]):
                 if type(o).__name__ in ("int", "float"):
                     continue
-                text, notdef, missing = font.decode(_string_bytes(o))
-                if text or notdef or missing:
+                text, counts = font.decode(_string_bytes(o))
+                if counts["codes"]:
                     out.setdefault(key, []).append(text)
-                    stats["notdef"] += notdef
-                    stats["missing_unicode"] += missing
-                    stats["codes"] += len(text) + notdef + missing
-                    stats["fonts"][font.name] = {"family": font.family, "subtype": font.subtype,
-                                                 "embedded": font.embedded,
-                                                 "tounicode": font.has_tounicode}
+                    for k in ("notdef", "missing_unicode", "pua", "replacement", "zero_value", "bom", "codes"):
+                        stats[k] += counts[k]
+                    # Keyed by resource name AND family: two pages can both name their font «/F1» while one
+                    # of them carries a different program, and a merged row would hide the broken one.
+                    fkey = f"{font.name}|{font.family or font.subtype}"
+                    row = stats["fonts"].setdefault(fkey, {
+                        "name": font.name, "family": font.family, "subtype": font.subtype,
+                        "embedded": font.embedded, "tounicode": font.has_tounicode,
+                        "two_byte": font.two_byte, "codes": 0, "notdef": 0, "missing_unicode": 0,
+                        "pua": 0, "replacement": 0, "zero_value": 0, "bom": 0,
+                    })
+                    for k in ("codes", "notdef", "missing_unicode", "pua", "replacement", "zero_value", "bom"):
+                        row[k] += counts[k]
         elif op == "Do" and operands and depth < 4:
             try:
                 xo = (resources or {}).get("/XObject", {}).get(str(operands[0]))
@@ -168,9 +197,15 @@ def _walk(instructions, resources, page_no, out: dict, stats: dict, depth=0, pro
 
 
 def scan(pdf_path: str) -> dict:
-    """{'text': {(page, mcid): str}, 'fonts': {...}, 'notdef': n, 'codes': n} for one file."""
+    """{'text': {(page, mcid): str}, 'fonts': {key: row}, 'notdef', 'missing_unicode', 'pua',
+    'replacement', 'zero_value', 'bom', 'codes'} for one file.
+
+    The per-font rows are the numbers the checker reports: a composite font that draws codes its ToUnicode
+    does not name is the failure ISO 32000-1 §14.8.2.4.2 forbids, and it is invisible in a merged total.
+    """
     out: dict = {}
-    stats = {"notdef": 0, "missing_unicode": 0, "codes": 0, "fonts": {}}
+    stats = {"notdef": 0, "missing_unicode": 0, "codes": 0, "pua": 0, "replacement": 0,
+             "zero_value": 0, "bom": 0, "fonts": {}}
     with pikepdf.open(pdf_path) as pdf:
         for page_no, page in enumerate(pdf.pages, 1):
             try:

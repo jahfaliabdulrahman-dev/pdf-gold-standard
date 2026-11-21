@@ -12,3 +12,7 @@ fonttools==4.68.0
 pdfplumber==0.11.10
 pdfminer.six==20260107
 jsonschema==4.26.0
+# arabic-pdf-check's orientation detector: MIT, zero runtime dependencies (the core ships a stdlib-only word
+# list), measured on the fixtures and the corpus before adoption (docs/checker-v0/00-sources.md §3).
+# A second detector written inside the checker would be a second metric that can drift from the measured one.
+arafix==1.2.0
