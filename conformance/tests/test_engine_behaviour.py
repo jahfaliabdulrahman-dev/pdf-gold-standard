@@ -144,6 +144,31 @@ def main() -> int:
         check("empty-cell:all-text-tagged", checks["all-text-tagged"]["status"] == "pass",
               checks["all-text-tagged"]["reason"])
 
+    # --- inline content never takes a line of its own (review P2, 2026-11-21) -------------------------
+    # The producer may not change the document's design to pass a metric: a paragraph/list/cell keeps the lines
+    # its text draws, and `_inline` must not add `<br>` or `display:block`. The mutation below re-adds a break
+    # and the same guard must catch it.
+    inline_texts = []
+    for case in corpus.values():
+        for block in case["blocks"]:
+            if block["type"] in ("paragraph", "heading"):
+                inline_texts.append(block["text"])
+            elif block["type"] == "list":
+                inline_texts.extend(block["items"])
+            elif block["type"] == "table":
+                header = block["header"]
+                rows = [header] if header and not isinstance(header[0], list) else list(header)
+                for row in rows + block["rows"]:
+                    inline_texts.extend(row)
+
+    def layout_breaks(fn) -> list[str]:
+        return [t for t in inline_texts if "<br" in fn(t) or "display:block" in fn(t)]
+
+    ok = not layout_breaks(html._inline)
+    check("layout:no-break", ok, "" if ok else str(layout_breaks(html._inline)[:3]))
+    ok = bool(layout_breaks(lambda t: html._inline(t) + "<br>"))
+    check("layout:mutation-caught", ok, "" if ok else "the guard did not catch a re-added break")
+
     print(f"\nDECLARED BEHAVIOURS: {len(html.ENGINE_BEHAVIOURS)}")
     if FAILED:
         print("TEST FAILED —", FAILED)
