@@ -573,6 +573,21 @@
       "skeleton_exact": 0.0,
       "word_f1": 0.625
      },
+     "num-invoice-kv-table": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.352941,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.387097
+     },
      "num-invoice-latn": {
       "defects": {
        "bidi": 0,
@@ -1555,6 +1570,21 @@
       "order": 1.0,
       "skeleton_exact": 1.0,
       "word_f1": 1.0
+     },
+     "num-invoice-kv-table": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.941176,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.941176
      },
      "num-invoice-latn": {
       "defects": {
@@ -2539,6 +2569,21 @@
       "skeleton_exact": 0.0,
       "word_f1": 0.6
      },
+     "num-invoice-kv-table": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.647059,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.789474
+     },
      "num-invoice-latn": {
       "defects": {
        "bidi": 0,
@@ -3517,6 +3562,21 @@
       "order": 0.75,
       "skeleton_exact": 0.0,
       "word_f1": 0.777778
+     },
+     "num-invoice-kv-table": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 1.0,
+      "order": 1.0,
+      "skeleton_exact": 1.0,
+      "word_f1": 1.0
      },
      "num-invoice-latn": {
       "defects": {
@@ -4501,6 +4561,21 @@
       "skeleton_exact": 0.0,
       "word_f1": 0.25
      },
+     "num-invoice-kv-table": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.294118,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.294118
+     },
      "num-invoice-latn": {
       "defects": {
        "bidi": 0,
@@ -5483,6 +5558,21 @@
       "order": 0.75,
       "skeleton_exact": 0.0,
       "word_f1": 0.75
+     },
+     "num-invoice-kv-table": {
+      "defects": {
+       "bidi": 0,
+       "presentation_forms": 0,
+       "pua": 0,
+       "replacement": 0,
+       "tatweel_excess": 0,
+       "zero_width": 0
+      },
+      "digit_runs": 1.0,
+      "exact": 0.0,
+      "order": 0.764706,
+      "skeleton_exact": 0.0,
+      "word_f1": 0.764706
      },
      "num-invoice-latn": {
       "defects": {
