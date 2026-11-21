@@ -80,7 +80,10 @@ def raw(path: str) -> dict:
     values = json.load(open(THRESHOLDS, encoding="utf-8"))["values"]
     orders = blind.visual_orders(texts, values)
     pairs = [content_f1(texts[a], texts[b]) for a, b in itertools.combinations(sorted(texts), 2)]
-    gap_max = max((v["gap_ratio"] for v in structure.font_verdicts(scan, 1.0)), default=0.0)
+    # Only fonts that HAVE a /ToUnicode map can have a gap in it: a simple font with no map is allowed by
+    # Matterhorn 31-027 and `font_verdicts` gives it level None — counting its gap_ratio (1.0) would derive
+    # a threshold from a non-defect.
+    gap_max = max((v["gap_ratio"] for v in structure.font_verdicts(scan, 1.0) if v["tounicode"]), default=0.0)
     empty_pages = {n: v for n, v in blind.empty_pages_for(pages, list(ok)).items() if v}
     return {
         "pf_ratio": metrics.pf_share(file_text),
@@ -187,14 +190,15 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
         elif expected == "tounicode-gaps" and row["missing_unicode"] <= 0:
             failures.append(f"{name}: ToUnicode gaps are not positive")
     th["measured_at"] = _now()
-    th["command"] = "python3 scripts/checker_measure.py --out docs/checker-v0/measurements"
     return th, failures
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out", default=OUT)
+    ap.add_argument("--out", default=None,
+                    help="where the measurement artifacts go (default: a fresh directory under /tmp; "
+                         "docs/checker-v0/measurements is never written unless named)")
     ap.add_argument("--owner-dir", default=OWNER_DIR)
     ap.add_argument("--skip-owner", action="store_true")
     ap.add_argument("--write", action="store_true",
@@ -202,6 +206,9 @@ def main() -> int:
     ap.add_argument("--owner-only", action="store_true",
                     help="measure only the owner's corpus against the committed thresholds")
     a = ap.parse_args()
+    if a.out is None:
+        a.out = tempfile.mkdtemp(prefix="checker-measure-")
+        print(f"out: {a.out} (pass --out to choose; the repository is not written by default)")
     os.makedirs(a.out, exist_ok=True)
 
     if a.owner_only:
@@ -234,17 +241,11 @@ def main() -> int:
     with open(THRESHOLDS, encoding="utf-8") as fh:
         base = json.load(fh)
     derived, failures = derive(clean_rows, planted_raw, base)
-    derived["command"] = (f"python3 scripts/checker_measure.py" + (" --write" if a.write else "")
-                          + (" --skip-owner" if a.skip_owner else ""))
+    derived["command"] = "python3 " + " ".join([os.path.relpath(__file__, REPO)] + sys.argv[1:])
     if derived["values"] != base["values"] and not a.write:
         print("THRESHOLDS DIFFER — the measurement does not match the shipped manifest; "
               "review it, then re-run with --write")
         return 1
-    if a.write:
-        with open(THRESHOLDS, "w", encoding="utf-8") as fh:
-            json.dump(derived, fh, ensure_ascii=False, indent=2)
-            fh.write("\n")
-        print(f"written: {THRESHOLDS}")
     print("   " + json.dumps(derived["observed"], ensure_ascii=False)[:400])
 
     print("== acceptance: the four planted files")
@@ -311,6 +312,12 @@ def main() -> int:
     if high_files:
         print(f"CLEAN FILE ALARMS: {len(high_files)} — " + ", ".join(r["label"] for r in high_files[:5]))
         return 1
+    # The manifest is written only after every gate passed: a failing run must not replace the shipped file.
+    if a.write:
+        with open(THRESHOLDS, "w", encoding="utf-8") as fh:
+            json.dump(derived, fh, ensure_ascii=False, indent=2)
+            fh.write("\n")
+        print(f"written: {THRESHOLDS}")
     print("MEASUREMENT COMPLETE — every planted file is high with its named signal; no clean file is high")
     return 0
 

@@ -26,13 +26,15 @@ def file_block(scan: dict) -> dict:
             "untagged_chars": len("".join(v for k, v in scan["text"].items() if k[1] < 0))}
 
 
-def measure_readings(scan: dict, readings: dict, truth_text: str, missing: dict) -> dict:
+def measure_readings(scan: dict, readings: dict, truth_text: str) -> dict:
     """The single per-reader loop: metrics, limits applied, limits refused.
 
     `readings` is `{reader_name: extracted_text}` for ONE file — batched by the caller when it measures many
     files. `truth_text` is REQUIRED: a measurement without a truth is `exact 0` by construction, and a
     function that silently produced that would be a trap for the next caller.
     """
+    if not isinstance(truth_text, str):
+        raise TypeError("measure_readings needs the truth text (str); measuring without it is not a comparison")
     from .readers import limitations, load
 
     block = {}
@@ -64,7 +66,8 @@ def as_results(block: dict) -> dict:
     return {name: {"version": b["version"],
                    "metrics": {m: b[m] for m in metrics.METRICS},
                    "defects": b["defects"],
-                   "limitations_applied": b["limitations_applied"]}
+                   "limitations_applied": b["limitations_applied"],
+                   "limitations_refused": b.get("limitations_refused", [])}
             for name, b in block.items()}
 
 
@@ -77,7 +80,9 @@ def mismatch_examples(truth_text: str, reading: str, limit: int = 5) -> list[dic
     want = set(metrics.N(truth_text).split())
     out = []
     for raw in (reading or "").splitlines():
-        line = " ".join((raw or "").split())
+        # Normalize THE LINE, not the whole reading: N also folds newlines into spaces, and a reading
+        # normalized whole would collapse every line into one 80-character excerpt.
+        line = " ".join(metrics.N(raw).split())
         if not line:
             continue
         if [w for w in line.split() if w not in want]:
@@ -108,7 +113,7 @@ def measure_text(pdf_path: str, truth_text: str, reader_names=None) -> dict:
 
     scan = mcid_text.scan(pdf_path)
     readings = {name: text_many(name, [pdf_path])[0] for name in ok}
-    return {"readers": measure_readings(scan, readings, truth_text, missing),
+    return {"readers": measure_readings(scan, readings, truth_text),
             "readings": readings, "missing": missing, "file": file_block(scan), "scan": scan}
 
 

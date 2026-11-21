@@ -92,6 +92,17 @@ check("v2-readers-carry-evidence",
       all({"confidence", "examples"} <= set(r) for r in cert["readers"].values()),
       str({n: sorted(set(r) - {"confidence", "examples"}) for n, r in cert["readers"].items()}))
 
+# A NEW-shape certificate (text_sha256) without per-reader evidence is refused by `validate`, although the
+# schema alone would accept it (old certificates must keep validating; new ones must carry the evidence).
+doctored = json.loads(json.dumps(cert))
+first = next(iter(doctored["readers"]))
+doctored["readers"][first].pop("confidence")
+doctored_path = os.path.join(tmp, "no-evidence.json")
+with open(doctored_path, "w", encoding="utf-8") as fh:
+    json.dump(doctored, fh, ensure_ascii=False)
+problems = certificate.validate(doctored_path, PDF)
+check("v2-validate-requires-evidence", any("confidence" in p for p in problems), "; ".join(problems[:3]))
+
 # ---- a BOM in the customer's truth file is a byte-order mark, not the first character of the text
 bom_truth = os.path.join(tmp, "bom.txt")
 with open(bom_truth, "w", encoding="utf-8-sig") as fh:

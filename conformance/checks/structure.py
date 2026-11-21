@@ -440,15 +440,18 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             return "".join(ch for ch in (x or "").lower() if ch.isalnum())
 
         allowed = {norm(declared), norm(fonts.FONTS["riyal"]["family"])}
+        verdicts = {v["key"]: v for v in font_verdicts(scan, 0.0)}
         bad_fonts = []
         for name, info in scan["fonts"].items():
             if not info["embedded"]:
                 bad_fonts.append(f"{info['family'] or name}: not embedded")
-            # The Matterhorn 31-027 exception, in ONE place for the gate too: a simple font without
-            # /ToUnicode is allowed when its encoding or glyph names carry the mapping (font_verdicts owns
-            # the rule); a composite font with no /ToUnicode is a failure.
-            if not info["tounicode"] and info["two_byte"]:
-                bad_fonts.append(f"{info['family'] or name}: composite font with no /ToUnicode")
+            # The Matterhorn 31-027 exception is OWNED by font_verdicts: a simple font with no /ToUnicode is
+            # level None there and passes here; a composite one, or a map with gaps, is high and fails. The
+            # gate consumes that verdict instead of restating the rule.
+            v = verdicts.get(name) or {}
+            tu = [p for p in v.get("problems", []) if "ToUnicode" in p or "Unicode value" in p]
+            if v.get("level") == "high" and tu:
+                bad_fonts.append(f"{info['family'] or name}: {tu[0]}")
             if not any(norm(info["family"]).startswith(a) for a in allowed if a):
                 bad_fonts.append(f"{info['family'] or name}: not the case's font ({declared}) nor the declared "
                                  f"fallback")
