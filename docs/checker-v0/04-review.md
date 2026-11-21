@@ -53,3 +53,32 @@
 - **خلاف القرّاء بمقارنة السطر:** رُفض الشكل المتري بقياس (`clean_min_pair_f1 = 0.0`)، والشكل الحتمي
   مشحون. ينتظر حالة موجبة من المالك أو قبول الشكل الحتمي (`03-implementation.md §4`).
 - **رقم الصفحة في أمثلة الشهادة المرجعية:** `page: null` بإعلان؛ التقرير الأعمى يعطي الصفحة.
+
+## الجولة الثانية — تدقيق الإصلاح (على `1ea3335`)
+
+ثلاثة مقاعد، نفس التكليف: «هل أُصلحت ملاحظاتك، وهل أدخل الإصلاح عيبًا؟». الأحكام الثلاثة:
+**REQUEST CHANGES** — كلها بسبب ملاحظة واحدة مشتركة (انحدار شكل نتائج `runner`) وملاحظات إضافية، وكلها
+أُصلحت ثم أُثبتت بتشغيل حيّ:
+
+| الملاحظة | الحكم في الجولة ٢ | ما فعلته |
+|---|---|---|
+| Standards S2 | OPEN — `certificate.validate` يقرأ النصّ بـ`utf-8` | `utf-8-sig` في المسار الثالث أيضًا (`certificate.py`)، فلا يبقى مسار يقرأ نصًّا بلا BOM. |
+| Standards S6 | OPEN — CI يسقط قبل خطوة القياس بسبب الانحدار | الانحدار أُصلح، والتشغيل الحيّ `conformance run --ratchet` أعاد **RATCHET HELD** (66 حالة × 5 قرّاء). |
+| Standards N1 (P0) | `KeyError: 'metrics'` في `runner.summarize`/`ratchet` | `reference.as_results()` يعيد الشكل المنشور؛ اختبار `results-shape-summarize` يمرّر ناتج المحوّل نفسه إلى `runner.summarize`. |
+| Standards N2 | لا اختبار يلمس `summarize` | أُضيف أعلاه؛ `test_ratchet` كان يبني الشكل بيده. |
+| Standards N3 | القياس يكتب العتبات دائمًا وأمره كاذب | `--write` صريح؛ بلا `--write` يقارن ويفشل؛ `command` يُبنى من `argv` الفعلي. |
+| Standards N4–N7 | معامل `missing` ميت، `version_mismatch` بلا مستهلك، `min_arabic_chars` لا يحكم الاتجاه، تناقض نصّ `test_pages` | حُذف المعامل؛ `version_mismatch` يُطبع في بيان السلوك؛ العتبة تُمرَّر كاملة إلى arafix؛ نصّ `test_pages` وضابط الفرع. |
+| Structure ST-1 | OPEN — `recheck` يمسح الملف مرتين | `evaluate(scan=measured["scan"])` في `recheck` أيضًا. |
+| Structure ST-2 | OPEN — نسبة الثغرة والأغلبية منسوختان | `font_verdicts` لنسبة الثغرة، و`blind.majority_needed()` للأغلبية، ومقام `visual_share` صار `MATRIX`. |
+| Structure N2 (P2) | تغيير عقد `certificate/2` بلا رفع إصدار | المخطط صار يقبل `sha256` القديم و`text_sha256` الجديد، و`confidence/examples/missing_readers` اختيارية؛ شهادة قديمة تجتاز. |
+| Structure N3 | «أعلى خطر لدى قارئ» = `risk.level` (يشمل إشارات الملف) | السطر يحسب `max(reader_levels)` منفصلًا في CLI وMarkdown. |
+| Structure N4 | قاعدة ToUnicode اثنتان (فحص `fonts` يفشل كل خط بلا خريطة) | فحص `fonts` يطبق استثناء 31-027 نفسه (خط بسيط بلا خريطة يمرّ). |
+| Structure N5–N9 | تكرار النسبة/الأغلبية، قراءتان للنصّ، أمثلة على `exact=1`، ضابط عتبات نصّي، `truth=None` فخّ | أُصلحت جميعًا؛ أُضيف ضابط سلوكي (رفع عتبة يُخفي الإشارة) و`N` في الأمثلة وإلزام النصّ. |
+| Spec P1-2 | OPEN — CLI يطبع `risk.level` | CLI وMarkdown: «حكم الملف» ثم «أعلى خطر لدى قارئ» (المحسوب من القرّاء). |
+| Spec P1-6 | OPEN — الحارس قائمة أسماء و`pf_*` محلية | `pf_count/arabic_count/pf_share` انتقلت إلى `conformance.checks.metrics`؛ الفاحص يستوردها. |
+| Spec N1 (P1) | القياس يعتمد على مقياس يملكه الفاحص | صار يعتمد على `metrics` فقط. |
+| Spec N3 | الشهادة لا تسمّي الغائب غير tier-1 | `missing_readers` في `certificate/2` وMarkdown. |
+| Spec N5 | Markdown الشهادة بلا ثقة/أمثلة، والثقة ثابتة | الثقة تُشتق من الحكم (حاسم vs جزئي)، والأمثلة تُعرض. |
+
+**بقيت قرارات مالك، لا ملاحظات مفتوحة:** شكل خلاف القرّاء (متري مرفوض بالقياس) · `no-text-layer` كإشارة
+سابعة · رقم الصفحة `null` في أمثلة النصّ الحرّ.

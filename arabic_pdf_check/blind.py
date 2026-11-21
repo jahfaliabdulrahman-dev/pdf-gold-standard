@@ -21,40 +21,24 @@ import os
 from conformance import certificate as cert_mod
 from conformance import reference
 from conformance.checks import mcid_text, metrics, structure, visual_order
+from conformance.checks.metrics import arabic_count, pf_count, pf_share
 from conformance.readers import MATRIX, available, declared, limitations, pages_many, text_many
 
 LEVELS = {"low": 0, "medium": 1, "high": 2}
 CONFIDENCE = {"low": 0, "medium": 1, "high": 2}
-_PF = metrics.PRESENTATION_FORM
-ARABIC = structure.ARABIC
+ARABIC = metrics.ARABIC
 
 
-def _is_pf(ch: str) -> bool:
-    cp = ord(ch)
-    return _PF[0] <= cp <= _PF[1] or _PF[2] <= cp <= _PF[3]
-
-
-def pf_count(text: str) -> int:
-    return sum(1 for ch in (text or "") if _is_pf(ch))
-
-
-def arabic_count(text: str) -> int:
-    return len(ARABIC.findall(text or ""))
-
-
-def pf_share(text: str) -> float:
-    """Presentation forms as a share of the Arabic characters that could be base letters.
-
-    One definition, used by the report and by the measurement that derives the threshold: a second copy in
-    the measurement script is how a threshold ends up derived from a rule the report does not use.
-    """
-    arabic, forms = arabic_count(text), pf_count(text)
-    return forms / (arabic + forms) if (arabic + forms) else 0.0
+def majority_needed() -> int:
+    """The declared matrix's majority (3 of 5) — a structural rule, not a measured threshold."""
+    return len(MATRIX) // 2 + 1
 
 
 def visual_orders(texts: dict, th: dict) -> dict:
-    """arafix's diagnosis per reader, with the manifest's orientation threshold PASSED (not assumed)."""
-    thresholds = {"visual_order": th["visual_order"]["value"]}
+    """arafix's diagnosis per reader, with the manifest's thresholds PASSED (not assumed)."""
+    thresholds = {"visual_order": th["visual_order"]["value"],
+                  "presentation_forms": th["presentation_forms"]["value"],
+                  "min_arabic_chars": th["min_arabic_chars"]["value"]}
     return {name: visual_order.inspect(text, thresholds) for name, text in texts.items()}
 
 
@@ -204,7 +188,7 @@ def check(pdf_path: str, thresholds: dict) -> dict:
     visual_readers = [n for n, o in orders.items() if o["visual"]]
     # The denominator is the DECLARED matrix, not the readers that happened to run: a machine without PDFKit
     # must not give the same file a different file-level verdict. The majority is half the matrix, plus one.
-    need = len(MATRIX) // 2 + 1
+    need = majority_needed()
     visual_cause = "file" if len(visual_readers) >= need else "reader"
     if visual_cause == "file":
         conf = min(("high" if (o["confidence"] or 0) >= 0.9 else
@@ -282,10 +266,12 @@ def check(pdf_path: str, thresholds: dict) -> dict:
                                  "statement": why, "applies": False})
         held, refused_d, _ = declared.usable(name, version)
         for entry in held:
+            note = (f" (declared on {entry['reader_version_measured']}, live {entry['reader_version_now']})"
+                    if entry["version_mismatch"] else "")
             known_limits.append({"id": entry["id"], "reader": name, "kind": "behaviour",
                                  "version": entry["reader_version_now"],
                                  "measured_on": entry["reader_version_measured"],
-                                 "statement": entry["claim"],
+                                 "statement": entry["claim"] + note,
                                  "applies": True})
         for why in refused_d:
             known_limits.append({"id": why.split(":")[0], "reader": name, "kind": "behaviour-refused",

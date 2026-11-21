@@ -190,9 +190,7 @@
           "skeleton_exact",
           "defects",
           "limitations_applied",
-          "ratcheted",
-          "confidence",
-          "examples"
+          "ratcheted"
         ],
         "properties": {
           "version": {
@@ -433,7 +431,6 @@
           "additionalProperties": false,
           "required": [
             "kind",
-            "text_sha256",
             "chars"
           ],
           "properties": {
@@ -453,10 +450,36 @@
             "text_sha256": {
               "type": "string",
               "pattern": "^[0-9a-f]{64}$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
             }
-          }
+          },
+          "allOf": [
+            {
+              "oneOf": [
+                {
+                  "required": [
+                    "text_sha256"
+                  ]
+                },
+                {
+                  "required": [
+                    "sha256"
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
+    },
+    "missing_readers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   }
 }

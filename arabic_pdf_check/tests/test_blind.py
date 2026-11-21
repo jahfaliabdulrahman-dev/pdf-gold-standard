@@ -65,6 +65,26 @@ for name, r in clean["readers"].items():
           len(r["examples"]) <= 5 and all(len(e["text"]) <= 80 for e in r["examples"]),
           f"{len(r['examples'])} example(s)")
 
+# Thresholds are CONSUMED, not printed: raise the presentation-forms threshold above the fixture's share and
+# its signal must disappear. (A string-search test could pass on a commented-out line; this cannot.)
+raised = json.loads(json.dumps(thresholds))
+raised["values"]["presentation_forms"]["value"] = 1.0
+rep = blind.check(built["planted"]["planted-presentation-forms"], raised)
+check("thresholds-consumed", "presentation-forms" not in [s["id"] for s in rep["signals"]],
+      str([s["id"] for s in rep["signals"]]))
+
+# A reader that reads but cannot name its pages is DECLARED, never reported as a reading of zero characters.
+real_pages_many = blind.pages_many
+blind.pages_many = lambda name, paths: None
+try:
+    unsupported = blind.check(built["clean"], thresholds)
+finally:
+    blind.pages_many = real_pages_many
+check("pages-unsupported-declared", all(r["pages"] == "unsupported" for r in unsupported["readers"].values()),
+      str({n: r["pages"] for n, r in unsupported["readers"].items()}))
+check("pages-unsupported-still-reads", all(r["chars"] > 0 for r in unsupported["readers"].values()),
+      str({n: r["chars"] for n, r in unsupported["readers"].items()}))
+
 print()
 if FAILS:
     print(f"BLIND ACCEPTANCE FAILED — {FAILS}")

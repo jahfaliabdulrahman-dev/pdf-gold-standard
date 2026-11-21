@@ -24,6 +24,8 @@ import subprocess
 
 import pikepdf
 
+from .checks import metrics
+
 MATTERHORN = {
     "source": "Matterhorn Protocol 1.1 (PDF Association, CC BY 4.0, 2021), «Matterhorn Protocol Checkpoints»",
     "conditions_total": 136,
@@ -124,11 +126,13 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
     floors = ratchet.load()
     for name, block in readers.items():
         # Per-reader judgement and evidence, in the shape the assignment's output names: the metrics are the
-        # judgement, the confidence says how the comparison was made (the reader's whole output against the
-        # whole truth — exhaustive, hence high), and the examples are the lines that carry a word the truth
-        # does not. The free truth has no pages, so an example's page is null rather than invented.
-        block["confidence"] = "high"
-        block["examples"] = reference.mismatch_examples(truth, measured["readings"].get(name, ""))
+        # judgement, the confidence grades how clear that judgement is (a clean pass or a clearly broken
+        # output is high; a partial one can flip with a small change), and the examples are the lines that
+        # carry a word the truth does not — none when the reader reproduced the truth exactly. The free truth
+        # has no pages, so an example's page is null rather than invented.
+        block["confidence"] = ("high" if block["exact"] == 1.0 or block["word_f1"] < 0.5 else "medium")
+        block["examples"] = ([] if block["exact"] == 1.0 else
+                             reference.mismatch_examples(truth, metrics.N(measured["readings"].get(name, ""))))
         floor = (((floors.get(name) or {}).get("floors") or {}).get(block["version"]) or {}).get(
             "cases", {}).get(case_id)
         block["ratcheted"] = floor is not None
@@ -162,8 +166,10 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
         "claims": claims,
         "checks": checks,
         "readers": readers,
+        "missing_readers": measured["missing"],
         "tier1_unavailable": unavailable,
-        "not_checked": MATTERHORN,
+        "not_checked": dict(MATTERHORN, **({} if case is not None else {
+            "note": MATTERHORN["note"] + " · the free truth has no page structure: an example's page is null"})),
         "verdict": verdict,
         "verdict_detail": detail + (" · pipeline tree dirty" if dirty else "")
                           + ("" if case is not None else
@@ -241,8 +247,9 @@ def recheck(pdf_path: str, cert: dict, truth_text: str | None = None) -> list[st
         if truth_text is None:
             return ["this certificate judges a free text: pass the same text (--truth FILE) to re-measure it"]
         got = hashlib.sha256(truth_text.encode("utf-8")).hexdigest()
-        if got != source["text_sha256"]:
-            return [f"the truth text hashes to {got[:12]}, the certificate names {source['text_sha256'][:12]}"]
+        declared_hash = source.get("text_sha256") or source.get("sha256")
+        if got != declared_hash:
+            return [f"the truth text hashes to {got[:12]}, the certificate names {str(declared_hash)[:12]}"]
         truth, case_id = truth_text, None
     else:
         case_id = source["case"]
@@ -272,7 +279,7 @@ def recheck(pdf_path: str, cert: dict, truth_text: str | None = None) -> list[st
                             f"{stored.get('version')} — re-issue it")
     producer = {"postprocess": cert["producer"].get("postprocess")}
     if case is not None:
-        live_checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True)
+        live_checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True, scan=measured["scan"])
     else:
         with pikepdf.open(pdf_path) as pdf:
             live_checks, _tree = structure.file_checks(pdf, pdf_path, measured["scan"], producer)
@@ -340,7 +347,7 @@ def validate(cert_path: str, pdf_path: str, do_recheck: bool = False,
         if truth_path:
             if not os.path.exists(truth_path):
                 return problems + [f"the truth file is missing: {truth_path}"]
-            truth_text = open(truth_path, encoding="utf-8").read()
+            truth_text = open(truth_path, encoding="utf-8-sig").read()
         problems.extend(recheck(pdf_path, cert, truth_text))
     # A limit must name an evidence-carrying entry for this reader, at the version the control was measured on.
     from .readers import limitations
@@ -364,7 +371,7 @@ def validate(cert_path: str, pdf_path: str, do_recheck: bool = False,
 def human_summary(cert: dict) -> str:
     source = cert.get("source") or {}
     if source.get("kind") == "truth":
-        src = f"truth: sha256 {source['text_sha256'][:12]} · {source['chars']} chars"
+        src = f"truth: sha256 {str(source.get('text_sha256') or source.get('sha256'))[:12]} · {source['chars']} chars"
     else:
         src = (f"corpus: {source.get('case', (cert.get('corpus') or {}).get('case'))} "
                f"({source.get('category', (cert.get('corpus') or {}).get('category'))}) · "

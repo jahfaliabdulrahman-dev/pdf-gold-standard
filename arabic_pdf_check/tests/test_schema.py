@@ -78,9 +78,16 @@ legacy["source"].pop("text_sha256")
 legacy["source"]["sha256"] = "0" * 64
 try:
     jsonschema.validate(legacy, cert_schema)
-    check("v2-truth-hash-is-named", False, "a truth source with `sha256` validated")
+    check("v2-accepts-old-truth-hash", True)
+except jsonschema.ValidationError as exc:
+    check("v2-accepts-old-truth-hash", False, exc.message)
+without = json.loads(json.dumps(cert))
+without["source"].pop("text_sha256")
+try:
+    jsonschema.validate(without, cert_schema)
+    check("v2-requires-a-truth-hash", False, "a truth source with no hash validated")
 except jsonschema.ValidationError:
-    check("v2-truth-hash-is-named", True)
+    check("v2-requires-a-truth-hash", True)
 check("v2-readers-carry-evidence",
       all({"confidence", "examples"} <= set(r) for r in cert["readers"].values()),
       str({n: sorted(set(r) - {"confidence", "examples"}) for n, r in cert["readers"].items()}))
