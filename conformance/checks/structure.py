@@ -128,22 +128,50 @@ def same_words(a: str, b: str) -> bool:
     return words_multi(a) == words_multi(b)
 
 
-def content_f1(a: str, b: str) -> float:
-    """F1 of the two word multisets under `_token` — order- and digit-reversal-blind.
+def font_verdicts(scan: dict, gap_high: float = 0.0) -> list[dict]:
+    """The ONE per-font ToUnicode rule, shared by the gate and the checker.
 
-    `metrics.word_f1` is the product metric, and it keeps a token's characters as the reader returned them:
-    a reversed word and a reversed digit run are different tokens there, by design. This function exists for
-    ATTRIBUTION only: two readings that differ solely in order, or in a digit run whose reverse is present,
-    are not a content disagreement, and counting them as one would report the reader's own defect twice.
+    · simple font, no /ToUnicode  → declared (Matterhorn 31-027 allows it), level None
+    · composite font, no /ToUnicode → high: nothing names its codes
+    · a map exists and misses codes → high when the missing SHARE is above `gap_high`, else medium
+    · PUA / U+FFFD / U+0000 / U+FEFF / drawn .notdef → high (Matterhorn 31-028 … 31-030)
+
+    The gate calls this with `gap_high=0.0` (any unmapped drawn code fails a certificate). The blind report
+    passes the measured share (`tounicode_gap_ratio`), so a 4-in-1536 gap is a medium finding and an empty
+    map is a high one. One rule with a threshold parameter — not two opinions.
     """
-    ca, cb = words_multi(a), words_multi(b)
-    if not ca and not cb:
-        return 1.0
-    overlap = sum((ca & cb).values())
-    if not overlap:
-        return 0.0
-    precision, recall = overlap / sum(ca.values()), overlap / sum(cb.values())
-    return 2 * precision * recall / (precision + recall)
+    out = []
+    for key, row in sorted(scan["fonts"].items()):
+        problems, warnings, note = [], [], None
+        if row["notdef"]:
+            problems.append(f"{row['notdef']} .notdef glyph(s) drawn")
+        if not row["tounicode"]:
+            if row["two_byte"]:
+                problems.append("composite font drawn with no /ToUnicode")
+            else:
+                note = ("simple font without /ToUnicode — allowed by Matterhorn 31-027 when the encoding or "
+                        "the glyph names carry the mapping; declared, not alarmed")
+        ratio = (row["missing_unicode"] / row["codes"]) if row["codes"] else 0.0
+        if row["missing_unicode"] and row["tounicode"]:
+            text = f"{row['missing_unicode']} of {row['codes']} drawn codes have no Unicode value"
+            (problems if ratio > gap_high else warnings).append(text)
+        if row["pua"]:
+            problems.append(f"{row['pua']} mapped character(s) in the private use area")
+        if row["replacement"]:
+            problems.append(f"{row['replacement']} mapped character(s) to U+FFFD")
+        if row["zero_value"]:
+            problems.append(f"{row['zero_value']} mapped character(s) to U+0000 (Matterhorn 31-028)")
+        if row["bom"]:
+            problems.append(f"{row['bom']} mapped character(s) to U+FEFF/U+FFFE (Matterhorn 31-029)")
+        out.append({"key": key, "name": row["family"] or row["name"], "family": row["family"],
+                    "subtype": row["subtype"], "embedded": row["embedded"],
+                    "tounicode": row["tounicode"], "two_byte": row["two_byte"], "codes": row["codes"],
+                    "missing_unicode": row["missing_unicode"], "gap_ratio": round(ratio, 4),
+                    "notdef": row["notdef"], "pua": row["pua"], "replacement": row["replacement"],
+                    "zero_value": row["zero_value"], "bom": row["bom"],
+                    "level": "high" if problems else ("medium" if warnings else None),
+                    "problems": problems, "warnings": warnings, "note": note})
+    return out
 
 
 def layer_seq(text: str) -> list[str]:
@@ -291,15 +319,19 @@ def file_checks(pdf, pdf_path: str, scan: dict, producer: dict | None = None,
         "no invisible joiner in the text layer" if invisible == 0 else
         f"{invisible} U+200B/200C/200D/2060 in the layer — the producer inserted them and a copy-paste "
         f"carries them")
+    core = metrics.PRESENTATION_FORM
     forms = sum(1 for ch in file_text
-                if 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF)
+                if core[0] <= ord(ch) <= core[1] or core[2] <= ord(ch) <= core[3])
     add("presentation-forms", forms == 0,
         "no presentation form in the text layer" if forms == 0 else
         f"{forms} presentation-form character(s) in the layer — a reader that trusts the CMap shows a glyph "
         f"name, not a letter")
-    add("tounicode-coverage", _tu_gaps(scan) == 0,
-        "every drawn code has a Unicode value" if _tu_gaps(scan) == 0 else
-        f"{_tu_gaps(scan)} code(s) with no /ToUnicode entry (readers would invent U+<glyph id>)")
+    verdicts = font_verdicts(scan, 0.0)
+    bad_fonts = [v for v in verdicts if v["level"] == "high"]
+    add("tounicode-coverage", not bad_fonts,
+        "every drawn code has a Unicode value" if not bad_fonts else
+        f"{len(bad_fonts)} font(s) with an unreadable code: " +
+        " · ".join(f"{v['name']}: {v['problems'][0]}" for v in bad_fonts[:3]))
 
     # --- numerals: one system per number, and never the Persian one ---------------------------------
     # Owner decision (19 Nov 2026): Western digits default; Arabic-Indic (٠-٩) is an explicit per-document
@@ -329,13 +361,15 @@ def file_checks(pdf, pdf_path: str, scan: dict, producer: dict | None = None,
 
 
 def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True,
-             honour_second_file: bool = True) -> list[dict]:
+             honour_second_file: bool = True, scan: dict | None = None) -> list[dict]:
     checks: list[dict] = []
 
     def add(cid: str, ok: bool | None, reason: str) -> None:
         checks.append({"id": cid, "status": "na" if ok is None else ("pass" if ok else "fail"), "reason": reason})
 
-    scan = mcid_text.scan(pdf_path)
+    # One parse per certificate: `certify` passes the scan it already made for the metrics. A second scan of
+    # the same file is how two blocks of one certificate start disagreeing.
+    scan = scan if scan is not None else mcid_text.scan(pdf_path)
     file_text = "\n".join(scan["text"].values())
 
     with pikepdf.open(pdf_path) as pdf:
@@ -473,11 +507,6 @@ def _missing(got: str, want: str) -> str:
 
 def _extra(got: str, want: str) -> str:
     return repr(" ".join((words_multi(got) - words_multi(want)).elements()))
-
-
-def _tu_gaps(scan: dict) -> int:
-    """Codes drawn with no ToUnicode entry — the ones a reader turns into U+<glyph id> (measured behaviour)."""
-    return int(scan.get("missing_unicode", 0))
 
 
 # A number, as the gate reads it: digits plus the separators that bind one number together (ASCII and Arabic

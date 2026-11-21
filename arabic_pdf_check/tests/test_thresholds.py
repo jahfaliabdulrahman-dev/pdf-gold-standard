@@ -2,7 +2,10 @@
 """The thresholds in the package are the ones the measurement derived — and nothing else is shipped.
 
   · presentation forms: value == max(declared, clean maximum)
-  · orientation majority: value == max(declared, clean maximum share)
+  · ToUnicode gap share: value == max(declared, clean maximum)
+  · orientation: arafix's published 0.30, and it is PASSED to the detector (a value in the manifest that no
+    code reads is a sentence, not a threshold)
+  · every key in `values` is consumed by the code — a key nobody reads is a lie in the report's manifest
   · the metric form of reader disagreement is REFUSED: its clean minimum is recorded in `observed.refused`,
     no threshold key exists for it, and the blind report only uses the deterministic page-empty form.
 """
@@ -14,6 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 THRESHOLDS = os.path.join(REPO, "arabic_pdf_check", "thresholds.json")
 MEASUREMENTS = os.path.join(REPO, "docs", "checker-v0", "measurements", "thresholds.json")
+sys.path.insert(0, REPO)
 
 fails = []
 
@@ -34,14 +38,20 @@ pf = th["values"]["presentation_forms"]
 check("presentation-forms-derived",
       abs(pf["value"] - round(max(pf["declared"], observed["clean_max_presentation_forms"]), 4)) < 1e-9,
       f"value {pf['value']} declared {pf['declared']} clean {observed.get('clean_max_presentation_forms')}")
-maj = th["values"]["visual_order_majority"]
-check("majority-derived",
-      abs(maj["value"] - round(max(maj["declared"], observed["clean_max_visual_share"]), 4)) < 1e-9,
-      f"value {maj['value']} declared {maj['declared']} clean {observed.get('clean_max_visual_share')}")
 gap = th["values"]["tounicode_gap_ratio"]
 check("gap-ratio-derived",
       abs(gap["value"] - round(max(gap["declared"], observed["clean_max_gap_ratio"]), 4)) < 1e-9,
       f"value {gap['value']} declared {gap['declared']} clean {observed.get('clean_max_gap_ratio')}")
+
+# The orientation threshold is arafix's published default; the checker must PASS it, not merely store it.
+import conformance.checks.visual_order as vo                        # noqa: E402
+check("visual-order-matches-arafix",
+      abs(float(th["values"]["visual_order"]["value"]) - vo.THRESHOLD) < 1e-9,
+      f"manifest {th['values']['visual_order']['value']} arafix {vo.THRESHOLD}")
+
+blind_src = open(os.path.join(REPO, "arabic_pdf_check", "blind.py"), encoding="utf-8").read()
+unread = [k for k in th["values"] if f'th["{k}"]' not in blind_src]
+check("every-threshold-is-read", not unread, f"never read by blind.py: {unread}")
 
 check("no-disagreement-threshold", not any(k.startswith("disagreement") for k in th["values"]),
       str(sorted(th["values"])))

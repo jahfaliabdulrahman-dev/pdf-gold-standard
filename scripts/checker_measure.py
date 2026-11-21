@@ -4,10 +4,10 @@
 The one command that produces every number in `docs/checker-v0/measurements/` and every threshold in
 `arabic_pdf_check/thresholds.json`. Thresholds are DERIVED here, never typed by hand:
 
-  · a "higher is worse" ratio (presentation forms):  value = max(declared floor, clean-set maximum)
-  · a "lower is worse" similarity (reader disagreement): value = min(declared floor, clean minimum − 0.20)
-    and the medium band at −0.10; both stay strictly below the clean minimum, so a clean file cannot trip them
-  · the orientation majority share: value = max(0.5, clean-set maximum share)
+  · presentation forms (higher is worse):  value = max(declared floor, clean-set maximum)
+  · ToUnicode gap share (higher is worse): value = max(declared floor, clean-set maximum)
+  · orientation majority is STRUCTURAL (`len(MATRIX)//2 + 1`), not a measured threshold: a machine without
+    one reader must not change a file's verdict. This script only proves the planted file crosses it.
 
 A signal that does not separate (planted value not at least 0.20 away from the clean value) is REFUSED here
 and the script fails: the assignment's rule is that a signal which cannot separate is not shipped.
@@ -30,7 +30,7 @@ import itertools                                    # noqa: E402
 from arabic_pdf_check import blind                  # noqa: E402
 from conformance import reference                    # noqa: E402
 from conformance.checks import mcid_text, metrics, structure, visual_order   # noqa: E402
-from conformance.readers import available, pages_many              # noqa: E402
+from conformance.readers import MATRIX, available, pages_many              # noqa: E402
 from conformance.corpus import cases as corpus_cases                          # noqa: E402
 import checker_fixtures                                                       # noqa: E402
 
@@ -39,6 +39,22 @@ OWNER_DIR = os.path.expanduser(
     "~/Library/CloudStorage/GoogleDrive-REDACTED/ملفاتي/PDF_for_PDF")
 OUT = os.path.join(REPO, "docs", "checker-v0", "measurements")
 THRESHOLDS = os.path.join(REPO, "arabic_pdf_check", "thresholds.json")
+
+
+def content_f1(a: str, b: str) -> float:
+    """F1 of the two word multisets under the gate's attribution token — order- and digit-blind.
+
+    Measurement only (it is the number that refused the metric form of reader disagreement); it is not a
+    gate, not a report field, and it lives in the measurement script so the gate keeps no unused surface.
+    """
+    ca, cb = structure.words_multi(a), structure.words_multi(b)
+    if not ca and not cb:
+        return 1.0
+    overlap = sum((ca & cb).values())
+    if not overlap:
+        return 0.0
+    precision, recall = overlap / sum(ca.values()), overlap / sum(cb.values())
+    return 2 * precision * recall / (precision + recall)
 
 
 def _now() -> str:
@@ -54,25 +70,16 @@ def raw(path: str) -> dict:
     file_text = "\n".join(scan["text"].values())
     arabic = blind.arabic_count(file_text)
     forms = blind.pf_count(file_text)
-    orders = {name: visual_order.inspect(t) for name, t in texts.items()}
-    pairs = [structure.content_f1(texts[a], texts[b]) for a, b in itertools.combinations(sorted(texts), 2)]
+    values = json.load(open(THRESHOLDS, encoding="utf-8"))["values"]
+    orders = blind.visual_orders(texts, values)
+    pairs = [content_f1(texts[a], texts[b]) for a, b in itertools.combinations(sorted(texts), 2)]
     gap_max = 0.0
     for row in scan["fonts"].values():
         if row["tounicode"] and row["codes"]:
             gap_max = max(gap_max, row["missing_unicode"] / row["codes"])
-    empty_pages = {}
-    for name in ok:
-        bad = []
-        for i, page in enumerate(pages[name]):
-            if structure.ARABIC.search(page or ""):
-                continue
-            others = sum(1 for other in ok if other != name and i < len(pages[other])
-                         and structure.ARABIC.search(pages[other][i] or ""))
-            if others >= 2:
-                bad.append(i + 1)
-        empty_pages[name] = bad
+    empty_pages = {n: v for n, v in blind.empty_pages_for(pages, list(ok)).items() if v}
     return {
-        "pf_ratio": (forms / (arabic + forms)) if (arabic + forms) else 0.0,
+        "pf_ratio": blind.pf_share(file_text),
         "gap_ratio_max": gap_max,
         "forms": forms,
         "arabic": arabic,
@@ -135,14 +142,12 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     th = json.loads(json.dumps(thresholds))
     failures = []
     clean_pf = max(r["pf_ratio"] for r in clean_rows)
-    clean_share = max(r["visual_share"] for r in clean_rows)
     clean_gap = max(r["gap_ratio_max"] for r in clean_rows)
+    clean_share = max(r["visual_share"] for r in clean_rows)   # a separation check, not a threshold
     clean_min = min(r["pair_min"] for r in clean_rows)
 
     th["values"]["presentation_forms"]["value"] = round(max(th["values"]["presentation_forms"]["declared"],
                                                              clean_pf), 4)
-    th["values"]["visual_order_majority"]["value"] = round(max(
-        th["values"]["visual_order_majority"]["declared"], clean_share), 4)
     th["values"]["tounicode_gap_ratio"]["value"] = round(max(
         th["values"]["tounicode_gap_ratio"]["declared"], clean_gap), 4)
     th["observed"] = {"clean_max_presentation_forms": round(clean_pf, 4),
@@ -169,11 +174,12 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
                 failures.append(f"{name}: presentation-forms does not separate "
                                 f"(planted {row['pf_ratio']:.3f} vs clean {clean_pf:.3f})")
         elif expected == "visual-order":
+            need = len(MATRIX) // 2 + 1
             gap = row["visual_share"] - clean_share
-            if gap < 0.20 or row["visual_share"] <= th["values"]["visual_order_majority"]["value"]:
+            if gap < 0.20 or row["visual_share"] * len(MATRIX) < need:
                 failures.append(f"{name}: orientation majority does not separate "
                                 f"(share {row['visual_share']:.2f} vs clean {clean_share:.2f}, "
-                                f"threshold {th['values']['visual_order_majority']['value']})")
+                                f"need {need}/{len(MATRIX)})")
         elif expected == "tounicode-gaps" and row["missing_unicode"] <= 0:
             failures.append(f"{name}: ToUnicode gaps are not positive")
     th["measured_at"] = _now()

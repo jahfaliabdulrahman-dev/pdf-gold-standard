@@ -65,6 +65,41 @@ check("markdown-no-percent", "%" not in md, "")
 check("markdown-lists-missing-readers", (not report["missing_readers"]) or "لم يعمل" in md, "")
 check("markdown-names-every-reader", all(name in md for name in report["readers"]), "")
 
+# ---- the v2 contract: one source, a text hash that says it is a text hash, per-reader evidence, no v1 corpus
+bad = json.loads(json.dumps(cert))
+bad["corpus"] = {"case": "x", "category": "y", "manifest_sha256": "0" * 64, "cases": 1}
+try:
+    jsonschema.validate(bad, cert_schema)
+    check("v2-rejects-corpus", False, "a certificate carried both `source` and the v1 `corpus` block")
+except jsonschema.ValidationError:
+    check("v2-rejects-corpus", True)
+legacy = json.loads(json.dumps(cert))
+legacy["source"].pop("text_sha256")
+legacy["source"]["sha256"] = "0" * 64
+try:
+    jsonschema.validate(legacy, cert_schema)
+    check("v2-truth-hash-is-named", False, "a truth source with `sha256` validated")
+except jsonschema.ValidationError:
+    check("v2-truth-hash-is-named", True)
+check("v2-readers-carry-evidence",
+      all({"confidence", "examples"} <= set(r) for r in cert["readers"].values()),
+      str({n: sorted(set(r) - {"confidence", "examples"}) for n, r in cert["readers"].items()}))
+
+# ---- a BOM in the customer's truth file is a byte-order mark, not the first character of the text
+bom_truth = os.path.join(tmp, "bom.txt")
+with open(bom_truth, "w", encoding="utf-8-sig") as fh:
+    fh.write(TRUTH)
+bom_out = os.path.join(tmp, "bom.json")
+bom_md = os.path.join(tmp, "bom.md")
+r = __import__("subprocess").run(
+    [sys.executable, "-m", "arabic_pdf_check", "verify", PDF, "--truth", bom_truth, "-o", bom_out, "--md", bom_md],
+    capture_output=True, text=True, timeout=900, cwd=REPO)
+ok = os.path.exists(bom_out)
+bom = json.load(open(bom_out, encoding="utf-8")) if ok else {}
+check("bom-cli-runs", ok, (r.stderr or r.stdout).strip()[-200:])
+check("bom-not-a-character", bom.get("source", {}).get("chars") == len(TRUTH),
+      f"chars {bom.get('source', {}).get('chars')} vs {len(TRUTH)}")
+
 print()
 if FAILS:
     print(f"CHECKER SCHEMA FAILED — {FAILS}")

@@ -1,6 +1,6 @@
 {
  "command": "python3 scripts/checker_measure.py --out docs/checker-v0/measurements",
- "measured_at": "2026-11-21T20:40:55Z",
+ "measured_at": "2026-11-21T21:54:44Z",
  "observed": {
   "clean_files": 70,
   "clean_max_gap_ratio": 0.0,
@@ -63,11 +63,6 @@
    "declared": 0.3,
    "source": "arafix DEFAULT_THRESHOLDS[\"visual_order\"] (MIT)",
    "value": 0.3
-  },
-  "visual_order_majority": {
-   "declared": 0.5,
-   "source": "more than half of the available readers: the cause of a file-wide orientation is a majority, not one reader",
-   "value": 0.5
   }
  }
 }

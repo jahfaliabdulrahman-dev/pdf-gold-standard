@@ -185,6 +185,13 @@ jobs:
           python3 arabic_pdf_check/tests/test_reference.py
           python3 arabic_pdf_check/tests/test_blind.py
 
+      - name: The checker — measure the planted and clean sets (the acceptance numbers, produced here)
+        run: |
+          # The acceptance numbers are PRODUCED here, not trusted from a committed file: the four planted
+          # files must be high with their named signal, and no clean file may be high. --skip-owner: the
+          # owner's corpus is not on this machine and is never downloaded, never deposited.
+          python3 scripts/checker_measure.py --skip-owner --out /tmp/checker-measure
+
       # The run's raw numbers are what a floors acceptance is made from: a version with no floors fails the
       # step above, and this artifact is the input to `conformance ratchet accept --from results.json`.
       - name: Upload the conformance run

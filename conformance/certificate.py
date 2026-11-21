@@ -103,7 +103,9 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
     else:
         assert truth_text is not None                     # guaranteed by the exactly-one rule above
         truth = truth_text
-        source = {"kind": "truth", "sha256": hashlib.sha256(truth_text.encode("utf-8")).hexdigest(),
+        # A hash of the TEXT, named as such: the caller may pass a file, a block, or a string, and a field
+        # called `sha256` would be read as the file's hash while it is not (the file hash is `file.sha256`).
+        source = {"kind": "truth", "text_sha256": hashlib.sha256(truth_text.encode("utf-8")).hexdigest(),
                   "chars": len(truth_text), "name": truth_name}
     # Provenance is DECLARED, never guessed: the file's own /Producer key is a claim, not a measurement, and
     # a certificate that invented an engine would be certifying its own assumption. `unknown` is a value.
@@ -121,6 +123,12 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
 
     floors = ratchet.load()
     for name, block in readers.items():
+        # Per-reader judgement and evidence, in the shape the assignment's output names: the metrics are the
+        # judgement, the confidence says how the comparison was made (the reader's whole output against the
+        # whole truth — exhaustive, hence high), and the examples are the lines that carry a word the truth
+        # does not. The free truth has no pages, so an example's page is null rather than invented.
+        block["confidence"] = "high"
+        block["examples"] = reference.mismatch_examples(truth, measured["readings"].get(name, ""))
         floor = (((floors.get(name) or {}).get("floors") or {}).get(block["version"]) or {}).get(
             "cases", {}).get(case_id)
         block["ratcheted"] = floor is not None
@@ -129,7 +137,8 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
     # honour_second_file=False: a certificate names ONE file and judges that file. An engine that writes a
     # separate PDF/A-3b file can be measured in a bakeoff (`a3b_path`), but never certified through it.
     if case is not None:
-        checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True, honour_second_file=False)
+        checks = structure.evaluate(pdf_path, case, producer, run_verapdf=True, honour_second_file=False,
+                                     scan=measured["scan"])
         claims = {"pdfua": "1", "pdfa": "3b"}
     else:
         # A free text declares no PDF/UA or PDF/A claim, so veraPDF is not run and `claims` is null: a
@@ -232,8 +241,8 @@ def recheck(pdf_path: str, cert: dict, truth_text: str | None = None) -> list[st
         if truth_text is None:
             return ["this certificate judges a free text: pass the same text (--truth FILE) to re-measure it"]
         got = hashlib.sha256(truth_text.encode("utf-8")).hexdigest()
-        if got != source["sha256"]:
-            return [f"the truth text hashes to {got[:12]}, the certificate names {source['sha256'][:12]}"]
+        if got != source["text_sha256"]:
+            return [f"the truth text hashes to {got[:12]}, the certificate names {source['text_sha256'][:12]}"]
         truth, case_id = truth_text, None
     else:
         case_id = source["case"]
@@ -355,7 +364,7 @@ def validate(cert_path: str, pdf_path: str, do_recheck: bool = False,
 def human_summary(cert: dict) -> str:
     source = cert.get("source") or {}
     if source.get("kind") == "truth":
-        src = f"truth: sha256 {source['sha256'][:12]} · {source['chars']} chars"
+        src = f"truth: sha256 {source['text_sha256'][:12]} · {source['chars']} chars"
     else:
         src = (f"corpus: {source.get('case', (cert.get('corpus') or {}).get('case'))} "
                f"({source.get('category', (cert.get('corpus') or {}).get('category'))}) · "

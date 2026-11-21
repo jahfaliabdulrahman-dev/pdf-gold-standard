@@ -44,7 +44,7 @@ def verify_command(a) -> int:
     from conformance import certificate
     from . import markdown
     try:
-        truth = open(a.truth, encoding="utf-8").read()
+        truth = open(a.truth, encoding="utf-8-sig").read()   # a BOM is not a character of the text
     except OSError as exc:
         print(f"REFUSED — the truth file cannot be read: {exc}")
         return 2
