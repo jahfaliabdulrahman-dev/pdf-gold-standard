@@ -54,6 +54,20 @@ def measure_readings(scan: dict, readings: dict, truth_text: str | None, missing
     return block
 
 
+def as_results(block: dict) -> dict:
+    """The corpus results shape (`per_reader[name].metrics.*`), from the one flat block.
+
+    `results.json` and `ratchet.json` were written with the metrics nested under `metrics`; a certificate
+    stores them flat. The NUMBERS are computed once (`measure_readings`); this adapter only changes the shape
+    the corpus contract already published, so the floors keep reading the file they know.
+    """
+    return {name: {"version": b["version"],
+                   "metrics": {m: b[m] for m in metrics.METRICS},
+                   "defects": b["defects"],
+                   "limitations_applied": b["limitations_applied"]}
+            for name, b in block.items()}
+
+
 def mismatch_examples(truth_text: str, reading: str, limit: int = 5) -> list[dict]:
     """Up to `limit` lines of the reader's text that carry a word the truth does not.
 

@@ -28,9 +28,8 @@ def render_blind(report: dict) -> str:
              (f"**أعلى خطر لدى قارئ:** {LEVEL_AR[risk['level']]}"
               + (" · السبب: " + " و".join("الملف" if c == "file" else "قارئ" for c in risk["causes"])
                  if risk["causes"] else "")),
-             (f"خطر الملف نفسه: {LEVEL_AR[risk['file']['level']]}"
-              + ("" if risk["file"]["level"] == "high"
-                 else " — إشارات القرّاء أدناه لا تُحسب على الملف")),
+             ("" if risk["file"]["level"] == "high"
+              else "**ملاحظة:** إشارات القرّاء أدناه تُحسب على أداة النسخ، لا على الملف."),
              ""]
     lines += ["## القرّاء", "", "| القارئ | الإصدار | الخطر | الثقة | الإشارات |", "|---|---|---|---|---|"]
     for name, r in report["readers"].items():

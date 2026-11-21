@@ -89,7 +89,7 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
     texts = {name: text_many(name, paths) for name in readers}
 
     from .checks import mcid_text
-    from .reference import file_block, measure_readings
+    from .reference import as_results, file_block, measure_readings
     out_cases = []
     for i, build in enumerate(builds):
         case = build["case"]
@@ -97,7 +97,8 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
         scan = mcid_text.scan(build["pdf"])
         # The SAME per-reader loop the certificate and the checker use (reference.measure_readings): the
         # corpus floors and a customer's certificate cannot be measured by two different loops.
-        per_reader = measure_readings(scan, {name: texts[name][i] for name in readers}, t, missing)
+        per_reader = as_results(measure_readings(scan, {name: texts[name][i] for name in readers}, t,
+                                                 missing))
         entry = {
             "id": case["id"], "category": case["category"], "font": case["font"],
             "pdf": os.path.basename(build["pdf"]), "bytes": build["bytes"], "sha256": build["sha256"],
