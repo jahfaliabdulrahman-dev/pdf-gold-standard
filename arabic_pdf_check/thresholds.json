@@ -1,7 +1,7 @@
 {
   "schema_version": "arabic-pdf-check-thresholds/1",
-  "command": "python3 scripts/checker_measure.py --write",
-  "measured_at": "2026-11-21T21:54:44Z",
+  "command": "python3 scripts/checker_measure.py --write --out docs/checker-v0/measurements",
+  "measured_at": "2026-11-21T23:12:36Z",
   "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
   "values": {
     "presentation_forms": {

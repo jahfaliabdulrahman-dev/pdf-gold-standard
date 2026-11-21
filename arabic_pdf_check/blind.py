@@ -221,7 +221,7 @@ def check(pdf_path: str, thresholds: dict) -> dict:
                 score=order["score"], votes=order["evidence"]))
         arabic = arabic_count(text)
         forms_r = pf_count(text)
-        if arabic + forms_r and forms_r / (arabic + forms_r) > th["presentation_forms"]["value"]:
+        if pf_share(text) > th["presentation_forms"]["value"]:
             # The cause is the FILE only when the file-level signal fired — the same name, not an inference
             # from a count. A reader whose count is high while the file's is below the threshold is the one
             # that turned the letters into forms.
@@ -313,6 +313,8 @@ def check(pdf_path: str, thresholds: dict) -> dict:
             "لا يُحكم على رسم الحروف: التقرير يقرأ طبقة النص لا الشكل المرئي",
             "لا OCR: الملف بلا طبقة نصية يُبلَّغ عنه كما هو، ولا يُصلَح",
             "سلوك قارئ معلن يفسّر خطر ذلك القارئ، ولا يرفع حكم الملف",
+            "خط بسيط بلا /ToUnicode يُعلَن ولا يُنذر (Matterhorn 31-027)؛ خريطته عبر /Encoding أو أسماء "
+            "المحارف لا تُتحقَّق هنا — قيد معلن، لا حكم",
         ],
     }
 

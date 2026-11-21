@@ -97,8 +97,7 @@ def run(engine: str, ids=None, outdir: str = "/tmp/conformance", reader_names=No
         scan = mcid_text.scan(build["pdf"])
         # The SAME per-reader loop the certificate and the checker use (reference.measure_readings): the
         # corpus floors and a customer's certificate cannot be measured by two different loops.
-        per_reader = as_results(measure_readings(scan, {name: texts[name][i] for name in readers}, t,
-                                                 missing))
+        per_reader = as_results(measure_readings(scan, {name: texts[name][i] for name in readers}, t))
         entry = {
             "id": case["id"], "category": case["category"], "font": case["font"],
             "pdf": os.path.basename(build["pdf"]), "bytes": build["bytes"], "sha256": build["sha256"],

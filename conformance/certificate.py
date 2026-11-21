@@ -132,7 +132,7 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
         # has no pages, so an example's page is null rather than invented.
         block["confidence"] = ("high" if block["exact"] == 1.0 or block["word_f1"] < 0.5 else "medium")
         block["examples"] = ([] if block["exact"] == 1.0 else
-                             reference.mismatch_examples(truth, metrics.N(measured["readings"].get(name, ""))))
+                             reference.mismatch_examples(truth, measured["readings"].get(name, "")))
         floor = (((floors.get(name) or {}).get("floors") or {}).get(block["version"]) or {}).get(
             "cases", {}).get(case_id)
         block["ratcheted"] = floor is not None
@@ -166,7 +166,8 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
         "claims": claims,
         "checks": checks,
         "readers": readers,
-        "missing_readers": measured["missing"],
+        "missing_readers": {n: (str(why).split(":")[0].strip() or "unavailable")[:60]
+                            for n, why in measured["missing"].items()},
         "tier1_unavailable": unavailable,
         "not_checked": dict(MATTERHORN, **({} if case is not None else {
             "note": MATTERHORN["note"] + " · the free truth has no page structure: an example's page is null"})),
@@ -320,6 +321,17 @@ def validate(cert_path: str, pdf_path: str, do_recheck: bool = False,
     schema_path = {"certificate/1": SCHEMA, "certificate/2": SCHEMA_V2}.get(version)
     if schema_path is None:
         return [f"unknown schema_version {version!r} — a certificate names its own shape"]
+    if cert.get("schema_version") == "certificate/2":
+        source0 = cert.get("source") or {}
+        if source0.get("kind") == "truth" and not (source0.get("text_sha256") or source0.get("sha256")):
+            return [f"source.kind is 'truth' but the certificate names no text hash "
+                    f"(text_sha256 or sha256); it cannot be re-measured"]
+        if source0.get("text_sha256"):
+            bare = [n for n, r in (cert.get("readers") or {}).items()
+                    if "confidence" not in r or "examples" not in r]
+            if bare:
+                return [f"certificate/2 (new shape) without per-reader confidence/examples: {bare} — "
+                        f"the assignment's report requires both for every reader"]
     schema = json.load(open(schema_path, encoding="utf-8"))
     problems: list[str] = []
     try:
