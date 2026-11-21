@@ -66,16 +66,6 @@ ENGINE_BEHAVIOURS = [
         "expect": "rows lose a cell when the producer writes no space",
     },
     {
-        "id": "identifier-own-line",
-        "rule": "a declared identifier (INV-, IBAN) starts on its own display line in a paragraph, list or cell",
-        "claim": "inline it is reordered by the readers (PDFium `-2026-0042INV`, PDFKit `0042-2026-INV`); the "
-                 "line break makes both tier-1 readers exact 1.0 (PDFKit 15.8.2 is a declared older-reader limit: "
-                 "its exact is a NOTE, not a pass) and leaves the logical text (and the floors) unchanged",
-        "case": "num-invoice-latn",
-        "engine": "chrome",
-        "expect": "the identifier is not in reading order when the break is absent",
-    },
-    {
         "id": "no-synthetic-bold",
         "rule": "both real weights declared per family",
         "claim": "a block asked for bold is set in the real 700 face, so no Type3 font appears",
@@ -104,23 +94,7 @@ def _cls(block: dict, extra: str = "") -> str:
 # sign on the left on the page. Isolation applies to (a) a cell that is nothing but an amount and (b) an inline
 # token that begins with a sign — the two places the defect exists; a bare positive number is already LTR.
 _AMOUNT = r"[0-9\u0660-\u0669\u06f0-\u06f9][0-9\u0660-\u0669\u06f0-\u06f9,./%\u066b\u066c]*"
-# A declared identifier format, not a shape heuristic. The invoice prefix (`INV-`) and the IBAN (ungrouped or
-# grouped in 4-digit blocks) are the owner's class; a new prefix/format is a deliberate addition with a case.
-# Shape-only forms matched standard names (`ISO-9001`, `COVID-19`) and split `PDF-1.7` mid-token; the declared
-# formats do not. In an RTL paragraph the readers reorder an inline identifier (PDFium `-2026-0042INV`, PDFKit
-# `0042-2026-INV`); the producer starts it on its own display line (`<br>`), and the case's logical text is
-# unchanged (a line break is whitespace to `metrics.N`), so the truth and the other readers' floors do not move.
-# `BREAK_IDENTIFIERS` is the test's off-switch (the defect half), never a production option.
-_IDENT = re.compile(
-    r"(?<![A-Za-z0-9])(?:"
-    r"INV-[A-Z0-9][A-Z0-9/-]*"                  # invoice prefix; the case declares it
-    r"|[A-Z]{2}\d{2}[A-Z0-9]{10,30}"            # IBAN, ungrouped
-    r"|[A-Z]{2}\d{2}(?:\s\d{4}){4,}"            # IBAN, grouped in 4-digit blocks
-    r")(?![A-Za-z0-9])"
-)
-_INLINE = re.compile(rf"(?P<sign>(?<![^\s(])[-−]\s?{_AMOUNT})|(?P<ident>{_IDENT.pattern})")
-_ARABIC = re.compile(r"[\u0600-\u06FF]")
-BREAK_IDENTIFIERS = True
+_SIGNED = re.compile(r"(?<![^\s(])([-\u2212]\s?" + _AMOUNT + r")")
 # Only a NEGATIVE amount is isolated: a positive number already reads left-to-right (UAX#9 gives digits
 # EN direction), so isolating it changes a case that was never broken — measured on `dig-phone`, whose `+966`
 # lost word_f1 1.0 -> 0.875 the moment it was wrapped.
@@ -133,23 +107,11 @@ def _ltr(inner: str) -> str:
 
 
 def _inline(text: str) -> str:
-    """Escape a paragraph, isolating a signed amount and starting a declared identifier on its own line.
-
-    The identifier is isolated when it follows Arabic **or** starts the paragraph (the RTL template). A
-    Latin-only line (`IBAN: SA03 …`, the `mon-iban` case) is left as written: its readers already read it and
-    breaking it would change a case that was never broken (measured: the break made `tagged-text` fail there).
-    """
+    """Escape a paragraph's text, isolating any signed amount inside it."""
     out, last = [], 0
-    for m in _INLINE.finditer(text):
-        prefix = text[last:m.start()]
-        out.append(esc(prefix))
-        if m.group("ident") is not None:
-            isolate = bool(_ARABIC.search(prefix)) or not prefix.strip()
-            if isolate and BREAK_IDENTIFIERS:
-                out.append("<br>")
-            out.append(_ltr(esc(m.group(0))) if isolate else esc(m.group(0)))
-        else:
-            out.append(_ltr(esc(m.group(0))))
+    for m in _SIGNED.finditer(text):
+        out.append(esc(text[last:m.start()]))
+        out.append(_ltr(esc(m.group(1))))
         last = m.end()
     out.append(esc(text[last:]))
     return "".join(out)

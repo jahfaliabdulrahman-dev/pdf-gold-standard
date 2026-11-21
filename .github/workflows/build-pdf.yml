@@ -166,7 +166,6 @@ jobs:
           python3 conformance/tests/test_certificate.py
           python3 conformance/tests/test_ratchet.py
           python3 conformance/tests/test_engine_behaviour.py
-          python3 conformance/tests/test_identifier_isolation.py
           python3 conformance/tests/test_mcid_text.py
           python3 conformance/tests/test_a3b_claim.py
           python3 conformance/tests/test_private_keys.py
