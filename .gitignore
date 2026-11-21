@@ -45,3 +45,6 @@ guide-check.pdf
 
 # the guide build output (a release artifact, not a source)
 guide-v2-ar.pdf
+
+# local editable install
+*.egg-info/
