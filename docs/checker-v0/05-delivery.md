@@ -1,10 +1,8 @@
 # التسليم — فاحص النسخ العربي v0
 
-**الفرع:** `feat/checker-v0` · **التزام الكود المدقق:** `37a58a8` (فوق `933daa8` فوق `6b95155` فوق `1ea3335`) ·
-**CI:** `Build PDF` تشغيل `44965336529` على `a0763cc` (الذي يحمل `37a58a8` كاملًا) = **success** — وفيه
-`MEASUREMENT COMPLETE` و`RATCHET HELD` و`BLIND ACCEPTANCE` والاختبارات الجديدة (`v2-bad-*-is-named` ·
-`examples-printable` · `why-class-drops-path`). وقبله success على `933daa8` (`44961747681`) و`b1fdcc6`
-(`44959080012`).
+**الفرع:** `feat/checker-v0` · **التزام الكود المدقق:** `f8dd571` (فوق `37a58a8` فوق `933daa8` فوق `6b95155`) ·
+**CI:** `Build PDF` تشغيل `44984490584` على `78a6b43` (الذي يحمل `f8dd571`) = **success** — وفيه
+`MEASUREMENT COMPLETE` و`RATCHET HELD` و`FONT RULES PASSED` و`BLIND ACCEPTANCE`.
 
 **ما هو:** CLI مفتوح المصدر يجيب سؤالًا واحدًا: **أين تنكسر نسخ النصّ العربي من PDF، وفي أي قارئ؟** — بلا
 إصلاح، وبلا OCR، وبلا واجهة ويب، وبلا Acrobat. يقرأ الطبقة النصّية وما يعيده خمسة قرّاء (PDFium · PDFKit ·
