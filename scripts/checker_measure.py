@@ -18,6 +18,7 @@ input directory is read, never written.
 import argparse
 import json
 import os
+import shlex
 import sys
 import tempfile
 from datetime import datetime, timezone
@@ -37,7 +38,6 @@ import checker_fixtures                                                       # 
 DOCS = {"guide": "guide-v2-ar.pdf", "report": "report.pdf", "najd": "najd.pdf", "print": "report-print.pdf"}
 OWNER_DIR = os.path.expanduser(
     "~/Library/CloudStorage/GoogleDrive-almohalhel1408@gmail.com/ملفاتي/PDF_for_PDF")
-OUT = os.path.join(REPO, "docs", "checker-v0", "measurements")
 THRESHOLDS = os.path.join(REPO, "arabic_pdf_check", "thresholds.json")
 
 
@@ -241,7 +241,7 @@ def main() -> int:
     with open(THRESHOLDS, encoding="utf-8") as fh:
         base = json.load(fh)
     derived, failures = derive(clean_rows, planted_raw, base)
-    derived["command"] = "python3 " + " ".join([os.path.relpath(__file__, REPO)] + sys.argv[1:])
+    derived["command"] = shlex.join(["python3", os.path.relpath(__file__, REPO)] + sys.argv[1:])
     if derived["values"] != base["values"] and not a.write:
         print("THRESHOLDS DIFFER — the measurement does not match the shipped manifest; "
               "review it, then re-run with --write")
@@ -287,24 +287,26 @@ def main() -> int:
             fh.write("\n")
         print(f"written: {path}")
 
-    dump("planted.json", {"generated_at": _now(), "files": accepted})
-    dump("clean.json", {"generated_at": _now(),
-                        "summary": {"files": len(clean_accept),
-                                    "file_high": len(high_files),
-                                    "files_with_reader_high": len(explained)},
-                        "files": clean_accept})
-    if owner is not None:
-        dump("owner.json", {"generated_at": _now(), **owner})
-    dump("thresholds.json", derived)
-    (lambda: open(os.path.join(a.out, "arafix.md"), "w", encoding="utf-8").write(
-        "# arafix — the orientation detector, measured\n\n"
-        f"- version: {visual_order.VERSION} (MIT)\n"
-        f"- threshold: {visual_order.THRESHOLD} (arafix DEFAULT_THRESHOLDS)\n"
-        f"- clean set: maximum orientation share {derived['observed']['clean_max_visual_share']}\n"
-        f"- planted: {json.dumps({k: v['visual_share'] for k, v in derived['observed']['planted'].items()})}\n"
-        "- mechanism: three voted signals (final-only letters, joining forms, definite article) — NOT the\n"
-        "  assignment's «share of words a lexicon reads forward vs reversed»; the difference is declared in\n"
-        "  docs/checker-v0/00-sources.md §3 and the measurements above are what the adoption rests on.\n"))()
+    def write_all() -> None:
+        """Every artifact is written here, and this is called only after every gate passed."""
+        dump("planted.json", {"generated_at": _now(), "files": accepted})
+        dump("clean.json", {"generated_at": _now(),
+                            "summary": {"files": len(clean_accept),
+                                        "file_high": len(high_files),
+                                        "files_with_reader_high": len(explained)},
+                            "files": clean_accept})
+        if owner is not None:
+            dump("owner.json", {"generated_at": _now(), **owner})
+        dump("thresholds.json", derived)
+        with open(os.path.join(a.out, "arafix.md"), "w", encoding="utf-8") as fh:
+            fh.write("# arafix — the orientation detector, measured\n\n"
+                     f"- version: {visual_order.VERSION} (MIT)\n"
+                     f"- threshold: {visual_order.THRESHOLD} (arafix DEFAULT_THRESHOLDS)\n"
+                     f"- clean set: maximum orientation share {derived['observed']['clean_max_visual_share']}\n"
+                     f"- planted: {json.dumps({k: v['visual_share'] for k, v in derived['observed']['planted'].items()})}\n"
+                     "- mechanism: three voted signals (final-only letters, joining forms, definite article) — NOT the\n"
+                     "  assignment's «share of words a lexicon reads forward vs reversed»; the difference is declared in\n"
+                     "  docs/checker-v0/00-sources.md §3 and the measurements above are what the adoption rests on.\n")
 
     if failures:
         print("SEPARATION FAILED:\n  " + "\n  ".join(failures))
@@ -312,7 +314,9 @@ def main() -> int:
     if high_files:
         print(f"CLEAN FILE ALARMS: {len(high_files)} — " + ", ".join(r["label"] for r in high_files[:5]))
         return 1
-    # The manifest is written only after every gate passed: a failing run must not replace the shipped file.
+    # Every artifact is written only after every gate passed: a failing run must not replace the deposited
+    # evidence, and the manifest must be the one produced by the run whose numbers are above.
+    write_all()
     if a.write:
         with open(THRESHOLDS, "w", encoding="utf-8") as fh:
             json.dump(derived, fh, ensure_ascii=False, indent=2)

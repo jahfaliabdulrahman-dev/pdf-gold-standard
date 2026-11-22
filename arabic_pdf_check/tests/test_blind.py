@@ -85,6 +85,11 @@ check("pages-unsupported-declared", all(r["pages"] == "unsupported" for r in uns
 check("pages-unsupported-still-reads", all(r["chars"] > 0 for r in unsupported["readers"].values()),
       str({n: r["chars"] for n, r in unsupported["readers"].items()}))
 
+# A reader's failure reason is a CLASS in the report, never the exception text (which can carry a local path
+# into a customer's document).
+check("why-class-drops-path", blind.why_class("ImportError: /Users/secret/libpdfkit.dylib") == "ImportError",
+      blind.why_class("ImportError: /Users/secret/libpdfkit.dylib"))
+
 print()
 if FAILS:
     print(f"BLIND ACCEPTANCE FAILED — {FAILS}")

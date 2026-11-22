@@ -83,6 +83,9 @@ def mismatch_examples(truth_text: str, reading: str, limit: int = 5) -> list[dic
         # Normalize THE LINE, not the whole reading: N also folds newlines into spaces, and a reading
         # normalized whole would collapse every line into one 80-character excerpt.
         line = " ".join(metrics.N(raw).split())
+        # Control characters (a PDFKit reading can carry U+0000) are not text: they would break the reader's
+        # display and are meaningless as evidence.
+        line = "".join(ch for ch in line if ch == " " or ch.isprintable())
         if not line:
             continue
         if [w for w in line.split() if w not in want]:

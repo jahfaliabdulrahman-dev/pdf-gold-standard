@@ -83,6 +83,10 @@ from conformance import runner                            # noqa: E402
 summary = runner.summarize([{"id": "probe", "category": "shape", "per_reader": shaped}], {"pdfium": None})
 check("results-shape-summarize", summary["pdfium"]["exact_cases"] == 1, str(summary)[:200])
 
+# A reading can carry control characters (PDFKit emits U+0000); an evidence excerpt must be printable text.
+ex = reference.mismatch_examples("كلمة أخرى", "سطر\u0000خاطئ\nثانٍ\u0000خاطئ")
+check("examples-printable", ex and all("\u0000" not in e["text"] for e in ex) and len(ex) == 2, str(ex))
+
 print()
 if FAILS:
     print(f"REFERENCE ACCEPTANCE FAILED — {FAILS}")
