@@ -128,50 +128,102 @@ def same_words(a: str, b: str) -> bool:
     return words_multi(a) == words_multi(b)
 
 
-def font_verdicts(scan: dict, gap_high: float = 0.0) -> list[dict]:
+def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = False) -> list[dict]:
     """The ONE per-font ToUnicode rule, shared by the gate and the checker.
 
-    · simple font, no /ToUnicode  → declared (Matterhorn 31-027 allows it), level None
+    · simple font, no /ToUnicode → declared (Matterhorn 31-027 allows it) **only** when its /Encoding is a
+      standard one (WinAnsi/MacRoman/Standard) and carries no /Differences: the exception rests on the
+      encoding or the glyph names naming every code, and this module does not verify a custom table.
     · composite font, no /ToUnicode → high: nothing names its codes
-    · a map exists and misses codes → high when the missing SHARE is above `gap_high`, else medium
-    · PUA / U+FFFD / U+0000 / U+FEFF / drawn .notdef → high (Matterhorn 31-028 … 31-030)
+    · a map exists and misses codes → high when the missing SHARE is above `gap_high` **and** (when
+      `inside_words_only`) at least one gap sits inside a word; a gap between words (a bullet, a tab) is a
+      warning. The certificate gate passes `inside_words_only=False`: certifying a file means no gap at all.
+    · a SYMBOL font (name, or every drawn code mapped into the PUA) is not a text defect: its codes ARE
+      icons. Its PUA characters are noted, never raised.
+    · PUA / U+FFFD / U+0000 / U+FEFF / drawn .notdef in a text font → high (Matterhorn 31-028 … 31-030)
 
-    The gate calls this with `gap_high=0.0` (any unmapped drawn code fails a certificate). The blind report
-    passes the measured share (`tounicode_gap_ratio`), so a 4-in-1536 gap is a medium finding and an empty
-    map is a high one. One rule with a threshold parameter — not two opinions.
+    One rule with two parameters — the gate and the report must not grow two opinions.
     """
     out = []
     for key, row in sorted(scan["fonts"].items()):
-        problems, warnings, note = [], [], None
-        if row["notdef"]:
+        problems, warnings, notes = [], [], []
+        family = row.get("family") or row.get("name") or ""
+        pua, codes = row.get("pua", 0), row.get("codes", 0)
+        symbol = bool(re.search(r"(?i)wingdings|webdings|symbol|zapfdingbats|marlett|dingbat", family)
+                      or (pua and pua >= codes))
+        if row.get("notdef"):
             problems.append(f"{row['notdef']} .notdef glyph(s) drawn")
         if not row["tounicode"]:
             if row["two_byte"]:
                 problems.append("composite font drawn with no /ToUnicode")
             else:
-                note = ("simple font without /ToUnicode — allowed by Matterhorn 31-027 when the encoding or "
-                        "the glyph names carry the mapping; declared, not alarmed")
-        ratio = (row["missing_unicode"] / row["codes"]) if row["codes"] else 0.0
-        if row["missing_unicode"] and row["tounicode"]:
-            text = f"{row['missing_unicode']} of {row['codes']} drawn codes have no Unicode value"
-            (problems if ratio > gap_high else warnings).append(text)
-        if row["pua"]:
-            problems.append(f"{row['pua']} mapped character(s) in the private use area")
-        if row["replacement"]:
+                base = (row.get("encoding") or "").lstrip("/")
+                standard = base in ("WinAnsiEncoding", "MacRomanEncoding", "StandardEncoding")
+                if standard:
+                    notes.append("simple font without /ToUnicode — Matterhorn 31-027: a standard encoding "
+                                 f"({base}) names every code"
+                                 + ("; its /Differences glyph names are not verified here" if
+                                    row.get("encoding_differences") else "")
+                                 + "; declared, not alarmed")
+                elif not base and not row.get("encoding_differences"):
+                    # No /Encoding at all: the font's built-in encoding applies, and this scan cannot verify
+                    # it. Declared as a limitation (the same stance as the pre-existing report), not raised.
+                    notes.append("simple font without /ToUnicode and no /Encoding — the built-in mapping is "
+                                 "not verified here; declared as a limitation, not alarmed")
+                else:
+                    problems.append(
+                        "simple font without /ToUnicode and "
+                        + (f"encoding /{base}" if base else "no /Encoding")
+                        + (" with /Differences" if row.get("encoding_differences") else "")
+                        + " — the mapping is not verifiable; 31-027 rests on a standard encoding")
+        ratio = (row.get("missing_unicode", 0) / codes) if codes else 0.0
+        if row.get("missing_unicode") and row["tounicode"]:
+            detail = _gap_detail(row)
+            text = f"{row['missing_unicode']} of {codes} drawn codes have no Unicode value{detail}"
+            over = ratio > gap_high
+            inside = bool(row.get("missing_in_word", 0))
+            empty_map = bool(codes) and row.get("missing_unicode", 0) >= codes
+            if over and (inside or empty_map or not inside_words_only):
+                problems.append(text)
+            else:
+                warnings.append(text + (" (between words: a bullet/tab, not a broken word)"
+                                        if not inside else ""))
+        if pua:
+            if symbol:
+                notes.append(f"symbol font: {pua} icon code(s) in the private use area — not text")
+            else:
+                problems.append(f"{pua} mapped character(s) in the private use area")
+        if row.get("replacement"):
             problems.append(f"{row['replacement']} mapped character(s) to U+FFFD")
-        if row["zero_value"]:
+        if row.get("zero_value"):
             problems.append(f"{row['zero_value']} mapped character(s) to U+0000 (Matterhorn 31-028)")
-        if row["bom"]:
+        if row.get("bom"):
             problems.append(f"{row['bom']} mapped character(s) to U+FEFF/U+FFFE (Matterhorn 31-029)")
         out.append({"key": key, "name": row["family"] or row["name"], "family": row["family"],
                     "subtype": row["subtype"], "embedded": row["embedded"],
-                    "tounicode": row["tounicode"], "two_byte": row["two_byte"], "codes": row["codes"],
-                    "missing_unicode": row["missing_unicode"], "gap_ratio": round(ratio, 4),
-                    "notdef": row["notdef"], "pua": row["pua"], "replacement": row["replacement"],
-                    "zero_value": row["zero_value"], "bom": row["bom"],
+                    "tounicode": row["tounicode"], "two_byte": row["two_byte"], "codes": codes,
+                    "encoding": row.get("encoding", ""),
+                    "encoding_differences": row.get("encoding_differences", False),
+                    "missing_unicode": row.get("missing_unicode", 0),
+                    "missing_in_word": row.get("missing_in_word", 0), "gap_ratio": round(ratio, 4),
+                    "missing_examples": _gap_codes(row),
+                    "notdef": row["notdef"], "pua": pua, "replacement": row["replacement"],
+                    "zero_value": row["zero_value"], "bom": row["bom"], "symbol": symbol,
                     "level": "high" if problems else ("medium" if warnings else None),
-                    "problems": problems, "warnings": warnings, "note": note})
+                    "problems": problems, "warnings": warnings, "note": " · ".join(notes) or None})
     return out
+
+
+def _gap_codes(row: dict, limit: int = 5) -> list[str]:
+    names = row.get("glyph_names") or {}
+    codes = row.get("missing_codes") or {}
+    top = sorted(codes.items(), key=lambda kv: -kv[1])[:limit]
+    return [f"0x{int(c):02X}" + (f" ({names[c]})" if c in names else "") for c, _ in top]
+
+
+def _gap_detail(row: dict) -> str:
+    codes = _gap_codes(row, 4)
+    return f" [{', '.join(codes)}]" if codes else ""
 
 
 def layer_seq(text: str) -> list[str]:
@@ -449,10 +501,8 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             # level None there and passes here; a composite one, or a map with gaps, is high and fails. The
             # gate consumes that verdict instead of restating the rule.
             v = verdicts.get(name) or {}
-            if v.get("level") == "high" and not v.get("tounicode"):
-                bad_fonts.append(f"{info['family'] or name}: composite font with no /ToUnicode")
-            elif v.get("level") == "high" and v.get("missing_unicode"):
-                bad_fonts.append(f"{info['family'] or name}: {v['missing_unicode']} code(s) have no Unicode value")
+            if v.get("level") == "high" and (not v.get("tounicode") or v.get("missing_unicode")):
+                bad_fonts.append(f"{info['family'] or name}: {v['problems'][0]}")
             if not any(norm(info["family"]).startswith(a) for a in allowed if a):
                 bad_fonts.append(f"{info['family'] or name}: not the case's font ({declared}) nor the declared "
                                  f"fallback")

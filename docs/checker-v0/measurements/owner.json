@@ -1,7 +1,8 @@
 {
  "by_file_level": {
-  "high": 41,
-  "low": 14
+  "high": 38,
+  "low": 16,
+  "medium": 1
  },
  "by_reader_risk": {
   "mupdf": {
@@ -28,11 +29,11 @@
   "no-text-layer": 1,
   "numerals-mixed": 3,
   "presentation-forms": 29,
-  "tounicode-gaps": 75,
+  "tounicode-gaps": 62,
   "visual-order": 15
  },
  "errors": 0,
  "files": 55,
- "generated_at": "2026-11-21T23:17:46Z",
+ "generated_at": "2026-11-22T04:10:21Z",
  "measured": 55
 }

@@ -35,13 +35,18 @@ MuPDF · Poppler · pdfminer)، ويصدر تقريرًا عربيًا (Markdown
 | القياس | القيمة |
 |---|---|
 | الملفات | 55 (قُرئت كلها، 0 أخطاء) |
-| حكم الملف | **41 عالٍ · 14 منخفض** |
-| `tounicode-gaps` | 75 |
+| حكم الملف | **38 عالٍ · 1 متوسط · 16 منخفض** |
+| `tounicode-gaps` (عدد الإشارات؛ الملف قد يحمل أكثر من واحدة) | 62 |
 | `presentation-forms` | 29 |
 | `visual-order` | 15 |
 | `numerals-mixed` | 3 |
 | `no-text-layer` | 1 |
 | القرّاء (عالٍ/منخفض) | pdfminer 55/0 · mupdf 30/25 · pdfkit 30/25 · poppler 30/25 · pdfium 14/41 |
+
+**بعد مراجعة المالك (P1):** خط الرموز لا يُرفع (اسمٌ معروف أو كل رموزه PUA)، وفجوة الخريطة عالية **فقط داخل
+كلمة**؛ بين الكلمات تحذير يسمّي الـcode (مثلًا Calibri `0x2D` 21/336 — شرطة، لا نص). الأثر المقيس: 41 → 38
+عالٍ، و14 → 16 منخفضًا + واحد متوسط، وإشارات `tounicode-gaps` 75 → 62، مع بقاء `presentation-forms 29`
+و`visual-order 15` بلا تغيير. التفاصيل والقياس قبل/بعد في `04-review.md` (الجولة الخامسة).
 
 **لا حكم على المجموعة** — قياس فقط؛ التوزيع نفسه هو النتيجة. (المجلد يُقرأ ولا يُكتب؛ ولا شيء منه في git.)
 
@@ -72,13 +77,20 @@ MuPDF · Poppler · pdfminer)، ويصدر تقريرًا عربيًا (Markdown
 الأمر: `python3 scripts/checker_measure.py --write --out docs/checker-v0/measurements` · القياس المودع يطابق
 المشحون (`test_thresholds`)، والكتابة لا تحدث إلا بعد نجاح كل البوابات.
 
+**عتبة من منتِج آخر (P2):** `docs/checker-v0/foreign/` يحمل مصدري HTML يُنتجان بـLibreOffice، و
+`scripts/checker_foreign.py` يقيسهما بلا كتابة عتبات: الملفان **ليسا عاليين** (واحد متوسط بفجوة بين كلمات،
+وواحد منخفض) — القياس في `measurements/foreign.json`. العتبة **لم تُعَد اشتقاقها**: تنتظر حكم المالك البشري
+على الملفات الخمسة ثم تُعاير من المجموعتين.
+
 ## 6 · ما تحقّق حيًّا في هذه الجلسة
 
 - **الخبرة عبر Claude:** استشارتان على الخطة (Round 1 + Round 2) — REQUEST CHANGES كلتاهما، محفوظتان في
   `docs/checker-v0/02-claude-round*.md`.
-- **ثلاث جولات مراجعة مستقلّة بثلاثة مقاعد** (Standards · Spec · Structure): على `d78a894`، ثم تدقيق
-  إصلاح على `1ea3335`، ثم تحقّق على `6b95155` — وكل ملاحظة أُصلحت أو رُفضت بقياس مكتوب، والإصلاحات
-  النهائية في `933daa8`: `docs/checker-v0/04-review.md`.
+- **أربع جولات مراجعة مستقلّة بثلاثة مقاعد** (Standards · Spec · Structure): على `d78a894`، ثم تدقيق
+  إصلاح على `1ea3335`، ثم تحقّق على `6b95155`، ثم توقيع على `933daa8` — وكل ملاحظة أُصلحت أو رُفضت بقياس
+  مكتوب: `docs/checker-v0/04-review.md`.
+- **مراجعة المالك الخارجية** (`bb21128`): P1 (إنذار رموز التعداد) · P2 (عتبة من منتِج واحد) · P3 (بوابة
+  `fonts` وتسمية العدّاد) — أُغلقت في الالتزام التالي؛ الأثر المقيس في §3 أعلاه، وP2 في §5.
 - **تشغيل حيّ:** `conformance run --ratchet` (RATCHET HELD) · `selftest` (17/17) · بوابات المستندات
   (39/39 ×4) · كل اختبارات الفاحص وconformance (أدناه).
 
@@ -88,7 +100,7 @@ MuPDF · Poppler · pdfminer)، ويصدر تقريرًا عربيًا (Markdown
 arabic_pdf_check/tests: isolation · fonts · thresholds · schema · pages · privacy · reference · blind
 conformance/tests: declared · certificate · mcid_text · ratchet · limits · engine_behaviour ·
                    private_keys · a3b_claim · corpus · metrics · isolation
-scripts: test_check_kinds (39 checks) · scripts/checker_measure.py --skip-owner
+scripts: test_check_kinds (39 checks) · scripts/checker_measure.py --skip-owner · scripts/checker_foreign.py
 conformance run --engine chrome --ratchet · conformance selftest
 ```
 
@@ -101,12 +113,16 @@ conformance run --engine chrome --ratchet · conformance selftest
 3. **أمثلة الشهادة المرجعية `page: null`:** النصّ الحرّ لا يحمل بنية صفحات؛ أُعلن القيد في `not_checked`.
    القرار: إقراره، أو تزويد النصّ المرجعي بفواصل صفحات.
 4. **النشر/الدمج:** الفرع مدفوع، ولم أفتح PR ولم أدمج — الدمج وCI النهائي للمالك.
+5. **التحقق البشري (10 دقائق):** خمسة ملفات سُمّيت في المحادثة؛ انسخ صفحة من كلٍّ في Preview وقل: هل ضاع
+   نص؟ جوابك هو مرجع P1، وعليه (مع مجموعة LibreOffice) تُعاير `tounicode_gap_ratio` من المجموعتين.
 
 ## 9 · ما لم يُثبت
 
-**لا شيء ممّا في هذا التقرير بلا أمر يعيده.** كل رقم أعلى يخرج من أمر مذكور في `docs/checker-v0/README.md`،
-ومخرجاته في `docs/checker-v0/measurements/`. (حدود مشتركة معروفة ومعلنة: PDFium 5.15.2 في صف المفتاح/القيمة،
-وMuPDF في انعكاس مجرى الأرقام — في `limitations.json` بضوابطها.)
+- **حكم النسخ البشري** على الملفات الخمسة لم يحدث بعد — لذلك لا يُعلَن أن إشارات الفجوات كلها صحيحة، ولا أن
+  الـ38/16/1 هي «الحكم النهائي» على الكوربوس؛ هي قياس الأداة بعد قواعد جديدة.
+- **تعميم العتبة** على منتِجين: عُرضت LibreOffice (ملفان، لا عالٍ) كدليل أولي، لا كافٍ لإعادة اشتقاق.
+- **حدود مشتركة معروفة ومعلنة:** PDFium 5.15.2 في صف المفتاح/القيمة، وMuPDF في انعكاس مجرى الأرقام —
+  في `limitations.json` بضوابطها. وما عدا ذلك كل رقم أعلى يخرج من أمر مذكور، ومخرجاته في `measurements/`.
 
 ## 10 · ما لا يفعله (معلن)
 

@@ -1,0 +1,28 @@
+{
+ "directory": "foreign-set",
+ "files": 2,
+ "high": 0,
+ "rows": [
+  {
+   "file": "lo-arabic-body.pdf",
+   "sha256": "8c8739f28dcc92b5534441268412529c2fbc63bbb0d6f366c203dda202780f09",
+   "level": "medium",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium"
+    }
+   ]
+  },
+  {
+   "file": "lo-arabic-table.pdf",
+   "sha256": "abbe3e705ffaf4f48fd22053a8d14dae85023a0e7589ac18001daa5e3b11913d",
+   "level": "low",
+   "signals": []
+  }
+ ]
+}
