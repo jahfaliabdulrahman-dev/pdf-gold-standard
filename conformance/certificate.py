@@ -322,13 +322,19 @@ def validate(cert_path: str, pdf_path: str, do_recheck: bool = False,
     if schema_path is None:
         return [f"unknown schema_version {version!r} — a certificate names its own shape"]
     if cert.get("schema_version") == "certificate/2":
-        source0 = cert.get("source") or {}
+        source0 = cert.get("source")
+        readers0 = cert.get("readers")
+        if not isinstance(source0, dict) or not isinstance(readers0, dict):
+            return ["source and readers must be JSON objects (the schema names the exact shape)"]
         if source0.get("kind") == "truth" and not (source0.get("text_sha256") or source0.get("sha256")):
             return [f"source.kind is 'truth' but the certificate names no text hash "
                     f"(text_sha256 or sha256); it cannot be re-measured"]
-        if source0.get("text_sha256"):
-            bare = [n for n, r in (cert.get("readers") or {}).items()
-                    if "confidence" not in r or "examples" not in r]
+        # A certificate the current emitter produced carries text_sha256 or missing_readers; one that does
+        # and lacks per-reader evidence is refused. A legacy/2 certificate (sha256 only, no missing_readers)
+        # predates the fields and stays valid — validate says so, the schema cannot express "issued before".
+        if source0.get("text_sha256") or "missing_readers" in cert:
+            bare = [n for n, r in readers0.items()
+                    if not isinstance(r, dict) or "confidence" not in r or "examples" not in r]
             if bare:
                 return [f"certificate/2 (new shape) without per-reader confidence/examples: {bare} — "
                         f"the assignment's report requires both for every reader"]

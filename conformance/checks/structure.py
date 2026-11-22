@@ -449,9 +449,10 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             # level None there and passes here; a composite one, or a map with gaps, is high and fails. The
             # gate consumes that verdict instead of restating the rule.
             v = verdicts.get(name) or {}
-            tu = [p for p in v.get("problems", []) if "ToUnicode" in p or "Unicode value" in p]
-            if v.get("level") == "high" and tu:
-                bad_fonts.append(f"{info['family'] or name}: {tu[0]}")
+            if v.get("level") == "high" and not v.get("tounicode"):
+                bad_fonts.append(f"{info['family'] or name}: composite font with no /ToUnicode")
+            elif v.get("level") == "high" and v.get("missing_unicode"):
+                bad_fonts.append(f"{info['family'] or name}: {v['missing_unicode']} code(s) have no Unicode value")
             if not any(norm(info["family"]).startswith(a) for a in allowed if a):
                 bad_fonts.append(f"{info['family'] or name}: not the case's font ({declared}) nor the declared "
                                  f"fallback")

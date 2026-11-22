@@ -103,6 +103,20 @@ with open(doctored_path, "w", encoding="utf-8") as fh:
 problems = certificate.validate(doctored_path, PDF)
 check("v2-validate-requires-evidence", any("confidence" in p for p in problems), "; ".join(problems[:3]))
 
+# A malformed certificate is a NAMED refusal, never a traceback: `source`/`readers` of the wrong JSON type
+# reach the new-shape guard before the schema runs, so the guard must check them.
+for field, bad in (("source", "x"), ("readers", ["pdfium"])):
+    broken = json.loads(json.dumps(cert))
+    broken[field] = bad
+    bpath = os.path.join(tmp, f"bad-{field}.json")
+    with open(bpath, "w", encoding="utf-8") as fh:
+        json.dump(broken, fh, ensure_ascii=False)
+    try:
+        out = certificate.validate(bpath, PDF)
+        check(f"v2-bad-{field}-is-named", any("JSON objects" in p for p in out), "; ".join(out[:2]))
+    except Exception as exc:                                     # noqa: BLE001 - the point is the absence
+        check(f"v2-bad-{field}-is-named", False, f"{type(exc).__name__}: {exc}")
+
 # ---- a BOM in the customer's truth file is a byte-order mark, not the first character of the text
 bom_truth = os.path.join(tmp, "bom.txt")
 with open(bom_truth, "w", encoding="utf-8-sig") as fh:

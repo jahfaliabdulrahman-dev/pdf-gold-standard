@@ -32,8 +32,8 @@ for name in ok:
     text = text_many(name, [PDF])[0]
     pages = pages_many(name, [PDF])
     check(f"{name}:pages-present-or-unsupported",
-          pages is None or len(pages) >= 1,
-          "a reader with pages_many returned no pages (the report declares `pages: unsupported`)")
+          pages is None or (len(pages) >= 1 and len(pages[0]) >= 1),
+          "a reader with pages_many returned zero pages")
     if not pages:
         continue
     joined = "\n".join(pages[0])

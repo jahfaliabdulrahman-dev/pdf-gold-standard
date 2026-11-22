@@ -65,6 +65,7 @@ MuPDF · Poppler · pdfminer)، ويصدر تقريرًا عربيًا (Markdown
 | `tounicode_gap_ratio` | 0.01 | `max(declared 0.01, clean_max 0.0)` — فوقه عالٍ، تحته متوسط |
 | أغلبية الترتيب | 3 من 5 | **بنيوية** (`len(MATRIX)//2+1`) لا عتبة مقيسة |
 | شكل خلاف القرّاء المتري | **مرفوض** | `content_f1` = 0.0 بين قرّاء نظيفين على الحالات القصيرة (`observed.refused`) |
+| شهادة قديمة الشكل | تُقبل بلا `confidence/examples` | سُكّت قبل الحقلين (معلن في `certificate.validate`)؛ المُصدِر الحالي لا يكتب ذلك الشكل |
 
 الأمر: `python3 scripts/checker_measure.py --write --out docs/checker-v0/measurements` · القياس المودع يطابق
 المشحون (`test_thresholds`)، والكتابة لا تحدث إلا بعد نجاح كل البوابات.
@@ -73,8 +74,9 @@ MuPDF · Poppler · pdfminer)، ويصدر تقريرًا عربيًا (Markdown
 
 - **الخبرة عبر Claude:** استشارتان على الخطة (Round 1 + Round 2) — REQUEST CHANGES كلتاهما، محفوظتان في
   `docs/checker-v0/02-claude-round*.md`.
-- **مراجعتان مستقلّتان بثلاثة مقاعد** (Standards · Spec · Structure) على `d78a894` ثم تدقيق إصلاح على
-  `1ea3335`: كل الملاحظات أُصلحت أو رُفضت بقياس مكتوب — `docs/checker-v0/04-review.md`.
+- **ثلاث جولات مراجعة مستقلّة بثلاثة مقاعد** (Standards · Spec · Structure): على `d78a894`، ثم تدقيق
+  إصلاح على `1ea3335`، ثم تحقّق على `6b95155` — وكل ملاحظة أُصلحت أو رُفضت بقياس مكتوب، والإصلاحات
+  النهائية في `933daa8`: `docs/checker-v0/04-review.md`.
 - **تشغيل حيّ:** `conformance run --ratchet` (RATCHET HELD) · `selftest` (17/17) · بوابات المستندات
   (39/39 ×4) · كل اختبارات الفاحص وconformance (أدناه).
 

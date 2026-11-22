@@ -122,6 +122,12 @@ def _font_signals(scan: dict, gap_high: float = 0.01) -> tuple[list[dict], list[
     return signals, rows
 
 
+def why_class(why) -> str:
+    """The failure CLASS only, never the exception text: an ImportError message can carry a local path, and
+    this string goes into a customer's report and certificate."""
+    return (str(why).split(":")[0].strip() or "unavailable")[:60]
+
+
 def check(pdf_path: str, thresholds: dict) -> dict:
     ok, missing = available()
     if not ok:
@@ -301,7 +307,7 @@ def check(pdf_path: str, thresholds: dict) -> dict:
                            "signals": reader_signals[name],
                            "examples": examples[name]}
                     for name in ok},
-        "missing_readers": missing,
+        "missing_readers": {n: why_class(w) for n, w in missing.items()},
         "fonts": font_rows,
         "signals": file_signals,
         "risk": {"level": total, "confidence": _confidence(at_top), "causes": causes,
