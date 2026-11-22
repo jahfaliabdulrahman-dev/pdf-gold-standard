@@ -220,6 +220,22 @@
             "type": "integer",
             "minimum": 0
           },
+          "missing_in_word": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "encoding": {
+            "type": "string"
+          },
+          "missing_examples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "symbol": {
+            "type": "boolean"
+          },
           "notdef": {
             "type": "integer",
             "minimum": 0

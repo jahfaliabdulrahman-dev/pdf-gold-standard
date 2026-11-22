@@ -105,10 +105,14 @@ def _font_signals(scan: dict, gap_high: float = 0.01) -> tuple[list[dict], list[
     the report and the certificate disagree about one font.
     """
     signals, rows = [], []
-    for v in structure.font_verdicts(scan, gap_high):
+    # A diagnosis, not a certificate: a gap between words (a bullet, a tab) is a warning, and a gap inside a
+    # word is the finding. The certificate gate calls the same rule with `inside_words_only=False`.
+    for v in structure.font_verdicts(scan, gap_high, inside_words_only=True):
         rows.append({"font": v["key"], "family": v["family"], "subtype": v["subtype"],
                      "embedded": v["embedded"], "tounicode": v["tounicode"],
                      "two_byte": v["two_byte"], "codes": v["codes"],
+                     "encoding": v["encoding"], "missing_in_word": v["missing_in_word"],
+                     "missing_examples": v["missing_examples"], "symbol": v["symbol"],
                      "missing_unicode": v["missing_unicode"], "notdef": v["notdef"],
                      "pua": v["pua"], "replacement": v["replacement"],
                      "zero_value": v["zero_value"], "bom": v["bom"], "note": v["note"]})
