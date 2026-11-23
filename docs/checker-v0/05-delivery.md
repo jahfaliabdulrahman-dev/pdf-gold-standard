@@ -17,9 +17,11 @@ MuPDF · Poppler · pdfminer)، ويصدر تقريرًا عربيًا (Markdown
 | `planted-chrome-raw` | `presentation-forms` | `presentation-forms` | عالٍ |
 | `planted-presentation-forms` | `presentation-forms` | `presentation-forms` + `visual-order` | عالٍ |
 | `planted-no-tounicode` | `tounicode-gaps` | `tounicode-gaps` + `no-text-layer` | عالٍ |
+| `planted-letter-swap` | `lexical-validity` | `visual-order` + `lexical-validity` | عالٍ |
 
-**4/4 ناجحة** (`scripts/checker_measure.py --write`، `arabic_pdf_check/tests/test_blind.py`). لا PDF
-مزروع في المستودع: الملفات يبنيها مولّدها بالـChrome المثبّت.
+**5/5 ناجحة** (`scripts/checker_measure.py --write`، `arabic_pdf_check/tests/test_blind.py`). لا PDF
+مزروع في المستودع: الملفات يبنيها مولّدها بالـChrome المثبّت. الخامسة تزرع ما لا تراه إشارة ترتيب أو شكل:
+حروف صحيحة بالترتيب، وكلمات لا وجود لها — يراها المعجم وحدها.
 
 ## 2 · النظيفة (المستندات الأربعة + 66 حالة)
 
@@ -33,18 +35,21 @@ MuPDF · Poppler · pdfminer)، ويصدر تقريرًا عربيًا (Markdown
 | القياس | القيمة |
 |---|---|
 | الملفات | 55 (قُرئت كلها، 0 أخطاء) |
-| حكم الملف | **38 عالٍ · 1 متوسط · 16 منخفض** |
+| حكم الملف | **32 عالٍ · 8 متوسط · 15 منخفض** |
 | `tounicode-gaps` (عدد الإشارات؛ الملف قد يحمل أكثر من واحدة) | 62 |
 | `presentation-forms` | 29 |
 | `visual-order` | 15 |
+| `lexical-validity` | 4 |
 | `numerals-mixed` | 3 |
 | `no-text-layer` | 1 |
 | القرّاء (عالٍ/منخفض) | pdfminer 55/0 · mupdf 30/25 · pdfkit 30/25 · poppler 30/25 · pdfium 14/41 |
 
-**بعد مراجعة المالك (P1):** خط الرموز لا يُرفع (اسمٌ معروف أو كل رموزه PUA)، وفجوة الخريطة عالية **فقط داخل
-كلمة**؛ بين الكلمات تحذير يسمّي الـcode (مثلًا Calibri `0x2D` 21/336 — شرطة، لا نص). الأثر المقيس: 41 → 38
-عالٍ، و14 → 16 منخفضًا + واحد متوسط، وإشارات `tounicode-gaps` 75 → 62، مع بقاء `presentation-forms 29`
-و`visual-order 15` بلا تغيير. التفاصيل والقياس قبل/بعد في `04-review.md` (الجولة الخامسة).
+**بعد مراجعة المالك (P1):** خط الرموز لا يُرفع، وفجوة الخريطة عالية **فقط داخل كلمة**؛ ثم من حكمه البشري على
+الملفين المتعاكسين: **`lexical-validity`** (كلمات كل قارئ في معجم، عالٍ إذا فشلت الأغلبية) صار الإشارة التي
+تفصل «حروف صحيحة وكلمات لا وجود لها» من «خريطة فارغة والقرّاء يستردّون النص». خريطة فارغة + استرداد
+الأغلبية ⇒ **متوسط** «قارئ لا يستنتج من الخط سينسخ فراغًا»، لا عالٍ. الأثر: 38 → **32 عالٍ**، و1 → **8 متوسط**،
+و16 → **15 منخفض**؛ `presentation-forms 29` و`visual-order 15` بلا تغيير؛ `lexical-validity` في 4 ملفات،
+وملف واحد يقوم حكمه العالي عليها وحدها. التفاصيل في `04-review.md` (الجولتان الخامسة والسادسة).
 
 **لا حكم على المجموعة** — قياس فقط؛ التوزيع نفسه هو النتيجة. (المجلد يُقرأ ولا يُكتب؛ ولا شيء منه في git.)
 
@@ -68,6 +73,8 @@ MuPDF · Poppler · pdfminer)، ويصدر تقريرًا عربيًا (Markdown
 | `visual_order` | 0.30 | arafix `DEFAULT_THRESHOLDS` (MIT) — تُمرَّر إلى `diagnose` |
 | `min_arabic_chars` | 8 | arafix (يُعلَن استعمالها المزدوج: حكم الاتجاه + «هل هذا مستند عربي؟») |
 | `tounicode_gap_ratio` | 0.01 | `max(declared 0.01, clean_max 0.0)` — فوقه عالٍ، تحته متوسط |
+| `lexical_validity` | **0.42** | أدنى قيمة في النظيفة (0.619) − 0.20؛ والملفان المحسومان 0.733 / 0.299 |
+| `lexical_min_runs` | 20 | أقل من ذلك لا يُحكم (لا مرور ولا فشل) |
 | أغلبية الترتيب | 3 من 5 | **بنيوية** (`len(MATRIX)//2+1`) لا عتبة مقيسة |
 | شكل خلاف القرّاء المتري | **مرفوض** | `content_f1` = 0.0 بين قرّاء نظيفين على الحالات القصيرة (`observed.refused`) |
 | شهادة قديمة الشكل | تُقبل بلا `confidence/examples` | سُكّت قبل الحقلين (معلن في `certificate.validate`)؛ المُصدِر الحالي لا يكتب ذلك الشكل |

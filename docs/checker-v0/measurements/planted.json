@@ -9,6 +9,16 @@
    "overall": "high",
    "pass": true
   },
+  "planted-letter-swap": {
+   "expected_signal": "lexical-validity",
+   "file_level": "high",
+   "file_signals": [
+    "visual-order",
+    "lexical-validity"
+   ],
+   "overall": "high",
+   "pass": true
+  },
   "planted-mupdf-logical": {
    "expected_signal": "visual-order",
    "file_level": "high",
@@ -39,5 +49,5 @@
    "pass": true
   }
  },
- "generated_at": "2026-11-22T04:10:21Z"
+ "generated_at": "2026-11-23T14:36:03Z"
 }

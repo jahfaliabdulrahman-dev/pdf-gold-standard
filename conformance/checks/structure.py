@@ -128,7 +128,8 @@ def same_words(a: str, b: str) -> bool:
     return words_multi(a) == words_multi(b)
 
 
-def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = False) -> list[dict]:
+def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = False,
+                  recovered: bool | None = None) -> list[dict]:
     """The ONE per-font ToUnicode rule, shared by the gate and the checker.
 
     · simple font, no /ToUnicode → declared (Matterhorn 31-027 allows it) **only** when its /Encoding is a
@@ -199,6 +200,22 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
             problems.append(f"{row['zero_value']} mapped character(s) to U+0000 (Matterhorn 31-028)")
         if row.get("bom"):
             problems.append(f"{row['bom']} mapped character(s) to U+FEFF/U+FFFE (Matterhorn 31-029)")
+        empty_mapping = (not row["tounicode"]) or bool(row["tounicode"] and codes
+                                                      and row.get("missing_unicode", 0) >= codes)
+        level = "high" if problems else ("medium" if warnings else None)
+        # The owner's P1 (2026-11-23): an empty map is a structural fact, not a verdict. Two files carried the
+        # same empty map and opposite realities — readers inferred the letters from the embedded font in one,
+        # and returned lexically nonexistent words in the other. When the caller measured that the readers
+        # RECOVER the text (lexical validity), the empty map is a declared warning: a reader that does not
+        # infer from the font will still copy nothing. The certificate gate passes recovered=None and keeps
+        # the strict rule (it has the truth text; the report has only readings).
+        if recovered is True and level == "high" and empty_mapping and all(
+                ("/ToUnicode" in p or "no Unicode value" in p) for p in problems):
+            warnings.extend(problems)
+            problems = []
+            warnings.append("readers recover the text from the embedded font (lexical validity) — declared, "
+                            "not raised; a reader that does not infer letters from the font will copy nothing")
+            level = "medium"
         out.append({"key": key, "name": row["family"] or row["name"], "family": row["family"],
                     "subtype": row["subtype"], "embedded": row["embedded"],
                     "tounicode": row["tounicode"], "two_byte": row["two_byte"], "codes": codes,
@@ -209,7 +226,7 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
                     "missing_examples": _gap_codes(row),
                     "notdef": row["notdef"], "pua": pua, "replacement": row["replacement"],
                     "zero_value": row["zero_value"], "bom": row["bom"], "symbol": symbol,
-                    "level": "high" if problems else ("medium" if warnings else None),
+                    "level": level,
                     "problems": problems, "warnings": warnings, "note": " · ".join(notes) or None})
     return out
 

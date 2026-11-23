@@ -9,8 +9,9 @@ Four planted files, each a named defect, and one clean base built by the pipelin
   2. `planted-chrome-raw`      — the corpus case built by the raw engine, before `fix_text_layer`: the text
                                  layer carries presentation forms.
   3. `planted-presentation-forms` — MuPDF writes the same text with the presentation-form characters.
-  4. `planted-no-tounicode`    — the clean Chrome file with every `/ToUnicode` removed: drawn codes with no
-                                 Unicode value (Matterhorn 10-001 / 31-027).
+  5. `planted-letter-swap`     — correct Arabic order, and every word has two letters swapped: the letters are
+                                 shaped, the words do not exist. The mutation the owner's review asked for:
+                                 no order or form signal sees it; only lexical validity does.
 
 No generated PDF is committed (the assignment's rule; and a fixture that drifts from its generator is a
 measurement of the wrong file). `build_all` is imported by the tests, and the CLI writes the set to a
@@ -39,7 +40,42 @@ PLANTED = {
     "planted-chrome-raw": "presentation-forms",
     "planted-presentation-forms": "presentation-forms",
     "planted-no-tounicode": "tounicode-gaps",
+    "planted-letter-swap": "lexical-validity",
 }
+
+SWAP_WORDS = ("الكتاب المدرسي يحتوي الدروس الجديدة الفصل الطلاب يقرؤون النصوص بسهولة المعلم الشرح "
+              "الواضح أمثلة تدريب نتائج الاختبار المراجعة الأسئلة الواجبات المنزلية المكتبة الحاسوب "
+              "الشبكة البرمجة الخوارزمية البيانات القواعد التطبيق المشروع التقرير العرض المناقشة "
+              "الملاحظات الدرجات النهائية").split()
+
+
+def _letter_swapped(text: str) -> str:
+    """Swap two adjacent letters in EVERY word; refuse a swap that happens to be a real word.
+
+    The point is a text whose letters are shaped and whose order is correct, but whose words do not exist —
+    no orientation or presentation-form signal can see it. The refusal keeps the fixture honest: if a swap
+    lands on a lexicon word (forward or reversed), the fixture would not be planted.
+    """
+    from conformance.checks import lexical
+    vocab = lexical.lexicon()
+    out = []
+    for word in text.split():
+        for i in range(1, len(word) - 1):
+            cand = word[:i] + word[i + 1] + word[i] + word[i + 2:]
+            n = lexical.normalize(cand)
+            if n not in vocab and n[::-1] not in vocab:
+                out.append(cand)
+                break
+        else:
+            raise RuntimeError(f"{word!r}: no letter swap makes a non-word — pick another fixture word")
+    return " ".join(out)
+
+
+def _swap_text() -> str:
+    """40 Arabic runs (the declared minimum is 20, and a reading must clear it on every reader) of correct
+    order and nonexistent words."""
+    lines = [" ".join(SWAP_WORDS[i:i + 5]) for i in range(0, 40, 5)]
+    return "\n".join(_letter_swapped(line) for line in lines)
 
 
 def _mupdf_pdf(body: str, path: str) -> str:
@@ -96,6 +132,7 @@ def build_all(out_dir: str | None = None) -> dict:
         "planted-presentation-forms": _mupdf_pdf(_presentation_forms(TEXT),
                                                  os.path.join(out_dir, "planted-presentation-forms.pdf")),
         "planted-no-tounicode": _strip_tounicode(clean, os.path.join(out_dir, "planted-no-tounicode.pdf")),
+        "planted-letter-swap": _mupdf_pdf(_swap_text(), os.path.join(out_dir, "planted-letter-swap.pdf")),
     }
     return {"clean": clean, "planted": planted, "dir": out_dir}
 

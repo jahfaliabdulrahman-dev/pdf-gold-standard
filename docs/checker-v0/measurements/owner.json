@@ -1,31 +1,32 @@
 {
  "by_file_level": {
-  "high": 38,
-  "low": 16,
-  "medium": 1
+  "high": 32,
+  "low": 15,
+  "medium": 8
  },
  "by_reader_risk": {
   "mupdf": {
-   "high": 30,
-   "low": 25
+   "high": 33,
+   "low": 22
   },
   "pdfium": {
-   "high": 14,
-   "low": 41
+   "high": 17,
+   "low": 38
   },
   "pdfkit": {
-   "high": 30,
-   "low": 25
+   "high": 32,
+   "low": 23
   },
   "pdfminer": {
    "high": 55
   },
   "poppler": {
-   "high": 30,
-   "low": 25
+   "high": 32,
+   "low": 23
   }
  },
  "by_signal": {
+  "lexical-validity": 4,
   "no-text-layer": 1,
   "numerals-mixed": 3,
   "presentation-forms": 29,
@@ -34,6 +35,6 @@
  },
  "errors": 0,
  "files": 55,
- "generated_at": "2026-11-22T04:10:21Z",
+ "generated_at": "2026-11-23T14:36:03Z",
  "measured": 55
 }

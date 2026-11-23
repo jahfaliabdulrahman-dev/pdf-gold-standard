@@ -30,7 +30,7 @@ import itertools                                    # noqa: E402
 
 from arabic_pdf_check import blind                  # noqa: E402
 from conformance import reference                    # noqa: E402
-from conformance.checks import mcid_text, metrics, structure, visual_order   # noqa: E402
+from conformance.checks import lexical, mcid_text, metrics, structure, visual_order   # noqa: E402
 from conformance.readers import MATRIX, available, pages_many, text_many   # noqa: E402
 from conformance.corpus import cases as corpus_cases                          # noqa: E402
 import checker_fixtures                                                       # noqa: E402
@@ -79,6 +79,8 @@ def raw(path: str) -> dict:
     forms = metrics.pf_count(file_text)
     values = json.load(open(THRESHOLDS, encoding="utf-8"))["values"]
     orders = blind.visual_orders(texts, values)
+    lex = {n: lexical.validity(t) for n, t in texts.items()}
+    judged = {n: v for n, v in lex.items() if v["runs"] >= values["lexical_min_runs"]["value"]}
     pairs = [content_f1(texts[a], texts[b]) for a, b in itertools.combinations(sorted(texts), 2)]
     # Only fonts that HAVE a /ToUnicode map can have a gap in it: a simple font with no map is allowed by
     # Matterhorn 31-027 and `font_verdicts` gives it level None — counting its gap_ratio (1.0) would derive
@@ -92,6 +94,9 @@ def raw(path: str) -> dict:
         "arabic": arabic,
         "visual_share": len([n for n, o in orders.items() if o["visual"]]) / len(MATRIX),
         "visual_readers": [n for n, o in orders.items() if o["visual"]],
+        "lexical_min": min((v["ratio"] for v in judged.values()), default=None),
+        "lexical_max": max((v["ratio"] for v in judged.values()), default=None),
+        "lexical_judged": len(judged),
         "pair_min": min(pairs) if pairs else 1.0,
         "empty_pages": {n: v for n, v in empty_pages.items() if v},
         "missing_unicode": scan["missing_unicode"],
@@ -152,12 +157,27 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     clean_gap = max(r["gap_ratio_max"] for r in clean_rows)
     clean_share = max(r["visual_share"] for r in clean_rows)   # a separation check, not a threshold
     clean_min = min(r["pair_min"] for r in clean_rows)
+    clean_lex = min((r["lexical_min"] for r in clean_rows if r["lexical_min"] is not None), default=None)
 
     th["values"]["presentation_forms"]["value"] = round(max(th["values"]["presentation_forms"]["declared"],
                                                              clean_pf), 4)
     th["values"]["tounicode_gap_ratio"]["value"] = round(max(
         th["values"]["tounicode_gap_ratio"]["declared"], clean_gap), 4)
+    swap = planted_rows.get("planted-letter-swap") or {}
+    broken_lex = swap.get("lexical_max")
+    if clean_lex is None or broken_lex is None:
+        failures.append("lexical-validity: no judgeable reading in the clean set or the letter-swap fixture")
+    elif clean_lex - broken_lex < 0.20:
+        failures.append(f"lexical-validity does not separate (clean minimum {clean_lex:.3f} vs planted "
+                        f"maximum {broken_lex:.3f}; need 0.20)")
+    else:
+        # Higher is better, so the rule mirrors the other signals: a clean reading must sit at least the
+        # declared 0.20 SEPARATION above the floor. (The letter-swap fixture is the negative side; the two
+        # owner-adjudicated files were measured at 0.733 / 0.299 and bracket this floor — see the report.)
+        th["values"]["lexical_validity"]["value"] = round(clean_lex - 0.20, 2)
     th["observed"] = {"clean_max_presentation_forms": round(clean_pf, 4),
+                      "clean_min_lexical_validity": None if clean_lex is None else round(clean_lex, 4),
+                      "clean_judged_files": sum(1 for r in clean_rows if r["lexical_min"] is not None),
                       "clean_max_visual_share": round(clean_share, 4),
                       "clean_max_gap_ratio": round(clean_gap, 4),
                       "clean_min_pair_f1": round(clean_min, 4),
@@ -170,6 +190,7 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
                       "planted": {name: {"forms": r["forms"], "arabic": r["arabic"],
                                          "visual_share": round(r["visual_share"], 3),
                                          "pair_min": round(r["pair_min"], 4),
+                                         "lexical_max": None if r["lexical_max"] is None else round(r["lexical_max"], 4),
                                          "missing_unicode": r["missing_unicode"]}
                                   for name, r in planted_rows.items()}}
     # separation is required only for the signal a fixture is planted to trip
@@ -189,6 +210,11 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
                                 f"need {need}/{len(MATRIX)})")
         elif expected == "tounicode-gaps" and row["missing_unicode"] <= 0:
             failures.append(f"{name}: ToUnicode gaps are not positive")
+        elif expected == "lexical-validity":
+            if row["lexical_max"] is None or row["lexical_max"] >= th["values"]["lexical_validity"]["value"]:
+                failures.append(f"{name}: lexical validity does not separate "
+                                f"(planted maximum {row['lexical_max']} vs threshold "
+                                f"{th['values']['lexical_validity']['value']})")
     th["measured_at"] = _now()
     return th, failures
 
@@ -242,6 +268,7 @@ def main() -> int:
         base = json.load(fh)
     derived, failures = derive(clean_rows, planted_raw, base)
     derived["command"] = shlex.join(["python3", os.path.relpath(__file__, REPO)] + sys.argv[1:])
+    print("   values: " + json.dumps({k: v["value"] for k, v in derived["values"].items()}))
     if derived["values"] != base["values"] and not a.write:
         print("THRESHOLDS DIFFER — the measurement does not match the shipped manifest; "
               "review it, then re-run with --write")
