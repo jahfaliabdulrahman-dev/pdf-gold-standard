@@ -42,6 +42,10 @@ gap = th["values"]["tounicode_gap_ratio"]
 check("gap-ratio-derived",
       abs(gap["value"] - round(max(gap["declared"], observed["clean_max_gap_ratio"]), 4)) < 1e-9,
       f"value {gap['value']} declared {gap['declared']} clean {observed.get('clean_max_gap_ratio')}")
+lex = th["values"]["lexical_validity"]
+check("lexical-validity-derived",
+      abs(lex["value"] - round(observed["clean_min_lexical_validity"] - 0.20, 2)) < 1e-9,
+      f"value {lex['value']} clean minimum {observed.get('clean_min_lexical_validity')}")
 
 # The orientation threshold is arafix's published default; the checker must PASS it, not merely store it.
 import conformance.checks.visual_order as vo                        # noqa: E402

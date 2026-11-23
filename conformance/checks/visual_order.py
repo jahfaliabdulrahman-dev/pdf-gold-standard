@@ -11,11 +11,21 @@ This wrapper is the ONLY place the checker's orientation metric may live: a dete
 `arabic_pdf_check/` would be a second opinion that can drift from the one the measurements were made with.
 """
 from arafix import DEFAULT_THRESHOLDS, __version__ as ARAFIX_VERSION, diagnose
+from arafix.normalize import normalize_text
 from arafix.types import Defect
 
 THRESHOLD = float(DEFAULT_THRESHOLDS["visual_order"])
 VERSION = ARAFIX_VERSION
 SIGNALS = ("final_only_letters", "joining_forms", "definite_article")
+
+
+def fold(text: str) -> str:
+    """arafix's presentation-form fold — the ONE normalization door for every caller in this repository.
+
+    `lexical` needs the same fold the detector uses (a visual run must be read as letters before a word can
+    be looked up), and a second import of `arafix` elsewhere would be a second normalization that can drift.
+    """
+    return normalize_text(text or "")
 
 
 def inspect(text: str, thresholds: dict | None = None) -> dict:

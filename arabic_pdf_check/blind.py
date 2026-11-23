@@ -20,7 +20,7 @@ import os
 
 from conformance import certificate as cert_mod
 from conformance import reference
-from conformance.checks import mcid_text, metrics, structure, visual_order
+from conformance.checks import lexical, mcid_text, metrics, structure, visual_order
 from conformance.checks.metrics import arabic_count, pf_count, pf_share
 from conformance.readers import MATRIX, available, declared, limitations, pages_many, text_many
 
@@ -97,7 +97,8 @@ def _examples(text: str, pages: list[str], limit: int = 5, predicate=None) -> li
     return out
 
 
-def _font_signals(scan: dict, gap_high: float = 0.01) -> tuple[list[dict], list[dict]]:
+def _font_signals(scan: dict, gap_high: float = 0.01,
+                  recovered: bool | None = None) -> tuple[list[dict], list[dict]]:
     """(file signals, font rows for the report) — the RULE lives in `conformance.checks.structure.font_verdicts`.
 
     This function only shapes the verdicts into the report: the same per-font decision the certificate's
@@ -107,7 +108,7 @@ def _font_signals(scan: dict, gap_high: float = 0.01) -> tuple[list[dict], list[
     signals, rows = [], []
     # A diagnosis, not a certificate: a gap between words (a bullet, a tab) is a warning, and a gap inside a
     # word is the finding. The certificate gate calls the same rule with `inside_words_only=False`.
-    for v in structure.font_verdicts(scan, gap_high, inside_words_only=True):
+    for v in structure.font_verdicts(scan, gap_high, inside_words_only=True, recovered=recovered):
         rows.append({"font": v["key"], "family": v["family"], "subtype": v["subtype"],
                      "embedded": v["embedded"], "tounicode": v["tounicode"],
                      "two_byte": v["two_byte"], "codes": v["codes"],
@@ -156,7 +157,16 @@ def check(pdf_path: str, thresholds: dict) -> dict:
 
     # ---- file-level signals -------------------------------------------------------------------
     th = thresholds["values"]
-    file_signals, font_rows = _font_signals(scan, th["tounicode_gap_ratio"]["value"])
+    need = majority_needed()
+    lexical_th = th["lexical_validity"]["value"]
+    lexical_min_runs = th["lexical_min_runs"]["value"]
+    lex = {name: lexical.validity(text) for name, text in texts.items()}
+    # A short reading is not judged: 20 runs is the declared floor, below it a report about words is not
+    # about this file. The map-recovery question is answered only when at least one reader is judgeable.
+    judged = {name: v for name, v in lex.items() if v["runs"] >= lexical_min_runs}
+    lexical_failing = sorted(name for name, v in judged.items() if v["ratio"] < lexical_th)
+    recovered = (len(lexical_failing) < need) if judged else None
+    file_signals, font_rows = _font_signals(scan, th["tounicode_gap_ratio"]["value"], recovered=recovered)
     file_arabic = arabic_count(file_text)
     forms = pf_count(file_text)
     # The share is computed by the same function the measurement derives the threshold with.
@@ -197,8 +207,7 @@ def check(pdf_path: str, thresholds: dict) -> dict:
     orders = visual_orders(texts, th)
     visual_readers = [n for n, o in orders.items() if o["visual"]]
     # The denominator is the DECLARED matrix, not the readers that happened to run: a machine without PDFKit
-    # must not give the same file a different file-level verdict. The majority is half the matrix, plus one.
-    need = majority_needed()
+    # must not give the same file a different file-level verdict. `need` is computed once, above.
     visual_cause = "file" if len(visual_readers) >= need else "reader"
     if visual_cause == "file":
         conf = min(("high" if (o["confidence"] or 0) >= 0.9 else
@@ -210,6 +219,18 @@ def check(pdf_path: str, thresholds: dict) -> dict:
             f"keeps the opposite order for those readers (the layer itself is not judged as a defect; a visual "
             f"layer is how most producers store Arabic)", readers=visual_readers,
             scores={n: orders[n]["score"] for n in visual_readers}))
+    # Lexical validity: the words themselves. A majority of the DECLARED matrix failing is a file finding;
+    # one failing reader is that reader's risk and never the file's (the same cause rule as orientation).
+    lexical_file_high = bool(judged) and len(lexical_failing) >= need
+    if lexical_file_high:
+        shown = ", ".join(f"{n} {judged[n]['known']} of {judged[n]['runs']}" for n in lexical_failing[:5])
+        file_signals.append(_finding(
+            "lexical-validity", "high", "file", "high",
+            f"{len(lexical_failing)} of {len(MATRIX)} declared readers return Arabic runs that are not Arabic "
+            f"words ({shown} runs are in the lexicon) — the letters are shaped, the words do not exist",
+            readers=lexical_failing,
+            counts={n: {"runs": judged[n]["runs"], "known": judged[n]["known"]} for n in lexical_failing},
+            threshold=lexical_th, min_runs=lexical_min_runs))
     # Reader disagreement: ONLY the deterministic form ships. The metric form (`content_f1` between
     # readers) was measured on the clean set and REFUSED: single-word and digit-only corpus cases reach 0.0
     # between clean readers (docs/checker-v0/measurements/clean.json), so no threshold above zero separates
@@ -220,6 +241,13 @@ def check(pdf_path: str, thresholds: dict) -> dict:
     for name, text in texts.items():
         signals = []
         order = orders[name]
+        if name in judged and judged[name]["ratio"] < lexical_th:
+            signals.append(_finding(
+                "lexical-validity", "high", "file" if lexical_file_high else "reader", "high",
+                f"{judged[name]['known']} of {judged[name]['runs']} Arabic run(s) in this reader's text are in "
+                f"the lexicon — the remaining runs are shaped letters that do not make Arabic words",
+                runs=judged[name]["runs"], known=judged[name]["known"],
+                reversed_known=judged[name]["reversed"], threshold=lexical_th))
         if order["visual"]:
             confidence = "high" if (order["confidence"] or 0) >= 0.9 else \
                          ("medium" if (order["confidence"] or 0) >= 0.6 else "low")
@@ -325,6 +353,8 @@ def check(pdf_path: str, thresholds: dict) -> dict:
             "سلوك قارئ معلن يفسّر خطر ذلك القارئ، ولا يرفع حكم الملف",
             "خط بسيط بلا /ToUnicode يُعلَن ولا يُنذر (Matterhorn 31-027)؛ خريطته عبر /Encoding أو أسماء "
             "المحارف لا تُتحقَّق هنا — قيد معلن، لا حكم",
+            "صحة الكلمات تُحكم على 20 تشكيلة عربية على الأقل في نص القارئ؛ ما دونها لا يُحكم عليه (لا يُعدّ "
+            "مرورًا ولا فشلًا)",
         ],
     }
 

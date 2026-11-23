@@ -1,0 +1,16 @@
+The word list in `ar_words_50k.txt.gz` is a filtered copy of:
+
+  FrequencyWords — Arabic 50k list (2018)
+  https://github.com/hermitdave/FrequencyWords
+  built from OpenSubtitles 2018 (http://opus.nlpl.eu/OpenSubtitles2018.php)
+
+Licensing, as declared by that project:
+
+  MIT License for the code.
+  CC-BY-SA-4.0 for the content.
+
+This repository keeps the content under CC-BY-SA-4.0 (attribution: FrequencyWords / OpenSubtitles 2018),
+and the code that reads it under this repository's MIT license. Filtering applied: only Arabic-script entries
+of 3 or more letters, deduplicated and sorted; no other change.
+
+The file is read at runtime by `conformance/checks/lexical.py`; it is never written to.

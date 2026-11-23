@@ -414,6 +414,7 @@
         "id": {
           "enum": [
             "tounicode-gaps",
+            "lexical-validity",
             "presentation-forms",
             "visual-order",
             "reader-disagreement",
