@@ -11,6 +11,7 @@ This wrapper is the ONLY place the checker's orientation metric may live: a dete
 `arabic_pdf_check/` would be a second opinion that can drift from the one the measurements were made with.
 """
 from arafix import DEFAULT_THRESHOLDS, __version__ as ARAFIX_VERSION, diagnose
+from arafix.lamalef import detect_lam_alef_transposition
 from arafix.normalize import normalize_text
 from arafix.types import Defect
 
@@ -26,6 +27,12 @@ def fold(text: str) -> str:
     be looked up), and a second import of `arafix` elsewhere would be a second normalization that can drift.
     """
     return normalize_text(text or "")
+
+
+def lam_alef(text: str) -> tuple[int, int]:
+    """(sure, ambiguous) lam-alef transpositions — arafix's detector, through the same one wrapper."""
+    sure, maybe, _evidence = detect_lam_alef_transposition(text or "")
+    return int(sure), int(maybe)
 
 
 def inspect(text: str, thresholds: dict | None = None) -> dict:

@@ -1,7 +1,7 @@
 {
   "schema_version": "arabic-pdf-check-thresholds/1",
   "command": "python3 scripts/checker_measure.py --write --out docs/checker-v0/measurements",
-  "measured_at": "2026-11-23T14:30:50Z",
+  "measured_at": "2026-11-23T15:00:48Z",
   "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
   "values": {
     "presentation_forms": {
@@ -25,7 +25,7 @@
       "source": "declared policy: one unmapped drawn code in a hundred is a high risk; the clean set measures 0, so value = max(0.01, clean maximum)"
     },
     "lexical_validity": {
-      "value": 0.42,
+      "value": 0.5,
       "declared": 0.4,
       "source": "derived: clean_set_minimum - 0.20 (the declared separation rule, with higher = better); the planted letter-swap file is the negative side and the two owner-adjudicated files (0.733 valid / 0.299 broken) bracket the floor"
     },
@@ -37,7 +37,7 @@
   },
   "observed": {
     "clean_max_presentation_forms": 0.0,
-    "clean_min_lexical_validity": 0.619,
+    "clean_min_lexical_validity": 0.7,
     "clean_judged_files": 8,
     "clean_max_visual_share": 0.2,
     "clean_max_gap_ratio": 0.0,

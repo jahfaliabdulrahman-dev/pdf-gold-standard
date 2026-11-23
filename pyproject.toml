@@ -28,4 +28,4 @@ include = ["arabic_pdf_check*", "conformance*"]
 [tool.setuptools.package-data]
 arabic_pdf_check = ["thresholds.json", "schema/*.json"]
 conformance = ["ratchet.json", "corpus/MANIFEST.json", "corpus/cases/*.json", "schema/*.json",
-               "readers/*.json"]
+               "readers/*.json", "data/*.gz", "data/LICENSE-*"]

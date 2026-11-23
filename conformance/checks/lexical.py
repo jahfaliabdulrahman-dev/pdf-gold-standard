@@ -6,7 +6,8 @@ letters from the embedded font and return real words; in the other they return l
 correct and lexically nonexistent ("إضدب مدب اةعدب…"). A structural scan cannot tell them apart; the words can.
 
 Method, deterministic and declared:
-  · each reader's text is split into Arabic runs of ≥3 letters;
+  · each reader's text is split into Arabic-letter runs of ≥3 letters (digits and Arabic punctuation are not
+    letters, so «٢٠٢٦» is not a word);
   · a run counts as known when it is in the lexicon, or when its reverse is (a visual-order run reads
     backwards, and that is a different signal's finding — here it is evidence the letters are real);
   · normalization: arafix's presentation-form fold, then diacritics/tatweel removed and the hamza/alef,
@@ -31,13 +32,13 @@ import re
 import unicodedata
 from functools import lru_cache
 
-from conformance.checks.visual_order import fold
+from conformance.checks.visual_order import fold, lam_alef
 
 DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "ar_words_50k.txt.gz")
 SOURCE = "FrequencyWords ar_50k (OpenSubtitles 2018) — CC-BY-SA-4.0"
 MIN_LETTERS = 3
 
-ARABIC_RUN = re.compile(r"[\u0600-\u06FF]+")
+ARABIC_RUN = re.compile(r"[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FF]+")
 DIACRITICS = re.compile(r"[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]")
 
 
@@ -64,10 +65,11 @@ def words(text: str) -> list[str]:
 
 
 def validity(text: str) -> dict:
-    """{'runs', 'known', 'ratio', 'reversed'} for one reader's text; ratio is a measured count, not a claim."""
+    """{'runs', 'known', 'ratio', 'reversed', 'lam_alef'} for one reader's text; ratio is a count, not a claim."""
     runs = words(text)
+    n_sure, _n_maybe = lam_alef(text or "")
     if not runs:
-        return {"runs": 0, "known": 0, "ratio": 0.0, "reversed": 0}
+        return {"runs": 0, "known": 0, "ratio": 0.0, "reversed": 0, "lam_alef": int(n_sure)}
     vocab = lexicon()
     known = back = 0
     for w in runs:
@@ -77,4 +79,5 @@ def validity(text: str) -> dict:
         elif n[::-1] in vocab:
             known += 1
             back += 1
-    return {"runs": len(runs), "known": known, "ratio": round(known / len(runs), 4), "reversed": back}
+    return {"runs": len(runs), "known": known, "ratio": round(known / len(runs), 4), "reversed": back,
+            "lam_alef": int(n_sure)}

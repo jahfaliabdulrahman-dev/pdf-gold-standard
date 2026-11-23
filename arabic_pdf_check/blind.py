@@ -248,6 +248,15 @@ def check(pdf_path: str, thresholds: dict) -> dict:
                 f"the lexicon — the remaining runs are shaped letters that do not make Arabic words",
                 runs=judged[name]["runs"], known=judged[name]["known"],
                 reversed_known=judged[name]["reversed"], threshold=lexical_th))
+        elif name in judged and judged[name].get("lam_alef"):
+            # The owner's P3: a word near a lexicon word with a decomposed lam-alef (e.g. «األهداف») is
+            # RECORDED, never raised. The reading still passes the lexical floor; the case is evidence.
+            signals.append(_finding(
+                "lexical-validity", "low", "reader", "medium",
+                f"{judged[name]['lam_alef']} lam-alef transposition(s) (e.g. «األهداف» for «الأهداف») — the "
+                f"reading is above the lexical floor; recorded as a near-miss, not raised",
+                runs=judged[name]["runs"], known=judged[name]["known"],
+                lam_alef=judged[name]["lam_alef"], threshold=lexical_th))
         if order["visual"]:
             confidence = "high" if (order["confidence"] or 0) >= 0.9 else \
                          ("medium" if (order["confidence"] or 0) >= 0.6 else "low")
@@ -355,6 +364,8 @@ def check(pdf_path: str, thresholds: dict) -> dict:
             "المحارف لا تُتحقَّق هنا — قيد معلن، لا حكم",
             "صحة الكلمات تُحكم على 20 تشكيلة عربية على الأقل في نص القارئ؛ ما دونها لا يُحكم عليه (لا يُعدّ "
             "مرورًا ولا فشلًا)",
+            "الكلمة الموصولة بجاراتها في نصّ القارئ تُعدّ تشكيلة واحدة (لا تُجزَّأ بالمعجم)؛ نصّ كثير الوصل قد "
+            "يخفض النسبة — لذلك العتبة مشتقة بهامش 0.20 ولا يرفع الحكم إلا فشل الأغلبية",
         ],
     }
 
