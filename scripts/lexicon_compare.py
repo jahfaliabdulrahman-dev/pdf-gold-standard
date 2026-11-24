@@ -214,6 +214,8 @@ def main() -> int:
     ap.add_argument("--owner-dir", default=OWNER_DIR)
     ap.add_argument("--zatca-dir", default=None)
     ap.add_argument("--foreign-dir", default=os.path.join(REPO, "docs", "checker-v0", "foreign"))
+    ap.add_argument("--clean-dir", default=None,
+                    help="reuse rendered case PDFs already in this directory (no Chrome; same case ids)")
     a = ap.parse_args()
     if not a.owner_dir or not os.path.isdir(a.owner_dir):
         ap.error("the owner corpus is private: set OWNER_CORPUS_DIR to a directory")
@@ -231,7 +233,8 @@ def main() -> int:
           f"current words {len(vocab['current'])} · wiki words {len(vocab['wiki'])}")
 
     print("== clean: 4 documents + 66 corpus cases")
-    clean = checker_measure.clean_files(tempfile.mkdtemp(prefix="pr2-cases-"))
+    clean = checker_measure.clean_files(a.clean_dir or tempfile.mkdtemp(prefix="pr2-cases-"),
+                                        reuse=bool(a.clean_dir))
     if len(clean) != 70:
         raise SystemExit(f"REFUSED — clean set is {len(clean)}, expected 70")
     print("== planted fixtures")
