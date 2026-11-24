@@ -286,13 +286,15 @@ jobs:
           python3 -m pip install --quiet -r requirements.txt
           sudo apt-get update -qq
           sudo apt-get install -y -qq poppler-utils
-      - name: Chrome — the pinned engine
-        id: chrome
-        uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce  # v1.7.3, pinned by SHA
-        with:
-          chrome-version: ${{ env.CHROME_VERSION }}
-      - name: CHROME_PATH
-        run: echo "CHROME_PATH=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+      - name: Chrome for Testing — the pinned engine (the same CfT build as macOS, not a Chromium snapshot)
+        run: |
+          set -euo pipefail
+          Z="$RUNNER_TEMP/chrome-linux64.zip"
+          curl -sSL --fail --retry 3 \
+            "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip" \
+            -o "$Z"
+          unzip -q "$Z" -d "$RUNNER_TEMP"
+          echo "CHROME_PATH=$RUNNER_TEMP/chrome-linux64/chrome" >> "$GITHUB_ENV"
       - name: Fonts and reader controls
         run: |
           python3 -m conformance.adapters.fetch_fonts
