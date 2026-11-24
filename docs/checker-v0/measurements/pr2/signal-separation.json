@@ -1,0 +1,339 @@
+{
+ "calibration": {
+  "7  - درس - مهارات التواصل.pdf": {
+   "defect_type": "lexical-validity",
+   "defect_types": [
+    "lexical-validity",
+    "lam-alef-transposition"
+   ],
+   "lam_alef": {
+    "mupdf": 89,
+    "pdfium": 89,
+    "pdfkit": 1,
+    "poppler": 89
+   },
+   "lexical_by_reader": {
+    "mupdf": {
+     "known": 407,
+     "lam_alef": 89,
+     "ratio": 0.3895,
+     "reversed": 46,
+     "runs": 1045
+    },
+    "pdfium": {
+     "known": 403,
+     "lam_alef": 89,
+     "ratio": 0.3853,
+     "reversed": 41,
+     "runs": 1046
+    },
+    "pdfkit": {
+     "known": 447,
+     "lam_alef": 1,
+     "ratio": 0.429,
+     "reversed": 40,
+     "runs": 1042
+    },
+    "pdfminer": {
+     "known": 366,
+     "lam_alef": 0,
+     "ratio": 0.3437,
+     "reversed": 262,
+     "runs": 1065
+    },
+    "poppler": {
+     "known": 423,
+     "lam_alef": 89,
+     "ratio": 0.4044,
+     "reversed": 35,
+     "runs": 1046
+    }
+   }
+  },
+  "نظام الشركات 1439 سعد الخنفري.pdf": {
+   "defect_type": "numerals-mixed",
+   "defect_types": [
+    "numerals-mixed",
+    "lam-alef-transposition"
+   ],
+   "lam_alef": {
+    "mupdf": 1090,
+    "pdfium": 1083,
+    "pdfminer": 1,
+    "poppler": 1091
+   },
+   "lexical_by_reader": {
+    "mupdf": {
+     "known": 14732,
+     "lam_alef": 1090,
+     "ratio": 0.7624,
+     "reversed": 48,
+     "runs": 19322
+    },
+    "pdfium": {
+     "known": 8250,
+     "lam_alef": 1083,
+     "ratio": 0.5713,
+     "reversed": 42,
+     "runs": 14441
+    },
+    "pdfkit": {
+     "known": 17477,
+     "lam_alef": 0,
+     "ratio": 0.9053,
+     "reversed": 38,
+     "runs": 19305
+    },
+    "pdfminer": {
+     "known": 14789,
+     "lam_alef": 1,
+     "ratio": 0.7663,
+     "reversed": 13338,
+     "runs": 19300
+    },
+    "poppler": {
+     "known": 14840,
+     "lam_alef": 1091,
+     "ratio": 0.7649,
+     "reversed": 152,
+     "runs": 19400
+    }
+   }
+  },
+  "٣ - درس - البايثون.pdf": {
+   "defect_type": "lam-alef-transposition",
+   "defect_types": [
+    "lam-alef-transposition",
+    "lexical-validity"
+   ],
+   "lam_alef": {
+    "mupdf": 21,
+    "pdfium": 21,
+    "poppler": 21
+   },
+   "lexical_by_reader": {
+    "mupdf": {
+     "known": 329,
+     "lam_alef": 21,
+     "ratio": 0.6756,
+     "reversed": 3,
+     "runs": 487
+    },
+    "pdfium": {
+     "known": 320,
+     "lam_alef": 21,
+     "ratio": 0.6653,
+     "reversed": 3,
+     "runs": 481
+    },
+    "pdfkit": {
+     "known": 345,
+     "lam_alef": 0,
+     "ratio": 0.7113,
+     "reversed": 6,
+     "runs": 485
+    },
+    "pdfminer": {
+     "known": 314,
+     "lam_alef": 0,
+     "ratio": 0.6638,
+     "reversed": 290,
+     "runs": 473
+    },
+    "poppler": {
+     "known": 335,
+     "lam_alef": 21,
+     "ratio": 0.6865,
+     "reversed": 4,
+     "runs": 488
+    }
+   }
+  }
+ },
+ "dirty": false,
+ "generated_at": "2026-11-24T21:21:50Z",
+ "head": "dcf0c60",
+ "note": "The clean population is the same 70 files; no owner text or ordinary owner name is stored. The three calibration names are the assignment's explicit exception.",
+ "population": {
+  "calibration": 3,
+  "clean": 70,
+  "planted": 5,
+  "readers": [
+   "pdfium",
+   "pdfkit",
+   "mupdf",
+   "poppler",
+   "pdfminer"
+  ]
+ },
+ "schema_version": "signal-separation/1",
+ "signals": {
+  "lam-alef-transposition": {
+   "broken": {
+    "max": 1091,
+    "median": 89,
+    "min": 21,
+    "n": 3
+   },
+   "clean": {
+    "max": 1,
+    "median": 0.0,
+    "min": 0,
+    "n": 70
+   },
+   "direction": "higher-is-worse",
+   "note": "reader counts are recorded; the clean maximum is the measured floor; the Python file has 21 in three readers and 0 in PDFKit, PDFMiner reads reversed. A candidate signal, not a threshold change.",
+   "passes": null,
+   "readers": {
+    "7  - درس - مهارات التواصل.pdf": {
+     "mupdf": 89,
+     "pdfium": 89,
+     "pdfkit": 1,
+     "poppler": 89
+    },
+    "نظام الشركات 1439 سعد الخنفري.pdf": {
+     "mupdf": 1090,
+     "pdfium": 1083,
+     "pdfminer": 1,
+     "poppler": 1091
+    },
+    "٣ - درس - البايثون.pdf": {
+     "mupdf": 21,
+     "pdfium": 21,
+     "poppler": 21
+    }
+   },
+   "required_separation": null,
+   "separation": null,
+   "source": "arafix detector inside lexical.validity",
+   "threshold": "not shipped as a file-level signal"
+  },
+  "lexical-validity": {
+   "broken": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 1
+   },
+   "clean": {
+    "max": 0.9882,
+    "median": 0.8786,
+    "min": 0.8333,
+    "n": 8
+   },
+   "direction": "higher-is-better",
+   "note": "",
+   "passes": true,
+   "required_separation": 0.2,
+   "separation": 0.8333,
+   "source": "planted-letter-swap",
+   "threshold": 0.67
+  },
+  "no-text-layer": {
+   "broken": {
+    "max": 0,
+    "median": 0,
+    "min": 0,
+    "n": 1
+   },
+   "clean": {
+    "max": 6488,
+    "median": 43.5,
+    "min": 5,
+    "n": 70
+   },
+   "direction": "presence",
+   "note": "not a distance metric; the signal is a presence rule",
+   "passes": null,
+   "required_separation": null,
+   "separation": null,
+   "source": "planted-no-tounicode / min_arabic_chars",
+   "threshold": "< 8 Arabic characters"
+  },
+  "numerals-mixed": {
+   "broken": {
+    "max": 6,
+    "median": 6,
+    "min": 6,
+    "n": 1
+   },
+   "clean": {
+    "max": 0,
+    "median": 0.0,
+    "min": 0,
+    "n": 70
+   },
+   "direction": "higher-is-worse",
+   "note": "a count of numbers mixing digit systems; the owner's `نظام الشركات` is the positive",
+   "passes": null,
+   "required_separation": null,
+   "separation": null,
+   "source": "owner calibration",
+   "threshold": "medium at > 0; no numeric floor"
+  },
+  "presentation-forms": {
+   "broken": {
+    "max": 0.9090909090909091,
+    "median": 0.9091,
+    "min": 0.9090909090909091,
+    "n": 1
+   },
+   "clean": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 70
+   },
+   "direction": "higher-is-worse",
+   "note": "",
+   "passes": true,
+   "required_separation": 0.2,
+   "separation": 0.9091,
+   "source": "planted-presentation-forms",
+   "threshold": 0.02
+  },
+  "tounicode-gaps": {
+   "broken": {
+    "max": 128,
+    "median": 128,
+    "min": 128,
+    "n": 1
+   },
+   "clean": {
+    "max": 0,
+    "median": 0.0,
+    "min": 0,
+    "n": 70
+   },
+   "direction": "higher-is-worse",
+   "note": "measured as a count of drawn codes without a Unicode value; the ratio in the manifest is the gate for fonts that carry a map, not for a font with no map at all",
+   "passes": true,
+   "required_separation": 1,
+   "separation": 128,
+   "source": "planted-no-tounicode",
+   "threshold": "0.01 gap ratio (fonts that HAVE a map)"
+  },
+  "visual-order": {
+   "broken": {
+    "max": 0.8,
+    "median": 0.8,
+    "min": 0.8,
+    "n": 1
+   },
+   "clean": {
+    "max": 0.2,
+    "median": 0.2,
+    "min": 0.0,
+    "n": 70
+   },
+   "direction": "higher-is-worse",
+   "note": "the threshold is the structural majority (3 of 5 readers), not a measured number",
+   "passes": true,
+   "required_separation": 0.2,
+   "separation": 0.6,
+   "source": "planted-mupdf-logical",
+   "threshold": 0.6
+  }
+ },
+ "thresholds_sha256": "5d41fb5df467656fb4b1754304c50d25d95cb0d94dfcb654f9072a3494bacecb"
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": "arabic-pdf-check-thresholds/1",
-  "command": "python3 scripts/checker_measure.py --write --out docs/checker-v0/measurements",
-  "measured_at": "2026-11-23T15:00:48Z",
+  "command": "python3 scripts/checker_measure.py --write --clean-dir /var/folders/jf/2jjdkdv97p95nhwgnn9k0tp80000gn/T/pr2-cases-ohrh3sbh --out docs/checker-v0/measurements/pr2",
+  "measured_at": "2026-11-24T21:10:53Z",
   "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
   "values": {
     "presentation_forms": {
@@ -25,9 +25,9 @@
       "source": "declared policy: one unmapped drawn code in a hundred is a high risk; the clean set measures 0, so value = max(0.01, clean maximum)"
     },
     "lexical_validity": {
-      "value": 0.5,
+      "value": 0.67,
       "declared": 0.4,
-      "source": "derived: clean_set_minimum - 0.20 (the declared separation rule, with higher = better); the planted letter-swap file is the negative side and the two owner-adjudicated files (0.733 valid / 0.299 broken) bracket the floor"
+      "source": "derived: clean_set_minimum - 0.20 (higher = better); four real documents, clean minimum 0.8684 (governing doc:report); 4 documents of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The PR-2 calibration file `٣ - درس - البايثون` is a measured lam-alef transposition (21 in pdfium, mupdf and poppler; 0 in PDFKit; PDFMiner reads reversed), so its defect is not lexical-only; its lexical ratio is above this floor and is NOT repaired by lowering the threshold."
     },
     "lexical_min_runs": {
       "value": 20,
@@ -37,8 +37,161 @@
   },
   "observed": {
     "clean_max_presentation_forms": 0.0,
-    "clean_min_lexical_validity": 0.7,
+    "clean_min_lexical_validity": 0.8684,
+    "clean_min_lexical_all": 0.8333,
+    "clean_min_lexical_case": "doc:report",
     "clean_judged_files": 8,
+    "clean_threshold_files": 4,
+    "clean_docs": {
+      "doc:guide": {
+        "pdfium": {
+          "runs": 614,
+          "known": 543,
+          "ratio": 0.8844,
+          "reversed": 1,
+          "lam_alef": 0
+        },
+        "pdfkit": {
+          "runs": 615,
+          "known": 541,
+          "ratio": 0.8797,
+          "reversed": 1,
+          "lam_alef": 0
+        },
+        "mupdf": {
+          "runs": 615,
+          "known": 541,
+          "ratio": 0.8797,
+          "reversed": 1,
+          "lam_alef": 0
+        },
+        "poppler": {
+          "runs": 615,
+          "known": 541,
+          "ratio": 0.8797,
+          "reversed": 1,
+          "lam_alef": 0
+        },
+        "pdfminer": {
+          "runs": 614,
+          "known": 542,
+          "ratio": 0.8827,
+          "reversed": 512,
+          "lam_alef": 0
+        }
+      },
+      "doc:report": {
+        "pdfium": {
+          "runs": 1140,
+          "known": 990,
+          "ratio": 0.8684,
+          "reversed": 2,
+          "lam_alef": 1
+        },
+        "pdfkit": {
+          "runs": 1140,
+          "known": 994,
+          "ratio": 0.8719,
+          "reversed": 2,
+          "lam_alef": 1
+        },
+        "mupdf": {
+          "runs": 1140,
+          "known": 995,
+          "ratio": 0.8728,
+          "reversed": 2,
+          "lam_alef": 1
+        },
+        "poppler": {
+          "runs": 1137,
+          "known": 993,
+          "ratio": 0.8734,
+          "reversed": 3,
+          "lam_alef": 1
+        },
+        "pdfminer": {
+          "runs": 1121,
+          "known": 975,
+          "ratio": 0.8698,
+          "reversed": 905,
+          "lam_alef": 0
+        }
+      },
+      "doc:najd": {
+        "pdfium": {
+          "runs": 667,
+          "known": 587,
+          "ratio": 0.8801,
+          "reversed": 1,
+          "lam_alef": 0
+        },
+        "pdfkit": {
+          "runs": 667,
+          "known": 588,
+          "ratio": 0.8816,
+          "reversed": 1,
+          "lam_alef": 0
+        },
+        "mupdf": {
+          "runs": 667,
+          "known": 588,
+          "ratio": 0.8816,
+          "reversed": 1,
+          "lam_alef": 0
+        },
+        "poppler": {
+          "runs": 667,
+          "known": 587,
+          "ratio": 0.8801,
+          "reversed": 1,
+          "lam_alef": 0
+        },
+        "pdfminer": {
+          "runs": 666,
+          "known": 585,
+          "ratio": 0.8784,
+          "reversed": 528,
+          "lam_alef": 0
+        }
+      },
+      "doc:print": {
+        "pdfium": {
+          "runs": 1141,
+          "known": 992,
+          "ratio": 0.8694,
+          "reversed": 2,
+          "lam_alef": 1
+        },
+        "pdfkit": {
+          "runs": 1141,
+          "known": 996,
+          "ratio": 0.8729,
+          "reversed": 2,
+          "lam_alef": 1
+        },
+        "mupdf": {
+          "runs": 1141,
+          "known": 997,
+          "ratio": 0.8738,
+          "reversed": 2,
+          "lam_alef": 1
+        },
+        "poppler": {
+          "runs": 1138,
+          "known": 995,
+          "ratio": 0.8743,
+          "reversed": 3,
+          "lam_alef": 1
+        },
+        "pdfminer": {
+          "runs": 1122,
+          "known": 977,
+          "ratio": 0.8708,
+          "reversed": 906,
+          "lam_alef": 0
+        }
+      }
+    },
     "clean_max_visual_share": 0.2,
     "clean_max_gap_ratio": 0.0,
     "clean_min_pair_f1": 0.0,

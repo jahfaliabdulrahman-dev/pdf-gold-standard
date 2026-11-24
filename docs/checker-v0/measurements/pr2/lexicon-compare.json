@@ -1,0 +1,8465 @@
+{
+ "counts": {
+  "calibration": 3,
+  "clean": 70,
+  "foreign": 2,
+  "known-bad": 1,
+  "owner": 51,
+  "planted": 5,
+  "zatca": 16
+ },
+ "decision": {
+  "accept": true,
+  "accept_lexical_only": true,
+  "current_separation_all": -0.106,
+  "current_separation_lexical_only": 0.2576,
+  "current_separation_reader_min": -0.106,
+  "population_all": "3 calibration + known-bad",
+  "population_lexical": [
+   "7  - درس - مهارات التواصل.pdf",
+   "known-bad"
+  ],
+  "primary": "separation_all = min clean file minimum - max ratio among 3 calibration files + known-bad",
+  "reader_min_accept": true,
+  "rule": "candidate is accepted only when its literal separation is not lower than the current lexicon's",
+  "secondary": "separation_lexical_only = same, only the 7-file and the known-bad file",
+  "threshold_matches_manifest": true,
+  "wiki_separation_all": -0.072,
+  "wiki_separation_lexical_only": 0.4043,
+  "wiki_separation_reader_min": -0.072
+ },
+ "dirty": false,
+ "generated_at": "2026-11-24T19:36:13Z",
+ "head": "b1b16d4",
+ "lexicons": {
+  "current": {
+   "path": "ar_words_50k.txt.gz",
+   "sha256": "ec20479b135587bf15ff1cdc16b9cd26cab031ad6e74c54925d971adbe864d81",
+   "words": 38880
+  },
+  "wiki": {
+   "path": "ar_words_wiki50k.txt.gz",
+   "sha256": "60ee5e67102248111ef87b6f72a8a1f73753c9d01994a98b233eadf6b321df69",
+   "words": 48513
+  }
+ },
+ "minimum_runs": 20,
+ "owner": {
+  "current": {
+   "by_reader": {
+    "mupdf": {
+     "judged": 49,
+     "median": 0.7942,
+     "min": 0.578
+    },
+    "pdfium": {
+     "judged": 49,
+     "median": 0.7929,
+     "min": 0.6292
+    },
+    "pdfkit": {
+     "judged": 49,
+     "median": 0.8055,
+     "min": 0.6438
+    },
+    "pdfminer": {
+     "judged": 49,
+     "median": 0.7505,
+     "min": 0.2023
+    },
+    "poppler": {
+     "judged": 49,
+     "median": 0.8128,
+     "min": 0.6311
+    }
+   },
+   "files": 51
+  },
+  "wiki": {
+   "by_reader": {
+    "mupdf": {
+     "judged": 49,
+     "median": 0.8657,
+     "min": 0.6414
+    },
+    "pdfium": {
+     "judged": 49,
+     "median": 0.8628,
+     "min": 0.6862
+    },
+    "pdfkit": {
+     "judged": 49,
+     "median": 0.881,
+     "min": 0.713
+    },
+    "pdfminer": {
+     "judged": 49,
+     "median": 0.8211,
+     "min": 0.237
+    },
+    "poppler": {
+     "judged": 49,
+     "median": 0.8847,
+     "min": 0.6912
+    }
+   },
+   "files": 51
+  }
+ },
+ "planted_letter_swap": {
+  "current": {
+   "errors": [],
+   "files": 1,
+   "high": 1,
+   "lexical_high": 1,
+   "lexicon": "ar_words_50k.txt.gz",
+   "rows": [
+    {
+     "file_level": "high",
+     "label": "planted-letter-swap",
+     "lexical_high": true,
+     "reader_high": [
+      "pdfium",
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    }
+   ],
+   "threshold": 0.5
+  },
+  "wiki": {
+   "errors": [],
+   "files": 1,
+   "high": 1,
+   "lexical_high": 1,
+   "lexicon": "ar_words_wiki50k.txt.gz",
+   "rows": [
+    {
+     "file_level": "high",
+     "label": "planted-letter-swap",
+     "lexical_high": true,
+     "reader_high": [
+      "pdfium",
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    }
+   ],
+   "threshold": 0.67
+  }
+ },
+ "records": [
+  {
+   "label": "doc:guide",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 476,
+      "lam_alef": 0,
+      "ratio": 0.774,
+      "reversed": 4,
+      "runs": 615
+     },
+     "pdfium": {
+      "known": 476,
+      "lam_alef": 0,
+      "ratio": 0.7752,
+      "reversed": 3,
+      "runs": 614
+     },
+     "pdfkit": {
+      "known": 476,
+      "lam_alef": 0,
+      "ratio": 0.774,
+      "reversed": 4,
+      "runs": 615
+     },
+     "pdfminer": {
+      "known": 474,
+      "lam_alef": 0,
+      "ratio": 0.772,
+      "reversed": 439,
+      "runs": 614
+     },
+     "poppler": {
+      "known": 476,
+      "lam_alef": 0,
+      "ratio": 0.774,
+      "reversed": 4,
+      "runs": 615
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 541,
+      "lam_alef": 0,
+      "ratio": 0.8797,
+      "reversed": 1,
+      "runs": 615
+     },
+     "pdfium": {
+      "known": 543,
+      "lam_alef": 0,
+      "ratio": 0.8844,
+      "reversed": 1,
+      "runs": 614
+     },
+     "pdfkit": {
+      "known": 541,
+      "lam_alef": 0,
+      "ratio": 0.8797,
+      "reversed": 1,
+      "runs": 615
+     },
+     "pdfminer": {
+      "known": 542,
+      "lam_alef": 0,
+      "ratio": 0.8827,
+      "reversed": 512,
+      "runs": 614
+     },
+     "poppler": {
+      "known": 541,
+      "lam_alef": 0,
+      "ratio": 0.8797,
+      "reversed": 1,
+      "runs": 615
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "doc:report",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 894,
+      "lam_alef": 1,
+      "ratio": 0.7842,
+      "reversed": 2,
+      "runs": 1140
+     },
+     "pdfium": {
+      "known": 892,
+      "lam_alef": 1,
+      "ratio": 0.7825,
+      "reversed": 1,
+      "runs": 1140
+     },
+     "pdfkit": {
+      "known": 893,
+      "lam_alef": 1,
+      "ratio": 0.7833,
+      "reversed": 2,
+      "runs": 1140
+     },
+     "pdfminer": {
+      "known": 873,
+      "lam_alef": 0,
+      "ratio": 0.7788,
+      "reversed": 787,
+      "runs": 1121
+     },
+     "poppler": {
+      "known": 893,
+      "lam_alef": 1,
+      "ratio": 0.7854,
+      "reversed": 1,
+      "runs": 1137
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 995,
+      "lam_alef": 1,
+      "ratio": 0.8728,
+      "reversed": 2,
+      "runs": 1140
+     },
+     "pdfium": {
+      "known": 990,
+      "lam_alef": 1,
+      "ratio": 0.8684,
+      "reversed": 2,
+      "runs": 1140
+     },
+     "pdfkit": {
+      "known": 994,
+      "lam_alef": 1,
+      "ratio": 0.8719,
+      "reversed": 2,
+      "runs": 1140
+     },
+     "pdfminer": {
+      "known": 975,
+      "lam_alef": 0,
+      "ratio": 0.8698,
+      "reversed": 905,
+      "runs": 1121
+     },
+     "poppler": {
+      "known": 993,
+      "lam_alef": 1,
+      "ratio": 0.8734,
+      "reversed": 3,
+      "runs": 1137
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "doc:najd",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 517,
+      "lam_alef": 0,
+      "ratio": 0.7751,
+      "reversed": 1,
+      "runs": 667
+     },
+     "pdfium": {
+      "known": 516,
+      "lam_alef": 0,
+      "ratio": 0.7736,
+      "reversed": 1,
+      "runs": 667
+     },
+     "pdfkit": {
+      "known": 517,
+      "lam_alef": 0,
+      "ratio": 0.7751,
+      "reversed": 1,
+      "runs": 667
+     },
+     "pdfminer": {
+      "known": 514,
+      "lam_alef": 0,
+      "ratio": 0.7718,
+      "reversed": 456,
+      "runs": 666
+     },
+     "poppler": {
+      "known": 516,
+      "lam_alef": 0,
+      "ratio": 0.7736,
+      "reversed": 1,
+      "runs": 667
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 588,
+      "lam_alef": 0,
+      "ratio": 0.8816,
+      "reversed": 1,
+      "runs": 667
+     },
+     "pdfium": {
+      "known": 587,
+      "lam_alef": 0,
+      "ratio": 0.8801,
+      "reversed": 1,
+      "runs": 667
+     },
+     "pdfkit": {
+      "known": 588,
+      "lam_alef": 0,
+      "ratio": 0.8816,
+      "reversed": 1,
+      "runs": 667
+     },
+     "pdfminer": {
+      "known": 585,
+      "lam_alef": 0,
+      "ratio": 0.8784,
+      "reversed": 528,
+      "runs": 666
+     },
+     "poppler": {
+      "known": 587,
+      "lam_alef": 0,
+      "ratio": 0.8801,
+      "reversed": 1,
+      "runs": 667
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "doc:print",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 896,
+      "lam_alef": 1,
+      "ratio": 0.7853,
+      "reversed": 2,
+      "runs": 1141
+     },
+     "pdfium": {
+      "known": 894,
+      "lam_alef": 1,
+      "ratio": 0.7835,
+      "reversed": 1,
+      "runs": 1141
+     },
+     "pdfkit": {
+      "known": 895,
+      "lam_alef": 1,
+      "ratio": 0.7844,
+      "reversed": 2,
+      "runs": 1141
+     },
+     "pdfminer": {
+      "known": 875,
+      "lam_alef": 0,
+      "ratio": 0.7799,
+      "reversed": 789,
+      "runs": 1122
+     },
+     "poppler": {
+      "known": 895,
+      "lam_alef": 1,
+      "ratio": 0.7865,
+      "reversed": 1,
+      "runs": 1138
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 997,
+      "lam_alef": 1,
+      "ratio": 0.8738,
+      "reversed": 2,
+      "runs": 1141
+     },
+     "pdfium": {
+      "known": 992,
+      "lam_alef": 1,
+      "ratio": 0.8694,
+      "reversed": 2,
+      "runs": 1141
+     },
+     "pdfkit": {
+      "known": 996,
+      "lam_alef": 1,
+      "ratio": 0.8729,
+      "reversed": 2,
+      "runs": 1141
+     },
+     "pdfminer": {
+      "known": 977,
+      "lam_alef": 0,
+      "ratio": 0.8708,
+      "reversed": 906,
+      "runs": 1122
+     },
+     "poppler": {
+      "known": 995,
+      "lam_alef": 1,
+      "ratio": 0.8743,
+      "reversed": 3,
+      "runs": 1138
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:bld-heading",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 4,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 4,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:bld-th",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 4,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:bld-word",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-article",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 6,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 7,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-date-hindi",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 2,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 2,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-in-table",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 4,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 5,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-mixed-order",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 2,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-mixed-scripts",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 3,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 3,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-paren-eol",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.6111,
+      "reversed": 0,
+      "runs": 18
+     },
+     "pdfium": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.6111,
+      "reversed": 0,
+      "runs": 18
+     },
+     "pdfkit": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.6111,
+      "reversed": 0,
+      "runs": 18
+     },
+     "pdfminer": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.6111,
+      "reversed": 9,
+      "runs": 18
+     },
+     "poppler": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.6111,
+      "reversed": 0,
+      "runs": 18
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 0,
+      "runs": 18
+     },
+     "pdfium": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 0,
+      "runs": 18
+     },
+     "pdfkit": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 0,
+      "runs": 18
+     },
+     "pdfminer": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 15,
+      "runs": 18
+     },
+     "poppler": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 0,
+      "runs": 18
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-percent",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 6,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 6,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-phone",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 1,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:dig-year",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:head-deep",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 9,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 9,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:head-h1-h3",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 15
+     },
+     "pdfium": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 15
+     },
+     "pdfkit": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 15
+     },
+     "pdfminer": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 14,
+      "runs": 15
+     },
+     "poppler": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 15
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 15
+     },
+     "pdfium": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 15
+     },
+     "pdfkit": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 15
+     },
+     "pdfminer": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 14,
+      "runs": 15
+     },
+     "poppler": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 15
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:head-latin",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 5,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 6,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:head-numbered",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 4,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 4,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:kash-explicit",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 3,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 6
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 5,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:kash-justify-tatweel",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 0,
+      "runs": 20
+     },
+     "pdfium": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 0,
+      "runs": 20
+     },
+     "pdfkit": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 0,
+      "runs": 20
+     },
+     "pdfminer": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 12,
+      "runs": 20
+     },
+     "poppler": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 0,
+      "runs": 20
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 18,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 20
+     },
+     "pdfium": {
+      "known": 18,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 20
+     },
+     "pdfkit": {
+      "known": 18,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 20
+     },
+     "pdfminer": {
+      "known": 18,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 17,
+      "runs": 20
+     },
+     "poppler": {
+      "known": 18,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 20
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:kash-justify",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 30,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 35
+     },
+     "pdfium": {
+      "known": 30,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 35
+     },
+     "pdfkit": {
+      "known": 30,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 35
+     },
+     "pdfminer": {
+      "known": 29,
+      "lam_alef": 0,
+      "ratio": 0.8788,
+      "reversed": 24,
+      "runs": 33
+     },
+     "poppler": {
+      "known": 30,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 35
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 31,
+      "lam_alef": 0,
+      "ratio": 0.8857,
+      "reversed": 0,
+      "runs": 35
+     },
+     "pdfium": {
+      "known": 31,
+      "lam_alef": 0,
+      "ratio": 0.8857,
+      "reversed": 0,
+      "runs": 35
+     },
+     "pdfkit": {
+      "known": 31,
+      "lam_alef": 0,
+      "ratio": 0.8857,
+      "reversed": 0,
+      "runs": 35
+     },
+     "pdfminer": {
+      "known": 29,
+      "lam_alef": 0,
+      "ratio": 0.8788,
+      "reversed": 25,
+      "runs": 33
+     },
+     "poppler": {
+      "known": 31,
+      "lam_alef": 0,
+      "ratio": 0.8857,
+      "reversed": 0,
+      "runs": 35
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:lst-bullet",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:lst-ordered",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 9,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 10,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mix-acronym",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 1,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 3
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 1,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 1,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 3
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mix-email-url",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 2,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 2,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mix-latin-sentence",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 7,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 7,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mix-latin-word",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mix-numbers-ltr",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 1,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 4,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 1,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 4,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mix-parens",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.625,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.625,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.625,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.5714,
+      "reversed": 4,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.625,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 6,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mix-version",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 4,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 4,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mon-decimal-table",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 5,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 7,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mon-iban",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     },
+     "pdfium": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     },
+     "pdfkit": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     },
+     "pdfminer": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     },
+     "poppler": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     },
+     "pdfium": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     },
+     "pdfkit": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     },
+     "pdfminer": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     },
+     "poppler": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 1
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mon-negative-hindi",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 4,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mon-negative-line-start",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mon-negative-table",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 6,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mon-riyal-sign",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 2,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 4
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 3,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 4
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mon-rs-abbrev",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 3,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 4,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:mon-thousands",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 2,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 3
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 3
+     },
+     "poppler": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:num-ids-latn-in-arab",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.8182,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfium": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.8182,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfkit": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.8182,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfminer": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.8182,
+      "reversed": 9,
+      "runs": 11
+     },
+     "poppler": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.8182,
+      "reversed": 0,
+      "runs": 11
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 0.9091,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfium": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 0.9091,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfkit": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 0.9091,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfminer": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 0.9091,
+      "reversed": 10,
+      "runs": 11
+     },
+     "poppler": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 0.9091,
+      "reversed": 0,
+      "runs": 11
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:num-invoice-arab",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 5,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 6,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 6
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:num-invoice-kv-table",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.9167,
+      "reversed": 0,
+      "runs": 12
+     },
+     "pdfium": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.9167,
+      "reversed": 0,
+      "runs": 12
+     },
+     "pdfkit": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.9167,
+      "reversed": 0,
+      "runs": 12
+     },
+     "pdfminer": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.9167,
+      "reversed": 11,
+      "runs": 12
+     },
+     "poppler": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 0.9167,
+      "reversed": 0,
+      "runs": 12
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 12
+     },
+     "pdfium": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 12
+     },
+     "pdfkit": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 12
+     },
+     "pdfminer": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 12,
+      "runs": 12
+     },
+     "poppler": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 12
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:num-invoice-latn",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 9,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 10,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:num-negative-arab",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 7,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 6,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:pun-comma",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.6,
+      "reversed": 3,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 6
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.6,
+      "reversed": 3,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.3333,
+      "reversed": 0,
+      "runs": 6
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:pun-edge",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 24
+     },
+     "pdfium": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 24
+     },
+     "pdfkit": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 24
+     },
+     "pdfminer": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 18,
+      "runs": 24
+     },
+     "poppler": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 24
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 24
+     },
+     "pdfium": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 24
+     },
+     "pdfkit": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 24
+     },
+     "pdfminer": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 20,
+      "runs": 24
+     },
+     "poppler": {
+      "known": 20,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 24
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:pun-quotes",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 4
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:pun-semicolon-question",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 5,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.5714,
+      "reversed": 4,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:shp-allah-sentence",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.8824,
+      "reversed": 0,
+      "runs": 17
+     },
+     "pdfium": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.8824,
+      "reversed": 0,
+      "runs": 17
+     },
+     "pdfkit": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.8824,
+      "reversed": 0,
+      "runs": 17
+     },
+     "pdfminer": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.8824,
+      "reversed": 14,
+      "runs": 17
+     },
+     "poppler": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.8824,
+      "reversed": 0,
+      "runs": 17
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.9412,
+      "reversed": 0,
+      "runs": 17
+     },
+     "pdfium": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.9412,
+      "reversed": 0,
+      "runs": 17
+     },
+     "pdfkit": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.9412,
+      "reversed": 0,
+      "runs": 17
+     },
+     "pdfminer": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.9412,
+      "reversed": 15,
+      "runs": 17
+     },
+     "poppler": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.9412,
+      "reversed": 0,
+      "runs": 17
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:shp-allah",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 7,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7,
+      "reversed": 0,
+      "runs": 10
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 8,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:shp-kaf-kitaba",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 5,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 5,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:shp-lam-alef-forms",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 16
+     },
+     "pdfium": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 16
+     },
+     "pdfkit": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 16
+     },
+     "pdfminer": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 6,
+      "runs": 16
+     },
+     "poppler": {
+      "known": 14,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 16
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.9375,
+      "reversed": 0,
+      "runs": 16
+     },
+     "pdfium": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.9375,
+      "reversed": 0,
+      "runs": 16
+     },
+     "pdfkit": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.9375,
+      "reversed": 0,
+      "runs": 16
+     },
+     "pdfminer": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.9375,
+      "reversed": 7,
+      "runs": 16
+     },
+     "poppler": {
+      "known": 15,
+      "lam_alef": 0,
+      "ratio": 0.9375,
+      "reversed": 0,
+      "runs": 16
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:shp-nonjoining",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfium": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfkit": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfminer": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 8,
+      "runs": 11
+     },
+     "poppler": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 11
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfium": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfkit": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 11
+     },
+     "pdfminer": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 7,
+      "runs": 11
+     },
+     "poppler": {
+      "known": 11,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 11
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:shp-single-letter",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 5
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:tbl-2col",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 6,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 6,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:tbl-5col",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfium": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfkit": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfminer": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 7,
+      "runs": 9
+     },
+     "poppler": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 9
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfium": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfkit": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfminer": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 7,
+      "runs": 9
+     },
+     "poppler": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 9
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:tbl-empty-cell",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 6,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:tbl-page-break",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 0,
+      "runs": 85
+     },
+     "pdfium": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 0,
+      "runs": 85
+     },
+     "pdfkit": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 0,
+      "runs": 85
+     },
+     "pdfminer": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 43,
+      "runs": 85
+     },
+     "poppler": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 0,
+      "runs": 85
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 0,
+      "runs": 85
+     },
+     "pdfium": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 0,
+      "runs": 85
+     },
+     "pdfkit": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 0,
+      "runs": 85
+     },
+     "pdfminer": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 43,
+      "runs": 85
+     },
+     "poppler": {
+      "known": 84,
+      "lam_alef": 0,
+      "ratio": 0.9882,
+      "reversed": 0,
+      "runs": 85
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:tbl-plain-fragment",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 6,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:tbl-two-header-rows",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 6,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 6,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 8
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:tbl-two-line-cell",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7778,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7778,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7778,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 6,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.7778,
+      "reversed": 0,
+      "runs": 9
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfium": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfkit": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 0,
+      "runs": 9
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 5,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8889,
+      "reversed": 0,
+      "runs": 9
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:tbl-width-100",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 6,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 7
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:voc-full",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 2,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 2,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:voc-lam-alef-marks",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 3,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 2,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:voc-no-heading",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 2,
+      "runs": 2
+     },
+     "poppler": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfium": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfkit": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 2,
+      "runs": 2
+     },
+     "poppler": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 3
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:voc-partial",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 1,
+      "runs": 14
+     },
+     "pdfium": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 1,
+      "runs": 14
+     },
+     "pdfkit": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 1,
+      "runs": 14
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.625,
+      "reversed": 2,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 1,
+      "runs": 14
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 14
+     },
+     "pdfium": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 14
+     },
+     "pdfkit": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 14
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.625,
+      "reversed": 2,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 12,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 0,
+      "runs": 14
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:voc-shadda-tanween",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 3,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 6
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 2,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 0,
+      "runs": 6
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:voc-shadda",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 0.8333,
+      "reversed": 4,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 7
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "case:voc-tanween",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 3,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 3,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 5,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 5
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfium": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfkit": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     },
+     "pdfminer": {
+      "known": 2,
+      "lam_alef": 0,
+      "ratio": 0.5,
+      "reversed": 2,
+      "runs": 4
+     },
+     "poppler": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 5
+     }
+    }
+   },
+   "set": "clean"
+  },
+  {
+   "label": "planted-mupdf-logical",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     }
+    }
+   },
+   "set": "planted"
+  },
+  {
+   "label": "planted-chrome-raw",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 8,
+      "lam_alef": 1,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 4,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 9,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 8,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 8,
+      "lam_alef": 1,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 8,
+      "lam_alef": 1,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 5,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 10,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 8,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 8,
+      "lam_alef": 1,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     }
+    }
+   },
+   "set": "planted"
+  },
+  {
+   "label": "planted-presentation-forms",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfium": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfkit": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     },
+     "pdfminer": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 0,
+      "runs": 8
+     },
+     "poppler": {
+      "known": 7,
+      "lam_alef": 0,
+      "ratio": 0.875,
+      "reversed": 7,
+      "runs": 8
+     }
+    }
+   },
+   "set": "planted"
+  },
+  {
+   "label": "planted-no-tounicode",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 0
+     },
+     "pdfium": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 0
+     },
+     "pdfkit": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 0
+     },
+     "pdfminer": {
+      "known": 4,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 2,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 0
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 0
+     },
+     "pdfium": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 0
+     },
+     "pdfkit": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 0
+     },
+     "pdfminer": {
+      "known": 6,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 4,
+      "runs": 6
+     },
+     "poppler": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 0
+     }
+    }
+   },
+   "set": "planted"
+  },
+  {
+   "label": "planted-letter-swap",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     },
+     "pdfium": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     },
+     "pdfkit": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     },
+     "pdfminer": {
+      "known": 0,
+      "lam_alef": 2,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     },
+     "poppler": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     },
+     "pdfium": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     },
+     "pdfkit": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     },
+     "pdfminer": {
+      "known": 0,
+      "lam_alef": 2,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     },
+     "poppler": {
+      "known": 0,
+      "lam_alef": 0,
+      "ratio": 0.0,
+      "reversed": 0,
+      "runs": 36
+     }
+    }
+   },
+   "set": "planted"
+  },
+  {
+   "label": "lo-arabic-body.pdf",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 16,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 0,
+      "runs": 24
+     },
+     "pdfium": {
+      "known": 19,
+      "lam_alef": 0,
+      "ratio": 0.76,
+      "reversed": 0,
+      "runs": 25
+     },
+     "pdfkit": {
+      "known": 24,
+      "lam_alef": 0,
+      "ratio": 0.9231,
+      "reversed": 1,
+      "runs": 26
+     },
+     "pdfminer": {
+      "known": 21,
+      "lam_alef": 0,
+      "ratio": 0.84,
+      "reversed": 16,
+      "runs": 25
+     },
+     "poppler": {
+      "known": 22,
+      "lam_alef": 0,
+      "ratio": 0.8462,
+      "reversed": 0,
+      "runs": 26
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 18,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 24
+     },
+     "pdfium": {
+      "known": 21,
+      "lam_alef": 0,
+      "ratio": 0.84,
+      "reversed": 0,
+      "runs": 25
+     },
+     "pdfkit": {
+      "known": 26,
+      "lam_alef": 0,
+      "ratio": 1.0,
+      "reversed": 0,
+      "runs": 26
+     },
+     "pdfminer": {
+      "known": 23,
+      "lam_alef": 0,
+      "ratio": 0.92,
+      "reversed": 20,
+      "runs": 25
+     },
+     "poppler": {
+      "known": 24,
+      "lam_alef": 0,
+      "ratio": 0.9231,
+      "reversed": 0,
+      "runs": 26
+     }
+    }
+   },
+   "set": "foreign"
+  },
+  {
+   "label": "lo-arabic-table.pdf",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 7,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfium": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfkit": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     },
+     "pdfminer": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 7,
+      "runs": 10
+     },
+     "poppler": {
+      "known": 8,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 0,
+      "runs": 10
+     }
+    }
+   },
+   "set": "foreign"
+  },
+  {
+   "label": "calibration-12",
+   "name": "7  - درس - مهارات التواصل.pdf",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 429,
+      "lam_alef": 89,
+      "ratio": 0.4105,
+      "reversed": 66,
+      "runs": 1045
+     },
+     "pdfium": {
+      "known": 425,
+      "lam_alef": 89,
+      "ratio": 0.4063,
+      "reversed": 60,
+      "runs": 1046
+     },
+     "pdfkit": {
+      "known": 461,
+      "lam_alef": 1,
+      "ratio": 0.4424,
+      "reversed": 53,
+      "runs": 1042
+     },
+     "pdfminer": {
+      "known": 408,
+      "lam_alef": 0,
+      "ratio": 0.3831,
+      "reversed": 284,
+      "runs": 1065
+     },
+     "poppler": {
+      "known": 451,
+      "lam_alef": 89,
+      "ratio": 0.4312,
+      "reversed": 64,
+      "runs": 1046
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 407,
+      "lam_alef": 89,
+      "ratio": 0.3895,
+      "reversed": 46,
+      "runs": 1045
+     },
+     "pdfium": {
+      "known": 403,
+      "lam_alef": 89,
+      "ratio": 0.3853,
+      "reversed": 41,
+      "runs": 1046
+     },
+     "pdfkit": {
+      "known": 447,
+      "lam_alef": 1,
+      "ratio": 0.429,
+      "reversed": 40,
+      "runs": 1042
+     },
+     "pdfminer": {
+      "known": 366,
+      "lam_alef": 0,
+      "ratio": 0.3437,
+      "reversed": 262,
+      "runs": 1065
+     },
+     "poppler": {
+      "known": 423,
+      "lam_alef": 89,
+      "ratio": 0.4044,
+      "reversed": 35,
+      "runs": 1046
+     }
+    }
+   },
+   "set": "calibration"
+  },
+  {
+   "label": "known-bad-41",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 5080,
+      "lam_alef": 155,
+      "ratio": 0.2826,
+      "reversed": 953,
+      "runs": 17978
+     },
+     "pdfium": {
+      "known": 5111,
+      "lam_alef": 174,
+      "ratio": 0.2822,
+      "reversed": 972,
+      "runs": 18109
+     },
+     "pdfkit": {
+      "known": 4896,
+      "lam_alef": 109,
+      "ratio": 0.2573,
+      "reversed": 843,
+      "runs": 19032
+     },
+     "pdfminer": {
+      "known": 4327,
+      "lam_alef": 182,
+      "ratio": 0.2212,
+      "reversed": 2339,
+      "runs": 19560
+     },
+     "poppler": {
+      "known": 5459,
+      "lam_alef": 175,
+      "ratio": 0.2987,
+      "reversed": 989,
+      "runs": 18273
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 5548,
+      "lam_alef": 155,
+      "ratio": 0.3086,
+      "reversed": 807,
+      "runs": 17978
+     },
+     "pdfium": {
+      "known": 5543,
+      "lam_alef": 174,
+      "ratio": 0.3061,
+      "reversed": 804,
+      "runs": 18109
+     },
+     "pdfkit": {
+      "known": 5328,
+      "lam_alef": 109,
+      "ratio": 0.2799,
+      "reversed": 848,
+      "runs": 19032
+     },
+     "pdfminer": {
+      "known": 4876,
+      "lam_alef": 182,
+      "ratio": 0.2493,
+      "reversed": 2249,
+      "runs": 19560
+     },
+     "poppler": {
+      "known": 6040,
+      "lam_alef": 175,
+      "ratio": 0.3305,
+      "reversed": 814,
+      "runs": 18273
+     }
+    }
+   },
+   "set": "known-bad"
+  },
+  {
+   "label": "calibration-51",
+   "name": "نظام الشركات 1439 سعد الخنفري.pdf",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 13455,
+      "lam_alef": 1090,
+      "ratio": 0.6964,
+      "reversed": 162,
+      "runs": 19322
+     },
+     "pdfium": {
+      "known": 7663,
+      "lam_alef": 1083,
+      "ratio": 0.5306,
+      "reversed": 102,
+      "runs": 14441
+     },
+     "pdfkit": {
+      "known": 15560,
+      "lam_alef": 0,
+      "ratio": 0.806,
+      "reversed": 52,
+      "runs": 19305
+     },
+     "pdfminer": {
+      "known": 13581,
+      "lam_alef": 1,
+      "ratio": 0.7037,
+      "reversed": 11941,
+      "runs": 19300
+     },
+     "poppler": {
+      "known": 13428,
+      "lam_alef": 1091,
+      "ratio": 0.6922,
+      "reversed": 255,
+      "runs": 19400
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 14732,
+      "lam_alef": 1090,
+      "ratio": 0.7624,
+      "reversed": 48,
+      "runs": 19322
+     },
+     "pdfium": {
+      "known": 8250,
+      "lam_alef": 1083,
+      "ratio": 0.5713,
+      "reversed": 42,
+      "runs": 14441
+     },
+     "pdfkit": {
+      "known": 17477,
+      "lam_alef": 0,
+      "ratio": 0.9053,
+      "reversed": 38,
+      "runs": 19305
+     },
+     "pdfminer": {
+      "known": 14789,
+      "lam_alef": 1,
+      "ratio": 0.7663,
+      "reversed": 13338,
+      "runs": 19300
+     },
+     "poppler": {
+      "known": 14840,
+      "lam_alef": 1091,
+      "ratio": 0.7649,
+      "reversed": 152,
+      "runs": 19400
+     }
+    }
+   },
+   "set": "calibration"
+  },
+  {
+   "label": "calibration-55",
+   "name": "٣ - درس - البايثون.pdf",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 286,
+      "lam_alef": 21,
+      "ratio": 0.5873,
+      "reversed": 2,
+      "runs": 487
+     },
+     "pdfium": {
+      "known": 279,
+      "lam_alef": 21,
+      "ratio": 0.58,
+      "reversed": 1,
+      "runs": 481
+     },
+     "pdfkit": {
+      "known": 294,
+      "lam_alef": 0,
+      "ratio": 0.6062,
+      "reversed": 3,
+      "runs": 485
+     },
+     "pdfminer": {
+      "known": 276,
+      "lam_alef": 0,
+      "ratio": 0.5835,
+      "reversed": 253,
+      "runs": 473
+     },
+     "poppler": {
+      "known": 292,
+      "lam_alef": 21,
+      "ratio": 0.5984,
+      "reversed": 1,
+      "runs": 488
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 329,
+      "lam_alef": 21,
+      "ratio": 0.6756,
+      "reversed": 3,
+      "runs": 487
+     },
+     "pdfium": {
+      "known": 320,
+      "lam_alef": 21,
+      "ratio": 0.6653,
+      "reversed": 3,
+      "runs": 481
+     },
+     "pdfkit": {
+      "known": 345,
+      "lam_alef": 0,
+      "ratio": 0.7113,
+      "reversed": 6,
+      "runs": 485
+     },
+     "pdfminer": {
+      "known": 314,
+      "lam_alef": 0,
+      "ratio": 0.6638,
+      "reversed": 290,
+      "runs": 473
+     },
+     "poppler": {
+      "known": 335,
+      "lam_alef": 21,
+      "ratio": 0.6865,
+      "reversed": 4,
+      "runs": 488
+     }
+    }
+   },
+   "set": "calibration"
+  },
+  {
+   "label": "zatca-01",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 152,
+      "lam_alef": 0,
+      "ratio": 0.8042,
+      "reversed": 0,
+      "runs": 189
+     },
+     "pdfium": {
+      "known": 152,
+      "lam_alef": 0,
+      "ratio": 0.8042,
+      "reversed": 0,
+      "runs": 189
+     },
+     "pdfkit": {
+      "known": 152,
+      "lam_alef": 0,
+      "ratio": 0.8042,
+      "reversed": 0,
+      "runs": 189
+     },
+     "pdfminer": {
+      "known": 149,
+      "lam_alef": 0,
+      "ratio": 0.7884,
+      "reversed": 141,
+      "runs": 189
+     },
+     "poppler": {
+      "known": 152,
+      "lam_alef": 0,
+      "ratio": 0.8042,
+      "reversed": 0,
+      "runs": 189
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 184,
+      "lam_alef": 0,
+      "ratio": 0.9735,
+      "reversed": 0,
+      "runs": 189
+     },
+     "pdfium": {
+      "known": 184,
+      "lam_alef": 0,
+      "ratio": 0.9735,
+      "reversed": 0,
+      "runs": 189
+     },
+     "pdfkit": {
+      "known": 184,
+      "lam_alef": 0,
+      "ratio": 0.9735,
+      "reversed": 0,
+      "runs": 189
+     },
+     "pdfminer": {
+      "known": 181,
+      "lam_alef": 0,
+      "ratio": 0.9577,
+      "reversed": 173,
+      "runs": 189
+     },
+     "poppler": {
+      "known": 184,
+      "lam_alef": 0,
+      "ratio": 0.9735,
+      "reversed": 0,
+      "runs": 189
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-02",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 147,
+      "lam_alef": 0,
+      "ratio": 0.8033,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfium": {
+      "known": 147,
+      "lam_alef": 0,
+      "ratio": 0.8033,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfkit": {
+      "known": 147,
+      "lam_alef": 0,
+      "ratio": 0.8033,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfminer": {
+      "known": 144,
+      "lam_alef": 0,
+      "ratio": 0.7869,
+      "reversed": 136,
+      "runs": 183
+     },
+     "poppler": {
+      "known": 147,
+      "lam_alef": 0,
+      "ratio": 0.8033,
+      "reversed": 0,
+      "runs": 183
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 178,
+      "lam_alef": 0,
+      "ratio": 0.9727,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfium": {
+      "known": 178,
+      "lam_alef": 0,
+      "ratio": 0.9727,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfkit": {
+      "known": 178,
+      "lam_alef": 0,
+      "ratio": 0.9727,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfminer": {
+      "known": 175,
+      "lam_alef": 0,
+      "ratio": 0.9563,
+      "reversed": 167,
+      "runs": 183
+     },
+     "poppler": {
+      "known": 178,
+      "lam_alef": 0,
+      "ratio": 0.9727,
+      "reversed": 0,
+      "runs": 183
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-03",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 147,
+      "lam_alef": 0,
+      "ratio": 0.8033,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfium": {
+      "known": 147,
+      "lam_alef": 0,
+      "ratio": 0.8033,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfkit": {
+      "known": 147,
+      "lam_alef": 0,
+      "ratio": 0.8033,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfminer": {
+      "known": 144,
+      "lam_alef": 0,
+      "ratio": 0.7869,
+      "reversed": 136,
+      "runs": 183
+     },
+     "poppler": {
+      "known": 147,
+      "lam_alef": 0,
+      "ratio": 0.8033,
+      "reversed": 0,
+      "runs": 183
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 178,
+      "lam_alef": 0,
+      "ratio": 0.9727,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfium": {
+      "known": 178,
+      "lam_alef": 0,
+      "ratio": 0.9727,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfkit": {
+      "known": 178,
+      "lam_alef": 0,
+      "ratio": 0.9727,
+      "reversed": 0,
+      "runs": 183
+     },
+     "pdfminer": {
+      "known": 175,
+      "lam_alef": 0,
+      "ratio": 0.9563,
+      "reversed": 167,
+      "runs": 183
+     },
+     "poppler": {
+      "known": 178,
+      "lam_alef": 0,
+      "ratio": 0.9727,
+      "reversed": 0,
+      "runs": 183
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-04",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 85,
+      "lam_alef": 0,
+      "ratio": 0.7589,
+      "reversed": 0,
+      "runs": 112
+     },
+     "pdfium": {
+      "known": 85,
+      "lam_alef": 0,
+      "ratio": 0.7589,
+      "reversed": 0,
+      "runs": 112
+     },
+     "pdfkit": {
+      "known": 85,
+      "lam_alef": 0,
+      "ratio": 0.7589,
+      "reversed": 0,
+      "runs": 112
+     },
+     "pdfminer": {
+      "known": 80,
+      "lam_alef": 0,
+      "ratio": 0.7143,
+      "reversed": 73,
+      "runs": 112
+     },
+     "poppler": {
+      "known": 85,
+      "lam_alef": 0,
+      "ratio": 0.7589,
+      "reversed": 0,
+      "runs": 112
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 104,
+      "lam_alef": 0,
+      "ratio": 0.9286,
+      "reversed": 0,
+      "runs": 112
+     },
+     "pdfium": {
+      "known": 104,
+      "lam_alef": 0,
+      "ratio": 0.9286,
+      "reversed": 0,
+      "runs": 112
+     },
+     "pdfkit": {
+      "known": 104,
+      "lam_alef": 0,
+      "ratio": 0.9286,
+      "reversed": 0,
+      "runs": 112
+     },
+     "pdfminer": {
+      "known": 96,
+      "lam_alef": 0,
+      "ratio": 0.8571,
+      "reversed": 90,
+      "runs": 112
+     },
+     "poppler": {
+      "known": 104,
+      "lam_alef": 0,
+      "ratio": 0.9286,
+      "reversed": 0,
+      "runs": 112
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-05",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 127,
+      "lam_alef": 0,
+      "ratio": 0.8089,
+      "reversed": 0,
+      "runs": 157
+     },
+     "pdfium": {
+      "known": 127,
+      "lam_alef": 0,
+      "ratio": 0.8089,
+      "reversed": 0,
+      "runs": 157
+     },
+     "pdfkit": {
+      "known": 127,
+      "lam_alef": 0,
+      "ratio": 0.8089,
+      "reversed": 0,
+      "runs": 157
+     },
+     "pdfminer": {
+      "known": 124,
+      "lam_alef": 0,
+      "ratio": 0.7898,
+      "reversed": 117,
+      "runs": 157
+     },
+     "poppler": {
+      "known": 127,
+      "lam_alef": 0,
+      "ratio": 0.8089,
+      "reversed": 0,
+      "runs": 157
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 152,
+      "lam_alef": 0,
+      "ratio": 0.9682,
+      "reversed": 0,
+      "runs": 157
+     },
+     "pdfium": {
+      "known": 152,
+      "lam_alef": 0,
+      "ratio": 0.9682,
+      "reversed": 0,
+      "runs": 157
+     },
+     "pdfkit": {
+      "known": 152,
+      "lam_alef": 0,
+      "ratio": 0.9682,
+      "reversed": 0,
+      "runs": 157
+     },
+     "pdfminer": {
+      "known": 149,
+      "lam_alef": 0,
+      "ratio": 0.949,
+      "reversed": 142,
+      "runs": 157
+     },
+     "poppler": {
+      "known": 152,
+      "lam_alef": 0,
+      "ratio": 0.9682,
+      "reversed": 0,
+      "runs": 157
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-06",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 125,
+      "lam_alef": 0,
+      "ratio": 0.8013,
+      "reversed": 0,
+      "runs": 156
+     },
+     "pdfium": {
+      "known": 125,
+      "lam_alef": 0,
+      "ratio": 0.8013,
+      "reversed": 0,
+      "runs": 156
+     },
+     "pdfkit": {
+      "known": 125,
+      "lam_alef": 0,
+      "ratio": 0.8013,
+      "reversed": 0,
+      "runs": 156
+     },
+     "pdfminer": {
+      "known": 119,
+      "lam_alef": 0,
+      "ratio": 0.7628,
+      "reversed": 111,
+      "runs": 156
+     },
+     "poppler": {
+      "known": 125,
+      "lam_alef": 0,
+      "ratio": 0.8013,
+      "reversed": 0,
+      "runs": 156
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 150,
+      "lam_alef": 0,
+      "ratio": 0.9615,
+      "reversed": 0,
+      "runs": 156
+     },
+     "pdfium": {
+      "known": 150,
+      "lam_alef": 0,
+      "ratio": 0.9615,
+      "reversed": 0,
+      "runs": 156
+     },
+     "pdfkit": {
+      "known": 150,
+      "lam_alef": 0,
+      "ratio": 0.9615,
+      "reversed": 0,
+      "runs": 156
+     },
+     "pdfminer": {
+      "known": 144,
+      "lam_alef": 0,
+      "ratio": 0.9231,
+      "reversed": 136,
+      "runs": 156
+     },
+     "poppler": {
+      "known": 150,
+      "lam_alef": 0,
+      "ratio": 0.9615,
+      "reversed": 0,
+      "runs": 156
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-07",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 67,
+      "lam_alef": 0,
+      "ratio": 0.7701,
+      "reversed": 0,
+      "runs": 87
+     },
+     "pdfium": {
+      "known": 67,
+      "lam_alef": 0,
+      "ratio": 0.7701,
+      "reversed": 0,
+      "runs": 87
+     },
+     "pdfkit": {
+      "known": 67,
+      "lam_alef": 0,
+      "ratio": 0.7701,
+      "reversed": 0,
+      "runs": 87
+     },
+     "pdfminer": {
+      "known": 64,
+      "lam_alef": 0,
+      "ratio": 0.7356,
+      "reversed": 60,
+      "runs": 87
+     },
+     "poppler": {
+      "known": 67,
+      "lam_alef": 0,
+      "ratio": 0.7701,
+      "reversed": 0,
+      "runs": 87
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 83,
+      "lam_alef": 0,
+      "ratio": 0.954,
+      "reversed": 0,
+      "runs": 87
+     },
+     "pdfium": {
+      "known": 83,
+      "lam_alef": 0,
+      "ratio": 0.954,
+      "reversed": 0,
+      "runs": 87
+     },
+     "pdfkit": {
+      "known": 83,
+      "lam_alef": 0,
+      "ratio": 0.954,
+      "reversed": 0,
+      "runs": 87
+     },
+     "pdfminer": {
+      "known": 80,
+      "lam_alef": 0,
+      "ratio": 0.9195,
+      "reversed": 76,
+      "runs": 87
+     },
+     "poppler": {
+      "known": 83,
+      "lam_alef": 0,
+      "ratio": 0.954,
+      "reversed": 0,
+      "runs": 87
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-08",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 128,
+      "lam_alef": 0,
+      "ratio": 0.805,
+      "reversed": 0,
+      "runs": 159
+     },
+     "pdfium": {
+      "known": 128,
+      "lam_alef": 0,
+      "ratio": 0.805,
+      "reversed": 0,
+      "runs": 159
+     },
+     "pdfkit": {
+      "known": 128,
+      "lam_alef": 0,
+      "ratio": 0.805,
+      "reversed": 0,
+      "runs": 159
+     },
+     "pdfminer": {
+      "known": 125,
+      "lam_alef": 0,
+      "ratio": 0.7862,
+      "reversed": 118,
+      "runs": 159
+     },
+     "poppler": {
+      "known": 128,
+      "lam_alef": 0,
+      "ratio": 0.805,
+      "reversed": 0,
+      "runs": 159
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 153,
+      "lam_alef": 0,
+      "ratio": 0.9623,
+      "reversed": 0,
+      "runs": 159
+     },
+     "pdfium": {
+      "known": 153,
+      "lam_alef": 0,
+      "ratio": 0.9623,
+      "reversed": 0,
+      "runs": 159
+     },
+     "pdfkit": {
+      "known": 153,
+      "lam_alef": 0,
+      "ratio": 0.9623,
+      "reversed": 0,
+      "runs": 159
+     },
+     "pdfminer": {
+      "known": 150,
+      "lam_alef": 0,
+      "ratio": 0.9434,
+      "reversed": 141,
+      "runs": 159
+     },
+     "poppler": {
+      "known": 153,
+      "lam_alef": 0,
+      "ratio": 0.9623,
+      "reversed": 0,
+      "runs": 159
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-09",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 122,
+      "lam_alef": 2,
+      "ratio": 0.8079,
+      "reversed": 0,
+      "runs": 151
+     },
+     "pdfium": {
+      "known": 125,
+      "lam_alef": 0,
+      "ratio": 0.8278,
+      "reversed": 93,
+      "runs": 151
+     },
+     "pdfkit": {
+      "known": 100,
+      "lam_alef": 0,
+      "ratio": 0.6667,
+      "reversed": 2,
+      "runs": 150
+     },
+     "pdfminer": {
+      "known": 122,
+      "lam_alef": 0,
+      "ratio": 0.8079,
+      "reversed": 115,
+      "runs": 151
+     },
+     "poppler": {
+      "known": 122,
+      "lam_alef": 3,
+      "ratio": 0.8079,
+      "reversed": 0,
+      "runs": 151
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 144,
+      "lam_alef": 2,
+      "ratio": 0.9536,
+      "reversed": 0,
+      "runs": 151
+     },
+     "pdfium": {
+      "known": 146,
+      "lam_alef": 0,
+      "ratio": 0.9669,
+      "reversed": 109,
+      "runs": 151
+     },
+     "pdfkit": {
+      "known": 115,
+      "lam_alef": 0,
+      "ratio": 0.7667,
+      "reversed": 1,
+      "runs": 150
+     },
+     "pdfminer": {
+      "known": 143,
+      "lam_alef": 0,
+      "ratio": 0.947,
+      "reversed": 136,
+      "runs": 151
+     },
+     "poppler": {
+      "known": 143,
+      "lam_alef": 3,
+      "ratio": 0.947,
+      "reversed": 0,
+      "runs": 151
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-10",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 75,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 100
+     },
+     "pdfium": {
+      "known": 74,
+      "lam_alef": 0,
+      "ratio": 0.7327,
+      "reversed": 1,
+      "runs": 101
+     },
+     "pdfkit": {
+      "known": 75,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 100
+     },
+     "pdfminer": {
+      "known": 71,
+      "lam_alef": 0,
+      "ratio": 0.71,
+      "reversed": 67,
+      "runs": 100
+     },
+     "poppler": {
+      "known": 75,
+      "lam_alef": 0,
+      "ratio": 0.75,
+      "reversed": 0,
+      "runs": 100
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 94,
+      "lam_alef": 0,
+      "ratio": 0.94,
+      "reversed": 0,
+      "runs": 100
+     },
+     "pdfium": {
+      "known": 92,
+      "lam_alef": 0,
+      "ratio": 0.9109,
+      "reversed": 0,
+      "runs": 101
+     },
+     "pdfkit": {
+      "known": 94,
+      "lam_alef": 0,
+      "ratio": 0.94,
+      "reversed": 0,
+      "runs": 100
+     },
+     "pdfminer": {
+      "known": 90,
+      "lam_alef": 0,
+      "ratio": 0.9,
+      "reversed": 86,
+      "runs": 100
+     },
+     "poppler": {
+      "known": 94,
+      "lam_alef": 0,
+      "ratio": 0.94,
+      "reversed": 0,
+      "runs": 100
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-11",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 76,
+      "lam_alef": 2,
+      "ratio": 0.7525,
+      "reversed": 0,
+      "runs": 101
+     },
+     "pdfium": {
+      "known": 76,
+      "lam_alef": 0,
+      "ratio": 0.76,
+      "reversed": 56,
+      "runs": 100
+     },
+     "pdfkit": {
+      "known": 62,
+      "lam_alef": 0,
+      "ratio": 0.62,
+      "reversed": 1,
+      "runs": 100
+     },
+     "pdfminer": {
+      "known": 76,
+      "lam_alef": 0,
+      "ratio": 0.7525,
+      "reversed": 71,
+      "runs": 101
+     },
+     "poppler": {
+      "known": 76,
+      "lam_alef": 3,
+      "ratio": 0.7525,
+      "reversed": 0,
+      "runs": 101
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 94,
+      "lam_alef": 2,
+      "ratio": 0.9307,
+      "reversed": 0,
+      "runs": 101
+     },
+     "pdfium": {
+      "known": 93,
+      "lam_alef": 0,
+      "ratio": 0.93,
+      "reversed": 69,
+      "runs": 100
+     },
+     "pdfkit": {
+      "known": 73,
+      "lam_alef": 0,
+      "ratio": 0.73,
+      "reversed": 1,
+      "runs": 100
+     },
+     "pdfminer": {
+      "known": 93,
+      "lam_alef": 0,
+      "ratio": 0.9208,
+      "reversed": 88,
+      "runs": 101
+     },
+     "poppler": {
+      "known": 93,
+      "lam_alef": 3,
+      "ratio": 0.9208,
+      "reversed": 0,
+      "runs": 101
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-12",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 132,
+      "lam_alef": 7,
+      "ratio": 0.7765,
+      "reversed": 0,
+      "runs": 170
+     },
+     "pdfium": {
+      "known": 137,
+      "lam_alef": 0,
+      "ratio": 0.8059,
+      "reversed": 97,
+      "runs": 170
+     },
+     "pdfkit": {
+      "known": 112,
+      "lam_alef": 0,
+      "ratio": 0.6627,
+      "reversed": 2,
+      "runs": 169
+     },
+     "pdfminer": {
+      "known": 132,
+      "lam_alef": 0,
+      "ratio": 0.7765,
+      "reversed": 123,
+      "runs": 170
+     },
+     "poppler": {
+      "known": 132,
+      "lam_alef": 8,
+      "ratio": 0.7765,
+      "reversed": 0,
+      "runs": 170
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 155,
+      "lam_alef": 7,
+      "ratio": 0.9118,
+      "reversed": 0,
+      "runs": 170
+     },
+     "pdfium": {
+      "known": 162,
+      "lam_alef": 0,
+      "ratio": 0.9529,
+      "reversed": 115,
+      "runs": 170
+     },
+     "pdfkit": {
+      "known": 130,
+      "lam_alef": 0,
+      "ratio": 0.7692,
+      "reversed": 1,
+      "runs": 169
+     },
+     "pdfminer": {
+      "known": 154,
+      "lam_alef": 0,
+      "ratio": 0.9059,
+      "reversed": 146,
+      "runs": 170
+     },
+     "poppler": {
+      "known": 154,
+      "lam_alef": 8,
+      "ratio": 0.9059,
+      "reversed": 0,
+      "runs": 170
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-13",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 132,
+      "lam_alef": 7,
+      "ratio": 0.7765,
+      "reversed": 0,
+      "runs": 170
+     },
+     "pdfium": {
+      "known": 137,
+      "lam_alef": 0,
+      "ratio": 0.8059,
+      "reversed": 97,
+      "runs": 170
+     },
+     "pdfkit": {
+      "known": 112,
+      "lam_alef": 0,
+      "ratio": 0.6627,
+      "reversed": 2,
+      "runs": 169
+     },
+     "pdfminer": {
+      "known": 132,
+      "lam_alef": 0,
+      "ratio": 0.7765,
+      "reversed": 123,
+      "runs": 170
+     },
+     "poppler": {
+      "known": 132,
+      "lam_alef": 8,
+      "ratio": 0.7765,
+      "reversed": 0,
+      "runs": 170
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 157,
+      "lam_alef": 7,
+      "ratio": 0.9235,
+      "reversed": 0,
+      "runs": 170
+     },
+     "pdfium": {
+      "known": 164,
+      "lam_alef": 0,
+      "ratio": 0.9647,
+      "reversed": 117,
+      "runs": 170
+     },
+     "pdfkit": {
+      "known": 132,
+      "lam_alef": 0,
+      "ratio": 0.7811,
+      "reversed": 1,
+      "runs": 169
+     },
+     "pdfminer": {
+      "known": 156,
+      "lam_alef": 0,
+      "ratio": 0.9176,
+      "reversed": 148,
+      "runs": 170
+     },
+     "poppler": {
+      "known": 156,
+      "lam_alef": 8,
+      "ratio": 0.9176,
+      "reversed": 0,
+      "runs": 170
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-14",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 127,
+      "lam_alef": 2,
+      "ratio": 0.7937,
+      "reversed": 0,
+      "runs": 160
+     },
+     "pdfium": {
+      "known": 130,
+      "lam_alef": 0,
+      "ratio": 0.8125,
+      "reversed": 97,
+      "runs": 160
+     },
+     "pdfkit": {
+      "known": 104,
+      "lam_alef": 0,
+      "ratio": 0.6541,
+      "reversed": 2,
+      "runs": 159
+     },
+     "pdfminer": {
+      "known": 127,
+      "lam_alef": 0,
+      "ratio": 0.7937,
+      "reversed": 120,
+      "runs": 160
+     },
+     "poppler": {
+      "known": 127,
+      "lam_alef": 3,
+      "ratio": 0.7937,
+      "reversed": 0,
+      "runs": 160
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 152,
+      "lam_alef": 2,
+      "ratio": 0.95,
+      "reversed": 0,
+      "runs": 160
+     },
+     "pdfium": {
+      "known": 154,
+      "lam_alef": 0,
+      "ratio": 0.9625,
+      "reversed": 116,
+      "runs": 160
+     },
+     "pdfkit": {
+      "known": 121,
+      "lam_alef": 0,
+      "ratio": 0.761,
+      "reversed": 1,
+      "runs": 159
+     },
+     "pdfminer": {
+      "known": 151,
+      "lam_alef": 0,
+      "ratio": 0.9437,
+      "reversed": 144,
+      "runs": 160
+     },
+     "poppler": {
+      "known": 151,
+      "lam_alef": 3,
+      "ratio": 0.9437,
+      "reversed": 0,
+      "runs": 160
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-15",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 124,
+      "lam_alef": 0,
+      "ratio": 0.8267,
+      "reversed": 0,
+      "runs": 150
+     },
+     "pdfium": {
+      "known": 124,
+      "lam_alef": 0,
+      "ratio": 0.8267,
+      "reversed": 0,
+      "runs": 150
+     },
+     "pdfkit": {
+      "known": 124,
+      "lam_alef": 0,
+      "ratio": 0.8267,
+      "reversed": 0,
+      "runs": 150
+     },
+     "pdfminer": {
+      "known": 120,
+      "lam_alef": 0,
+      "ratio": 0.8,
+      "reversed": 113,
+      "runs": 150
+     },
+     "poppler": {
+      "known": 124,
+      "lam_alef": 0,
+      "ratio": 0.8267,
+      "reversed": 0,
+      "runs": 150
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 146,
+      "lam_alef": 0,
+      "ratio": 0.9733,
+      "reversed": 0,
+      "runs": 150
+     },
+     "pdfium": {
+      "known": 146,
+      "lam_alef": 0,
+      "ratio": 0.9733,
+      "reversed": 0,
+      "runs": 150
+     },
+     "pdfkit": {
+      "known": 146,
+      "lam_alef": 0,
+      "ratio": 0.9733,
+      "reversed": 0,
+      "runs": 150
+     },
+     "pdfminer": {
+      "known": 142,
+      "lam_alef": 0,
+      "ratio": 0.9467,
+      "reversed": 134,
+      "runs": 150
+     },
+     "poppler": {
+      "known": 146,
+      "lam_alef": 0,
+      "ratio": 0.9733,
+      "reversed": 0,
+      "runs": 150
+     }
+    }
+   },
+   "set": "zatca"
+  },
+  {
+   "label": "zatca-16",
+   "scores": {
+    "current": {
+     "mupdf": {
+      "known": 118,
+      "lam_alef": 0,
+      "ratio": 0.8194,
+      "reversed": 0,
+      "runs": 144
+     },
+     "pdfium": {
+      "known": 118,
+      "lam_alef": 0,
+      "ratio": 0.8194,
+      "reversed": 0,
+      "runs": 144
+     },
+     "pdfkit": {
+      "known": 118,
+      "lam_alef": 0,
+      "ratio": 0.8194,
+      "reversed": 0,
+      "runs": 144
+     },
+     "pdfminer": {
+      "known": 115,
+      "lam_alef": 0,
+      "ratio": 0.7986,
+      "reversed": 108,
+      "runs": 144
+     },
+     "poppler": {
+      "known": 118,
+      "lam_alef": 0,
+      "ratio": 0.8194,
+      "reversed": 0,
+      "runs": 144
+     }
+    },
+    "wiki": {
+     "mupdf": {
+      "known": 139,
+      "lam_alef": 0,
+      "ratio": 0.9653,
+      "reversed": 0,
+      "runs": 144
+     },
+     "pdfium": {
+      "known": 139,
+      "lam_alef": 0,
+      "ratio": 0.9653,
+      "reversed": 0,
+      "runs": 144
+     },
+     "pdfkit": {
+      "known": 139,
+      "lam_alef": 0,
+      "ratio": 0.9653,
+      "reversed": 0,
+      "runs": 144
+     },
+     "pdfminer": {
+      "known": 136,
+      "lam_alef": 0,
+      "ratio": 0.9444,
+      "reversed": 129,
+      "runs": 144
+     },
+     "poppler": {
+      "known": 139,
+      "lam_alef": 0,
+      "ratio": 0.9653,
+      "reversed": 0,
+      "runs": 144
+     }
+    }
+   },
+   "set": "zatca"
+  }
+ ],
+ "script_sha256": "3cd4a0bac8e979cda5dbd4f8a4fbf9a3de565d05624a782b9b6211ec68d5fef6",
+ "summary": {
+  "current": {
+   "broken_max": 0.806,
+   "broken_max_by_reader": {
+    "mupdf": 0.6964,
+    "pdfium": 0.58,
+    "pdfkit": 0.806,
+    "pdfminer": 0.7037,
+    "poppler": 0.6922
+   },
+   "calibration": {
+    "7  - درس - مهارات التواصل.pdf": {
+     "mupdf": 0.4105,
+     "pdfium": 0.4063,
+     "pdfkit": 0.4424,
+     "pdfminer": 0.3831,
+     "poppler": 0.4312
+    },
+    "known-bad": {
+     "mupdf": 0.2826,
+     "pdfium": 0.2822,
+     "pdfkit": 0.2573,
+     "pdfminer": 0.2212,
+     "poppler": 0.2987
+    },
+    "نظام الشركات 1439 سعد الخنفري.pdf": {
+     "mupdf": 0.6964,
+     "pdfium": 0.5306,
+     "pdfkit": 0.806,
+     "pdfminer": 0.7037,
+     "poppler": 0.6922
+    },
+    "٣ - درس - البايثون.pdf": {
+     "mupdf": 0.5873,
+     "pdfium": 0.58,
+     "pdfkit": 0.6062,
+     "pdfminer": 0.5835,
+     "poppler": 0.5984
+    }
+   },
+   "calibration_judged": 3,
+   "clean_docs_min": 0.7718,
+   "clean_file_min": 0.7,
+   "clean_judged": 8,
+   "clean_median_by_reader": {
+    "mupdf": 0.7847500000000001,
+    "pdfium": 0.7829999999999999,
+    "pdfkit": 0.7838499999999999,
+    "pdfminer": 0.77935,
+    "poppler": 0.7859499999999999
+   },
+   "clean_min_by_reader": {
+    "mupdf": 0.7,
+    "pdfium": 0.7,
+    "pdfkit": 0.7,
+    "pdfminer": 0.75,
+    "poppler": 0.7
+   },
+   "lexical_broken_max": 0.4424,
+   "lexical_broken_max_by_reader": {
+    "mupdf": 0.4105,
+    "pdfium": 0.4063,
+    "pdfkit": 0.4424,
+    "pdfminer": 0.3831,
+    "poppler": 0.4312
+   },
+   "readers": [
+    "mupdf",
+    "pdfium",
+    "pdfkit",
+    "pdfminer",
+    "poppler"
+   ],
+   "separation_all": -0.106,
+   "separation_by_reader": {
+    "mupdf": 0.0036,
+    "pdfium": 0.12,
+    "pdfkit": -0.106,
+    "pdfminer": 0.0463,
+    "poppler": 0.0078
+   },
+   "separation_lexical_only": 0.2576,
+   "separation_lexical_only_by_reader": {
+    "mupdf": 0.2895,
+    "pdfium": 0.2937,
+    "pdfkit": 0.2576,
+    "pdfminer": 0.3669,
+    "poppler": 0.2688
+   },
+   "separation_reader_median": 0.0078,
+   "separation_reader_min": -0.106
+  },
+  "wiki": {
+   "broken_max": 0.9053,
+   "broken_max_by_reader": {
+    "mupdf": 0.7624,
+    "pdfium": 0.6653,
+    "pdfkit": 0.9053,
+    "pdfminer": 0.7663,
+    "poppler": 0.7649
+   },
+   "calibration": {
+    "7  - درس - مهارات التواصل.pdf": {
+     "mupdf": 0.3895,
+     "pdfium": 0.3853,
+     "pdfkit": 0.429,
+     "pdfminer": 0.3437,
+     "poppler": 0.4044
+    },
+    "known-bad": {
+     "mupdf": 0.3086,
+     "pdfium": 0.3061,
+     "pdfkit": 0.2799,
+     "pdfminer": 0.2493,
+     "poppler": 0.3305
+    },
+    "نظام الشركات 1439 سعد الخنفري.pdf": {
+     "mupdf": 0.7624,
+     "pdfium": 0.5713,
+     "pdfkit": 0.9053,
+     "pdfminer": 0.7663,
+     "poppler": 0.7649
+    },
+    "٣ - درس - البايثون.pdf": {
+     "mupdf": 0.6756,
+     "pdfium": 0.6653,
+     "pdfkit": 0.7113,
+     "pdfminer": 0.6638,
+     "poppler": 0.6865
+    }
+   },
+   "calibration_judged": 3,
+   "clean_docs_min": 0.8684,
+   "clean_file_min": 0.8333,
+   "clean_judged": 8,
+   "clean_median_by_reader": {
+    "mupdf": 0.88065,
+    "pdfium": 0.88225,
+    "pdfkit": 0.88065,
+    "pdfminer": 0.8786,
+    "poppler": 0.8799
+   },
+   "clean_min_by_reader": {
+    "mupdf": 0.8333,
+    "pdfium": 0.8333,
+    "pdfkit": 0.8333,
+    "pdfminer": 0.8333,
+    "poppler": 0.8333
+   },
+   "lexical_broken_max": 0.429,
+   "lexical_broken_max_by_reader": {
+    "mupdf": 0.3895,
+    "pdfium": 0.3853,
+    "pdfkit": 0.429,
+    "pdfminer": 0.3437,
+    "poppler": 0.4044
+   },
+   "readers": [
+    "mupdf",
+    "pdfium",
+    "pdfkit",
+    "pdfminer",
+    "poppler"
+   ],
+   "separation_all": -0.072,
+   "separation_by_reader": {
+    "mupdf": 0.0709,
+    "pdfium": 0.168,
+    "pdfkit": -0.072,
+    "pdfminer": 0.067,
+    "poppler": 0.0684
+   },
+   "separation_lexical_only": 0.4043,
+   "separation_lexical_only_by_reader": {
+    "mupdf": 0.4438,
+    "pdfium": 0.448,
+    "pdfkit": 0.4043,
+    "pdfminer": 0.4896,
+    "poppler": 0.4289
+   },
+   "separation_reader_median": 0.0684,
+   "separation_reader_min": -0.072
+  }
+ },
+ "thresholds": {
+  "baseline": 0.5,
+  "baseline_source": "docs/checker-v0/measurements/thresholds.json",
+  "candidate": 0.67,
+  "shipped": 0.67
+ },
+ "zatca": {
+  "current": {
+   "errors": [],
+   "files": 16,
+   "high": 16,
+   "lexical_high": 0,
+   "lexicon": "ar_words_50k.txt.gz",
+   "rows": [
+    {
+     "file_level": "high",
+     "label": "zatca-01",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-02",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-03",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-04",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-05",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-06",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-07",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-08",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-09",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-10",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-11",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-12",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-13",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-14",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-15",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-16",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    }
+   ],
+   "threshold": 0.5
+  },
+  "wiki": {
+   "errors": [],
+   "files": 16,
+   "high": 16,
+   "lexical_high": 0,
+   "lexicon": "ar_words_wiki50k.txt.gz",
+   "rows": [
+    {
+     "file_level": "high",
+     "label": "zatca-01",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-02",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-03",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-04",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-05",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-06",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-07",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-08",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-09",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-10",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-11",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-12",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-13",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-14",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfium",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-15",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    },
+    {
+     "file_level": "high",
+     "label": "zatca-16",
+     "lexical_high": false,
+     "reader_high": [
+      "pdfkit",
+      "mupdf",
+      "poppler",
+      "pdfminer"
+     ]
+    }
+   ],
+   "threshold": 0.67
+  }
+ }
+}

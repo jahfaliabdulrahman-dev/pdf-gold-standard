@@ -13,9 +13,11 @@ the human verdict decides which side is wrong, and nothing is written to the man
 """
 import argparse
 import glob
+import hashlib
 import json
 import os
 import sys
+from datetime import datetime, timezone
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, REPO)
@@ -23,12 +25,17 @@ sys.path.insert(0, REPO)
 from arabic_pdf_check import blind                                      # noqa: E402
 
 
+def _now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("directory")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    with open(os.path.join(REPO, "arabic_pdf_check", "thresholds.json"), encoding="utf-8") as fh:
+    thresholds_path = os.path.join(REPO, "arabic_pdf_check", "thresholds.json")
+    with open(thresholds_path, encoding="utf-8") as fh:
         thresholds = json.load(fh)
     rows, high = [], []
     for path in sorted(glob.glob(os.path.join(a.directory, "*.pdf"))):
@@ -39,7 +46,9 @@ def main() -> int:
         if level == "high":
             high.append(os.path.basename(path))
     payload = {"directory": os.path.basename(os.path.abspath(a.directory)), "files": len(rows),
-               "high": len(high), "rows": rows}
+               "high": len(high), "generated_at": _now(),
+               "thresholds_sha256": hashlib.sha256(open(thresholds_path, "rb").read()).hexdigest(),
+               "command": " ".join(sys.argv), "rows": rows}
     with open(a.out, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=1)
         fh.write("\n")

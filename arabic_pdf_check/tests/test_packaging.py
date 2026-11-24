@@ -57,7 +57,8 @@ with tempfile.TemporaryDirectory(prefix="wheel-") as tmp:
         with zipfile.ZipFile(os.path.join(tmp, wheels[0])) as zf:
             names = set(zf.namelist())
             check("wheel-thresholds", "arabic_pdf_check/thresholds.json" in names)
-            check("wheel-word-list", "conformance/data/ar_words_50k.txt.gz" in names)
+            check("wheel-word-list", "conformance/data/ar_words_wiki50k.txt.gz" in names)
+            check("wheel-word-list-baseline", "conformance/data/ar_words_50k.txt.gz" in names)
             check("wheel-word-notice", "conformance/data/LICENSE-ar_words.txt" in names)
             licences = [n for n in names if "/licenses/" in n]
             check("wheel-license-files", any(n.endswith("LICENSE-ar_words.txt") for n in licences)

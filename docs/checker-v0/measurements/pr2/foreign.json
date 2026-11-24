@@ -1,0 +1,31 @@
+{
+ "directory": "foreign-pr2b",
+ "files": 2,
+ "high": 0,
+ "generated_at": "2026-11-24T20:33:04Z",
+ "thresholds_sha256": "857b8dc83be2f54e9e4f42f49af7124d2a48b20e4a9eeed78f3efbbea73a6615",
+ "command": "scripts/checker_foreign.py /tmp/foreign-pr2b --out docs/checker-v0/measurements/pr2/foreign.json",
+ "rows": [
+  {
+   "file": "lo-arabic-body.pdf",
+   "sha256": "25ff92db36290785049cced5c06794699eab3aec698ed25eacd3aaa3790739b2",
+   "level": "medium",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium"
+    }
+   ]
+  },
+  {
+   "file": "lo-arabic-table.pdf",
+   "sha256": "46ec6afb3f82295a58005bd72d74b07e2b9f8be8c792707cdcee5437cd1f3cc0",
+   "level": "low",
+   "signals": []
+  }
+ ]
+}

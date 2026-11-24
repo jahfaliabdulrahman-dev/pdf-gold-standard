@@ -225,6 +225,10 @@ jobs:
           python3 arabic_pdf_check/tests/test_refusals.py
           python3 arabic_pdf_check/tests/test_packaging.py
           python3 arabic_pdf_check/tests/test_blind.py
+          python3 scripts/build_wiki_lexicon.py --verify-source
+          python3 scripts/test_build_wiki_lexicon.py
+          python3 scripts/test_lexicon_compare.py
+          python3 scripts/test_calibration.py
 
       - name: Foreign producer set — LibreOffice output, measured by the checker
         run: |
@@ -241,7 +245,14 @@ jobs:
           # The acceptance numbers are PRODUCED here, not trusted from a committed file: the four planted
           # files must be high with their named signal, and no clean file may be high. --skip-owner: the
           # owner's corpus is not on this machine and is never downloaded, never deposited.
-          python3 scripts/checker_measure.py --skip-owner --out /tmp/checker-measure
+          python3 scripts/checker_measure.py --skip-owner --tolerance 0.05 --out /tmp/checker-measure
+
+      - name: Upload the checker measurement (the environment's raw thresholds)
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: checker-measure
+          path: /tmp/checker-measure
 
       # The run's raw numbers are what a floors acceptance is made from: a version with no floors fails the
       # step above, and this artifact is the input to `conformance ratchet accept --from results.json`.
@@ -313,6 +324,9 @@ jobs:
           python3 arabic_pdf_check/tests/test_pages.py
           python3 arabic_pdf_check/tests/test_controls.py
           python3 arabic_pdf_check/tests/test_packaging.py
+          python3 scripts/test_build_wiki_lexicon.py
+          python3 scripts/test_lexicon_compare.py
+          python3 scripts/test_calibration.py
           python3 scripts/test_ci_wiring.py
       - name: The checker with four Linux readers
         run: |
