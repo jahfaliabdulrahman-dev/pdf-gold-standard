@@ -267,7 +267,9 @@ jobs:
 
   checker-linux:
     # The checker on a Linux machine: four readers (PDFKit is macOS-only and must be declared missing), the
-    # same file, and no conformance ratchet — the ratchet's floors belong to the macOS order.
+    # same file, and no conformance ratchet. This job's poppler is the distribution's UNPINNED build — it is a
+    # smoke run of the checker, not the conformance floors (those pin 26.11.0 and refuse other builds; the
+    # floor job is macOS). The distinction is deliberate and named here.
     runs-on: ubuntu-latest
     env:
       CHROME_VERSION: "157.0.8103.78"

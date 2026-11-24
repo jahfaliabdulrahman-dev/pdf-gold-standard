@@ -124,6 +124,18 @@ def main() -> int:
           and sum(r["notdef"] for r in scan["fonts"].values()) == scan["notdef"],
           f"codes {sum(r['codes'] for r in scan['fonts'].values())}/{scan['codes']} "
           f"gaps {sum(r['missing_unicode'] for r in scan['fonts'].values())}/{scan['missing_unicode']}")
+    # A parser problem that is not `unparsable` must still reach the verdict: a lone surrogate destination
+    # used to leave `level=None` because the allowlist only knew the map-short problems. The row below is
+    # what `_Font` now produces from `parse_tu_report`; the verdict is the same law the checker uses.
+    from conformance.checks import structure
+    row = {"key": "/F1|X", "family": "X", "subtype": "/Type0", "embedded": True, "tounicode": True,
+           "two_byte": True, "encoding": "", "encoding_differences": False, "codes": 10,
+           "missing_unicode": 0, "missing_in_word": 0, "missing_codes": {}, "glyph_names": {},
+           "pua": 0, "replacement": 0, "zero_value": 0, "bom": 0, "notdef": 0, "symbol": False,
+           "unparsable": False, "capped": 0, "width_mismatch": False,
+           "problems": ["1 destination(s) contain a lone UTF-16 surrogate — the reader cannot show it"]}
+    verdict = structure.font_verdicts({"fonts": {"/F1|X": row}})[0]
+    check("surrogate-problem-is-high", verdict["level"] == "high", f"level={verdict['level']}")
     print()
     if FAILS:
         print(f"MCID-TEXT GUARD FAILED — {len(FAILS)}: {', '.join(FAILS)}")

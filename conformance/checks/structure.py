@@ -173,6 +173,17 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
         if partial:
             warnings.append("ToUnicode map is incomplete: " + "; ".join(partial)[:240]
                             + " — the mapped entries are used, the missing tail is not invented")
+        # The parser's other non-fatal problems are NOT cosmetic: a lone UTF-16 surrogate is a destination
+        # that cannot be shown (Matterhorn 31-029), a range wider than 256 codes is a range the spec bounds,
+        # and an overlap means one entry was silently superseded. Each gets a named home; the parser's
+        # `problems` list is the source, not a substring allowlist that can drift from it.
+        for p in row.get("problems") or []:
+            if "lone UTF-16 surrogate" in p:
+                problems.append("ToUnicode destination problem: " + p)
+            elif "wider than 256" in p:
+                warnings.append("ToUnicode range problem: " + p + " — the later entries may be lost")
+            elif "overlapping mapping" in p:
+                notes.append("ToUnicode note: " + p)
         if row.get("notdef"):
             problems.append(f"{row['notdef']} .notdef glyph(s) drawn")
         if not row["tounicode"]:

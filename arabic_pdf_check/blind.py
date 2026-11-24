@@ -341,7 +341,7 @@ def check(pdf_path: str, thresholds: dict) -> dict:
                 "visual-order", "high", visual_cause, confidence,
                 f"returns {'reversed' if (order['score'] or 0) > 0 else 'logical'} text "
                 f"(score {order['score']:+.2f}; +1 reversed, −1 logical) — "
-                f"{len(visual_readers)} of {len(MATRIX)} declared readers return reversed text",
+                f"{len(visual_readers)} of {len(ok)} readers that read return reversed text",
                 score=order["score"], votes=order["evidence"]))
         arabic = arabic_count(text)
         forms_r = pf_count(text)
