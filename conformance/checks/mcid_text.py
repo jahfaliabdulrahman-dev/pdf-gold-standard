@@ -82,6 +82,7 @@ class _Font:
         self.capped = 0
         self.problem = ""
         self.problems = []
+        self.status = "ok"
         if tu is not None:
             try:
                 report = parse_tu_report(tu.read_bytes().decode("latin-1"))
@@ -120,6 +121,17 @@ class _Font:
                 self.unparsable = True
                 self.problem = f"ToUnicode could not be read: {type(exc).__name__}"
                 self.map = {}
+        # ONE status per font: the booleans above are the evidence, the status is the verdict the report
+        # and `structure.font_verdicts` consume. The precedence is explicit; a fifth flag cannot invent a
+        # new severity by being checked in a different order.
+        if self.unparsable:
+            self.status = "unparsable"
+        elif self.capped:
+            self.status = "capped"
+        elif self.width_mismatch:
+            self.status = "width-mismatch"
+        elif self.problems and all("usecmap" in p for p in self.problems):
+            self.status = "usecmap"
 
     def decode(self, raw: bytes) -> tuple[str, dict]:
         """(text, counts) — `counts` is per DRAWING of this string, keyed for aggregation.
@@ -246,13 +258,16 @@ def _walk(instructions, resources, page_no, out: dict, stats: dict, depth=0, pro
                         "missing_unicode": 0, "missing_in_word": 0, "missing_codes": {}, "glyph_names": {},
                         "pua": 0, "replacement": 0, "zero_value": 0, "bom": 0,
                         "unparsable": False, "capped": 0, "width_mismatch": False, "problem": "",
-                        "problems": [],
+                        "problems": [], "status": "ok",
                     })
                     row["unparsable"] = row["unparsable"] or font.unparsable
                     row["capped"] = max(row["capped"], font.capped)
                     row["width_mismatch"] = row["width_mismatch"] or font.width_mismatch
                     row["problem"] = row["problem"] or font.problem
                     row["problems"].extend(font.problems)
+                    _rank = {"ok": 0, "usecmap": 1, "width-mismatch": 2, "capped": 3, "unparsable": 4}
+                    if _rank[font.status] > _rank[row["status"]]:
+                        row["status"] = font.status
                     for k in ("codes", "notdef", "missing_unicode", "missing_in_word", "pua", "replacement",
                               "zero_value", "bom"):
                         row[k] += counts[k]

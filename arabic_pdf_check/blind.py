@@ -174,10 +174,12 @@ def _font_signals(scan: dict, gap_high: float = 0.01,
                      "pua": v["pua"], "replacement": v["replacement"],
                      "zero_value": v["zero_value"], "bom": v["bom"], "note": v["note"],
                      "unparsable": bool(v.get("unparsable")), "capped": int(v.get("capped") or 0),
-                     "width_mismatch": bool(v.get("width_mismatch"))})
+                     "width_mismatch": bool(v.get("width_mismatch")), "status": v.get("status")})
         if v["level"]:
             signals.append(_finding(
-                "tounicode-unparsable" if (v.get("unparsable") or v.get("capped")) else "tounicode-gaps",
+                "tounicode-unparsable" if (v.get("status") in ("unparsable", "capped")
+                                           or v.get("unparsable") or v.get("capped"))
+                else "tounicode-gaps",
                 v["level"], "file", "high",
                 f"{v['name']} ({v['subtype']}): " + "; ".join(v["problems"] or v["warnings"]),
                 font=v["key"], codes=v["codes"], missing_unicode=v["missing_unicode"],

@@ -222,7 +222,8 @@
           "note",
           "unparsable",
           "capped",
-          "width_mismatch"
+          "width_mismatch",
+          "status"
         ],
         "properties": {
           "font": {
@@ -302,6 +303,9 @@
           },
           "width_mismatch": {
             "type": "boolean"
+          },
+          "status": {
+            "enum": ["ok", "usecmap", "width-mismatch", "capped", "unparsable"]
           }
         }
       }

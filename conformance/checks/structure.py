@@ -153,12 +153,27 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
         pua, codes = row.get("pua", 0), row.get("codes", 0)
         symbol = bool(re.search(r"(?i)wingdings|webdings|symbol|zapfdingbats|marlett|dingbat", family)
                       or (pua and pua >= codes))
-        if row.get("unparsable"):
+        # ONE status per font: the row's flags are evidence, `status` is the verdict. A synthetic row from a
+        # older caller may omit `status`; derive it with the same precedence the scanner uses, never a
+        # different order. The problems loop below still adds the surrogate/range/overlap evidence.
+        status = row.get("status")
+        if not status:
+            if row.get("unparsable"):
+                status = "unparsable"
+            elif row.get("capped"):
+                status = "capped"
+            elif row.get("width_mismatch"):
+                status = "width-mismatch"
+            elif any("usecmap" in p for p in row.get("problems") or []):
+                status = "usecmap"
+            else:
+                status = "ok"
+        if status == "unparsable":
             problems.append("ToUnicode could not be parsed completely: "
                             + (row.get("problem") or "named parse problem"))
-        if row.get("capped"):
+        elif status == "capped":
             problems.append(f"{row['capped']} bfrange(s) exceeded 65,536 codes and were capped")
-        if row.get("width_mismatch"):
+        elif status == "width-mismatch":
             warnings.append("ToUnicode parsed, but its code width does not match the font: "
                             + (row.get("problem") or "named width mismatch")
                             + " — a conforming reader may ignore the map")
@@ -263,7 +278,7 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
                     "notdef": row["notdef"], "pua": pua, "replacement": row["replacement"],
                     "zero_value": row["zero_value"], "bom": row["bom"], "symbol": symbol,
                     "unparsable": bool(row.get("unparsable")), "capped": int(row.get("capped") or 0),
-                    "width_mismatch": bool(row.get("width_mismatch")),
+                    "width_mismatch": bool(row.get("width_mismatch")), "status": status,
                     "level": level,
                     "problems": problems, "warnings": warnings, "note": " · ".join(notes) or None})
     return out
