@@ -36,8 +36,9 @@ from conformance.corpus import cases as corpus_cases                          # 
 import checker_fixtures                                                       # noqa: E402
 
 DOCS = {"guide": "guide-v2-ar.pdf", "report": "report.pdf", "najd": "najd.pdf", "print": "report-print.pdf"}
-OWNER_DIR = os.path.expanduser(
-    "~/Library/CloudStorage/GoogleDrive-REDACTED/ملفاتي/PDF_for_PDF")
+# The owner's corpus is private and lives outside the repository; its location is the machine's business,
+# not the code's, so it comes from the environment and is never committed.
+OWNER_DIR = os.path.expanduser(os.environ.get("OWNER_CORPUS_DIR", ""))
 THRESHOLDS = os.path.join(REPO, "arabic_pdf_check", "thresholds.json")
 
 
@@ -232,6 +233,9 @@ def main() -> int:
     ap.add_argument("--owner-only", action="store_true",
                     help="measure only the owner's corpus against the committed thresholds")
     a = ap.parse_args()
+    if not a.skip_owner and not a.owner_dir:
+        ap.error("the owner corpus is private: set OWNER_CORPUS_DIR or pass --owner-dir "
+                 "(or --skip-owner)")
     if a.out is None:
         a.out = tempfile.mkdtemp(prefix="checker-measure-")
         print(f"out: {a.out} (pass --out to choose; the repository is not written by default)")
