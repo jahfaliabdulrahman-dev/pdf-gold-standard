@@ -1,9 +1,9 @@
 # Code Review Closure — PR-2 (`feat/lexicon-wiki50k`)
 
-**Target:** `9ece554...b1b16d4` (PR-2 commits `e1ba621`, `c2f1346`, `e99c80b`, `11c0fad`, `a36199a`, `b1b16d4`).
+**Target:** `9ece554...af7f1d7` (PR-2 commits `e1ba621`, `c2f1346`, `e99c80b`, `11c0fad`, `a36199a`, `b1b16d4`, `a9889d2`, merge `af7f1d7`).
 **First round:** three isolated seats on `9ece554...e1ba621`; their full transcripts are the review of
 record. This report closes every P0–P3 item and names the declared limits. **The code measured is
-`b1b16d4`**; the later commits are evidence/docs only. The compare records `head: b1b16d4`, `dirty: false`, and the
+`a9889d2`**; the merge `af7f1d7` brings PR-1 into the branch and changes no PR-2 code. The evidence is tied to `a9889d2`. The compare records `head: b1b16d4`, `dirty: false`, and the
 measuring script sha256.
 
 ## Verdict
@@ -45,6 +45,27 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `b1
    `scripts/checker_fixtures.py:75-77`. Move: make the declaration true. Evidence: `_swap_text` uses
    `range(0, len(SWAP_WORDS), 5)` and says 36; `04-review` corrected; `test_blind` still gets a high file.
    Tag: مُثبت. **Fixed** (`c2f1346`).
+
+15. **P2 · the calibration manifest had no defect type, so the Python item could not be classified** ·
+    `docs/checker-v0/measurements/calibration.json:1-8` carried only free text. Consequence: the owner's
+    Python item read as "owner-adjudicated, no signal" and could not be checked by a taxonomy. Move: add
+    `schema_version: calibration/2`, `defect_type` + `defect_types` + measured evidence, and a guard.
+    Evidence: `scripts/test_calibration.py` passes; the Python row is `lam-alef-transposition` with
+    `{pdfium:21, pdfkit:0, mupdf:21, poppler:21, pdfminer:0}`. Tag: مُثبت. **Fixed** (`a9889d2`).
+
+16. **P2 · "separation" was reported only for lexical validity** · `scripts/lexicon_compare.py:100-153`
+    computed one signal; the other shipped signals had no re-derived table. Consequence: the owner could
+    not see which signal separates and by how much. Move: one measurement over the same clean/planted/
+    calibration files. Evidence: `docs/checker-v0/measurements/pr2/signal-separation.json`
+    (presentation 0.9091; visual 0.60; ToUnicode 128 codes; lexical 0.8333; numerals 6; lam-alef 20
+    against a clean max 1; no-text 0 vs 5). Tag: مُثبت. **Fixed** (`a9889d2`).
+
+17. **P2 · the Python item said "no shipped signal" while the measured lam-alef defect was invisible in
+    the summary** · `docs/checker-v0/08-pr2-evidence-2026-11-24.md:119` and `calibration.json:...`.
+    Consequence: a real reader-level defect looked like an unexplained false negative. Move: name the
+    defect and keep the majority policy; do not lower the lexical floor. Evidence: 21/21/21 lam-alef in
+    three readers, PDFKit 0, PDFMiner reversed; `lam-alef-transposition` is a defect type but not a
+    shipped file-level signal. Tag: مُثبت. **Fixed** (`a9889d2`).
 
 ## Spec
 
@@ -133,8 +154,10 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `b1
   green `Build PDF` on `feat/lexicon-wiki50k` (macOS + Linux).
 - **The 2022 Wikipedia dump's historical licence version** — the official page current is 4.0; the dump's
   own `COPYING` was not read. Ends with the dump's licence file or legal review.
-- **The owner's verdict on `٣ - درس - البايثون`** — its defect class is owner-adjudicated, not measured.
-  Ends with the owner's classification; the threshold is not changed.
+- **`٣ - درس - البايثون`** is classified as `lam-alef-transposition` by measurement (21/21/21; PDFKit 0;
+  PDFMiner reversed), not owner-adjudicated; it remains file-level low by the 3-of-5 lexical majority.
+  Ends with a shipped file-level lam-alef signal if the owner wants the file raised; the floor is not
+  lowered. (Closed classification; open product decision.)
 - **The negative literal separation is a policy choice** — the assignment's rule accepts the candidate;
   whether a negative absolute separation is acceptable is a product decision. Ends with the owner's read
   of `08:136-142`.
