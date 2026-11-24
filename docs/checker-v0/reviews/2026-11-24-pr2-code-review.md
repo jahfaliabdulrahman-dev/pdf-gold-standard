@@ -129,7 +129,7 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `b1
 
 ## Not proven
 
-- **CI on GitHub** has not run on this branch; the 43 tests and RATCHET/SELFTEST are local. Ends with a
+- **CI on GitHub** ran green on `a309e5c` (run `45476723675`): `build` and `checker-linux` both success, `RATCHET HELD`, `SELFTEST PASSED`, `MEASUREMENT COMPLETE` at the shipped 0.67 (CI derives 0.64, delta −0.03 inside the declared 0.05; no threshold changed). The Linux job still proves the reader matrix, not the Arabic blind set end-to-end. Ends with a
   green `Build PDF` on `feat/lexicon-wiki50k` (macOS + Linux).
 - **The 2022 Wikipedia dump's historical licence version** — the official page current is 4.0; the dump's
   own `COPYING` was not read. Ends with the dump's licence file or legal review.
