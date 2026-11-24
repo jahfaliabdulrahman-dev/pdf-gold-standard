@@ -101,7 +101,11 @@ class _Font:
                 expected_bytes = 2 if self.two_byte else 1
                 widths = set(report.get("src_widths") or [])
                 codespace = set(report.get("codespace_widths") or [])
-                if report.get("unparsable"):
+                # `/UseCMap` is legal inheritance the parser does not resolve. The strict writer wrapper still
+                # refuses it (it cannot rebuild the inherited map), but the CHECKER must not call a conforming
+                # file high: the local entries are used and the inheritance is named as a medium limitation.
+                usecmap_only = bool(self.problems) and all("usecmap" in p for p in self.problems)
+                if report.get("unparsable") and not usecmap_only:
                     self.unparsable = True
                     self.problem = "; ".join(report.get("problems") or [])[:300]
                 elif widths and any(w != expected_bytes for w in widths):
@@ -112,15 +116,8 @@ class _Font:
                     self.width_mismatch = True
                     self.problem = (f"ToUnicode codespace is {sorted(codespace)} byte(s); "
                                     f"the font uses {expected_bytes}")
-                elif self.capped:
-                    self.unparsable = True
-                    self.problem = f"{self.capped} bfrange(s) exceeded 65,536 codes and were capped"
-                try:
-                    if hasattr(tu, "get") and tu.get("/UseCMap") is not None:
-                        self.unparsable = True
-                        self.problem = "/UseCMap is declared; this reader does not resolve the inherited map"
-                except Exception:
-                    pass
+                elif usecmap_only:
+                    self.problem = "; ".join(self.problems)[:300]
             except Exception as exc:
                 # A /ToUnicode that is not a stream, or a stream that cannot be read: a named defect, never
                 # the silent `{}` that made every code look unmapped and every report look the same.

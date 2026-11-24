@@ -108,7 +108,9 @@ try:
     crashed = blind.check(built["clean"], thresholds)
 finally:
     blind.isolate.read = real_read
-check("reader-failure:named", crashed["failed_readers"].get("pdfium") == "ReaderFailed",
+check("reader-failure:named", crashed["failed_readers"].get("pdfium", "").startswith("ReaderFailed"),
+      str(crashed.get("failed_readers")))
+check("reader-failure:reason", "boom" in crashed["failed_readers"].get("pdfium", ""),
       str(crashed.get("failed_readers")))
 check("reader-failure:signal", any(s["id"] == "reader-failure" for s in crashed["signals"]),
       str([s["id"] for s in crashed["signals"]]))

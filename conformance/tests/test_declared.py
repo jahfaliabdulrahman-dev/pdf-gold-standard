@@ -37,7 +37,7 @@ try:
 except declared.DeclaredRefused as exc:
     check("empty-control-refused", "does not exist" in str(exc), str(exc))
 
-held, refused, controls = declared.usable("pdfium", pdfium.version())
+held, refused, controls = declared.usable("pdfium", pdfium.version(), mode="live")
 check("pdfium-row-order-holds", any(e["id"] == "pdfium-rtl-row-order" for e in held),
       "; ".join(refused) or "the control did not reproduce")
 if held:

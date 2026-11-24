@@ -254,6 +254,11 @@ def parse_tu_report(data: str) -> dict:
         code = int.from_bytes(src, "big")
         text = _utf16(dst, problems, where)
         if text is None:
+            # A destination that cannot be decoded leaves a HOLE in the map. The old caller replaced the whole
+            # map with {}; this parser keeps the valid entries, but the writer must not rewrite a layer from a
+            # map it knows is short — so the hole is fatal, named, and the strict wrapper refuses.
+            nonlocal fatal
+            fatal = True
             return False
         _count_surrogates(text)
         if code in mapping and mapping[code] != text:

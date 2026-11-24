@@ -182,6 +182,9 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
                 problems.append("ToUnicode destination problem: " + p)
             elif "wider than 256" in p:
                 warnings.append("ToUnicode range problem: " + p + " — the later entries may be lost")
+            elif "usecmap" in p.lower():
+                warnings.append("ToUnicode map inherits an unresolved /UseCMap: " + p
+                                + " — the local entries are used; the inherited map is not guessed")
             elif "overlapping mapping" in p:
                 notes.append("ToUnicode note: " + p)
         if row.get("notdef"):

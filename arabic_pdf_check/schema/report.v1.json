@@ -190,12 +190,12 @@
         "readers": {
           "type": "object", "additionalProperties": false, "required": ["read", "needed"],
           "properties": {"read": {"type": "integer", "minimum": 0},
-                         "needed": {"type": "integer", "minimum": 0}}
+                         "needed": {"type": ["integer", "null"], "minimum": 0}}
         },
         "lexical": {
           "type": "object", "additionalProperties": false, "required": ["read", "needed"],
           "properties": {"read": {"type": "integer", "minimum": 0},
-                         "needed": {"type": "integer", "minimum": 0}}
+                         "needed": {"type": ["integer", "null"], "minimum": 0}}
         },
         "recovery": {"enum": ["recovered", "failed", "split", "no-voters"]}
       }

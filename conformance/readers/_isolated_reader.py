@@ -9,7 +9,7 @@ import json
 import os
 import sys
 
-from conformance.readers import load
+from conformance.readers import pages_many, text_many
 
 
 def main() -> int:
@@ -17,10 +17,9 @@ def main() -> int:
         return 2
     name, path, fd = sys.argv[1], sys.argv[2], int(sys.argv[3])
     try:
-        mod = load(name)
-        got = mod.pages_many([path]) if hasattr(mod, "pages_many") else None
+        got = pages_many(name, [path])
         if got is None or got[0] is None:
-            text = mod.text_many([path])[0] if hasattr(mod, "text_many") else mod.text(path)
+            text = text_many(name, [path])[0]
             payload = {"ok": True, "pages": None, "text": text}
         else:
             payload = {"ok": True, "pages": got[0], "text": "\n".join(got[0])}

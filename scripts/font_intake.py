@@ -71,7 +71,7 @@ def licence_state(names: dict[int, str]) -> tuple[str, bool, bool]:
     granted = any(token in grant_text for token in (
         "open font license", "ofl", "apache license", "apache 2", "general public license", "gpl",
         "bitstream vera", "cc0", "creative commons zero", "public domain"))
-    restricted = not granted and ("all rights reserved" in licence_text.lower() or not names.get(13))
+    restricted = not granted
     return licence_text[:160] or "(none declared)", granted, restricted
 
 

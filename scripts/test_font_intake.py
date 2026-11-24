@@ -29,6 +29,8 @@ cases = {
     "eula-url-only": ({0: "Copyright Example", 14: "https://example.com/eula"}, True),
     "eula-text-and-url": ({0: "Copyright Example", 13: "Commercial licence. All rights reserved.",
                           14: "https://example.com/eula"}, True),
+    "eula-name13-no-phrase": ({0: "Copyright Example", 13: "Acme End User License Agreement. See the URL.",
+                              14: "https://example.com/eula"}, True),
     "ofl-text": ({0: "Copyright Example", 13: "SIL Open Font License, Version 1.1",
                   14: "https://openfontlicense.org"}, False),
     "apache-text": ({0: "Copyright Example", 13: "Licensed under the Apache License, Version 2.0"}, False),

@@ -136,6 +136,16 @@ def main() -> int:
            "problems": ["1 destination(s) contain a lone UTF-16 surrogate — the reader cannot show it"]}
     verdict = structure.font_verdicts({"fonts": {"/F1|X": row}})[0]
     check("surrogate-problem-is-high", verdict["level"] == "high", f"level={verdict['level']}")
+    # /UseCMap is legal inheritance: the checker names it medium, the strict writer still refuses it.
+    row2 = dict(row, problems=["usecmap is declared; the inherited map is not resolved"], unparsable=False)
+    verdict2 = structure.font_verdicts({"fonts": {"/F1|X": row2}})[0]
+    check("usecmap-is-medium", verdict2["level"] == "medium", f"level={verdict2['level']}")
+    # A capped map is one problem, not two: `capped` is high by itself and must not also print the
+    # generic "could not be parsed completely" sentence for the same fact.
+    row3 = dict(row, problems=[], unparsable=False, capped=1)
+    verdict3 = structure.font_verdicts({"fonts": {"/F1|X": row3}})[0]
+    check("capped-is-one-problem", verdict3["level"] == "high" and len(verdict3["problems"]) == 1,
+          f"level={verdict3['level']} problems={verdict3['problems']}")
     print()
     if FAILS:
         print(f"MCID-TEXT GUARD FAILED — {len(FAILS)}: {', '.join(FAILS)}")

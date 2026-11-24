@@ -73,7 +73,10 @@ def repo_fingerprint(controls_dir: str) -> str:
     def walk(directory: str):
         for name in sorted(os.listdir(directory)):
             path = os.path.join(directory, name)
-            if name == "__pycache__":
+            # The fingerprint covers the code a control imports, not the tests and corpus that describe it:
+            # hashing `conformance/tests/**` made a test edit invalidate every stored control, so `check`
+            # refused every limit for a change that cannot alter a reader's behaviour.
+            if name in ("__pycache__", "tests", "corpus"):
                 continue
             if os.path.isdir(path):
                 walk(path)
@@ -173,8 +176,7 @@ def _read(path: str, entry: dict, key: str) -> dict:
 _MEM: dict[tuple[str, str], dict] = {}
 
 
-def control_data(entry: dict, controls_dir: str, reader_name: str = "", reader_version: str = "",
-                 mode: str = "live") -> dict:
+def control_data(entry: dict, controls_dir: str, reader_name: str, reader_version: str, mode: str) -> dict:
     """The control's measurement.
 
     `mode="live"`    — run it now (the certificate/reference path).

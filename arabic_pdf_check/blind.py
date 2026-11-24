@@ -16,6 +16,7 @@ layer and of what the readers make of it. The risk is reported at two levels, an
 limit never raises `risk.file` — that is the assignment's «تُعلَن ولا تُحسب على الملف», as code.
 """
 import os
+import re
 
 from conformance import certificate as cert_mod
 from conformance import reference
@@ -176,7 +177,7 @@ def _font_signals(scan: dict, gap_high: float = 0.01,
                      "width_mismatch": bool(v.get("width_mismatch"))})
         if v["level"]:
             signals.append(_finding(
-                "tounicode-unparsable" if v.get("unparsable") else "tounicode-gaps",
+                "tounicode-unparsable" if (v.get("unparsable") or v.get("capped")) else "tounicode-gaps",
                 v["level"], "file", "high",
                 f"{v['name']} ({v['subtype']}): " + "; ".join(v["problems"] or v["warnings"]),
                 font=v["key"], codes=v["codes"], missing_unicode=v["missing_unicode"],
@@ -191,6 +192,20 @@ def why_class(why) -> str:
     if isinstance(why, BaseException):
         return type(why).__name__
     return (str(why).split(":")[0].strip() or "unavailable")[:60]
+
+
+_PATH = re.compile(r"(?:[A-Za-z]:)?(?:/[^\s:;]+){2,}")
+
+
+def why_reason(why) -> str:
+    """A one-line reason with absolute paths replaced by `<path>`; the class and the reason are two fields.
+
+    The class alone answers "did it hang or crash?" with nothing — the assignment asks for `reader-failed`
+    «مع السبب بسطر». The reason is sanitized with the same excerpt rule as the report and never carries a
+    local path, so a customer's report can name a timeout without leaking the home directory.
+    """
+    raw = reference.sanitize_line(str(why) if why is not None else "")
+    return " ".join(_PATH.sub("<path>", raw).split())[:160]
 
 
 def check(pdf_path: str, thresholds: dict) -> dict:
@@ -216,8 +231,10 @@ def check(pdf_path: str, thresholds: dict) -> dict:
                 texts[name] = "\n".join(got_pages)
         except Exception as exc:
             # A crash, an abort or a timeout inside a reader is a fact about this file's parser-hostility.
-            # It must not take the report down, and it must not disappear: the file is not clean.
-            failed[name] = why_class(exc)
+            # It must not take the report down, and it must not disappear: the file is not clean. The reason
+            # is kept beside the class (sanitized) so "timed out after 120s" is not flattened to "ReaderFailed".
+            reason = why_reason(exc)
+            failed[name] = f"{why_class(exc)}: {reason}" if reason else why_class(exc)
             del ok[name]
     if not ok:
         raise RuntimeError("every reader failed on this file — a report with no reading is not a report")
@@ -428,8 +445,8 @@ def check(pdf_path: str, thresholds: dict) -> dict:
         "failed_readers": dict(sorted(failed.items())),
         "majority": {
             "declared": len(MATRIX),
-            "readers": {"read": len(ok), "needed": need_visual or 0},
-            "lexical": {"read": len(judged), "needed": need_lex or 0},
+            "readers": {"read": len(ok), "needed": need_visual},
+            "lexical": {"read": len(judged), "needed": need_lex},
             "recovery": recovery,
         },
         "fonts": font_rows,

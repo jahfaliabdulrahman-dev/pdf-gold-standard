@@ -56,7 +56,7 @@ def measure_readings(scan: dict, readings: dict, truth_text: str) -> dict:
     for name, reading in readings.items():
         mod = load(name)
         version = mod.version()
-        limits, refused, controls = limitations.usable(name, version)
+        limits, refused, controls = limitations.usable(name, version, mode="live")
         result = metrics.measure(reading, truth_text,
                                  metrics.bidi_count("\n".join(scan["text"].values())))
         applied = [limitations.apply(lim, truth_text, reading, result, control)

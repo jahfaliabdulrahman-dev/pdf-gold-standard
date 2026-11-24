@@ -46,7 +46,7 @@ def control_data(entry: dict, reader_name: str = "", reader_version: str = "", m
         raise DeclaredRefused(str(exc)) from None
 
 
-def usable(reader_name: str, reader_version: str, mode: str = "live") -> tuple[list[dict], list[str], list[dict]]:
+def usable(reader_name: str, reader_version: str, mode: str) -> tuple[list[dict], list[str], list[dict]]:
     """(declarations that hold, named refusals, the control measurements they rest on).
 
     The version in the file is the version the behaviour was MEASURED on; the installed reader's version is

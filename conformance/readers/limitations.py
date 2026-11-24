@@ -52,7 +52,7 @@ def control_data(limit: dict, reader_name: str = "", reader_version: str = "", m
         raise LimitRefused(str(exc)) from None
 
 
-def usable(reader_name: str, reader_version: str, mode: str = "live") -> tuple[list[dict], list[str], list[dict]]:
+def usable(reader_name: str, reader_version: str, mode: str) -> tuple[list[dict], list[str], list[dict]]:
     """(limits to apply, named refusals, the control measurements they rest on).
 
     `mode="cached"` is the check path: it reads the stored result and refuses by name when absent, so a
