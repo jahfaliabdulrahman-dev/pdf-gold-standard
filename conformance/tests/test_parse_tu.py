@@ -92,6 +92,18 @@ report = parse_tu_report(wrap("1 usecmap", kind="bfchar", count=1))
 check("usecmap:unresolved", report["unparsable"] is True and any("usecmap" in p for p in report["problems"]),
       str(report["problems"]))
 
+# A destination with an odd number of bytes is a HOLE: the old parser dropped it and the writer accepted a
+# short map. The report is fatal and the strict wrapper refuses; the valid entries are not silently shipped.
+bad_dst = wrap("<0001> <062700>", kind="bfchar", count=1)
+report = parse_tu_report(bad_dst)
+check("bad-destination:report", report["unparsable"] is True,
+      str(report["problems"]))
+try:
+    parse_tu(bad_dst)
+    check("bad-destination:strict-raises", False, "no exception")
+except CMapError as exc:
+    check("bad-destination:strict-raises", True, str(exc))
+
 # Real CMaps: the four shipped PDFs carry Chrome/Skia output, header and all. The parser must read them.
 import pikepdf                                            # noqa: E402
 

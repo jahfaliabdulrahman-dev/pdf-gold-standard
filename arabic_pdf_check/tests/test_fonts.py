@@ -79,6 +79,15 @@ check("gaps-under-1pct-is-medium", any(s["level"] == "medium" and "4 of 1536" in
       str(signals))
 signals, _ = blind._font_signals(row(missing_unicode=6, codes=6), gap_high=0.01)
 check("empty-map-is-high", any(s["level"] == "high" for s in signals), str(signals))
+# The recovery rule through the SIGNAL, not only `recovery_state`: an EMPTY map the readers recover is
+# medium; the same map with no recovery is high. This is the assignment's «ثلاثة ناجحون ⇒ متوسط» at the
+# surface a user reads; a partial gap is not the empty-map case and stays high.
+signals, _ = blind._font_signals(row(missing_unicode=100, codes=100), gap_high=0.01, recovered=True)
+check("recovered-empty-map-is-medium", any(s["id"] == "tounicode-gaps" and s["level"] == "medium"
+                                           for s in signals), str(signals))
+signals, _ = blind._font_signals(row(missing_unicode=100, codes=100), gap_high=0.01, recovered=False)
+check("unrecovered-empty-map-is-high", any(s["id"] == "tounicode-gaps" and s["level"] == "high"
+                                           for s in signals), str(signals))
 
 # 4 · a symbol font's PUA icons are not a text defect; a text font's PUA still is
 signals, rows = blind._font_signals(row(family="Wingdings", codes=13, pua=13))

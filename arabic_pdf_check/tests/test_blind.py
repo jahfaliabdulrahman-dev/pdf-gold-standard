@@ -96,6 +96,8 @@ check("recovered:two-fail", state(0.1, 0.2)[0] is False, str(state(0.1, 0.2)))
 check("recovered:three-pass", state(0.9, 0.8, 0.7)[0] is True, str(state(0.9, 0.8, 0.7)))
 check("recovered:split", state(0.9, 0.1)[0] is None and state(0.9, 0.1)[1] == "split", str(state(0.9, 0.1)))
 check("recovered:one-voter", state(0.9)[0] is None and state(0.9)[1] == "no-voters", str(state(0.9)))
+check("majority:one-voter-none", blind.majority_needed(1) is None, str(blind.majority_needed(1)))
+check("majority:five-readers-three", blind.majority_needed(5) == 3, str(blind.majority_needed(5)))
 
 # A reader that crashes is named, dropped from the majority, and the file is not clean.
 real_read = blind.isolate.read
