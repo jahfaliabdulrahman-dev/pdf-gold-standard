@@ -93,6 +93,8 @@ jobs:
           # N docs · N samples · 1 continue · N auto-install script. The final N is the installer's question.
           printf '1\n%s\nO\n1\nN\nY\nN\nN\n1\nN\n' "$RUNNER_TEMP/verapdf" | java -jar "$JAR" -console
           echo "$RUNNER_TEMP/verapdf" >> "$GITHUB_PATH"
+          # GITHUB_PATH applies to LATER steps; this step needs the absolute bin now.
+          export PATH="$RUNNER_TEMP/verapdf:$PATH"
           got="$(verapdf --version 2>/dev/null | head -1 | awk '{print $2}')"
           if [ "$got" != "$VERAPDF_VERSION" ]; then
             echo "veraPDF $got is installed; the pinned distribution is $VERAPDF_VERSION — refused by name"
