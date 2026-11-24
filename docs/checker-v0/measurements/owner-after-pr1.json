@@ -1,0 +1,882 @@
+{
+ "date": "2026-11-24",
+ "head": "dec5ea1",
+ "corpus": "55 owner PDFs",
+ "counts": {
+  "low": 21,
+  "high": 31,
+  "medium": 3
+ },
+ "before_counts": {
+  "low": 16,
+  "high": 31,
+  "medium": 8
+ },
+ "files": {
+  " الإسبوع 11 - الموضوع 8 - درس - الإحصاء.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  " الإسبوع 3 - الموضوع 2 - درس - الإحصاء.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  " الإسبوع 4 - الموضوع 2 - درس - الإحصاء.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  " الإسبوع 6 - الموضوع 4 - درس - الإحصاء.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  " الإسبوع 7 - الموضوع 6 - درس - الإحصاء.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  " الإسبوع 8 - الموضوع 7 - درس - الإحصاء.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "10  - درس - مفاهيم نظم التشغيل.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "11  - درس - مفاهيم نظم التشغيل.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "5 - درس - البايثون.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "6 - درس - البايثون.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "7  - درس - مفاهيم نظم التشغيل.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "7  - درس - مهارات التواصل.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "lexical-validity",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "7 - درس - البايثون.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "8  - درس - مفاهيم نظم التشغيل.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "9  - درس - مفاهيم نظم التشغيل.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "ANN202 L1.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "ANN202 L11.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "ANN202 L12.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "ANN202 L13.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "ANN202 L3.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "ANN202 L4.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "ANN202 L6.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "ANN202 L8.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "CNN205 L2.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "CNN205 L4.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "CNN205 L5.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "NLP203 L1.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "NLP203 L10.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "NLP203 L11.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "NLP203 L12.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "NLP203 L2.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "NLP203 L7.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "NLP203 L8.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "NLP203 L9.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "RNN204 L2.pdf": {
+   "level": "medium",
+   "signals": [
+    {
+     "id": "numerals-mixed",
+     "level": "medium",
+     "cause": "file"
+    }
+   ]
+  },
+  "RNN204 L5.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "ادوات وتقنيات التحسين المستمر.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "الاستثمار في سوق الاسهم.pdf": {
+   "level": "medium",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    }
+   ]
+  },
+  "البنود والشروط في AppleCare-.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "التسويق بالعمولة.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "اللائحة-التنفيذية-وملحقاتها.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "lexical-validity",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "المنتج الناجح.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "numerals-mixed",
+     "level": "medium",
+     "cause": "file"
+    }
+   ]
+  },
+  "الموضوع الأول - أﺳﺎﺳﻴﺎت ﻫﻨﺪﺳﺔ اﻷواﻣﺮ.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "الموضوع الثالث - التواصل المهني.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "الموضوع الخامس - أﺳﺎﺳﻴﺎت ﻫﻨﺪﺳﺔ اﻷواﻣﺮ.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "الموضوع الرابع - التواصل المهني.pdf": {
+   "level": "low",
+   "signals": []
+  },
+  "خيارات الشحن والتوصيل.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "ليش لازم تبدأ ولو ما كنت مستعد.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "مالذي يصنع القائد.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "مسابقة تحليل البيانات.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "نظام الشركات 1439 سعد الخنفري.pdf": {
+   "level": "medium",
+   "signals": [
+    {
+     "id": "numerals-mixed",
+     "level": "medium",
+     "cause": "file"
+    }
+   ]
+  },
+  "نظام ملكية الوحدات العقارية وفرزها وإدارتها.pdf": {
+   "level": "low",
+   "signals": [
+    {
+     "id": "no-text-layer",
+     "level": "low",
+     "cause": "file"
+    }
+   ]
+  },
+  "٢  - درس - مفاهيم نظم التشغيل.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "٢  - درس - مهارات التواصل.pdf": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "٣ - درس - البايثون.pdf": {
+   "level": "low",
+   "signals": []
+  }
+ }
+}
