@@ -1,0 +1,65 @@
+{
+ "generated_at": "2026-11-24T17:39:29Z",
+ "head": "9ece554",
+ "source": "docs/checker-v0/measurements/pr2/lexicon-compare.json",
+ "note": "Names and measured ratios only; no text, no excerpts. These three are the owner's real-broken calibration files named in the PR-2 assignment.",
+ "files": [
+  {
+   "name": "نظام الشركات 1439 سعد الخنفري.pdf",
+   "sha256": "7e5f9a6159b69cd27a058aed819d0f12404d7a72c79acb16c4026ca25cd1d28e",
+   "defect": "numerals-mixed (owner-adjudicated; the text is lexically valid, the defect is the numeral forms)",
+   "current": {
+    "mupdf": 0.6964,
+    "pdfium": 0.5306,
+    "pdfkit": 0.806,
+    "pdfminer": 0.7037,
+    "poppler": 0.6922
+   },
+   "wiki": {
+    "mupdf": 0.7624,
+    "pdfium": 0.5713,
+    "pdfkit": 0.9053,
+    "pdfminer": 0.7663,
+    "poppler": 0.7649
+   }
+  },
+  {
+   "name": "٣ - درس - البايثون.pdf",
+   "sha256": "2b558d14b6eabcf6bef414c60c737a1b7bfff4d0082cde4b33c786c5081062c6",
+   "defect": "owner-adjudicated broken; no shipped signal on the current build, its lexical ratio is borderline (0.58 current / 0.66 wiki on PDFium)",
+   "current": {
+    "mupdf": 0.5873,
+    "pdfium": 0.58,
+    "pdfkit": 0.6062,
+    "pdfminer": 0.5835,
+    "poppler": 0.5984
+   },
+   "wiki": {
+    "mupdf": 0.6756,
+    "pdfium": 0.6653,
+    "pdfkit": 0.7113,
+    "pdfminer": 0.6638,
+    "poppler": 0.6865
+   }
+  },
+  {
+   "name": "7  - درس - مهارات التواصل.pdf",
+   "sha256": "14e5cee6443c18cbfd775bc5cd2ca9c27afd4b0f29a7882c56ad1db63565f7cf",
+   "defect": "lexical-validity high (garbled words; all five readers below the current and candidate thresholds)",
+   "current": {
+    "mupdf": 0.4105,
+    "pdfium": 0.4063,
+    "pdfkit": 0.4424,
+    "pdfminer": 0.3831,
+    "poppler": 0.4312
+   },
+   "wiki": {
+    "mupdf": 0.3895,
+    "pdfium": 0.3853,
+    "pdfkit": 0.429,
+    "pdfminer": 0.3437,
+    "poppler": 0.4044
+   }
+  }
+ ]
+}

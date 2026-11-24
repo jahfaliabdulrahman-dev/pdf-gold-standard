@@ -1,16 +1,26 @@
-The word list in `ar_words_50k.txt.gz` is a filtered copy of:
+This directory contains TWO word lists. They are different sources and both keep their own licence;
+this repository's MIT licence does not relicense either.
 
-  FrequencyWords — Arabic 50k list (2018)
-  https://github.com/hermitdave/FrequencyWords
-  built from OpenSubtitles 2018 (http://opus.nlpl.eu/OpenSubtitles2018.php)
+1. `ar_words_wiki50k.txt.gz` — the shipped lexicon (PR-2 candidate)
+   The first 50,000 lines of the Arabic Wikipedia frequency list:
+     IlyaSemenov/wikipedia-word-frequency — results/arwiki-2022-08-29.txt
+     pinned commit b49c2ea1554d87094959ba15a41b3f383795434d
+     source sha256 c98ae500aa256bd36943677f395ae2457ea5c19576354139319db9833f74713c
+     output sha256 60ee5e67102248111ef87b6f72a8a1f73753c9d01994a98b233eadf6b321df69
+   The text is derived from Arabic Wikipedia and is licensed CC-BY-SA (attribution: Arabic Wikipedia
+   contributors, via IlyaSemenov/wikipedia-word-frequency). The repository that publishes the list is MIT.
+   Filtering: only the word field of each source line; the first 50,000 lines; gzip with mtime=0. No other
+   change. The build is `scripts/build_wiki_lexicon.py` (both digests are constants it verifies).
 
-Licensing, as declared by that project:
+2. `ar_words_50k.txt.gz` — the PR-2 baseline
+   FrequencyWords — Arabic 50k list (2018):
+     https://github.com/hermitdave/FrequencyWords
+     built from OpenSubtitles 2018 (http://opus.nlpl.eu/OpenSubtitles2018.php)
+   MIT License for the code; CC-BY-SA-4.0 for the content. This repository keeps the content under
+   CC-BY-SA-4.0 (attribution: FrequencyWords / OpenSubtitles 2018). Filtering: only Arabic-script entries
+   of 3 or more letters, deduplicated and sorted.
 
-  MIT License for the code.
-  CC-BY-SA-4.0 for the content.
-
-This repository keeps the content under CC-BY-SA-4.0 (attribution: FrequencyWords / OpenSubtitles 2018),
-and the code that reads it under this repository's MIT license. Filtering applied: only Arabic-script entries
-of 3 or more letters, deduplicated and sorted; no other change.
-
-The file is read at runtime by `conformance/checks/lexical.py`; it is never written to.
+Both files are read at runtime by `conformance/checks/lexical.py`; they are never written to. The first is
+the default (`DATA`); the second is `CURRENT_DATA`, retained so the comparison in
+`docs/checker-v0/08-pr2-evidence-2026-11-24.md` can be re-run. If the comparison says the candidate is not
+better, the default returns to the baseline and the candidate is not merged.

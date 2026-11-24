@@ -1,6 +1,6 @@
 # خارطة الطريق · ROADMAP
 
-آخر تحديث: ١٨ نوفمبر ٢٠٢٦ · آخر إصدار منشور: [`v2.3.5`](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/releases/tag/v2.3.5) — **يسبق `main`**: دمج ١٧ نوفمبر (`986fc79`) لم يُوسَم بعد
+آخر تحديث: ٢٤ نوفمبر ٢٠٢٦ · آخر إصدار منشور: [`v2.3.5`](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/releases/tag/v2.3.5) — **يسبق `main`**: دمج ١٧ نوفمبر (`986fc79`) لم يُوسَم بعد
 
 ## فاحص النسخ العربي v0.1 (جاهز للدمج، ٢٤ نوفمبر ٢٠٢٦)
 
@@ -15,8 +15,11 @@
   المعجم بعد التطبيع، الضوابط في مخبأ `controls --refresh` (لا Chrome/Swift في `check`)، عزل كل قارئ في
   عملية بمهلة، رفض بثلاث رسائل مسمّاة، تعقيم الأمثلة، `lcs` bit-parallel، وCI: veraPDF مثبّت بالرابط+sha256،
   و`checker_foreign.py`، ووظيفة `ubuntu-latest` بأربعة قرّاء.
-- **PR-2 (`feat/lexicon-wiki50k`):** معجم ويكيبيديا 50k مقابل الحالي، يُقاس بالقرّاء الخمسة على 70 نظيفًا
-  والمزروعة وLibreOffice والـ55 (عبر `OWNER_CORPUS_DIR`) وZATCA 16؛ لا يُدمج إن لم يزد الفاصل.
+- **PR-2 (`feat/lexicon-wiki50k`):** معجم ويكيبيديا 50k مقابل الحالي، قيس بالقرّاء الخمسة على 70 نظيفًا
+  والمزروعة وLibreOffice والـ55 (عبر `OWNER_CORPUS_DIR`) وZATCA 16. **النتيجة:** الفصل ‎−0.106 → −0.072‎
+  (أعلى)، وعلى المعطوبين لغويًّا ‎0.2576 → 0.4043‎، والعتبة المشتقة **0.63**؛ ZATCA `lexical-validity`
+  **0/16**؛ `planted-letter-swap` بقي عاليًا؛ توزيع المالك **31/3/21** بلا تغيير. **مُقترح للدمج، لم يُدمج.**
+  الدليل: `docs/checker-v0/08-pr2-evidence-2026-11-24.md`.
 - **الخطة والقبول:** `docs/checker-v0/06-plan-2026-11-24.md`. لا دمج في `main` من الوكيل؛ الدمج للمالك بعد CI.
 
 

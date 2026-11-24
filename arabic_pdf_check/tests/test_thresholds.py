@@ -16,7 +16,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 THRESHOLDS = os.path.join(REPO, "arabic_pdf_check", "thresholds.json")
-MEASUREMENTS = os.path.join(REPO, "docs", "checker-v0", "measurements", "thresholds.json")
+MEASUREMENTS = os.path.join(REPO, "docs", "checker-v0", "measurements", "pr2", "thresholds.json")
 sys.path.insert(0, REPO)
 
 fails = []
@@ -72,7 +72,7 @@ check("clean-min-pair-recorded", "clean_min_pair_f1" in observed, "")
 measured = json.load(open(MEASUREMENTS, encoding="utf-8")) if os.path.exists(MEASUREMENTS) else None
 check("committed-measurement-matches", measured is not None and
       measured["values"] == th["values"] and measured["observed"] == observed,
-      "docs/checker-v0/measurements/thresholds.json is stale — re-run scripts/checker_measure.py")
+      "docs/checker-v0/measurements/pr2/thresholds.json is stale — re-run scripts/checker_measure.py")
 
 print()
 if fails:

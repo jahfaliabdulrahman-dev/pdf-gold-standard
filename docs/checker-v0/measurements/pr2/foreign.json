@@ -1,0 +1,28 @@
+{
+ "directory": "foreign-pr2",
+ "files": 2,
+ "high": 0,
+ "rows": [
+  {
+   "file": "lo-arabic-body.pdf",
+   "sha256": "abe16c1b3dd41cd3e16123d5a108a0407f7deab04b765a3a6a26b8f62e64e420",
+   "level": "medium",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium"
+    }
+   ]
+  },
+  {
+   "file": "lo-arabic-table.pdf",
+   "sha256": "16f9e808c43843db24ed75cc195036d3dc083df1deeca1f1dcff57027fbfcb33",
+   "level": "low",
+   "signals": []
+  }
+ ]
+}

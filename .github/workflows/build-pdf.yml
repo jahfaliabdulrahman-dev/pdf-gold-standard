@@ -225,6 +225,8 @@ jobs:
           python3 arabic_pdf_check/tests/test_refusals.py
           python3 arabic_pdf_check/tests/test_packaging.py
           python3 arabic_pdf_check/tests/test_blind.py
+          python3 scripts/test_build_wiki_lexicon.py
+          python3 scripts/test_lexicon_compare.py
 
       - name: Foreign producer set — LibreOffice output, measured by the checker
         run: |
@@ -313,6 +315,8 @@ jobs:
           python3 arabic_pdf_check/tests/test_pages.py
           python3 arabic_pdf_check/tests/test_controls.py
           python3 arabic_pdf_check/tests/test_packaging.py
+          python3 scripts/test_build_wiki_lexicon.py
+          python3 scripts/test_lexicon_compare.py
           python3 scripts/test_ci_wiring.py
       - name: The checker with four Linux readers
         run: |
