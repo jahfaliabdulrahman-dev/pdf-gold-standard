@@ -116,6 +116,14 @@ def main() -> int:
     scan = mcid_text.scan(path)
     check("inherited-resources", scan["text"].get((1, 0)) == "با",
           f"got {scan['text']!r} fonts={list(scan['fonts'])}")
+    # The per-font rows are the checker's numbers: they must sum to the file totals, or two readers of the
+    # same file would report two different gap counts.
+    check("per-font-rows-sum-to-file-totals",
+          sum(r["codes"] for r in scan["fonts"].values()) == scan["codes"]
+          and sum(r["missing_unicode"] for r in scan["fonts"].values()) == scan["missing_unicode"]
+          and sum(r["notdef"] for r in scan["fonts"].values()) == scan["notdef"],
+          f"codes {sum(r['codes'] for r in scan['fonts'].values())}/{scan['codes']} "
+          f"gaps {sum(r['missing_unicode'] for r in scan['fonts'].values())}/{scan['missing_unicode']}")
     print()
     if FAILS:
         print(f"MCID-TEXT GUARD FAILED — {len(FAILS)}: {', '.join(FAILS)}")

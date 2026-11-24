@@ -41,6 +41,12 @@ def text(path: str) -> str:
     return text_many([path])[0]
 
 
+def pages_many(paths: list[str]) -> list[list[str]]:
+    """The same reading, one string per page (see `pdfium.pages_many`)."""
+    payload = _run(paths)
+    return [payload["pages"].get(p, []) for p in paths]
+
+
 def text_many(paths: list[str]) -> list[str]:
     payload = _run(paths)
     return [payload["texts"].get(p, "") for p in paths]

@@ -35,9 +35,12 @@ def main(argv=None) -> int:
     r.add_argument("--no-structure", action="store_true",
                    help="skip the structural checks and veraPDF (a quick text-metric run only)")
 
-    c = sub.add_parser("certify", help="write a certificate for one file against one case")
+    c = sub.add_parser("certify", help="write a certificate for one file against one case or a truth text")
     c.add_argument("pdf")
-    c.add_argument("--case", required=True)
+    one = c.add_mutually_exclusive_group(required=True)
+    one.add_argument("--case", help="a corpus case id")
+    one.add_argument("--truth", help="a UTF-8 text file: the reference the file must reproduce")
+    c.add_argument("--truth-name", default=None, help="a label for the truth text (never a path in the report)")
     c.add_argument("--engine", default="unknown", choices=["chrome", "chrome-raw", "unknown"],
                    help="the producer you declare for this file (recorded as a declaration, not a measurement)")
     c.add_argument("-o", "--out", required=True)
@@ -47,6 +50,8 @@ def main(argv=None) -> int:
     v.add_argument("pdf")
     v.add_argument("--recheck", action="store_true",
                    help="re-extract the file with the tier-1 readers and re-run every check")
+    v.add_argument("--truth", default=None,
+                   help="the same text the certificate was issued against (required to recheck a free-text one)")
 
     rt = sub.add_parser("ratchet", help="record or check floors from a saved results.json (one file per run)")
     rt.add_argument("action", choices=["accept", "check"])

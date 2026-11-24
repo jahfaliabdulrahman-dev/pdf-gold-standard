@@ -11,14 +11,18 @@ let v = ProcessInfo.processInfo.operatingSystemVersion
 let stamp = "PDFKit \(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
 
 var texts: [String: String] = [:]
+var pages: [String: [String]] = [:]
 for path in CommandLine.arguments.dropFirst() {
     if let doc = PDFDocument(url: URL(fileURLWithPath: path)) {
         texts[path] = doc.string ?? ""
+        // The same reading, page by page: a checker that names a page must not invent one.
+        pages[path] = (0..<doc.pageCount).map { doc.page(at: $0)?.string ?? "" }
     } else {
         texts[path] = ""          // unreadable: an empty string is a measurement, not a crash
+        pages[path] = []
     }
 }
 
-let payload: [String: Any] = ["version": stamp, "texts": texts]
+let payload: [String: Any] = ["version": stamp, "texts": texts, "pages": pages]
 let data = try JSONSerialization.data(withJSONObject: payload, options: [])
 FileHandle.standardOutput.write(data)

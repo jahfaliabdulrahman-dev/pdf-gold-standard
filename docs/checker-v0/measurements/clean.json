@@ -1,0 +1,884 @@
+{
+ "files": [
+  {
+   "file_level": "low",
+   "label": "doc:guide",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "doc:report",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "doc:najd",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "doc:print",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:bld-heading",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:bld-th",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:bld-word",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-article",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-date-hindi",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-in-table",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-mixed-order",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-mixed-scripts",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-paren-eol",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-percent",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-phone",
+   "overall": "low",
+   "reader_high": [],
+   "reader_signals": {}
+  },
+  {
+   "file_level": "low",
+   "label": "case:dig-year",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:head-deep",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:head-h1-h3",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:head-latin",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:head-numbered",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:kash-explicit",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:kash-justify-tatweel",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:kash-justify",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:lst-bullet",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:lst-ordered",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mix-acronym",
+   "overall": "low",
+   "reader_high": [],
+   "reader_signals": {}
+  },
+  {
+   "file_level": "low",
+   "label": "case:mix-email-url",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mix-latin-sentence",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mix-latin-word",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mix-numbers-ltr",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mix-parens",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mix-version",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mon-decimal-table",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mon-iban",
+   "overall": "low",
+   "reader_high": [],
+   "reader_signals": {}
+  },
+  {
+   "file_level": "low",
+   "label": "case:mon-negative-hindi",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mon-negative-line-start",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mon-negative-table",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mon-riyal-sign",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mon-rs-abbrev",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:mon-thousands",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:num-ids-latn-in-arab",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:num-invoice-arab",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:num-invoice-kv-table",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:num-invoice-latn",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:num-negative-arab",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:pun-comma",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:pun-edge",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:pun-quotes",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:pun-semicolon-question",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:shp-allah-sentence",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:shp-allah",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:shp-kaf-kitaba",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:shp-lam-alef-forms",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:shp-nonjoining",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:shp-single-letter",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:tbl-2col",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:tbl-5col",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:tbl-empty-cell",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:tbl-page-break",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:tbl-plain-fragment",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:tbl-two-header-rows",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:tbl-two-line-cell",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:tbl-width-100",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:voc-full",
+   "overall": "low",
+   "reader_high": [],
+   "reader_signals": {}
+  },
+  {
+   "file_level": "low",
+   "label": "case:voc-lam-alef-marks",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:voc-no-heading",
+   "overall": "low",
+   "reader_high": [],
+   "reader_signals": {}
+  },
+  {
+   "file_level": "low",
+   "label": "case:voc-partial",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:voc-shadda-tanween",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:voc-shadda",
+   "overall": "high",
+   "reader_high": [
+    "pdfminer"
+   ],
+   "reader_signals": {
+    "pdfminer": [
+     "visual-order"
+    ]
+   }
+  },
+  {
+   "file_level": "low",
+   "label": "case:voc-tanween",
+   "overall": "low",
+   "reader_high": [],
+   "reader_signals": {}
+  }
+ ],
+ "generated_at": "2026-11-23T15:06:09Z",
+ "summary": {
+  "file_high": 0,
+  "files": 70,
+  "files_with_reader_high": 64
+ }
+}

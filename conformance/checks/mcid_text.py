@@ -56,6 +56,30 @@ class _Font:
             pass
         tu = font.get("/ToUnicode")
         self.has_tounicode = tu is not None
+        # The simple-font exception (Matterhorn 31-027) rests on the ENCODING carrying the mapping, so the
+        # encoding has to be read: a custom /Differences or a non-standard base is not verifiable here.
+        self.encoding = ""
+        self.encoding_differences = False
+        self.glyph_names = {}
+        try:
+            enc = font.get("/Encoding")
+            if enc is not None:
+                if hasattr(enc, "get"):
+                    self.encoding = str(enc.get("/BaseEncoding", "") or "")
+                    diffs = enc.get("/Differences")
+                    if diffs is not None:
+                        self.encoding_differences = True
+                        code = 0
+                        for item in diffs:
+                            if isinstance(item, (int, float)):
+                                code = int(item)
+                            else:
+                                self.glyph_names[code] = str(item).lstrip("/")
+                                code += 1
+                else:
+                    self.encoding = str(enc)
+        except Exception:
+            self.encoding = ""
         self.map = {}
         if tu is not None:
             try:
@@ -63,19 +87,52 @@ class _Font:
             except Exception:
                 self.map = {}
 
-    def decode(self, raw: bytes) -> tuple[str, int, int]:
-        """(text, notdef_codes, codes_without_a_unicode_value). A code with no entry decodes to '' and is
-        never invented — the count is what the font check reports."""
+    def decode(self, raw: bytes) -> tuple[str, dict]:
+        """(text, counts) — `counts` is per DRAWING of this string, keyed for aggregation.
+
+        A code with no entry decodes to '' and is never invented — the count is what the font check
+        reports. The mapped value is inspected character by character: a valid CMap can still map a code to
+        the private use area (a glyph name, not a letter), to U+FFFD, to U+0000 (Matterhorn 31-028) or to
+        U+FEFF/U+FFFE (31-029), and the reader then shows exactly that. Counting them here is the only place
+        that sees the mapping itself rather than a reader's interpretation of it.
+        """
         width = 2 if self.two_byte else 1
-        out, notdef, missing = [], 0, 0
-        for i in range(0, len(raw) - width + 1, width):
-            code = int.from_bytes(raw[i:i + width], "big")
+        out = []
+        counts: dict = {"codes": 0, "notdef": 0, "missing_unicode": 0, "pua": 0, "replacement": 0,
+                        "zero_value": 0, "bom": 0, "missing_in_word": 0}
+        counts["missing_codes"] = {}
+        codes = [int.from_bytes(raw[i:i + width], "big") for i in range(0, len(raw) - width + 1, width)]
+        for idx, code in enumerate(codes):
+            counts["codes"] += 1
             if code == 0:
-                notdef += 1
-            elif code not in self.map:
-                missing += 1
-            out.append(self.map.get(code, ""))
-        return "".join(out), notdef, missing
+                counts["notdef"] += 1
+                continue
+            if code not in self.map:
+                counts["missing_unicode"] += 1
+                counts["missing_codes"][code] = counts["missing_codes"].get(code, 0) + 1
+                # A gap INSIDE a word destroys the word; a gap between words (a bullet, a tab, a rule) does
+                # not. The neighbours are read from the same string: previous decoded character, and the
+                # first character of the next code's mapping.
+                prev = out[-1][-1] if out and out[-1] else ""
+                nxt = ""
+                if idx + 1 < len(codes):
+                    nxt = (self.map.get(codes[idx + 1]) or "")[:1]
+                if prev.isalpha() and nxt.isalpha():
+                    counts["missing_in_word"] += 1
+                continue
+            value = self.map[code]
+            out.append(value)
+            for ch in value:
+                cp = ord(ch)
+                if 0xE000 <= cp <= 0xF8FF:
+                    counts["pua"] += 1
+                elif cp == 0xFFFD:
+                    counts["replacement"] += 1
+                elif cp == 0:
+                    counts["zero_value"] += 1
+                elif cp in (0xFEFF, 0xFFFE):
+                    counts["bom"] += 1
+        return "".join(out), counts
 
 
 def _string_bytes(obj) -> bytes:
@@ -138,15 +195,30 @@ def _walk(instructions, resources, page_no, out: dict, stats: dict, depth=0, pro
             for o in (items if op == "TJ" else operands[:1]):
                 if type(o).__name__ in ("int", "float"):
                     continue
-                text, notdef, missing = font.decode(_string_bytes(o))
-                if text or notdef or missing:
+                text, counts = font.decode(_string_bytes(o))
+                if counts["codes"]:
                     out.setdefault(key, []).append(text)
-                    stats["notdef"] += notdef
-                    stats["missing_unicode"] += missing
-                    stats["codes"] += len(text) + notdef + missing
-                    stats["fonts"][font.name] = {"family": font.family, "subtype": font.subtype,
-                                                 "embedded": font.embedded,
-                                                 "tounicode": font.has_tounicode}
+                    for k in ("notdef", "missing_unicode", "pua", "replacement", "zero_value", "bom", "codes",
+                              "missing_in_word"):
+                        stats[k] += counts[k]
+                    # Keyed by resource name AND family: two pages can both name their font «/F1» while one
+                    # of them carries a different program, and a merged row would hide the broken one.
+                    fkey = f"{font.name}|{font.family or font.subtype}"
+                    row = stats["fonts"].setdefault(fkey, {
+                        "name": font.name, "family": font.family, "subtype": font.subtype,
+                        "embedded": font.embedded, "tounicode": font.has_tounicode,
+                        "two_byte": font.two_byte, "encoding": font.encoding,
+                        "encoding_differences": font.encoding_differences, "codes": 0, "notdef": 0,
+                        "missing_unicode": 0, "missing_in_word": 0, "missing_codes": {}, "glyph_names": {},
+                        "pua": 0, "replacement": 0, "zero_value": 0, "bom": 0,
+                    })
+                    for k in ("codes", "notdef", "missing_unicode", "missing_in_word", "pua", "replacement",
+                              "zero_value", "bom"):
+                        row[k] += counts[k]
+                    for c, n in counts["missing_codes"].items():
+                        row["missing_codes"][c] = row["missing_codes"].get(c, 0) + n
+                        if c in font.glyph_names:
+                            row["glyph_names"][c] = font.glyph_names[c]
         elif op == "Do" and operands and depth < 4:
             try:
                 xo = (resources or {}).get("/XObject", {}).get(str(operands[0]))
@@ -168,9 +240,15 @@ def _walk(instructions, resources, page_no, out: dict, stats: dict, depth=0, pro
 
 
 def scan(pdf_path: str) -> dict:
-    """{'text': {(page, mcid): str}, 'fonts': {...}, 'notdef': n, 'codes': n} for one file."""
+    """{'text': {(page, mcid): str}, 'fonts': {key: row}, 'notdef', 'missing_unicode', 'missing_in_word',
+    'pua', 'replacement', 'zero_value', 'bom', 'codes'} for one file.
+
+    The per-font rows are the numbers the checker reports: a composite font that draws codes its ToUnicode
+    does not name is the failure ISO 32000-1 §14.8.2.4.2 forbids, and it is invisible in a merged total.
+    """
     out: dict = {}
-    stats = {"notdef": 0, "missing_unicode": 0, "codes": 0, "fonts": {}}
+    stats = {"notdef": 0, "missing_unicode": 0, "missing_in_word": 0, "codes": 0, "pua": 0,
+             "replacement": 0, "zero_value": 0, "bom": 0, "fonts": {}}
     with pikepdf.open(pdf_path) as pdf:
         for page_no, page in enumerate(pdf.pages, 1):
             try:

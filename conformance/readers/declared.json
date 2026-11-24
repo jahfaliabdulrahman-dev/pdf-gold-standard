@@ -1,0 +1,11 @@
+[
+  {
+    "id": "pdfium-rtl-row-order",
+    "reader": "pdfium",
+    "claim": "PDFium reads an RTL key/value row whose value starts with a Latin letter as value-before-label; the identifier itself is intact. The source declares label-then-value.",
+    "reader_version_measured": "5.15.2",
+    "control_script": "controls/pdfium_row_order.py",
+    "control_evidence": "python3 -m conformance.readers.controls.pdfium_row_order → builds the row with Chrome (source order label→value), reads it with PDFium: «INV-2026-0042 الفاتورة» (value first, identifier intact), reproduces=true on PDFium 5.15.2",
+    "source": "docs/engine-bakeoff/10-g5-identifiers.md §3b (measured 2026-11-20; the case's certificate is FAIL on that row by decision, not by accident)"
+  }
+]
