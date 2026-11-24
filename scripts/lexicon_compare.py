@@ -57,7 +57,7 @@ def now() -> str:
 def git_info() -> dict:
     head = subprocess.run(["git", "-C", REPO, "rev-parse", "--short", "HEAD"],
                           capture_output=True, text=True, check=True).stdout.strip()
-    dirty = bool(subprocess.run(["git", "-C", REPO, "status", "--porcelain"],
+    dirty = bool(subprocess.run(["git", "-C", REPO, "status", "--porcelain", "--untracked-files=no"],
                                 capture_output=True, text=True, check=True).stdout.strip())
     script = hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest()
     return {"head": head, "dirty": dirty, "script_sha256": script}
