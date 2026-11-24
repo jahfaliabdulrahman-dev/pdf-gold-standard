@@ -2,8 +2,11 @@
 
 آخر تحديث: ١٨ نوفمبر ٢٠٢٦ · آخر إصدار منشور: [`v2.3.5`](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/releases/tag/v2.3.5) — **يسبق `main`**: دمج ١٧ نوفمبر (`986fc79`) لم يُوسَم بعد
 
-## فاحص النسخ العربي v0.1 (قيد التدقيق، ٢٤ نوفمبر ٢٠٢٦)
+## فاحص النسخ العربي v0.1 (جاهز للدمج، ٢٤ نوفمبر ٢٠٢٦)
 
+- **الحالة:** CI [`45438456585`](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/actions/runs/45438456585)
+  أخضر على `d296f10` (macOS + Linux) · مراجعة `code-review-elite` بثلاثة مقاعد: 15 ملاحظة، كلها مغلقة
+  (`docs/checker-v0/reviews/2026-11-24-pr1-code-review.md`) · توزيع المالك ‎31/8/16 → 31/3/21‎.
 - **ما هو:** `arabic-pdf-check check FILE.pdf` تقرير تشخيصي بلا نصّ مرجعي: إشارات مسمّاة وخطر لكل قارئ
   وللملف، بلا نسبة وبلا PASS؛ و`verify` شهادة `certificate/2` مقابل نصّ حرّ. كلّه طبقة رقيقة فوق
   `conformance/` (لا قارئ ولا مقياس ولا تطبيع ثانٍ). المصادر والقياسات والمراجعات في `docs/checker-v0/`.
