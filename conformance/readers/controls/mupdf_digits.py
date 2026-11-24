@@ -27,17 +27,23 @@ TRUTH = "٢٠٢٦"
 
 def main() -> int:
     font = fonts.path("amiri")
-    tmp = tempfile.mkdtemp(prefix="ctrl-mupdf-digits-")
-    pdf = os.path.join(tmp, "written-by-mupdf.pdf")
-    doc = pymupdf.open()
-    page = doc.new_page(width=595, height=842)
-    page.insert_text((72, 120), TRUTH, fontname="Amiri", fontfile=font, fontsize=24)
-    doc.save(pdf)
-    doc.close()
-    mupdf_read = pymupdf.open(pdf)[0].get_text().strip()
-    pdfium_doc = pypdfium2.PdfDocument(pdf)
-    pdfium_read = pdfium_doc[0].get_textpage().get_text_range().strip()
-    pdfium_doc.close()
+    with tempfile.TemporaryDirectory(prefix="ctrl-mupdf-digits-") as tmp:
+        pdf = os.path.join(tmp, "written-by-mupdf.pdf")
+        doc = pymupdf.open()
+        page = doc.new_page(width=595, height=842)
+        page.insert_text((72, 120), TRUTH, fontname="Amiri", fontfile=font, fontsize=24)
+        doc.save(pdf)
+        doc.close()
+        mupdf_read = pymupdf.open(pdf)[0].get_text().strip()
+        pdfium_doc = pypdfium2.PdfDocument(pdf)
+        try:
+            textpage = pdfium_doc[0].get_textpage()
+            try:
+                pdfium_read = textpage.get_text_range().strip()
+            finally:
+                textpage.close()
+        finally:
+            pdfium_doc.close()
     reproduces = (mupdf_read == TRUTH[::-1] and pdfium_read == TRUTH)
     print(json.dumps({
         "reproduces": reproduces,

@@ -60,8 +60,13 @@ def lexicon() -> frozenset[str]:
 
 
 def words(text: str) -> list[str]:
-    """Arabic runs of at least MIN_LETTERS — punctuation, Latin and digits are not words here."""
-    return [w for w in ARABIC_RUN.findall(text or "") if len(w) >= MIN_LETTERS]
+    """Arabic runs of at least MIN_LETTERS — punctuation, Latin and digits are not words here.
+
+    Tokenising happens AFTER the one normalization (fold → strip tashkeel/tatweel → fold the letter
+    variants): cutting first broke every word that carried a mark or a kashida, and turned presentation
+    forms into `[]`. The lexicon is normalized the same way at load, so a token and an entry are comparable.
+    """
+    return [w for w in ARABIC_RUN.findall(normalize(text or "")) if len(w) >= MIN_LETTERS]
 
 
 def validity(text: str) -> dict:

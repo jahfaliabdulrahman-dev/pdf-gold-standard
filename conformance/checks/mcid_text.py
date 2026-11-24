@@ -24,7 +24,7 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if os.path.join(REPO, "scripts") not in sys.path:
     sys.path.insert(0, os.path.join(REPO, "scripts"))
 
-from fix_text_layer import parse_tu          # noqa: E402  (the repository's ToUnicode reader)
+from fix_text_layer import parse_tu_report   # noqa: E402  (the repository's ToUnicode reader)
 
 TEXT_OPS = {"Tj", "TJ", "'", '"'}
 
@@ -81,10 +81,49 @@ class _Font:
         except Exception:
             self.encoding = ""
         self.map = {}
+        self.unparsable = False
+        self.width_mismatch = False
+        self.capped = 0
+        self.problem = ""
         if tu is not None:
             try:
-                self.map = parse_tu(tu.read_bytes().decode("latin-1"))
-            except Exception:
+                report = parse_tu_report(tu.read_bytes().decode("latin-1"))
+                self.map = report["map"]
+                self.capped = int(report.get("capped") or 0)
+                # The source codes must be as wide as the font's codes: `<41>` and `<0041>` are different
+                # code spaces, and a map written for one cannot name the other. The codespace range says the
+                # same thing from the other side; both are checked because either can be wrong alone. A
+                # mismatch is a CONFORMANCE warning, not an unparsable map: the entries can still be usable
+                # (a 2-byte codespace declaration over 1-byte keys was measured on a real owner file), so the
+                # signal is medium, not the high of a parse failure.
+                expected_bytes = 2 if self.two_byte else 1
+                widths = set(report.get("src_widths") or [])
+                codespace = set(report.get("codespace_widths") or [])
+                if report.get("unparsable"):
+                    self.unparsable = True
+                    self.problem = "; ".join(report.get("problems") or [])[:300]
+                elif widths and any(w != expected_bytes for w in widths):
+                    self.width_mismatch = True
+                    self.problem = (f"ToUnicode source codes are {sorted(widths)} byte(s); "
+                                    f"the font uses {expected_bytes}")
+                elif codespace and expected_bytes not in codespace:
+                    self.width_mismatch = True
+                    self.problem = (f"ToUnicode codespace is {sorted(codespace)} byte(s); "
+                                    f"the font uses {expected_bytes}")
+                elif self.capped:
+                    self.unparsable = True
+                    self.problem = f"{self.capped} bfrange(s) exceeded 65,536 codes and were capped"
+                try:
+                    if hasattr(tu, "get") and tu.get("/UseCMap") is not None:
+                        self.unparsable = True
+                        self.problem = "/UseCMap is declared; this reader does not resolve the inherited map"
+                except Exception:
+                    pass
+            except Exception as exc:
+                # A /ToUnicode that is not a stream, or a stream that cannot be read: a named defect, never
+                # the silent `{}` that made every code look unmapped and every report look the same.
+                self.unparsable = True
+                self.problem = f"ToUnicode could not be read: {type(exc).__name__}"
                 self.map = {}
 
     def decode(self, raw: bytes) -> tuple[str, dict]:
@@ -211,7 +250,12 @@ def _walk(instructions, resources, page_no, out: dict, stats: dict, depth=0, pro
                         "encoding_differences": font.encoding_differences, "codes": 0, "notdef": 0,
                         "missing_unicode": 0, "missing_in_word": 0, "missing_codes": {}, "glyph_names": {},
                         "pua": 0, "replacement": 0, "zero_value": 0, "bom": 0,
+                        "unparsable": False, "capped": 0, "width_mismatch": False, "problem": "",
                     })
+                    row["unparsable"] = row["unparsable"] or font.unparsable
+                    row["capped"] = max(row["capped"], font.capped)
+                    row["width_mismatch"] = row["width_mismatch"] or font.width_mismatch
+                    row["problem"] = row["problem"] or font.problem
                     for k in ("codes", "notdef", "missing_unicode", "missing_in_word", "pua", "replacement",
                               "zero_value", "bom"):
                         row[k] += counts[k]

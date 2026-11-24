@@ -8,6 +8,7 @@ import json
 import os
 import shutil
 import subprocess
+import tempfile
 
 NAME = "pdfkit"
 SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pdfkit_text.swift")
@@ -23,7 +24,12 @@ def _swift() -> str:
 
 
 def _run(paths: list[str]) -> dict:
-    r = subprocess.run([_swift(), SCRIPT, *paths], capture_output=True, text=True, timeout=300)
+    # PDFKit creates a `TemporaryDirectory.*/.keep-directory` in TMPDIR on every document; left alone it
+    # accumulates one directory per reading. The child gets a private TMPDIR and the wrapper removes it, so a
+    # check that reads five files leaves zero.
+    with tempfile.TemporaryDirectory(prefix="pdfkit-run-") as tmp:
+        env = {**os.environ, "TMPDIR": tmp}
+        r = subprocess.run([_swift(), SCRIPT, *paths], capture_output=True, text=True, timeout=300, env=env)
     if r.returncode != 0:
         raise RuntimeError(f"swift/PDFKit failed: {(r.stderr or r.stdout).strip()[:200]}")
     try:

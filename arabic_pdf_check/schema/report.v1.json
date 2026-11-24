@@ -12,6 +12,8 @@
     "tool",
     "readers",
     "missing_readers",
+    "failed_readers",
+    "majority",
     "fonts",
     "signals",
     "risk",
@@ -172,6 +174,32 @@
         "minLength": 1
       }
     },
+    "failed_readers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "majority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declared", "readers", "lexical", "recovery"],
+      "properties": {
+        "declared": {"type": "integer", "minimum": 1},
+        "readers": {
+          "type": "object", "additionalProperties": false, "required": ["read", "needed"],
+          "properties": {"read": {"type": "integer", "minimum": 0},
+                         "needed": {"type": "integer", "minimum": 0}}
+        },
+        "lexical": {
+          "type": "object", "additionalProperties": false, "required": ["read", "needed"],
+          "properties": {"read": {"type": "integer", "minimum": 0},
+                         "needed": {"type": "integer", "minimum": 0}}
+        },
+        "recovery": {"enum": ["recovered", "failed", "split", "no-voters"]}
+      }
+    },
     "fonts": {
       "type": "array",
       "items": {
@@ -191,7 +219,10 @@
           "replacement",
           "zero_value",
           "bom",
-          "note"
+          "note",
+          "unparsable",
+          "capped",
+          "width_mismatch"
         ],
         "properties": {
           "font": {
@@ -261,6 +292,16 @@
               "string",
               "null"
             ]
+          },
+          "unparsable": {
+            "type": "boolean"
+          },
+          "capped": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "width_mismatch": {
+            "type": "boolean"
           }
         }
       }
@@ -414,6 +455,8 @@
         "id": {
           "enum": [
             "tounicode-gaps",
+            "tounicode-unparsable",
+            "reader-failure",
             "lexical-validity",
             "presentation-forms",
             "visual-order",

@@ -15,23 +15,71 @@ layer and of what the readers make of it. The risk is reported at two levels, an
 `risk.file` is about the document, `risk.readers.<name>` is about copying from that tool. A reader's known
 limit never raises `risk.file` — that is the assignment's «تُعلَن ولا تُحسب على الملف», as code.
 """
-import hashlib
 import os
 
 from conformance import certificate as cert_mod
 from conformance import reference
 from conformance.checks import lexical, mcid_text, metrics, structure, visual_order
 from conformance.checks.metrics import arabic_count, pf_count, pf_share
-from conformance.readers import MATRIX, available, declared, limitations, pages_many, text_many
+from conformance.hashing import sha256_file
+from conformance.readers import MATRIX, available, declared, isolate, limitations
 
 LEVELS = {"low": 0, "medium": 1, "high": 2}
 CONFIDENCE = {"low": 0, "medium": 1, "high": 2}
 ARABIC = metrics.ARABIC
 
 
-def majority_needed() -> int:
-    """The declared matrix's majority (3 of 5) — a structural rule, not a measured threshold."""
-    return len(MATRIX) // 2 + 1
+class Refused(RuntimeError):
+    """A file the checker will not judge: encrypted, empty, or not a readable PDF."""
+
+
+def _preflight(pdf_path: str) -> None:
+    """Classify a refusal BEFORE a reader touches the file.
+
+    `pikepdf` is the one parser: an owner-password-only PDF opens without a password and is readable, so it
+    is not refused; a user-password PDF raises `PasswordError`, and a corrupt/zero-page file is named. A
+    traceback from a C reader is not a refusal — it is a tool failure, and it is reported as one line.
+    """
+    import pikepdf
+    try:
+        with pikepdf.open(pdf_path) as pdf:
+            if len(pdf.pages) == 0:
+                raise Refused("no pages")
+    except Refused:
+        raise
+    except pikepdf.PasswordError:
+        raise Refused("encrypted (password required)") from None
+    except Exception:
+        raise Refused("unreadable PDF") from None
+
+
+def majority_needed(voters: int) -> int | None:
+    """A majority of the readers that actually vote — `None` when fewer than two can.
+
+    The assignment's item 1 (`len(lexical_passing) >= need`) and item 5 («الأغلبية تُحسب على القرّاء الذين
+    قرؤوا») replace the earlier declared-matrix rule: the two-reader test (both failing ⇒ high) cannot be met
+    by a fixed 3 of 5. A majority of one is not a majority, so one voter withholds a file-level claim.
+    """
+    return voters // 2 + 1 if voters >= 2 else None
+
+
+def recovery_state(judged: dict, lexical_th: float) -> tuple[bool | None, str, int | None, list[str], list[str]]:
+    """(recovered, label, need, passing, failing) — the assignment's item 1, with a split as `None`.
+
+    `True` only when a majority of the judgeable readers passes; `False` only when a majority fails; a split
+    (or fewer than two voters) is `None`, and `None` never lowers the ToUnicode gap. This is the function the
+    two-reader test drives directly; `check` has no second copy of the rule.
+    """
+    passing = sorted(name for name, v in judged.items() if v["ratio"] >= lexical_th)
+    failing = sorted(name for name, v in judged.items() if v["ratio"] < lexical_th)
+    need = majority_needed(len(judged))
+    if need is None:
+        return None, "no-voters", need, passing, failing
+    if len(passing) >= need:
+        return True, "recovered", need, passing, failing
+    if len(failing) >= need:
+        return False, "failed", need, passing, failing
+    return None, "split", need, passing, failing
 
 
 def visual_orders(texts: dict, th: dict) -> dict:
@@ -81,24 +129,30 @@ def _examples(text: str, pages: list[str], limit: int = 5, predicate=None) -> li
     """Up to `limit` bounded lines; a page number is measured by finding the line in that reader's page.
 
     A line longer than 80 characters is CUT, not skipped: the long broken line is exactly the evidence a
-    reader of the report needs, and skipping it can leave a signal with no example at all.
+    reader of the report needs, and skipping it can leave a signal with no example at all. The page is found
+    with the RAW line (the page text carries whatever the reader returned), and the excerpt is the sanitized
+    one: no control character, no bidi override, no reverse-line mark.
     """
     out = []
     for line in (text or "").splitlines():
-        line = (line or "").strip()
-        if not line:
+        raw = (line or "").strip()
+        if not raw:
             continue
-        if predicate and not predicate(line):
+        if predicate and not predicate(raw):
             continue
-        page = next((i + 1 for i, p in enumerate(pages) if line in (p or "")), None)
-        out.append({"page": page, "text": line[:80]})
+        page = next((i + 1 for i, p in enumerate(pages) if raw in (p or "")), None)
+        shown = reference.sanitize_line(raw)[:80]
+        if not shown:
+            continue
+        out.append({"page": page, "text": shown})
         if len(out) >= limit:
             break
     return out
 
 
 def _font_signals(scan: dict, gap_high: float = 0.01,
-                  recovered: bool | None = None) -> tuple[list[dict], list[dict]]:
+                  recovered: bool | None = None,
+                  recovered_by_font: dict[str, bool] | None = None) -> tuple[list[dict], list[dict]]:
     """(file signals, font rows for the report) — the RULE lives in `conformance.checks.structure.font_verdicts`.
 
     This function only shapes the verdicts into the report: the same per-font decision the certificate's
@@ -108,7 +162,8 @@ def _font_signals(scan: dict, gap_high: float = 0.01,
     signals, rows = [], []
     # A diagnosis, not a certificate: a gap between words (a bullet, a tab) is a warning, and a gap inside a
     # word is the finding. The certificate gate calls the same rule with `inside_words_only=False`.
-    for v in structure.font_verdicts(scan, gap_high, inside_words_only=True, recovered=recovered):
+    for v in structure.font_verdicts(scan, gap_high, inside_words_only=True, recovered=recovered,
+                                     recovered_by_font=recovered_by_font):
         rows.append({"font": v["key"], "family": v["family"], "subtype": v["subtype"],
                      "embedded": v["embedded"], "tounicode": v["tounicode"],
                      "two_byte": v["two_byte"], "codes": v["codes"],
@@ -116,10 +171,13 @@ def _font_signals(scan: dict, gap_high: float = 0.01,
                      "missing_examples": v["missing_examples"], "symbol": v["symbol"],
                      "missing_unicode": v["missing_unicode"], "notdef": v["notdef"],
                      "pua": v["pua"], "replacement": v["replacement"],
-                     "zero_value": v["zero_value"], "bom": v["bom"], "note": v["note"]})
+                     "zero_value": v["zero_value"], "bom": v["bom"], "note": v["note"],
+                     "unparsable": bool(v.get("unparsable")), "capped": int(v.get("capped") or 0),
+                     "width_mismatch": bool(v.get("width_mismatch"))})
         if v["level"]:
             signals.append(_finding(
-                "tounicode-gaps", v["level"], "file", "high",
+                "tounicode-unparsable" if v.get("unparsable") else "tounicode-gaps",
+                v["level"], "file", "high",
                 f"{v['name']} ({v['subtype']}): " + "; ".join(v["problems"] or v["warnings"]),
                 font=v["key"], codes=v["codes"], missing_unicode=v["missing_unicode"],
                 notdef=v["notdef"], pua=v["pua"], replacement=v["replacement"],
@@ -130,43 +188,63 @@ def _font_signals(scan: dict, gap_high: float = 0.01,
 def why_class(why) -> str:
     """The failure CLASS only, never the exception text: an ImportError message can carry a local path, and
     this string goes into a customer's report and certificate."""
+    if isinstance(why, BaseException):
+        return type(why).__name__
     return (str(why).split(":")[0].strip() or "unavailable")[:60]
 
 
 def check(pdf_path: str, thresholds: dict) -> dict:
+    _preflight(pdf_path)
     ok, missing = available()
     if not ok:
         raise RuntimeError("no reader is available — a report with no reader is not a report")
 
-    texts, pages, page_unsupported = {}, {}, []
-    for name in ok:
-        got = pages_many(name, [pdf_path])
-        if got is None or got[0] is None:
-            # A reader that cannot name its pages still has text; its examples carry `page: null`, and the
-            # report names it. Folding this to an empty page list would report a reading of zero characters.
-            page_unsupported.append(name)
-            pages[name] = []
-            texts[name] = text_many(name, [pdf_path])[0]
-            continue
-        pages[name] = got[0]
-        # ONE extraction per reader: the text is the pages joined, so an example's page and the metrics
-        # cannot come from two different readings. `test_pages.py` proves the join equals `text()` under N.
-        texts[name] = "\n".join(pages[name])
+    texts, pages, page_unsupported, failed = {}, {}, [], {}
+    for name in list(ok):
+        try:
+            got_pages, text = isolate.read(name, pdf_path)
+            if got_pages is None:
+                # A reader that cannot name its pages still has text; its examples carry `page: null`, and
+                # the report names it. Folding this to an empty page list would report zero characters.
+                page_unsupported.append(name)
+                pages[name] = []
+                texts[name] = text
+            else:
+                pages[name] = got_pages
+                # ONE extraction per reader: the text is the pages joined, so an example's page and the
+                # metrics cannot come from two readings. `test_pages.py` proves the join equals `text()`.
+                texts[name] = "\n".join(got_pages)
+        except Exception as exc:
+            # A crash, an abort or a timeout inside a reader is a fact about this file's parser-hostility.
+            # It must not take the report down, and it must not disappear: the file is not clean.
+            failed[name] = why_class(exc)
+            del ok[name]
+    if not ok:
+        raise RuntimeError("every reader failed on this file — a report with no reading is not a report")
     scan = mcid_text.scan(pdf_path)
     file_text = "\n".join(scan["text"].values())
 
     # ---- file-level signals -------------------------------------------------------------------
     th = thresholds["values"]
-    need = majority_needed()
     lexical_th = th["lexical_validity"]["value"]
     lexical_min_runs = th["lexical_min_runs"]["value"]
     lex = {name: lexical.validity(text) for name, text in texts.items()}
     # A short reading is not judged: 20 runs is the declared floor, below it a report about words is not
-    # about this file. The map-recovery question is answered only when at least one reader is judgeable.
+    # about this file. The map-recovery question is answered only by the readers that can judge words.
     judged = {name: v for name, v in lex.items() if v["runs"] >= lexical_min_runs}
-    lexical_failing = sorted(name for name, v in judged.items() if v["ratio"] < lexical_th)
-    recovered = (len(lexical_failing) < need) if judged else None
-    file_signals, font_rows = _font_signals(scan, th["tounicode_gap_ratio"]["value"], recovered=recovered)
+    recovered, recovery, need_lex, lexical_passing, lexical_failing = recovery_state(judged, lexical_th)
+    text_fonts = [k for k, row in scan["fonts"].items() if row.get("codes")]
+    recovered_by_font = ({text_fonts[0]: recovered}
+                         if len(text_fonts) == 1 and recovered is not None else None)
+    file_signals, font_rows = _font_signals(scan, th["tounicode_gap_ratio"]["value"],
+                                            recovered=recovered, recovered_by_font=recovered_by_font)
+    # A reader that crashed or timed out is a fact about this file's parser-hostility: the file is not clean.
+    # The signal is medium, and the majority is computed after the reader is dropped (and says so).
+    for name, why in sorted(failed.items()):
+        file_signals.append(_finding(
+            "reader-failure", "medium", "file", "high",
+            f"{name} failed on this file ({why}); the majority was computed after dropping it",
+            reader=name, reason=why))
     file_arabic = arabic_count(file_text)
     forms = pf_count(file_text)
     # The share is computed by the same function the measurement derives the threshold with.
@@ -206,27 +284,26 @@ def check(pdf_path: str, thresholds: dict) -> dict:
     # ---- per-reader signals --------------------------------------------------------------------
     orders = visual_orders(texts, th)
     visual_readers = [n for n, o in orders.items() if o["visual"]]
-    # The denominator is the DECLARED matrix, not the readers that happened to run: a machine without PDFKit
-    # must not give the same file a different file-level verdict. `need` is computed once, above.
-    visual_cause = "file" if len(visual_readers) >= need else "reader"
+    need_visual = majority_needed(len(ok))
+    visual_cause = "file" if need_visual is not None and len(visual_readers) >= need_visual else "reader"
     if visual_cause == "file":
         conf = min(("high" if (o["confidence"] or 0) >= 0.9 else
                     "medium" if (o["confidence"] or 0) >= 0.6 else "low")
                    for o in (orders[n] for n in visual_readers))
         file_signals.append(_finding(
             "visual-order", "high", "file", conf,
-            f"{len(visual_readers)} of {len(MATRIX)} declared readers return reversed text — the copied text "
+            f"{len(visual_readers)} of {len(ok)} readers that read return reversed text — the copied text "
             f"keeps the opposite order for those readers (the layer itself is not judged as a defect; a visual "
             f"layer is how most producers store Arabic)", readers=visual_readers,
             scores={n: orders[n]["score"] for n in visual_readers}))
-    # Lexical validity: the words themselves. A majority of the DECLARED matrix failing is a file finding;
-    # one failing reader is that reader's risk and never the file's (the same cause rule as orientation).
-    lexical_file_high = bool(judged) and len(lexical_failing) >= need
+    # Lexical validity: the words themselves. A majority of the readers that can judge words is a file
+    # finding; one failing reader is that reader's risk and never the file's.
+    lexical_file_high = need_lex is not None and len(lexical_failing) >= need_lex
     if lexical_file_high:
         shown = ", ".join(f"{n} {judged[n]['known']} of {judged[n]['runs']}" for n in lexical_failing[:5])
         file_signals.append(_finding(
             "lexical-validity", "high", "file", "high",
-            f"{len(lexical_failing)} of {len(MATRIX)} declared readers return Arabic runs that are not Arabic "
+            f"{len(lexical_failing)} of {len(judged)} judged readers return Arabic runs that are not Arabic "
             f"words ({shown} runs are in the lexicon) — the letters are shaped, the words do not exist",
             readers=lexical_failing,
             counts={n: {"runs": judged[n]["runs"], "known": judged[n]["known"]} for n in lexical_failing},
@@ -302,7 +379,7 @@ def check(pdf_path: str, thresholds: dict) -> dict:
     known_limits = []
     for name, mod in ok.items():
         version = mod.version()
-        limits, refused, _controls = limitations.usable(name, version)
+        limits, refused, _controls = limitations.usable(name, version, mode="cached")
         for lim in limits:
             known_limits.append({"id": lim["id"], "reader": name, "kind": "limit",
                                  "version": version, "measured_on": lim["reader_version_measured"],
@@ -311,7 +388,7 @@ def check(pdf_path: str, thresholds: dict) -> dict:
             known_limits.append({"id": why.split(":")[0], "reader": name, "kind": "limit-refused",
                                  "version": version, "measured_on": version,
                                  "statement": why, "applies": False})
-        held, refused_d, _ = declared.usable(name, version)
+        held, refused_d, _ = declared.usable(name, version, mode="cached")
         for entry in held:
             note = (f" (declared on {entry['reader_version_measured']}, live {entry['reader_version_now']})"
                     if entry["version_mismatch"] else "")
@@ -331,8 +408,7 @@ def check(pdf_path: str, thresholds: dict) -> dict:
         # The tool can run from a copy without a git checkout; the report then says so instead of failing a
         # customer's file because our provenance is unavailable.
         commit, dirty = "unknown", None
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "thresholds.json"), "rb") as fh:
-        thresholds_sha = hashlib.sha256(fh.read()).hexdigest()
+    thresholds_sha = sha256_file(os.path.join(os.path.dirname(os.path.abspath(__file__)), "thresholds.json"))
     return {
         "schema_version": "arabic-pdf-check/1",
         "mode": "blind",
@@ -349,13 +425,20 @@ def check(pdf_path: str, thresholds: dict) -> dict:
                            "examples": examples[name]}
                     for name in ok},
         "missing_readers": {n: why_class(w) for n, w in missing.items()},
+        "failed_readers": dict(sorted(failed.items())),
+        "majority": {
+            "declared": len(MATRIX),
+            "readers": {"read": len(ok), "needed": need_visual or 0},
+            "lexical": {"read": len(judged), "needed": need_lex or 0},
+            "recovery": recovery,
+        },
         "fonts": font_rows,
         "signals": file_signals,
         "risk": {"level": total, "confidence": _confidence(at_top), "causes": causes,
                  "file": {"level": file_level, "confidence": _confidence(file_signals)},
                  "readers": reader_levels},
         "known_limits": known_limits,
-        "not_judged": [
+        "not_judged": [s for s in [
             "هذا ليس حكم PDF/UA ولا PDF/A، وليس شهادة مطابقة من أي نوع",
             "لا يُحكم على رسم الحروف: التقرير يقرأ طبقة النص لا الشكل المرئي",
             "لا OCR: الملف بلا طبقة نصية يُبلَّغ عنه كما هو، ولا يُصلَح",
@@ -366,7 +449,19 @@ def check(pdf_path: str, thresholds: dict) -> dict:
             "مرورًا ولا فشلًا)",
             "الكلمة الموصولة بجاراتها في نصّ القارئ تُعدّ تشكيلة واحدة (لا تُجزَّأ بالمعجم)؛ نصّ كثير الوصل قد "
             "يخفض النسبة — لذلك العتبة مشتقة بهامش 0.20 ولا يرفع الحكم إلا فشل الأغلبية",
-        ],
+            f"الأغلبية تُحسب على القرّاء الذين قرؤوا: {len(ok)} من {len(MATRIX)} للاتجاه، و{len(judged)} "
+            f"للكلمات — تغيير معلن عن قاعدة المقام المعلن 3 من 5 (ST-5)؛ الجدول المنشور يقيس قلب الأحكام",
+            (f"قارئ واحد بلغ حدّ الحكم لا يكفي: لا حكم ملفي على الاسترداد ({recovery})"
+             if recovery == "no-voters" else
+             f"الاسترداد غير محسوم: القرّاء انقسموا ({len(lexical_passing)} ناجح، {len(lexical_failing)} فاشل) "
+             f"— الانقسام لا يخفّض غطاء ToUnicode، والإشارة تبقى عالية" if recovery == "split" else ""),
+            (f"استرداد نص القارئ منسوب إلى الملف لا إلى خط بعينه: الملف يرسم بـ{len(text_fonts)} خطوط؛ "
+             "لا يُربط بخط إلا حين يكون خطًا واحدًا" if len(text_fonts) != 1 and recovered is not None else ""),
+            ("قارئ فشل على هذا الملف وأُسقط من الأغلبية؛ فشله إشارة على الملف، والتقرير يسمّيه"
+             if failed else ""),
+            ("حدود القرّاء غير مثبتة في هذه البيئة — شغّل `arabic-pdf-check controls --refresh`"
+             if any(not lim["applies"] for lim in known_limits) else ""),
+        ] if s],
     }
 
 
@@ -376,5 +471,4 @@ def _tool_version() -> str:
 
 
 def _sha256(path: str) -> str:
-    with open(path, "rb") as fh:
-        return hashlib.sha256(fh.read()).hexdigest()
+    return sha256_file(path)

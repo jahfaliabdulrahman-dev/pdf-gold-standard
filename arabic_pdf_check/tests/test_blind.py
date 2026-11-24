@@ -75,16 +75,55 @@ check("thresholds-consumed", "presentation-forms" not in [s["id"] for s in rep["
       str([s["id"] for s in rep["signals"]]))
 
 # A reader that reads but cannot name its pages is DECLARED, never reported as a reading of zero characters.
-real_pages_many = blind.pages_many
-blind.pages_many = lambda name, paths: None
+real_read = blind.isolate.read
+blind.isolate.read = lambda name, path: (None, real_read(name, path)[1])
 try:
     unsupported = blind.check(built["clean"], thresholds)
 finally:
-    blind.pages_many = real_pages_many
+    blind.isolate.read = real_read
 check("pages-unsupported-declared", all(r["pages"] == "unsupported" for r in unsupported["readers"].values()),
       str({n: r["pages"] for n, r in unsupported["readers"].items()}))
 check("pages-unsupported-still-reads", all(r["chars"] > 0 for r in unsupported["readers"].values()),
       str({n: r["chars"] for n, r in unsupported["readers"].items()}))
+
+# The assignment's two-reader test: two judged readers, both failing ⇒ the gap stays high; three passing ⇒
+# medium. `recovery_state` is the one rule; the report's `majority.recovery` says which branch ran.
+def state(*ratios):
+    return blind.recovery_state({f"r{i}": {"ratio": r, "runs": 100} for i, r in enumerate(ratios)}, 0.5)
+
+
+check("recovered:two-fail", state(0.1, 0.2)[0] is False, str(state(0.1, 0.2)))
+check("recovered:three-pass", state(0.9, 0.8, 0.7)[0] is True, str(state(0.9, 0.8, 0.7)))
+check("recovered:split", state(0.9, 0.1)[0] is None and state(0.9, 0.1)[1] == "split", str(state(0.9, 0.1)))
+check("recovered:one-voter", state(0.9)[0] is None and state(0.9)[1] == "no-voters", str(state(0.9)))
+
+# A reader that crashes is named, dropped from the majority, and the file is not clean.
+real_read = blind.isolate.read
+def crash(name, path):
+    if name == "pdfium":
+        raise blind.isolate.ReaderFailed("exited 1: boom")
+    return real_read(name, path)
+blind.isolate.read = crash
+try:
+    crashed = blind.check(built["clean"], thresholds)
+finally:
+    blind.isolate.read = real_read
+check("reader-failure:named", crashed["failed_readers"].get("pdfium") == "ReaderFailed",
+      str(crashed.get("failed_readers")))
+check("reader-failure:signal", any(s["id"] == "reader-failure" for s in crashed["signals"]),
+      str([s["id"] for s in crashed["signals"]]))
+check("reader-failure:not-clean", crashed["risk"]["file"]["level"] != "low",
+      crashed["risk"]["file"]["level"])
+check("reader-failure:majority-dropped", crashed["majority"]["readers"]["read"] == 4,
+      str(crashed["majority"]))
+
+# Examples: no bidi override, no ESC, and a code span that survives a backtick.
+examples = blind._examples("نص `مكسور` ‮عكس\x1b[31m", [])
+check("examples:no-bidi", "\u202e" not in examples[0]["text"], repr(examples[0]["text"]))
+check("examples:no-esc", "\x1b" not in examples[0]["text"], repr(examples[0]["text"]))
+from arabic_pdf_check import markdown                    # noqa: E402
+span = markdown._code(examples[0]["text"])
+check("examples:code-span", span.startswith("``") and span.endswith("``"), span)
 
 # A reader's failure reason is a CLASS in the report, never the exception text (which can carry a local path
 # into a customer's document).

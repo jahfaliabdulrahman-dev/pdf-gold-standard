@@ -35,10 +35,10 @@ CASE = {
 
 
 def main() -> int:
-    work = tempfile.mkdtemp(prefix="pdfium-row-")
-    pdf = os.path.join(work, "control.pdf")
-    chrome.render_case(CASE, pdf, "chrome")
-    text = pdfium.text(pdf)
+    with tempfile.TemporaryDirectory(prefix="pdfium-row-") as work:
+        pdf = os.path.join(work, "control.pdf")
+        chrome.render_case(CASE, pdf, "chrome")
+        text = pdfium.text(pdf)
     line = next((ln for ln in text.splitlines() if "INV-2026-0042" in ln), None)
     if line is None:
         print(json.dumps({"reproduces": False, "reader": "pdfium",

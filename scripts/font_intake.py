@@ -58,6 +58,23 @@ def features(font: TTFont, table: str) -> set[str]:
         return set()
 
 
+def licence_state(names: dict[int, str]) -> tuple[str, bool, bool]:
+    """(licence text, granted, redistribution_unclear) — a URL in nameID 14 is not a licence grant.
+
+    nameID 13 is the licence description and nameID 0 the copyright notice: those carry TEXT, and an open
+    licence named there is a grant. nameID 14 is a URL; a commercial EULA link lives there too, and treating
+    its presence as a grant made every font with a licence link look redistributable. The URL is kept for
+    the report, never counted as permission.
+    """
+    licence_text = " ".join(names.get(i, "") for i in (0, 13, 14)).strip()
+    grant_text = " ".join(names.get(i, "") for i in (0, 13)).lower()
+    granted = any(token in grant_text for token in (
+        "open font license", "ofl", "apache license", "apache 2", "general public license", "gpl",
+        "bitstream vera", "cc0", "creative commons zero", "public domain"))
+    restricted = not granted and ("all rights reserved" in licence_text.lower() or not names.get(13))
+    return licence_text[:160] or "(none declared)", granted, restricted
+
+
 def embedding_permission(fs: int | None) -> str:
     """What the font's OS/2.fsType actually grants, read from the file — not inferred from nameID 0/13/14."""
     if fs is None:
@@ -80,12 +97,7 @@ def check(path: str, corpora: list[str]) -> dict:
     fs_type = font["OS/2"].fsType if "OS/2" in font else None
     axes = [(a.axisTag, a.minValue, a.defaultValue, a.maxValue) for a in font["fvar"].axes] if "fvar" in font else []
 
-    licence_text = " ".join(n.get(i, "") for i in (0, 13, 14))
-    low = licence_text.lower()
-    # A grant exists if the font names a public licence or points at one. "All rights reserved" alone is
-    # not a grant — but it is also not a prohibition of embedding, only of shipping the font itself.
-    granted = "open font license" in low or "ofl" in low or bool(n.get(14)) or "public domain" in low
-    restricted = not granted and ("all rights reserved" in low or not n.get(13))
+    licence_text, _granted, restricted = licence_state(n)
 
     required = set(ARABIC_LETTERS + TASHKEEL + PUNCT + DIGITS)
     missing_required = sorted(f"{c} (U+{ord(c):04X})" for c in required if ord(c) not in cmap)
@@ -130,6 +142,7 @@ def check(path: str, corpora: list[str]) -> dict:
         "gsub": sorted(gsub),
         "gpos": sorted(gpos),
         "licence": licence_text.strip()[:160] or "(none declared)",
+        "licence_url": n.get(14, ""),
         "os2_fsType": fs_type,
         "embedding": embedding_permission(fs_type),
         "redistribution_unclear": restricted,

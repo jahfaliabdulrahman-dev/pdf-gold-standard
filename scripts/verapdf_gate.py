@@ -43,8 +43,9 @@ if __name__ == "__main__":
         print("FAIL verapdf-version — `verapdf --version` printed nothing; the tool is not usable")
         raise SystemExit(1)
     ver = ver[0]
-    if base["version"] not in ver:
-        print(f"FAIL verapdf-version - installed «{ver}», baseline measured on {base['version']}")
+    accepted = {str(v) for v in (base.get("version"), base.get("revalidated_on")) if v}
+    if not any(label in ver for label in accepted):
+        print(f"FAIL verapdf-version - installed «{ver}», baseline measured on {sorted(accepted)}")
         raise SystemExit(1)
     bad = 0
     for f in flavours:

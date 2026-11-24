@@ -8,7 +8,6 @@ Every number carries its producer: the engine and its version, the reader and it
 manifest's own sha256. There is no aggregate "score" — a single number is what lets a bad reader hide behind a
 good one.
 """
-import hashlib
 import json
 import os
 import statistics
@@ -19,13 +18,13 @@ from .checks import metrics
 from .corpus import cases as corpus_cases
 from .corpus import coverage, manifest
 from .corpus.truth import truth
+from .hashing import sha256_file
 
 ENGINES = {"chrome": "chrome", "chrome-raw": "chrome-raw"}
 
 
 def _sha256(path: str) -> str:
-    with open(path, "rb") as fh:
-        return hashlib.sha256(fh.read()).hexdigest()
+    return sha256_file(path)
 
 
 def preflight(ids=None) -> tuple[list[dict], list[str]]:

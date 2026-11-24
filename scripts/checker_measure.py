@@ -203,7 +203,7 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
                 failures.append(f"{name}: presentation-forms does not separate "
                                 f"(planted {row['pf_ratio']:.3f} vs clean {clean_pf:.3f})")
         elif expected == "visual-order":
-            need = blind.majority_needed()
+            need = blind.majority_needed(len(MATRIX))
             gap = row["visual_share"] - clean_share
             if gap < 0.20 or row["visual_share"] * len(MATRIX) < need:
                 failures.append(f"{name}: orientation majority does not separate "

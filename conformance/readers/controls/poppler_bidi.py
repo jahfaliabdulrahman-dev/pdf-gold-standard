@@ -30,24 +30,30 @@ LINE = "سطر عربي واحد بلا محارف اتجاه في المصدر.
 
 def main() -> int:
     font = fonts.path("amiri")
-    tmp = tempfile.mkdtemp(prefix="ctrl-poppler-bidi-")
-    pdf = os.path.join(tmp, "written-by-mupdf.pdf")
-    doc = pymupdf.open()
-    page = doc.new_page(width=595, height=842)
-    page.insert_text((72, 120), LINE, fontname="Amiri", fontfile=font, fontsize=14)
-    doc.save(pdf)
-    doc.close()
-    binary = poppler_reader.binary()      # the pinned build, exactly as the reader resolves it
-    r = subprocess.run([binary, "-q", "-enc", "UTF-8", pdf, "-"],
-                       capture_output=True, text=True, timeout=120)
-    if r.returncode != 0:
-        print(json.dumps({"reproduces": False, "detail": {"error": f"{binary} exited {r.returncode}",
-                                                          "stderr": (r.stderr or "").strip()[:200]}}))
-        return 0
-    out = r.stdout
-    ref_doc = pypdfium2.PdfDocument(pdf)
-    ref = ref_doc[0].get_textpage().get_text_range()
-    ref_doc.close()
+    with tempfile.TemporaryDirectory(prefix="ctrl-poppler-bidi-") as tmp:
+        pdf = os.path.join(tmp, "written-by-mupdf.pdf")
+        doc = pymupdf.open()
+        page = doc.new_page(width=595, height=842)
+        page.insert_text((72, 120), LINE, fontname="Amiri", fontfile=font, fontsize=14)
+        doc.save(pdf)
+        doc.close()
+        binary = poppler_reader.binary()      # the pinned build, exactly as the reader resolves it
+        r = subprocess.run([binary, "-q", "-enc", "UTF-8", pdf, "-"],
+                           capture_output=True, text=True, timeout=120)
+        if r.returncode != 0:
+            print(json.dumps({"reproduces": False, "detail": {"error": f"{binary} exited {r.returncode}",
+                                                              "stderr": (r.stderr or "").strip()[:200]}}))
+            return 0
+        out = r.stdout
+        ref_doc = pypdfium2.PdfDocument(pdf)
+        try:
+            textpage = ref_doc[0].get_textpage()
+            try:
+                ref = textpage.get_text_range()
+            finally:
+                textpage.close()
+        finally:
+            ref_doc.close()
     lines = max(1, len([ln for ln in out.splitlines() if ln.strip()]))
     per_line = metrics.bidi_count(out) // lines
     detail = {"producer": f"PyMuPDF {pymupdf.__version__}", "binary": binary, "per_line": per_line,

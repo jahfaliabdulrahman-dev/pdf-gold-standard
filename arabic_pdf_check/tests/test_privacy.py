@@ -45,8 +45,9 @@ blob = json.dumps(report, ensure_ascii=False)
 check("no-write-during-check", not WRITES, str(WRITES[:4]))
 check("no-path-in-report", PDF not in blob and os.path.basename(PDF) not in blob, "the report names the file")
 check("report-keys-exact", set(report) == {"schema_version", "mode", "file", "tool", "readers",
-                                           "missing_readers", "fonts", "signals", "risk", "known_limits",
-                                           "not_judged"}, str(sorted(report)))
+                                           "missing_readers", "failed_readers", "majority", "fonts",
+                                           "signals", "risk", "known_limits", "not_judged"},
+      str(sorted(report)))
 check("file-block-is-hash-only", set(report["file"]) == {"sha256", "bytes", "pages"}, str(report["file"]))
 
 examples = [e for r in report["readers"].values() for e in r["examples"]]
