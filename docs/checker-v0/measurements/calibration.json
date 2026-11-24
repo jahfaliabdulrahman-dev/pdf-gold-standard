@@ -1,8 +1,8 @@
 {
- "generated_at": "2026-11-24T17:39:29Z",
- "head": "9ece554",
+ "generated_at": "2026-11-24T18:41:33Z",
+ "head": "e99c80b",
  "source": "docs/checker-v0/measurements/pr2/lexicon-compare.json",
- "note": "Names and measured ratios only; no text, no excerpts. These three are the owner's real-broken calibration files named in the PR-2 assignment.",
+ "note": "Three calibration names only; no text, no excerpts. The 51 ordinary owner files are aggregate in the compare artifact; the known-bad file is a label, not a name.",
  "files": [
   {
    "name": "نظام الشركات 1439 سعد الخنفري.pdf",
