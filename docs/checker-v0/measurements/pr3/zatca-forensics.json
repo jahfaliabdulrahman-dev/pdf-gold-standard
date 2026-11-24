@@ -31,7 +31,25 @@
   "pua_total": 0,
   "file_level_high_signal": "presentation-forms (16/16)",
   "visual_order_file_level": 0,
-  "tounicode_gap_signal": 0
+  "tounicode_gap_signal": 0,
+  "drawn_codes_total": 33264,
+  "fonts_total": 71,
+  "producer": "iText 7.1.16",
+  "type3_samples": [
+   9,
+   11,
+   12,
+   13,
+   14
+  ],
+  "af_absent_samples": [
+   9,
+   11,
+   12,
+   13,
+   14
+  ],
+  "type3_correlation": "the five Type3/no-/AF samples are exactly the five where pdfkit/mupdf/poppler return base letters; correlation measured, cause not proven"
  },
  "files": [
   {
