@@ -53,8 +53,12 @@ arabic-pdf-check manifest                            # العتبات وأمر �
 - القيم في `thresholds.json` **مشتقة** من `scripts/checker_measure.py`، ومكتوب معها أمرها و`measured_at`.
 - المخرجات المودعة: `docs/checker-v0/measurements/` — المزروعة الخمس، والمجموعة النظيفة (4 مستندات +
   66 حالة)، وتوزيع مجلد المالك (تجميعي فقط، بلا أسماء).
-- **المعجم:** `conformance/data/ar_words_50k.txt.gz` — قائمة FrequencyWords العربية (OpenSubtitles 2018)،
-  رخصة المحتوى CC-BY-SA-4.0 (النص في `conformance/data/LICENSE-ar_words.txt`)، والقراءة عبر
+- **المعجم:** `conformance/data/ar_words_wiki50k.txt.gz` — أعلى 50,000 كلمة من قائمة تكرار ويكيبيديا العربية
+  (`arwiki-2022-08-29`، التزام مثبّت)؛ النص CC-BY-SA والقائمة MIT. يبقى `ar_words_50k.txt.gz` (FrequencyWords /
+  OpenSubtitles) كخط أساس للمقارنة. البناء: `scripts/build_wiki_lexicon.py`، والتقرير:
+  `docs/checker-v0/08-pr2-evidence-2026-11-24.md`.
+  رخصة المحتوى CC-BY-SA كما في `conformance/data/LICENSE-ar_words.txt` (ملف FrequencyWords يبقى 4.0)،
+  والقراءة عبر
   `conformance/checks/lexical.py` وحده. معجم arafix المضمَّن (1,716 كلمة لأجل لام-ألف) قيس ورُفض: يعرف
   0.1–3.1% من كلمات مستند عربي سليم، فلا يفصل سليمًا من مشوّه.
 - إشارة لا تنفصل عن النظيف بفاصل ≥ 0.2 **لا تُشحن**. مثال مُعلن: الشكل المتري لخلاف القرّاء رُفض لأن

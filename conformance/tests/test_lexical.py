@@ -46,6 +46,14 @@ check("lam-alef:one-token", lexical.words("لأن") == ["لان"], str(lexical.w
 check("lexicon-normalized", lexical.normalize("العَرَبيّة") in lexical.lexicon(),
       "the normalized word is not in the normalized lexicon")
 
+# PR-2: both lists load, and the explicit path is the only seam (the checker reads SHIPPED_DATA by default).
+current = lexical.lexicon(lexical.BASELINE_DATA)
+wiki = lexical.lexicon(lexical.SHIPPED_DATA)
+check("two-lexicons-load", len(current) > 35_000 and len(wiki) > 45_000, f"{len(current)} / {len(wiki)}")
+check("shipped-is-default", lexical.lexicon() == wiki, "the default is not the shipped list")
+check("baseline-not-default", lexical.lexicon(lexical.BASELINE_DATA) != lexical.lexicon(),
+      "the baseline is being served as the shipped list")
+
 print()
 if fails:
     print(f"LEXICAL FAILED — {fails}")

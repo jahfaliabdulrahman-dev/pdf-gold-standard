@@ -1,0 +1,53 @@
+{
+ "files": {
+  "planted-chrome-raw": {
+   "expected_signal": "presentation-forms",
+   "file_level": "high",
+   "file_signals": [
+    "presentation-forms"
+   ],
+   "overall": "high",
+   "pass": true
+  },
+  "planted-letter-swap": {
+   "expected_signal": "lexical-validity",
+   "file_level": "high",
+   "file_signals": [
+    "visual-order",
+    "lexical-validity"
+   ],
+   "overall": "high",
+   "pass": true
+  },
+  "planted-mupdf-logical": {
+   "expected_signal": "visual-order",
+   "file_level": "high",
+   "file_signals": [
+    "visual-order"
+   ],
+   "overall": "high",
+   "pass": true
+  },
+  "planted-no-tounicode": {
+   "expected_signal": "tounicode-gaps",
+   "file_level": "high",
+   "file_signals": [
+    "tounicode-gaps",
+    "no-text-layer"
+   ],
+   "overall": "high",
+   "pass": true
+  },
+  "planted-presentation-forms": {
+   "expected_signal": "presentation-forms",
+   "file_level": "high",
+   "file_signals": [
+    "presentation-forms",
+    "visual-order"
+   ],
+   "overall": "high",
+   "pass": true
+  }
+ },
+ "generated_at": "2026-11-24T21:16:57Z"
+}

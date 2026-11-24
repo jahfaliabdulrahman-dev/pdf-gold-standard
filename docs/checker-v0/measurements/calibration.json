@@ -1,0 +1,158 @@
+{
+ "generated_at": "2026-11-24T19:38:25Z",
+ "head": "b1b16d4",
+ "source": "docs/checker-v0/measurements/pr2/lexicon-compare.json",
+ "note": "Three calibration names only; no text, no excerpts. The 51 ordinary owner files are aggregate in the compare artifact; the known-bad file is a label, not a name. Every file carries defect_type + defect_types + measured evidence.",
+ "files": [
+  {
+   "name": "نظام الشركات 1439 سعد الخنفري.pdf",
+   "sha256": "7e5f9a6159b69cd27a058aed819d0f12404d7a72c79acb16c4026ca25cd1d28e",
+   "defect": "numerals-mixed (owner-adjudicated; the text is lexically valid, the defect is the numeral forms)",
+   "current": {
+    "mupdf": 0.6964,
+    "pdfium": 0.5306,
+    "pdfkit": 0.806,
+    "pdfminer": 0.7037,
+    "poppler": 0.6922
+   },
+   "wiki": {
+    "mupdf": 0.7624,
+    "pdfium": 0.5713,
+    "pdfkit": 0.9053,
+    "pdfminer": 0.7663,
+    "poppler": 0.7649
+   },
+   "defect_type": "numerals-mixed",
+   "defect_types": [
+    "numerals-mixed",
+    "lam-alef-transposition"
+   ],
+   "defect_evidence": {
+    "mixed_numbers": [
+     "1٦473",
+     "143٦",
+     "2٦",
+     "١٤٣9"
+    ],
+    "file_level": "medium",
+    "lam_alef": {
+     "pdfium": 1083,
+     "pdfkit": 0,
+     "mupdf": 1090,
+     "poppler": 1091,
+     "pdfminer": 1
+    },
+    "note": "The file-level signal is numerals-mixed; the lam-alef transposition is measured in the same three readers and is recorded, not raised by a shipped signal."
+   }
+  },
+  {
+   "name": "٣ - درس - البايثون.pdf",
+   "sha256": "2b558d14b6eabcf6bef414c60c737a1b7bfff4d0082cde4b33c786c5081062c6",
+   "defect": "lam-alef transposition (PDFium/MuPDF/poppler 21 each; PDFKit 0; PDFMiner reads reversed). The lexical ratio is a symptom, not a lexical-only defect; file-level low because 3 of 5 judged readers are at/above 0.67. The floor is not lowered.",
+   "current": {
+    "mupdf": 0.5873,
+    "pdfium": 0.58,
+    "pdfkit": 0.6062,
+    "pdfminer": 0.5835,
+    "poppler": 0.5984
+   },
+   "wiki": {
+    "mupdf": 0.6756,
+    "pdfium": 0.6653,
+    "pdfkit": 0.7113,
+    "pdfminer": 0.6638,
+    "poppler": 0.6865
+   },
+   "defect_type": "lam-alef-transposition",
+   "defect_types": [
+    "lam-alef-transposition",
+    "lexical-validity"
+   ],
+   "defect_evidence": {
+    "file_level": "low",
+    "reader_level": {
+     "pdfium": "high",
+     "pdfkit": "low",
+     "mupdf": "low",
+     "poppler": "low",
+     "pdfminer": "high"
+    },
+    "lam_alef": {
+     "pdfium": 21,
+     "pdfkit": 0,
+     "mupdf": 21,
+     "poppler": 21,
+     "pdfminer": 0
+    },
+    "lexical_ratio": {
+     "pdfium": 0.6653,
+     "pdfkit": 0.7113,
+     "mupdf": 0.6756,
+     "poppler": 0.6865,
+     "pdfminer": 0.6638
+    },
+    "note": "ToUnicode/lam-alef order: 21 in the three readers that trust the map; PDFKit 0 (font cmap); PDFMiner reads reversed so the detector is blind. The lexical floor is NOT lowered: the file is low at file level because 3 of 5 judged readers are at/above 0.67, while the defect is named at reader level."
+   }
+  },
+  {
+   "name": "7  - درس - مهارات التواصل.pdf",
+   "sha256": "14e5cee6443c18cbfd775bc5cd2ca9c27afd4b0f29a7882c56ad1db63565f7cf",
+   "defect": "lexical-validity high (garbled words; all five readers below the current and candidate thresholds)",
+   "current": {
+    "mupdf": 0.4105,
+    "pdfium": 0.4063,
+    "pdfkit": 0.4424,
+    "pdfminer": 0.3831,
+    "poppler": 0.4312
+   },
+   "wiki": {
+    "mupdf": 0.3895,
+    "pdfium": 0.3853,
+    "pdfkit": 0.429,
+    "pdfminer": 0.3437,
+    "poppler": 0.4044
+   },
+   "defect_type": "lexical-validity",
+   "defect_types": [
+    "lexical-validity",
+    "lam-alef-transposition"
+   ],
+   "defect_evidence": {
+    "file_level": "high",
+    "lam_alef": {
+     "pdfium": 89,
+     "pdfkit": 1,
+     "mupdf": 89,
+     "poppler": 89,
+     "pdfminer": 0
+    },
+    "lexical_ratio": {
+     "pdfium": 0.3853,
+     "pdfkit": 0.429,
+     "mupdf": 0.3895,
+     "poppler": 0.4044,
+     "pdfminer": 0.3437
+    },
+    "note": "All five judged readers are below the 0.67 floor; the lam-alef transposition is a second measured defect, recorded as defect_types[1]."
+   }
+  }
+ ],
+ "schema_version": "calibration/2",
+ "defect_types": {
+  "numerals-mixed": {
+   "definition": "a number that mixes Arabic-Indic and Latin digits; measured by conformance.checks.structure.mixed_numbers",
+   "level": "medium",
+   "citation": "conformance/checks/structure.py"
+  },
+  "lam-alef-transposition": {
+   "definition": "the lam-alef ligature is mapped in visual order (e.g. «األهداف» for «الأهداف»); arafix detector through conformance/checks/visual_order.py:32, surfaced as lexical.validity(...).lam_alef",
+   "level": "reader-level unless a shipped majority signal exists",
+   "citation": "conformance/checks/visual_order.py:32"
+  },
+  "lexical-validity": {
+   "definition": "a majority of judged readers return Arabic runs that are not Arabic words; measured against the shipped lexicon at the measured floor",
+   "level": "high (file)",
+   "citation": "conformance/checks/lexical.py:80"
+  }
+ }
+}

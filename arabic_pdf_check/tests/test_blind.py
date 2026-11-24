@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.join(REPO, "scripts"))
 
 import checker_fixtures                                    # noqa: E402
 from arabic_pdf_check import blind                         # noqa: E402
+from conformance.checks import lexical                     # noqa: E402
 
 FAILS = []
 
@@ -55,6 +56,11 @@ for name, path in built["planted"].items():
 clean = blind.check(built["clean"], thresholds)
 check("clean:file-not-high", clean["risk"]["file"]["level"] != "high",
       f"file={clean['risk']['file']['level']} signals={[s['id'] for s in clean['signals']]}")
+check("tool:lexicon-named", clean["tool"]["lexicon"]["file"] == os.path.basename(lexical.SHIPPED_DATA)
+      and len(clean["tool"]["lexicon"]["sha256"]) == 64, str(clean["tool"]["lexicon"]))
+baseline = blind.check(built["clean"], thresholds, lexicon_path=lexical.BASELINE_DATA)
+check("tool:explicit-lexicon-recorded", baseline["tool"]["lexicon"]["file"] == os.path.basename(lexical.BASELINE_DATA),
+      str(baseline["tool"]["lexicon"]))
 reader_high = {n: r["risk"] for n, r in clean["readers"].items() if r["risk"] == "high"}
 check("clean:reader-highs-are-reader-caused",
       all(s["cause"] == "reader" for r in clean["readers"].values()

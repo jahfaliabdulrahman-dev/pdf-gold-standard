@@ -72,9 +72,9 @@ def _letter_swapped(text: str) -> str:
 
 
 def _swap_text() -> str:
-    """40 Arabic runs (the declared minimum is 20, and a reading must clear it on every reader) of correct
-    order and nonexistent words."""
-    lines = [" ".join(SWAP_WORDS[i:i + 5]) for i in range(0, 40, 5)]
+    """36 Arabic runs (the declared minimum is 20, and a reading must clear it on every reader) of correct
+    order and nonexistent words. The word list is 36; the range is its length, not a guessed 40."""
+    lines = [" ".join(SWAP_WORDS[i:i + 5]) for i in range(0, len(SWAP_WORDS), 5)]
     return "\n".join(_letter_swapped(line) for line in lines)
 
 
