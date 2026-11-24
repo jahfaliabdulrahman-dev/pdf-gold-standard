@@ -85,11 +85,13 @@ class _Font:
         self.width_mismatch = False
         self.capped = 0
         self.problem = ""
+        self.problems = []
         if tu is not None:
             try:
                 report = parse_tu_report(tu.read_bytes().decode("latin-1"))
                 self.map = report["map"]
                 self.capped = int(report.get("capped") or 0)
+                self.problems = list(report.get("problems") or [])
                 # The source codes must be as wide as the font's codes: `<41>` and `<0041>` are different
                 # code spaces, and a map written for one cannot name the other. The codespace range says the
                 # same thing from the other side; both are checked because either can be wrong alone. A
@@ -251,11 +253,13 @@ def _walk(instructions, resources, page_no, out: dict, stats: dict, depth=0, pro
                         "missing_unicode": 0, "missing_in_word": 0, "missing_codes": {}, "glyph_names": {},
                         "pua": 0, "replacement": 0, "zero_value": 0, "bom": 0,
                         "unparsable": False, "capped": 0, "width_mismatch": False, "problem": "",
+                        "problems": [],
                     })
                     row["unparsable"] = row["unparsable"] or font.unparsable
                     row["capped"] = max(row["capped"], font.capped)
                     row["width_mismatch"] = row["width_mismatch"] or font.width_mismatch
                     row["problem"] = row["problem"] or font.problem
+                    row["problems"].extend(font.problems)
                     for k in ("codes", "notdef", "missing_unicode", "missing_in_word", "pua", "replacement",
                               "zero_value", "bom"):
                         row[k] += counts[k]

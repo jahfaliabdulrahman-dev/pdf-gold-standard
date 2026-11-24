@@ -162,6 +162,17 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
             warnings.append("ToUnicode parsed, but its code width does not match the font: "
                             + (row.get("problem") or "named width mismatch")
                             + " — a conforming reader may ignore the map")
+        # A non-fatal parser problem can still leave the map SHORT: a bfrange tail that overflows UTF-16, a
+        # count that disagrees with the entries, an array with fewer destinations than codes. The old parser
+        # threw on the first of these and the caller silently replaced the whole map with `{}`; this parser
+        # keeps the valid entries, so the remaining defect must be named instead of disappearing into a
+        # clean-looking font row. It is a warning (medium): the drawn codes were measured, and recovery is
+        # handled by the one `recovered` rule.
+        partial = [p for p in row.get("problems") or []
+                   if "mapping stops there" in p or "count says" in p or "array has" in p]
+        if partial:
+            warnings.append("ToUnicode map is incomplete: " + "; ".join(partial)[:240]
+                            + " — the mapped entries are used, the missing tail is not invented")
         if row.get("notdef"):
             problems.append(f"{row['notdef']} .notdef glyph(s) drawn")
         if not row["tounicode"]:
