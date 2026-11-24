@@ -20,11 +20,7 @@ import sys
 
 import pikepdf
 
-REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-if os.path.join(REPO, "scripts") not in sys.path:
-    sys.path.insert(0, os.path.join(REPO, "scripts"))
-
-from fix_text_layer import parse_tu_report   # noqa: E402  (the repository's ToUnicode reader)
+from conformance.cmap import parse_tu_report
 
 TEXT_OPS = {"Tj", "TJ", "'", '"'}
 
