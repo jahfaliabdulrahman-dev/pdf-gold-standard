@@ -1,0 +1,40 @@
+{
+ "by_file_level": {
+  "high": 31,
+  "low": 16,
+  "medium": 8
+ },
+ "by_reader_risk": {
+  "mupdf": {
+   "high": 32,
+   "low": 23
+  },
+  "pdfium": {
+   "high": 16,
+   "low": 39
+  },
+  "pdfkit": {
+   "high": 32,
+   "low": 23
+  },
+  "pdfminer": {
+   "high": 55
+  },
+  "poppler": {
+   "high": 32,
+   "low": 23
+  }
+ },
+ "by_signal": {
+  "lexical-validity": 4,
+  "no-text-layer": 1,
+  "numerals-mixed": 3,
+  "presentation-forms": 29,
+  "tounicode-gaps": 62,
+  "visual-order": 15
+ },
+ "errors": 0,
+ "files": 55,
+ "generated_at": "2026-11-23T15:06:09Z",
+ "measured": 55
+}

@@ -1,0 +1,456 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdf-gold-standard.local/arabic-pdf-check/report.v1.json",
+  "title": "arabic-pdf-check blind report v1",
+  "description": "A blind report: named signals with a risk level and a confidence per reader and for the file. It carries no percentage and no PASS by construction.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mode",
+    "file",
+    "tool",
+    "readers",
+    "missing_readers",
+    "fonts",
+    "signals",
+    "risk",
+    "known_limits",
+    "not_judged"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "arabic-pdf-check/1"
+    },
+    "mode": {
+      "const": "blind"
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha256",
+        "bytes",
+        "pages"
+      ],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "commit",
+        "dirty",
+        "arafix",
+        "thresholds_sha256"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^(unknown|[0-9a-f]{7,40})$"
+        },
+        "dirty": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "arafix": {
+          "type": "string",
+          "minLength": 1
+        },
+        "thresholds_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "readers": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "version",
+          "chars",
+          "empty",
+          "risk",
+          "confidence",
+          "signals",
+          "examples",
+          "pages"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "chars": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "risk": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/signal"
+            }
+          },
+          "examples": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "page",
+                "text"
+              ],
+              "properties": {
+                "page": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 80
+                }
+              }
+            }
+          },
+          "pages": {
+            "enum": [
+              "per-page",
+              "unsupported"
+            ]
+          }
+        }
+      }
+    },
+    "missing_readers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "fonts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "font",
+          "family",
+          "subtype",
+          "embedded",
+          "tounicode",
+          "two_byte",
+          "codes",
+          "missing_unicode",
+          "notdef",
+          "pua",
+          "replacement",
+          "zero_value",
+          "bom",
+          "note"
+        ],
+        "properties": {
+          "font": {
+            "type": "string"
+          },
+          "family": {
+            "type": "string"
+          },
+          "subtype": {
+            "type": "string"
+          },
+          "embedded": {
+            "type": "boolean"
+          },
+          "tounicode": {
+            "type": "boolean"
+          },
+          "two_byte": {
+            "type": "boolean"
+          },
+          "codes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "missing_unicode": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "missing_in_word": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "encoding": {
+            "type": "string"
+          },
+          "missing_examples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "symbol": {
+            "type": "boolean"
+          },
+          "notdef": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pua": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "replacement": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "zero_value": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "bom": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/signal"
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "confidence",
+        "causes",
+        "file",
+        "readers"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "causes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "file",
+              "reader"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "file": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "confidence"
+          ],
+          "properties": {
+            "level": {
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "confidence": {
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            }
+          }
+        },
+        "readers": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          }
+        }
+      }
+    },
+    "known_limits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "reader",
+          "kind",
+          "version",
+          "statement",
+          "applies"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reader": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "limit",
+              "limit-refused",
+              "behaviour",
+              "behaviour-refused"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "applies": {
+            "type": "boolean"
+          },
+          "measured_on": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "not_judged": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "level",
+        "cause",
+        "confidence",
+        "detail",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "tounicode-gaps",
+            "lexical-validity",
+            "presentation-forms",
+            "visual-order",
+            "reader-disagreement",
+            "numerals-persian",
+            "numerals-mixed",
+            "no-text-layer"
+          ]
+        },
+        "level": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "cause": {
+          "enum": [
+            "file",
+            "reader"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

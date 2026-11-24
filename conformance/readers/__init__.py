@@ -37,5 +37,17 @@ def text_many(name: str, paths: list[str]) -> list[str]:
     return [mod.text(p) for p in paths]
 
 
+def pages_many(name: str, paths: list[str]) -> list[list[str]] | None:
+    """The same reading, page by page — `None` when a reader cannot name its pages.
+
+    A caller that needs a page must not invent one: `None` is a value, and the checker prints
+    `page: null` with that reader named instead of a guess.
+    """
+    mod = load(name)
+    if hasattr(mod, "pages_many"):
+        return mod.pages_many(paths)
+    return None
+
+
 def version_of(name: str) -> str:
     return load(name).version()

@@ -14,12 +14,17 @@ def text(path: str) -> str:
     return text_many([path])[0]
 
 
-def text_many(paths: list[str]) -> list[str]:
+def pages_many(paths: list[str]) -> list[list[str]]:
+    """The same reading, one string per page — the checker's only way to name a page honestly."""
     out = []
     for path in paths:
         doc = pypdfium2.PdfDocument(path)
         try:
-            out.append("\n".join(page.get_textpage().get_text_range() for page in doc))
+            out.append([page.get_textpage().get_text_range() for page in doc])
         finally:
             doc.close()
     return out
+
+
+def text_many(paths: list[str]) -> list[str]:
+    return ["\n".join(pages) for pages in pages_many(paths)]

@@ -16,17 +16,16 @@ Two predicates, each measured on this machine (2026-11-19):
 """
 import json
 import os
-import subprocess
-import sys
 
 from ..checks import metrics
+from .controls_runner import ControlRefused, control_data as _control_data, run_control as _run_control
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LIMITS = os.path.join(HERE, "limitations.json")
 CONTROLS = os.path.join(HERE, "controls")
 
 
-class LimitRefused(RuntimeError):
+class LimitRefused(ControlRefused):
     """A limit without a working control is not a limit — it is an exemption."""
 
 
@@ -40,34 +39,17 @@ def controls_dir() -> str:
 
 
 def run_control(limit: dict) -> dict:
-    """Run the control in a fresh process; it prints one JSON object on stdout."""
-    script = limit.get("control_script") or ""
-    path = os.path.join(CONTROLS, os.path.basename(script))
-    if not script or not os.path.exists(path):
-        raise LimitRefused(f"{limit['id']}: control script {script!r} does not exist")
-    r = subprocess.run([sys.executable, path], capture_output=True, text=True, timeout=600,
-                       cwd=os.path.dirname(HERE))
-    if r.returncode != 0:
-        raise LimitRefused(f"{limit['id']}: control failed — {(r.stderr or r.stdout).strip()[:300]}")
     try:
-        out = json.loads(r.stdout.strip().splitlines()[-1])
-    except json.JSONDecodeError as exc:
-        raise LimitRefused(f"{limit['id']}: control printed no JSON ({exc}): {r.stdout[:200]!r}") from None
-    if not out.get("reproduces"):
-        raise LimitRefused(f"{limit['id']}: the control no longer reproduces the defect on this reader "
-                           f"({out.get('detail')}) — the limit is stale and must not be applied")
-    out.setdefault("detail", {})
-    return out
-
-
-_CONTROL_CACHE: dict[str, dict] = {}
+        return _run_control(limit, CONTROLS)
+    except ControlRefused as exc:
+        raise LimitRefused(str(exc)) from None
 
 
 def control_data(limit: dict) -> dict:
-    """The control's measurement, run once per process. A control cannot pass silently: it raises."""
-    if limit["id"] not in _CONTROL_CACHE:
-        _CONTROL_CACHE[limit["id"]] = run_control(limit)
-    return _CONTROL_CACHE[limit["id"]]
+    try:
+        return _control_data(limit, CONTROLS)
+    except ControlRefused as exc:
+        raise LimitRefused(str(exc)) from None
 
 
 def usable(reader_name: str, reader_version: str) -> tuple[list[dict], list[str], list[dict]]:

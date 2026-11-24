@@ -92,7 +92,7 @@ def read_tree(pdf) -> Node:
     return top
 
 
-ARABIC = re.compile("[\u0600-\u06FF\u0750-\u077F]")
+ARABIC = metrics.ARABIC
 LATIN_OR_DIGIT = re.compile("[A-Za-z0-9]")
 
 
@@ -126,6 +126,121 @@ def words_multi(text: str) -> Counter:
 
 def same_words(a: str, b: str) -> bool:
     return words_multi(a) == words_multi(b)
+
+
+def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = False,
+                  recovered: bool | None = None) -> list[dict]:
+    """The ONE per-font ToUnicode rule, shared by the gate and the checker.
+
+    · simple font, no /ToUnicode → declared (Matterhorn 31-027 allows it) **only** when its /Encoding is a
+      standard one (WinAnsi/MacRoman/Standard) and carries no /Differences: the exception rests on the
+      encoding or the glyph names naming every code, and this module does not verify a custom table.
+    · composite font, no /ToUnicode → high: nothing names its codes
+    · a map exists and misses codes → high when the missing SHARE is above `gap_high` **and** (when
+      `inside_words_only`) at least one gap sits inside a word; a gap between words (a bullet, a tab) is a
+      warning. The certificate gate passes `inside_words_only=False`: certifying a file means no gap at all.
+    · a SYMBOL font (name, or every drawn code mapped into the PUA) is not a text defect: its codes ARE
+      icons. Its PUA characters are noted, never raised.
+    · PUA / U+FFFD / U+0000 / U+FEFF / drawn .notdef in a text font → high (Matterhorn 31-028 … 31-030)
+
+    One rule with two parameters — the gate and the report must not grow two opinions.
+    """
+    out = []
+    for key, row in sorted(scan["fonts"].items()):
+        problems, warnings, notes = [], [], []
+        family = row.get("family") or row.get("name") or ""
+        pua, codes = row.get("pua", 0), row.get("codes", 0)
+        symbol = bool(re.search(r"(?i)wingdings|webdings|symbol|zapfdingbats|marlett|dingbat", family)
+                      or (pua and pua >= codes))
+        if row.get("notdef"):
+            problems.append(f"{row['notdef']} .notdef glyph(s) drawn")
+        if not row["tounicode"]:
+            if row["two_byte"]:
+                problems.append("composite font drawn with no /ToUnicode")
+            else:
+                base = (row.get("encoding") or "").lstrip("/")
+                standard = base in ("WinAnsiEncoding", "MacRomanEncoding", "StandardEncoding")
+                if standard:
+                    notes.append("simple font without /ToUnicode — Matterhorn 31-027: a standard encoding "
+                                 f"({base}) names every code"
+                                 + ("; its /Differences glyph names are not verified here" if
+                                    row.get("encoding_differences") else "")
+                                 + "; declared, not alarmed")
+                elif not base and not row.get("encoding_differences"):
+                    # No /Encoding at all: the font's built-in encoding applies, and this scan cannot verify
+                    # it. Declared as a limitation (the same stance as the pre-existing report), not raised.
+                    notes.append("simple font without /ToUnicode and no /Encoding — the built-in mapping is "
+                                 "not verified here; declared as a limitation, not alarmed")
+                else:
+                    problems.append(
+                        "simple font without /ToUnicode and "
+                        + (f"encoding /{base}" if base else "no /Encoding")
+                        + (" with /Differences" if row.get("encoding_differences") else "")
+                        + " — the mapping is not verifiable; 31-027 rests on a standard encoding")
+        ratio = (row.get("missing_unicode", 0) / codes) if codes else 0.0
+        if row.get("missing_unicode") and row["tounicode"]:
+            detail = _gap_detail(row)
+            text = f"{row['missing_unicode']} of {codes} drawn codes have no Unicode value{detail}"
+            over = ratio > gap_high
+            inside = bool(row.get("missing_in_word", 0))
+            empty_map = bool(codes) and row.get("missing_unicode", 0) >= codes
+            if over and (inside or empty_map or not inside_words_only):
+                problems.append(text)
+            else:
+                warnings.append(text + (" (between words: a bullet/tab, not a broken word)"
+                                        if not inside else ""))
+        if pua:
+            if symbol:
+                notes.append(f"symbol font: {pua} icon code(s) in the private use area — not text")
+            else:
+                problems.append(f"{pua} mapped character(s) in the private use area")
+        if row.get("replacement"):
+            problems.append(f"{row['replacement']} mapped character(s) to U+FFFD")
+        if row.get("zero_value"):
+            problems.append(f"{row['zero_value']} mapped character(s) to U+0000 (Matterhorn 31-028)")
+        if row.get("bom"):
+            problems.append(f"{row['bom']} mapped character(s) to U+FEFF/U+FFFE (Matterhorn 31-029)")
+        empty_mapping = (not row["tounicode"]) or bool(row["tounicode"] and codes
+                                                      and row.get("missing_unicode", 0) >= codes)
+        level = "high" if problems else ("medium" if warnings else None)
+        # The owner's P1 (2026-11-23): an empty map is a structural fact, not a verdict. Two files carried the
+        # same empty map and opposite realities — readers inferred the letters from the embedded font in one,
+        # and returned lexically nonexistent words in the other. When the caller measured that the readers
+        # RECOVER the text (lexical validity), the empty map is a declared warning: a reader that does not
+        # infer from the font will still copy nothing. The certificate gate passes recovered=None and keeps
+        # the strict rule (it has the truth text; the report has only readings).
+        if recovered is True and level == "high" and empty_mapping and all(
+                ("/ToUnicode" in p or "no Unicode value" in p) for p in problems):
+            warnings.extend(problems)
+            problems = []
+            warnings.append("readers recover the text from the embedded font (lexical validity) — declared, "
+                            "not raised; a reader that does not infer letters from the font will copy nothing")
+            level = "medium"
+        out.append({"key": key, "name": row["family"] or row["name"], "family": row["family"],
+                    "subtype": row["subtype"], "embedded": row["embedded"],
+                    "tounicode": row["tounicode"], "two_byte": row["two_byte"], "codes": codes,
+                    "encoding": row.get("encoding", ""),
+                    "encoding_differences": row.get("encoding_differences", False),
+                    "missing_unicode": row.get("missing_unicode", 0),
+                    "missing_in_word": row.get("missing_in_word", 0), "gap_ratio": round(ratio, 4),
+                    "missing_examples": _gap_codes(row),
+                    "notdef": row["notdef"], "pua": pua, "replacement": row["replacement"],
+                    "zero_value": row["zero_value"], "bom": row["bom"], "symbol": symbol,
+                    "level": level,
+                    "problems": problems, "warnings": warnings, "note": " · ".join(notes) or None})
+    return out
+
+
+def _gap_codes(row: dict, limit: int = 5) -> list[str]:
+    names = row.get("glyph_names") or {}
+    codes = row.get("missing_codes") or {}
+    top = sorted(codes.items(), key=lambda kv: -kv[1])[:limit]
+    return [f"0x{int(c):02X}" + (f" ({names[c]})" if c in names else "") for c, _ in top]
+
+
+def _gap_detail(row: dict) -> str:
+    codes = _gap_codes(row, 4)
+    return f" [{', '.join(codes)}]" if codes else ""
 
 
 def layer_seq(text: str) -> list[str]:
@@ -201,61 +316,135 @@ def a3b_target(producer: dict, pdf_path: str) -> str:
     return second
 
 
-def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True,
-             honour_second_file: bool = True) -> list[dict]:
+def file_checks(pdf, pdf_path: str, scan: dict, producer: dict | None = None,
+                honour_second_file: bool = True) -> tuple[list[dict], Node | None]:
+    """The half of `evaluate` that needs only the file — and therefore also applies to a free text.
+
+    `pdf` is an OPEN pikepdf document (one parse per certificate), `scan` is `mcid_text.scan` of the same
+    file. Returns the checks and the structure tree (or None) so `evaluate` can continue with the case-only
+    checks without reading the tree twice. `evaluate` and the checker's reference mode both call THIS
+    function: a check that exists in two places can disagree with itself.
+
+    What is here: tagging, language, the house key, every-character-tagged, fonts drawn, .notdef,
+    invisible format characters, presentation forms, ToUnicode coverage, and the two numeral rules.
+    What is not: anything that compares the file to a document's expected text (headings, tables, block
+    order, outline, the case's font family) — those need a case and stay in `evaluate`.
+    """
     checks: list[dict] = []
 
     def add(cid: str, ok: bool | None, reason: str) -> None:
         checks.append({"id": cid, "status": "na" if ok is None else ("pass" if ok else "fail"), "reason": reason})
 
-    scan = mcid_text.scan(pdf_path)
     # Joined with a NEWLINE: MCID boundaries are line/element boundaries, and gluing them with "" merges the
     # last word of one element with the first of the next (measured: «ةمدقملوألا»). N collapses it to a space.
     file_text = "\n".join(scan["text"].values())
 
+    mark = pdf.Root.get("/MarkInfo")
+    marked = bool(mark is not None and mark.get("/Marked") is True)
+    add("markinfo", marked, "/MarkInfo /Marked true" if marked else "no /MarkInfo with /Marked true")
+    lang = str(pdf.Root.get("/Lang", "")).strip("()")
+    add("lang", lang.lower().startswith("ar"), f"/Lang {lang!r}" if lang else "no /Lang")
+
+    # --- no house key in the delivered file ---------------------------------------------------------
+    # PDF/A does not forbid private data and no validator judges it (TechNote 0010, A009: Annex E is
+    # outside ISO 19005's scope), so a leaked `/PL*` key has to fail HERE — the gate that issues the
+    # certificate — not only in the document-specific gate. A file whose objects cannot be read is a
+    # FAIL, never a pass by default.
+    try:
+        keys = pdfops.private_keys(pdf)
+        if honour_second_file and (producer or {}).get("a3b_path"):
+            # A bake-off may judge the A-3b claim on a second file; the key rule follows the claim.
+            # An undeclared or missing second file is refused by the veraPDF check, by name.
+            try:
+                second = a3b_target(producer, pdf_path)
+            except ValueError:
+                second = None
+            if second and os.path.realpath(second) != os.path.realpath(pdf_path):
+                with pikepdf.open(second) as second_pdf:
+                    keys += [f"{os.path.basename(second)}: {k}" for k in pdfops.private_keys(second_pdf)]
+        add("private-keys", not keys, ", ".join(keys[:6]) or "no /PL* key in the object graph")
+    except Exception as exc:
+        add("private-keys", False, f"cannot read the objects: {exc}")
+
+    try:
+        tree = read_tree(pdf)
+    except ValueError as exc:
+        add("tagged", False, str(exc))
+        tree = None
+    else:
+        add("tagged", True, "structure tree present and readable")
+
+    # --- every character is tagged (no text outside any MCID) ---------------------------------------
+    untagged = {k: v for k, v in scan["text"].items() if k[1] < 0}
+    untagged_words = sum(len(metrics.N(v).split()) for v in untagged.values())
+    add("all-text-tagged", untagged_words == 0,
+        "every text show carries an MCID" if untagged_words == 0 else
+        f"{untagged_words} word(s) sit outside every marked-content sequence")
+
+    add("notdef", scan["notdef"] == 0,
+        "no glyph 0 drawn" if scan["notdef"] == 0 else f"{scan['notdef']} .notdef glyph(s) drawn")
+    invisible = sum(1 for ch in file_text if 0x200B <= ord(ch) <= 0x200D or ord(ch) == 0x2060)
+    add("invisible-format", invisible == 0,
+        "no invisible joiner in the text layer" if invisible == 0 else
+        f"{invisible} U+200B/200C/200D/2060 in the layer — the producer inserted them and a copy-paste "
+        f"carries them")
+    core = metrics.PRESENTATION_FORM
+    forms = sum(1 for ch in file_text
+                if core[0] <= ord(ch) <= core[1] or core[2] <= ord(ch) <= core[3])
+    add("presentation-forms", forms == 0,
+        "no presentation form in the text layer" if forms == 0 else
+        f"{forms} presentation-form character(s) in the layer — a reader that trusts the CMap shows a glyph "
+        f"name, not a letter")
+    verdicts = font_verdicts(scan, 0.0)
+    bad_fonts = [v for v in verdicts if v["level"] == "high"]
+    add("tounicode-coverage", not bad_fonts,
+        "every drawn code has a Unicode value" if not bad_fonts else
+        f"{len(bad_fonts)} font(s) with an unreadable code: " +
+        " · ".join(f"{v['name']}: {v['problems'][0]}" for v in bad_fonts[:3]))
+
+    # --- numerals: one system per number, and never the Persian one ---------------------------------
+    # Owner decision (19 Nov 2026): Western digits default; Arabic-Indic (٠-٩) is an explicit per-document
+    # choice; identifiers stay Western. The gate can judge the two universal rules without knowing the
+    # choice: a Persian digit (۰-۹) is never an Arabic document's digit, and one number never mixes the
+    # systems. Separator STYLE (Arabic ٬/٫ vs ASCII ,/.) is not mixed here — the owner's decision names
+    # numerals and identifiers, not separators; the corpus case `num-ids-latn-in-arab` covers identifiers.
+    persian = persian_digits(file_text)
+    add("numerals-persian", bool(file_text) and not persian,
+        "no text layer to read" if not file_text else
+        ("no U+06F0–U+06F9 digit in the layer" if not persian else
+         f"{len(persian)} Persian digit(s) in the layer — an ar file uses ٠-٩ or 0-9, never ۰-۹"))
+    mixed = mixed_numbers(file_text)
+    add("numerals-mixed", bool(file_text) and not mixed,
+        "no text layer to read" if not file_text else
+        ("no number mixes digit systems" if not mixed else
+         f"{len(mixed)} number(s) mix digit systems: " + ", ".join(mixed[:4])))
+
+    # --- the declared model, read from the same open file (one parse per certificate) ---------------
+    if (producer or {}).get("postprocess"):
+        problems = pdfops.model_boundary(pdf)
+        add("model-boundary", not problems, "; ".join(problems[:3]) or "inside the declared model")
+    else:
+        add("model-boundary", None, "n/a — our post-processing did not run, and the boundary is its guard")
+
+    return checks, tree
+
+
+def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True,
+             honour_second_file: bool = True, scan: dict | None = None) -> list[dict]:
+    checks: list[dict] = []
+
+    def add(cid: str, ok: bool | None, reason: str) -> None:
+        checks.append({"id": cid, "status": "na" if ok is None else ("pass" if ok else "fail"), "reason": reason})
+
+    # One parse per certificate: `certify` passes the scan it already made for the metrics. A second scan of
+    # the same file is how two blocks of one certificate start disagreeing.
+    scan = scan if scan is not None else mcid_text.scan(pdf_path)
+    file_text = "\n".join(scan["text"].values())
+
     with pikepdf.open(pdf_path) as pdf:
-        mark = pdf.Root.get("/MarkInfo")
-        marked = bool(mark is not None and mark.get("/Marked") is True)
-        add("markinfo", marked, "/MarkInfo /Marked true" if marked else "no /MarkInfo with /Marked true")
-        lang = str(pdf.Root.get("/Lang", "")).strip("()")
-        add("lang", lang.lower().startswith("ar"), f"/Lang {lang!r}" if lang else "no /Lang")
-
-        # --- no house key in the delivered file -----------------------------------------------------
-        # PDF/A does not forbid private data and no validator judges it (TechNote 0010, A009: Annex E is
-        # outside ISO 19005's scope), so a leaked `/PL*` key has to fail HERE — the gate that issues the
-        # certificate — not only in the document-specific gate. A file whose objects cannot be read is a
-        # FAIL, never a pass by default.
-        try:
-            keys = pdfops.private_keys(pdf)
-            if honour_second_file and (producer or {}).get("a3b_path"):
-                # A bake-off may judge the A-3b claim on a second file; the key rule follows the claim.
-                # An undeclared or missing second file is refused by the veraPDF check below, by name.
-                try:
-                    second = a3b_target(producer, pdf_path)
-                except ValueError:
-                    second = None
-                if second and os.path.realpath(second) != os.path.realpath(pdf_path):
-                    with pikepdf.open(second) as second_pdf:
-                        keys += [f"{os.path.basename(second)}: {k}" for k in pdfops.private_keys(second_pdf)]
-            add("private-keys", not keys, ", ".join(keys[:6]) or "no /PL* key in the object graph")
-        except Exception as exc:
-            add("private-keys", False, f"cannot read the objects: {exc}")
-
-        try:
-            tree = read_tree(pdf)
-        except ValueError as exc:
-            add("tagged", False, str(exc))
-            tree = None
-        else:
-            add("tagged", True, "structure tree present and readable")
+        file_part, tree = file_checks(pdf, pdf_path, scan, producer, honour_second_file)
+        checks.extend(file_part)
         nodes = list(tree.walk()) if tree is not None else []
-
-        # --- every character is tagged (no text outside any MCID) -----------------------------------
-        untagged = {k: v for k, v in scan["text"].items() if k[1] < 0}
-        untagged_words = sum(len(metrics.N(v).split()) for v in untagged.values())
-        add("all-text-tagged", untagged_words == 0,
-            "every text show carries an MCID" if untagged_words == 0 else
-            f"{untagged_words} word(s) sit outside every marked-content sequence")
 
         # --- the tagged words are the case's words (attribution, not order) -------------------------
         want_text = _truth_text(case)
@@ -320,50 +509,22 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             return "".join(ch for ch in (x or "").lower() if ch.isalnum())
 
         allowed = {norm(declared), norm(fonts.FONTS["riyal"]["family"])}
+        verdicts = {v["key"]: v for v in font_verdicts(scan, 0.0)}
         bad_fonts = []
         for name, info in scan["fonts"].items():
             if not info["embedded"]:
                 bad_fonts.append(f"{info['family'] or name}: not embedded")
-            if not info["tounicode"]:
-                bad_fonts.append(f"{info['family'] or name}: no /ToUnicode")
+            # The Matterhorn 31-027 exception is OWNED by font_verdicts: a simple font with no /ToUnicode is
+            # level None there and passes here; a composite one, or a map with gaps, is high and fails. The
+            # gate consumes that verdict instead of restating the rule.
+            v = verdicts.get(name) or {}
+            if v.get("level") == "high" and (not v.get("tounicode") or v.get("missing_unicode")):
+                bad_fonts.append(f"{info['family'] or name}: {v['problems'][0]}")
             if not any(norm(info["family"]).startswith(a) for a in allowed if a):
                 bad_fonts.append(f"{info['family'] or name}: not the case's font ({declared}) nor the declared "
                                  f"fallback")
         add("fonts", not bad_fonts, "; ".join(sorted(set(bad_fonts))[:4]) or
-            f"{len(scan['fonts'])} font(s) used for text, all embedded with /ToUnicode")
-        add("notdef", scan["notdef"] == 0,
-            "no glyph 0 drawn" if scan["notdef"] == 0 else f"{scan['notdef']} .notdef glyph(s) drawn")
-        invisible = sum(1 for ch in file_text if 0x200B <= ord(ch) <= 0x200D or ord(ch) == 0x2060)
-        add("invisible-format", invisible == 0,
-            "no invisible joiner in the text layer" if invisible == 0 else
-            f"{invisible} U+200B/200C/200D/2060 in the layer — the producer inserted them and a copy-paste "
-            f"carries them")
-        forms = sum(1 for ch in file_text
-                    if 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF)
-        add("presentation-forms", forms == 0,
-            "no presentation form in the text layer" if forms == 0 else
-            f"{forms} presentation-form character(s) in the layer — a reader that trusts the CMap shows a glyph "
-            f"name, not a letter")
-        add("tounicode-coverage", _tu_gaps(scan) == 0,
-            "every drawn code has a Unicode value" if _tu_gaps(scan) == 0 else
-            f"{_tu_gaps(scan)} code(s) with no /ToUnicode entry (readers would invent U+<glyph id>)")
-
-        # --- numerals: one system per number, and never the Persian one ------------------------------
-        # Owner decision (19 Nov 2026): Western digits default; Arabic-Indic (٠-٩) is an explicit per-document
-        # choice; identifiers stay Western. The gate can judge the two universal rules without knowing the
-        # choice: a Persian digit (۰-۹) is never an Arabic document's digit, and one number never mixes the
-        # systems. Separator STYLE (Arabic ٬/٫ vs ASCII ,/.) is not mixed here — the owner's decision names
-        # numerals and identifiers, not separators; the corpus case `num-ids-latn-in-arab` covers identifiers.
-        persian = [ch for ch in file_text if 0x06F0 <= ord(ch) <= 0x06F9]
-        add("numerals-persian", bool(file_text) and not persian,
-            "no text layer to read" if not file_text else
-            ("no U+06F0–U+06F9 digit in the layer" if not persian else
-             f"{len(persian)} Persian digit(s) in the layer — an ar file uses ٠-٩ or 0-9, never ۰-۹"))
-        mixed = mixed_numbers(file_text)
-        add("numerals-mixed", bool(file_text) and not mixed,
-            "no text layer to read" if not file_text else
-            ("no number mixes digit systems" if not mixed else
-             f"{len(mixed)} number(s) mix digit systems: " + ", ".join(mixed[:4])))
+            f"{len(scan['fonts'])} font(s) used for text, all embedded; every composite font has /ToUnicode")
 
         # --- the outline says what the headings say -------------------------------------------------
         import pymupdf
@@ -378,17 +539,10 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         add("outline", ok_toc, f"{len(toc)} entr(y/ies)" + ("" if ok_toc else
             f" — the case declares {[(l, t[:16]) for l, t in want_toc]}"))
 
-        # --- the declared model, read from the same open file (one parse per certificate) ------------
-        if producer.get("postprocess"):
-            problems = pdfops.model_boundary(pdf)
-            add("model-boundary", not problems, "; ".join(problems[:3]) or "inside the declared model")
-        else:
-            add("model-boundary", None, "n/a — our post-processing did not run, and the boundary is its guard")
-
     if run_verapdf:
         # A CERTIFICATE judges the file it names: `certificate.py` passes honour_second_file=False, so the A-3b
         # claim can never be satisfied by a different document than the certified one.
-        a3b_path = a3b_target(producer, pdf_path) if honour_second_file else pdf_path
+        a3b_path = a3b_target(producer or {}, pdf_path) if honour_second_file else pdf_path
         for flavour, cid in (("ua1", "verapdf-ua1"), ("3b", "verapdf-pdfa3b")):
             target = a3b_path if flavour == "3b" else pdf_path
             try:
@@ -429,11 +583,6 @@ def _extra(got: str, want: str) -> str:
     return repr(" ".join((words_multi(got) - words_multi(want)).elements()))
 
 
-def _tu_gaps(scan: dict) -> int:
-    """Codes drawn with no ToUnicode entry — the ones a reader turns into U+<glyph id> (measured behaviour)."""
-    return int(scan.get("missing_unicode", 0))
-
-
 # A number, as the gate reads it: digits plus the separators that bind one number together (ASCII and Arabic
 # decimal/thousands marks). A hyphen, slash or space ends the token: `2026-11-19` is three numbers, and a phone
 # written with spaces is several — judging those as one number would invent a rule the owner did not set.
@@ -462,3 +611,12 @@ def mixed_numbers(text: str) -> list[str]:
         if len(systems) > 1:
             out.append(m.group())
     return out
+
+
+def persian_digits(text: str) -> list[str]:
+    """The Persian digits (U+06F0–U+06F9) in a text.
+
+    One rule, one function: the gate (`evaluate`), the checker's blind mode and any future consumer read the
+    same predicate, so a document cannot pass one and fail the other on the same characters.
+    """
+    return [ch for ch in (text or "") if 0x06F0 <= ord(ch) <= 0x06F9]
