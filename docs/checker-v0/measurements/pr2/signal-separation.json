@@ -150,9 +150,9 @@
    }
   }
  },
- "dirty": true,
- "generated_at": "2026-11-24T21:18:26Z",
- "head": "5e6b258",
+ "dirty": false,
+ "generated_at": "2026-11-24T21:21:50Z",
+ "head": "dcf0c60",
  "note": "The clean population is the same 70 files; no owner text or ordinary owner name is stored. The three calibration names are the assignment's explicit exception.",
  "population": {
   "calibration": 3,
