@@ -23,14 +23,15 @@ jobs:
       # 2026-11-24); the installer below is pinned by SHA-256, not by what brew ships today.
       VERAPDF_VERSION: "1.30.4"
       VERAPDF_INSTALLER_SHA256: "04415ef3f149526a3048b9889723e81320ddf013bd891bcc7f0f297f3eadcc23"
-      # The checker reads stored controls; `check` must never launch Chrome or Swift. One cache per run.
-      ARABIC_PDF_CHECK_CACHE: ${{ runner.temp }}/arabic-pdf-check
       # poppler is pinned to an exact conda-forge build, not to whatever brew has today: a reader's floors are
       # recorded per version, so an unpinned source turns every upstream bump into a red main. The version below
       # is the one whose floors the ratchet holds, and the step refuses any other by name.
       POPPLER_VERSION: "26.11.0"
     steps:
       - uses: actions/checkout@v5
+
+      - name: One cache root for the run (the checker reads stored controls)
+        run: echo "ARABIC_PDF_CHECK_CACHE=$RUNNER_TEMP/arabic-pdf-check" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v6
         with:
@@ -273,9 +274,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CHROME_VERSION: "157.0.8103.78"
-      ARABIC_PDF_CHECK_CACHE: ${{ runner.temp }}/arabic-pdf-check
     steps:
       - uses: actions/checkout@v5
+      - name: One cache root for the run (the checker reads stored controls)
+        run: echo "ARABIC_PDF_CHECK_CACHE=$RUNNER_TEMP/arabic-pdf-check" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
