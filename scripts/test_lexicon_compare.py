@@ -44,14 +44,17 @@ check("clean-median-by-reader",
 check("clean-file-min", s["clean_file_min"] == 0.7, s["clean_file_min"])
 check("broken-max", s["broken_max"] == 0.5, s["broken_max"])
 check("separation-all", s["separation_all"] == 0.2, s["separation_all"])
+check("separation-lexical-only", s["separation_lexical_only"] == 0.4, s["separation_lexical_only"])
 check("separation-by-reader", s["separation_by_reader"] == {"r0": 0.4, "r1": 0.2}, s["separation_by_reader"])
 check("short-not-judged", s["clean_judged"] == 2, s["clean_judged"])
 check("calibration-judged", s["calibration_judged"] == 1, s["calibration_judged"])
+check("known-bad-label", "known-bad" in s["calibration"], s["calibration"])
 
 w = C.summarize(records, "wiki", min_runs=20)
 check("wiki-clean-min", w["clean_file_min"] == 0.8, w["clean_file_min"])
 check("wiki-broken-max", w["broken_max"] == 0.45, w["broken_max"])
 check("wiki-separation", w["separation_all"] == 0.35, w["separation_all"])
+check("wiki-separation-lexical-only", w["separation_lexical_only"] == 0.45, w["separation_lexical_only"])
 
 print()
 if fails:

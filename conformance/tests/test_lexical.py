@@ -46,24 +46,13 @@ check("lam-alef:one-token", lexical.words("لأن") == ["لان"], str(lexical.w
 check("lexicon-normalized", lexical.normalize("العَرَبيّة") in lexical.lexicon(),
       "the normalized word is not in the normalized lexicon")
 
-# PR-2: both lists load, and the measurement seam changes the default the checker reads.
-current = lexical.lexicon(lexical.CURRENT_DATA)
-wiki = lexical.lexicon(lexical.DATA)
+# PR-2: both lists load, and the explicit path is the only seam (the checker reads SHIPPED_DATA by default).
+current = lexical.lexicon(lexical.BASELINE_DATA)
+wiki = lexical.lexicon(lexical.SHIPPED_DATA)
 check("two-lexicons-load", len(current) > 35_000 and len(wiki) > 45_000, f"{len(current)} / {len(wiki)}")
-old = lexical.DEFAULT
-try:
-    lexical.set_default(lexical.CURRENT_DATA)
-    check("default-current", lexical.lexicon() == current, "set_default did not switch the default")
-    lexical.set_default(lexical.DATA)
-    check("default-wiki", lexical.lexicon() == wiki, "set_default did not switch the default")
-    try:
-        lexical.set_default("/tmp/not-a-shipped-lexicon.gz")
-    except ValueError:
-        check("unknown-default-refused", True)
-    else:
-        check("unknown-default-refused", False, "accepted a path that is not a shipped lexicon")
-finally:
-    lexical.set_default(old)
+check("shipped-is-default", lexical.lexicon() == wiki, "the default is not the shipped list")
+check("baseline-not-default", lexical.lexicon(lexical.BASELINE_DATA) != lexical.lexicon(),
+      "the baseline is being served as the shipped list")
 
 print()
 if fails:

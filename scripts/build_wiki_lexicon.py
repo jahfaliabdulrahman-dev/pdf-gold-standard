@@ -86,6 +86,8 @@ def main() -> int:
     ap.add_argument("--source", default=None, help="local source file; its sha256 must be the pinned one")
     ap.add_argument("--output", default=OUTPUT)
     ap.add_argument("--check", action="store_true", help="verify the existing output; do not write")
+    ap.add_argument("--verify-source", action="store_true",
+                    help="verify the pinned source digest and recompute the output; do not write")
     a = ap.parse_args()
 
     if a.check:
@@ -105,8 +107,12 @@ def main() -> int:
             data = fh.read()
     else:
         req = urllib.request.Request(SOURCE_URL, headers={"User-Agent": "pdf-gold-standard/1"})
-        with urllib.request.urlopen(req, timeout=120) as fh:
-            data = fh.read()
+        try:
+            with urllib.request.urlopen(req, timeout=120) as fh:
+                data = fh.read()
+        except OSError as exc:
+            print(f"REFUSED — source download failed: {type(exc).__name__}", file=sys.stderr)
+            return 2
     got = sha256(data)
     if got != SOURCE_SHA256:
         print(f"REFUSED — source sha256 {got}, expected {SOURCE_SHA256}", file=sys.stderr)
@@ -121,6 +127,9 @@ def main() -> int:
     if got != OUTPUT_SHA256:
         print(f"REFUSED — output sha256 {got}, expected {OUTPUT_SHA256}", file=sys.stderr)
         return 2
+    if a.verify_source:
+        print(f"VERIFIED SOURCE — {len(words)} words · source {SOURCE_SHA256} · output {got}")
+        return 0
     os.makedirs(os.path.dirname(a.output), exist_ok=True)
     with open(a.output, "wb") as fh:
         fh.write(out)

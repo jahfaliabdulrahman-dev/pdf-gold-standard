@@ -225,6 +225,7 @@ jobs:
           python3 arabic_pdf_check/tests/test_refusals.py
           python3 arabic_pdf_check/tests/test_packaging.py
           python3 arabic_pdf_check/tests/test_blind.py
+          python3 scripts/build_wiki_lexicon.py --verify-source
           python3 scripts/test_build_wiki_lexicon.py
           python3 scripts/test_lexicon_compare.py
 

@@ -2,6 +2,9 @@
  "directory": "foreign-pr2",
  "files": 2,
  "high": 0,
+ "generated_at": "2026-11-24T18:34:44Z",
+ "thresholds_sha256": "ba982d1cbaba94da822f8d9ec6a81e3a4761e513e28d1625c95f930ec6830f4d",
+ "command": "scripts/checker_foreign.py /tmp/foreign-pr2 --out docs/checker-v0/measurements/pr2/foreign.json",
  "rows": [
   {
    "file": "lo-arabic-body.pdf",

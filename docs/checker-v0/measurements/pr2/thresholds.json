@@ -1,12 +1,13 @@
 {
  "command": "python3 scripts/checker_measure.py --write --out docs/checker-v0/measurements/pr2",
- "measured_at": "2026-11-24T17:40:28Z",
+ "measured_at": "2026-11-24T18:26:16Z",
  "observed": {
   "clean_files": 70,
   "clean_judged_files": 8,
   "clean_max_gap_ratio": 0.0,
   "clean_max_presentation_forms": 0.0,
   "clean_max_visual_share": 0.2,
+  "clean_min_lexical_case": "case:pun-edge",
   "clean_min_lexical_validity": 0.8333,
   "clean_min_pair_f1": 0.0,
   "planted": {
@@ -65,7 +66,7 @@
   },
   "lexical_validity": {
    "declared": 0.4,
-   "source": "derived: clean_set_minimum - 0.20 (the declared separation rule, with higher = better); the planted letter-swap file is the negative side and the two owner-adjudicated files (0.733 valid / 0.299 broken) bracket the floor",
+   "source": "derived: clean_set_minimum - 0.20 (higher = better); clean minimum 0.8333 over 8 of 70 clean files (governing case:pun-edge); the planted letter-swap is the negative side. The 20-run floor leaves 62 clean cases unjudged; the PR-2 calibration file `٣ - درس - البايثون` measures above this floor and is not caught — declared in the PR-2 evidence, not repaired by lowering the threshold.",
    "value": 0.63
   },
   "min_arabic_chars": {

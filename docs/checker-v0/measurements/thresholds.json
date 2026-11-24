@@ -1,4 +1,5 @@
 {
+ "superseded_by": "docs/checker-v0/measurements/pr2/thresholds.json",
  "command": "python3 scripts/checker_measure.py --write --out docs/checker-v0/measurements",
  "measured_at": "2026-11-23T15:00:48Z",
  "observed": {

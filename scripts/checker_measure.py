@@ -151,6 +151,15 @@ def _measure_owner(directory: str, thresholds: dict) -> dict:
             "by_file_level": by_file_level, "by_signal": by_signal, "by_reader_risk": by_reader_risk}
 
 
+def derive_lexical_threshold(clean_min: float) -> float:
+    """The one formula for the lexical floor: a clean reading must sit 0.20 above the floor.
+
+    `checker_measure --write` and the PR-2 comparison both call this function; a second copy of the
+    arithmetic would certify a threshold that is not shipped.
+    """
+    return round(clean_min - 0.20, 2)
+
+
 def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tuple[dict, list[str]]:
     th = json.loads(json.dumps(thresholds))
     failures = []
@@ -159,6 +168,8 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     clean_share = max(r["visual_share"] for r in clean_rows)   # a separation check, not a threshold
     clean_min = min(r["pair_min"] for r in clean_rows)
     clean_lex = min((r["lexical_min"] for r in clean_rows if r["lexical_min"] is not None), default=None)
+    judged_clean = [r for r in clean_rows if r["lexical_min"] is not None]
+    clean_min_case = min(judged_clean, key=lambda r: r["lexical_min"])["label"] if judged_clean else None
 
     th["values"]["presentation_forms"]["value"] = round(max(th["values"]["presentation_forms"]["declared"],
                                                              clean_pf), 4)
@@ -173,12 +184,19 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
                         f"maximum {broken_lex:.3f}; need 0.20)")
     else:
         # Higher is better, so the rule mirrors the other signals: a clean reading must sit at least the
-        # declared 0.20 SEPARATION above the floor. (The letter-swap fixture is the negative side; the two
-        # owner-adjudicated files were measured at 0.733 / 0.299 and bracket this floor — see the report.)
-        th["values"]["lexical_validity"]["value"] = round(clean_lex - 0.20, 2)
+        # declared 0.20 SEPARATION above the floor. The planted letter-swap is the negative side; the
+        # PR-2 calibration files are measured separately (docs/checker-v0/08-pr2-evidence-2026-11-24.md).
+        th["values"]["lexical_validity"]["value"] = derive_lexical_threshold(clean_lex)
+        th["values"]["lexical_validity"]["source"] = (
+            f"derived: clean_set_minimum - 0.20 (higher = better); clean minimum {clean_lex:.4f} over "
+            f"{len(judged_clean)} of {len(clean_rows)} clean files (governing {clean_min_case}); the "
+            f"planted letter-swap is the negative side. The 20-run floor leaves 62 clean cases unjudged; "
+            f"the PR-2 calibration file `٣ - درس - البايثون` measures above this floor and is not caught "
+            f"— declared in the PR-2 evidence, not repaired by lowering the threshold.")
     th["observed"] = {"clean_max_presentation_forms": round(clean_pf, 4),
                       "clean_min_lexical_validity": None if clean_lex is None else round(clean_lex, 4),
-                      "clean_judged_files": sum(1 for r in clean_rows if r["lexical_min"] is not None),
+                      "clean_min_lexical_case": clean_min_case,
+                      "clean_judged_files": len(judged_clean),
                       "clean_max_visual_share": round(clean_share, 4),
                       "clean_max_gap_ratio": round(clean_gap, 4),
                       "clean_min_pair_f1": round(clean_min, 4),
@@ -279,7 +297,7 @@ def main() -> int:
         return 1
     print("   " + json.dumps(derived["observed"], ensure_ascii=False)[:400])
 
-    print("== acceptance: the four planted files")
+    print(f"== acceptance: the {len(built['planted'])} planted files")
     accepted = {}
     for name, path in built["planted"].items():
         rep = blind.check(path, derived)

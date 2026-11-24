@@ -210,7 +210,7 @@ def why_reason(why) -> str:
     return " ".join(_PATH.sub("<path>", raw).split())[:160]
 
 
-def check(pdf_path: str, thresholds: dict) -> dict:
+def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_DATA) -> dict:
     _preflight(pdf_path)
     ok, missing = available()
     if not ok:
@@ -247,7 +247,8 @@ def check(pdf_path: str, thresholds: dict) -> dict:
     th = thresholds["values"]
     lexical_th = th["lexical_validity"]["value"]
     lexical_min_runs = th["lexical_min_runs"]["value"]
-    lex = {name: lexical.validity(text) for name, text in texts.items()}
+    lexicon = lexical.lexicon(lexicon_path)
+    lex = {name: lexical.validity(text, lexicon) for name, text in texts.items()}
     # A short reading is not judged: 20 runs is the declared floor, below it a report about words is not
     # about this file. The map-recovery question is answered only by the readers that can judge words.
     judged = {name: v for name, v in lex.items() if v["runs"] >= lexical_min_runs}
@@ -434,7 +435,9 @@ def check(pdf_path: str, thresholds: dict) -> dict:
         "file": {"sha256": _sha256(pdf_path), "bytes": os.path.getsize(pdf_path),
                  "pages": reference.page_count(pdf_path)},
         "tool": {"version": _tool_version(), "commit": commit, "dirty": dirty,
-                 "arafix": visual_order.VERSION, "thresholds_sha256": thresholds_sha},
+                 "arafix": visual_order.VERSION, "thresholds_sha256": thresholds_sha,
+                 "lexicon": {"file": os.path.basename(lexicon_path),
+                             "sha256": sha256_file(lexicon_path)}},
         "readers": {name: {"version": ok[name].version(), "chars": len(metrics.N(texts[name])),
                            "empty": not metrics.N(texts[name]),
                            "pages": "unsupported" if name in page_unsupported else "per-page",

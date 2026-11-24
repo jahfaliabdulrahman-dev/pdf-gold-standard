@@ -9,6 +9,7 @@
   · the metric form of reader disagreement is REFUSED: its clean minimum is recorded in `observed.refused`,
     no threshold key exists for it, and the blind report only uses the deterministic page-empty form.
 """
+import glob
 import json
 import os
 import sys
@@ -73,6 +74,13 @@ measured = json.load(open(MEASUREMENTS, encoding="utf-8")) if os.path.exists(MEA
 check("committed-measurement-matches", measured is not None and
       measured["values"] == th["values"] and measured["observed"] == observed,
       "docs/checker-v0/measurements/pr2/thresholds.json is stale — re-run scripts/checker_measure.py")
+for p in glob.glob(os.path.join(REPO, "docs", "checker-v0", "measurements", "**", "thresholds.json"),
+                   recursive=True):
+    d = json.load(open(p, encoding="utf-8"))
+    if d.get("superseded_by"):
+        continue
+    check(f"unmarked-measurement-{os.path.relpath(p, REPO)}", d["values"] == th["values"],
+          f"{p} is neither the shipped values nor marked superseded_by")
 
 print()
 if fails:

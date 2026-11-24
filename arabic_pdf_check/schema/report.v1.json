@@ -58,7 +58,8 @@
         "commit",
         "dirty",
         "arafix",
-        "thresholds_sha256"
+        "thresholds_sha256",
+        "lexicon"
       ],
       "properties": {
         "version": {
@@ -82,6 +83,15 @@
         "thresholds_sha256": {
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"
+        },
+        "lexicon": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file", "sha256"],
+          "properties": {
+            "file": {"type": "string", "minLength": 1},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
         }
       }
     },
