@@ -1,6 +1,6 @@
 # Code Review Closure — PR-2 (`feat/lexicon-wiki50k`)
 
-**Target:** `9ece554...af7f1d7` (PR-2 commits `e1ba621`, `c2f1346`, `e99c80b`, `11c0fad`, `a36199a`, `b1b16d4`, `a9889d2`, merge `af7f1d7`).
+**Target:** `9ece554...a86433f` (PR-2 commits `e1ba621`, `c2f1346`, `e99c80b`, `11c0fad`, `a36199a`, `b1b16d4`, `a9889d2`, merge `af7f1d7`, docs `a86433f`).
 **First round:** three isolated seats on `9ece554...e1ba621`; their full transcripts are the review of
 record. This report closes every P0–P3 item and names the declared limits. **The code measured is
 `a9889d2`**; the merge `af7f1d7` brings PR-1 into the branch and changes no PR-2 code. The evidence is tied to `a9889d2`. The compare records `head: b1b16d4`, `dirty: false`, and the
@@ -142,7 +142,7 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `b1
 - **The literal separation is negative** (−0.072) because `نظام الشركات` (numerals, lexically valid) is
   the highest “real broken” at 0.9053; the candidate still improves on the current (−0.106), which is
   the assignment's rule. The lexical-only number (0.4043) is secondary.
-- **All 16 ZATCA files remain high for other signals**; `lexical-validity` contributes 0/16.
+- **All 16 ZATCA files are high by `presentation-forms`**; `visual-order` is reader-level (PDFMiner 16, PDFium 5; no 3/5) and `tounicode-gaps` is 0/16 (0 missing/notdef/PUA). `lexical-validity` contributes 0/16. This replaces the earlier “order/map” wording.
 - **The historical 2022 dump's licence version** is not independently verified; the official page
   currently states 4.0, and the notice says so with the limit.
 - **8 of 70 clean files are judged** by the 20-run floor; the governing 0.8684 case is `doc:report` (four documents, 8 judged files).
@@ -150,7 +150,7 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `b1
 
 ## Not proven
 
-- **CI on GitHub** ran green on `a309e5c` (run `45476723675`): `build` and `checker-linux` both success, `RATCHET HELD`, `SELFTEST PASSED`, `MEASUREMENT COMPLETE` at the shipped 0.67 (CI derives 0.64, delta −0.03 inside the declared 0.05; no threshold changed). The Linux job still proves the reader matrix, not the Arabic blind set end-to-end. Ends with a
+- **CI on GitHub** ran green on `a86433f` (run `45490733095`): `build` and `checker-linux` both success, `RATCHET HELD`, `SELFTEST PASSED`, `MEASUREMENT COMPLETE` at the shipped 0.67 (CI derives 0.64, delta −0.03 inside the declared 0.05; no threshold changed). The uploaded `checker-measure` artifact showed the cause: CI has 69 clean files (no `najd.pdf`), and PDFKit on `macos-15` reads `doc:guide` at 0.8369 vs 0.8797 locally; PDFium/MuPDF/poppler/pdfminer match. GeezaPro is not the cause. The Linux job still proves the reader matrix, not the Arabic blind set end-to-end. Ends with a
   green `Build PDF` on `feat/lexicon-wiki50k` (macOS + Linux).
 - **The 2022 Wikipedia dump's historical licence version** — the official page current is 4.0; the dump's
   own `COPYING` was not read. Ends with the dump's licence file or legal review.
