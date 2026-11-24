@@ -318,14 +318,22 @@ jobs:
         run: |
           python3 - <<'PY'
           import json
-          import sys
+          import os
           import tempfile
-          sys.path.insert(0, "scripts")
-          import checker_fixtures
+          import fitz
           from arabic_pdf_check import blind
+          # A clean LATIN file: the Arabic blind-acceptance set is the macOS job's, and this job's claim is the
+          # four-reader matrix on Linux (Chrome's Arabic fixture crashed a Chromium snapshot; the CfT control
+          # above still proves the browser works). A Latin layer triggers no Arabic signal and keeps the file low.
+          pdf = os.path.join(tempfile.mkdtemp(prefix="linux-check-"), "clean-latn.pdf")
+          doc = fitz.open()
+          page = doc.new_page()
+          page.insert_text((72, 72), "Invoice 2026-11-24  Total 1,234.56 SAR  Thank you for your business.",
+                           fontname="helv", fontsize=12)
+          doc.save(pdf)
+          doc.close()
           thresholds = json.load(open("arabic_pdf_check/thresholds.json", encoding="utf-8"))
-          built = checker_fixtures.build_all(tempfile.mkdtemp(prefix="linux-check-"))
-          report = blind.check(built["clean"], thresholds)
+          report = blind.check(pdf, thresholds)
           expected = {"pdfium", "mupdf", "poppler", "pdfminer"}
           assert set(report["readers"]) == expected, report["readers"]
           assert "pdfkit" in report["missing_readers"], report["missing_readers"]
