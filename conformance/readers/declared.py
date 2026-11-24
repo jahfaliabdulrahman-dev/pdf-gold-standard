@@ -39,26 +39,29 @@ def run_control(entry: dict) -> dict:
         raise DeclaredRefused(str(exc)) from None
 
 
-def control_data(entry: dict) -> dict:
+def control_data(entry: dict, reader_name: str = "", reader_version: str = "", mode: str = "live") -> dict:
     try:
-        return _control_data(entry, CONTROLS)
+        return _control_data(entry, CONTROLS, reader_name=reader_name, reader_version=reader_version, mode=mode)
     except ControlRefused as exc:
         raise DeclaredRefused(str(exc)) from None
 
 
-def usable(reader_name: str, reader_version: str) -> tuple[list[dict], list[str], list[dict]]:
+def usable(reader_name: str, reader_version: str, mode: str) -> tuple[list[dict], list[str], list[dict]]:
     """(declarations that hold, named refusals, the control measurements they rest on).
 
     The version in the file is the version the behaviour was MEASURED on; the installed reader's version is
     attached to every entry as `reader_version_now`, and a mismatch is marked. The control decides whether the
     declaration still holds — printing the old version as if it were measured now is what this field prevents.
+
+    `mode` is the same three-way choice as the limit registry: live for a certificate, cached for the check,
+    refresh for `controls --refresh`. A raising control is a one-line refusal, never a traceback.
     """
     ok, refused, controls = [], [], []
     for entry in load():
         if entry.get("reader") != reader_name:
             continue
         try:
-            control = control_data(entry)
+            control = control_data(entry, reader_name, reader_version, mode)
             entry = dict(entry)
             entry["reader_version_now"] = reader_version
             entry["version_mismatch"] = entry.get("reader_version_measured") != reader_version
@@ -66,4 +69,7 @@ def usable(reader_name: str, reader_version: str) -> tuple[list[dict], list[str]
             controls.append(control)
         except DeclaredRefused as exc:
             refused.append(str(exc))
+        except Exception as exc:
+            refused.append(f"{entry.get('id', '?')}: control failed — {type(exc).__name__}: "
+                           f"{' '.join(str(exc).split())[:200]}")
     return ok, refused, controls

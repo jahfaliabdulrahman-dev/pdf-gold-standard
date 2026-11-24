@@ -27,7 +27,7 @@ Usage: fix_text_layer.py in.pdf out.pdf
 Measured on guide v2.1 (word sequence vs source): Preview 80.8→98.8%, PDFium 37.0→95.7%, poppler 78.3→95.1%,
 MuPDF 13.5→80.0%, pdf.js 12.3→58.7%.
 """
-import collections, io, os, re, sys, unicodedata
+import collections, io, os, re, struct, sys, unicodedata
 
 import pikepdf
 from fontTools.ttLib import TTFont
@@ -50,35 +50,12 @@ PRES = lambda ch: 0xFB50 <= ord(ch) <= 0xFDFF or 0xFE70 <= ord(ch) <= 0xFEFF
 is_mark = lambda ch: unicodedata.category(ch) == "Mn"
 
 
-def parse_tu(data):
-    m = {}
-    for blk in re.findall(r"beginbfchar(.*?)endbfchar", data, re.S):
-        for a, b in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", blk):
-            m[int(a, 16)] = bytes.fromhex(b).decode("utf-16-be")
-    for blk in re.findall(r"beginbfrange(.*?)endbfrange", data, re.S):
-        for line in blk.strip().splitlines():
-            t = re.findall(r"<([0-9A-Fa-f]+)>", line)
-            if "[" in line:
-                for j, b in enumerate(t[2:]):
-                    m[int(t[0], 16) + j] = bytes.fromhex(b).decode("utf-16-be")
-            else:
-                lo, hi, b = int(t[0], 16), int(t[1], 16), int(t[2], 16)
-                for j in range(hi - lo + 1):
-                    m[lo + j] = chr(b + j)
-    return m
-
-
-def write_tu(m):
-    items, out = sorted(m.items()), []
-    for i in range(0, len(items), 100):
-        chunk = items[i:i + 100]
-        out.append(f"{len(chunk)} beginbfchar\n" + "\n".join(
-            f"<{c:04X}> <{s.encode('utf-16-be').hex().upper()}>" for c, s in chunk) + "\nendbfchar")
-    return ("/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo\n<< /Registry (Adobe)\n"
-            "/Ordering (UCS)\n/Supplement 0\n>> def\n/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n"
-            "1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n" + "\n".join(out) +
-            "\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend").encode()
-
+# The ToUnicode parser lives in `conformance/cmap.py`: it is the one reader shared by the writer and the
+# checker (`conformance.checks.mcid_text`), and the script no longer needs to be on the checker's sys.path.
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+from conformance.cmap import CMapError, parse_tu, parse_tu_report, write_tu  # noqa: E402,F401
 
 def parse_w(W):
     w, i, W = {}, 0, list(W)
@@ -98,7 +75,14 @@ def parse_w(W):
 class FontState:
     def __init__(self, F):
         self.F, self.D = F, F.DescendantFonts[0]
-        self.old = parse_tu(F.ToUnicode.read_bytes().decode("latin1"))
+        report = parse_tu_report(F.ToUnicode.read_bytes().decode("latin1"))
+        if report["unparsable"] or report["capped"] or any("lone UTF-16 surrogate" in p for p in report["problems"]):
+            # The writer must not rebuild a layer from a map it could not read completely: an empty map used
+            # to be accepted silently, and the output then lost every code the parser had not seen.
+            raise CMapError("refusing to rewrite a font whose /ToUnicode is "
+                            + ("unparsable" if report["unparsable"] else "capped" if report["capped"] else "not Unicode")
+                            + ": " + "; ".join(report["problems"][:3]))
+        self.old = report["map"]
         self.width = parse_w(self.D.get("/W", []))
         self.dw = float(self.D.get("/DW", 1000))
         tt = TTFont(io.BytesIO(self.D.FontDescriptor.FontFile2.read_bytes()), lazy=True)

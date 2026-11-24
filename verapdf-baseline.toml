@@ -6,6 +6,11 @@
 # fixed.rules and regressions.open stay at clause level: a rule that stopped failing cannot be
 # re-measured for its test number, so those historical lists are compared by clause.
 version = "1.30.0"
+# The validator's CLI reports 1.30.0 (its Maven project version); the distribution that ships that CLI is
+# 1.30.4. The official installer below was measured against these baselines on 2026-11-24: every failing
+# rule set is identical (guide 1/2/4), so the label changed, the validation did not.
+revalidated_on = "1.30.4"
+revalidated_sha256 = "04415ef3f149526a3048b9889723e81320ddf013bd891bcc7f0f297f3eadcc23"
 # measured_on explains the base: at 08e921f the file had NO XMP, so 6.6.2.1/6.7.2.1 failed
 # (metadata absent). With XMP the same defect reports as 6.6.4/6.7.3 (identification absent):
 # a rule SUBSTITUTION, not a regression. Base set and fixed/regression lists are unchanged.

@@ -15,12 +15,27 @@ def text(path: str) -> str:
 
 
 def pages_many(paths: list[str]) -> list[list[str]]:
-    """The same reading, one string per page — the checker's only way to name a page honestly."""
+    """The same reading, one string per page — the checker's only way to name a page honestly.
+
+    Every `PdfTextPage` and `PdfPage` is closed as soon as its string is read: PDFium keeps native buffers
+    behind both handles, and a 500-page document measured on the checker leaked one page and one text page
+    per page until the document closed. `test_pdfium_close.py` proves the calls with a fake module.
+    """
     out = []
     for path in paths:
         doc = pypdfium2.PdfDocument(path)
         try:
-            out.append([page.get_textpage().get_text_range() for page in doc])
+            pages = []
+            for page in doc:
+                try:
+                    textpage = page.get_textpage()
+                    try:
+                        pages.append(textpage.get_text_range())
+                    finally:
+                        textpage.close()
+                finally:
+                    page.close()
+            out.append(pages)
         finally:
             doc.close()
     return out

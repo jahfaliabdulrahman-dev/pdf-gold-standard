@@ -45,20 +45,20 @@ def run_control(limit: dict) -> dict:
         raise LimitRefused(str(exc)) from None
 
 
-def control_data(limit: dict) -> dict:
+def control_data(limit: dict, reader_name: str = "", reader_version: str = "", mode: str = "live") -> dict:
     try:
-        return _control_data(limit, CONTROLS)
+        return _control_data(limit, CONTROLS, reader_name=reader_name, reader_version=reader_version, mode=mode)
     except ControlRefused as exc:
         raise LimitRefused(str(exc)) from None
 
 
-def usable(reader_name: str, reader_version: str) -> tuple[list[dict], list[str], list[dict]]:
+def usable(reader_name: str, reader_version: str, mode: str) -> tuple[list[dict], list[str], list[dict]]:
     """(limits to apply, named refusals, the control measurements they rest on).
 
-    The control runs HERE, once per limit, inside the try: a control that stopped reproducing is a named
-    refusal (`limitations_refused`), never an exception that escapes as a traceback. The version in the file is
-    the version the defect was measured on; when the installed reader differs, the control is re-run and its
-    verdict decides — the assignment's «upgrade ⇒ re-run the control» as code, not as a comment.
+    `mode="cached"` is the check path: it reads the stored result and refuses by name when absent, so a
+    customer's file does not launch Chrome or Swift. `mode="live"` runs the control (the certificate path);
+    `mode="refresh"` runs it and stores it (the `controls --refresh` command). A control that raises — timeout,
+    missing binary, bad JSON — is a one-line refusal, never a traceback that escapes a report.
     """
     ok, refused, controls = [], [], []
     for limit in load():
@@ -67,11 +67,14 @@ def usable(reader_name: str, reader_version: str) -> tuple[list[dict], list[str]
         try:
             if not limit.get("control_script"):
                 raise LimitRefused(f"{limit['id']}: no control_script — an unproven limit is an exemption")
-            control = control_data(limit)
+            control = control_data(limit, reader_name, reader_version, mode)
             ok.append(limit)
             controls.append(control)
         except LimitRefused as exc:
             refused.append(str(exc))
+        except Exception as exc:                      # a control cannot take the report down with it
+            refused.append(f"{limit.get('id', '?')}: control failed — {type(exc).__name__}: "
+                           f"{' '.join(str(exc).split())[:200]}")
     return ok, refused, controls
 
 

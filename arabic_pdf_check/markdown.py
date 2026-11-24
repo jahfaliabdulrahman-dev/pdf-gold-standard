@@ -10,12 +10,28 @@ Rules it enforces by construction:
   · the declared reader limits are printed as declarations about the READER, with the sentence that says
     they do not count against the file.
 """
+import re
+
 LEVEL_AR = {"low": "منخفض", "medium": "متوسط", "high": "عالٍ"}
 CONF_AR = {"low": "منخفضة", "medium": "متوسطة", "high": "عالية"}
 
 
 def _cell(text) -> str:
     return str(text).replace("|", "\\|").replace("\n", " ")
+
+
+def _code(text) -> str:
+    """A Markdown code span that survives backticks in the excerpt.
+
+    A single backtick pair breaks as soon as the excerpt carries one; the fence is therefore one backtick
+    longer than the longest run in the text (CommonMark), with a space when the text itself starts or ends
+    with a backtick.
+    """
+    value = str(text)
+    longest = max((len(m.group(0)) for m in re.finditer(r"`+", value)), default=0)
+    fence = "`" * (longest + 1)
+    pad = " " if value.startswith("`") or value.endswith("`") else ""
+    return f"{fence}{pad}{value}{pad}{fence}"
 
 
 def render_blind(report: dict) -> str:
@@ -64,7 +80,7 @@ def render_blind(report: dict) -> str:
                              f"{'الملف' if s['cause'] == 'file' else 'القارئ'}): {s['detail']}")
             for ex in r["examples"]:
                 where = f"ص {ex['page']}" if ex["page"] else "صفحة غير محددة"
-                lines.append(f"  - {where}: `{ex['text']}`")
+                lines.append(f"  - {where}: {_code(ex['text'])}")
             lines.append("")
     lines += ["## حدود قرّاء معلنة (تُعلَن ولا تُحسب على الملف)", ""]
     if report["known_limits"]:

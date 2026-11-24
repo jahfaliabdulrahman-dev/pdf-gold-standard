@@ -19,15 +19,19 @@ jobs:
       # ONE value in this file: the action input below and chrome_pin.py are compared against it, and the gate
       # refuses a manifest that names anything else.
       CHROME_VERSION: "157.0.8103.78"
-      # The baselines were measured on this validator. Homebrew ships whatever is current, so the pin is
-      # enforced where it matters — at use, by name (the same choice as Chrome).
-      VERAPDF_VERSION: "1.30.0"
+      # The baselines' rule sets are identical on the 1.30.0 CLI string and the 1.30.4 distribution (measured
+      # 2026-11-24); the installer below is pinned by SHA-256, not by what brew ships today.
+      VERAPDF_VERSION: "1.30.4"
+      VERAPDF_INSTALLER_SHA256: "04415ef3f149526a3048b9889723e81320ddf013bd891bcc7f0f297f3eadcc23"
       # poppler is pinned to an exact conda-forge build, not to whatever brew has today: a reader's floors are
       # recorded per version, so an unpinned source turns every upstream bump into a red main. The version below
       # is the one whose floors the ratchet holds, and the step refuses any other by name.
       POPPLER_VERSION: "26.11.0"
     steps:
       - uses: actions/checkout@v5
+
+      - name: One cache root for the run (the checker reads stored controls)
+        run: echo "ARABIC_PDF_CHECK_CACHE=$RUNNER_TEMP/arabic-pdf-check" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v6
         with:
@@ -68,15 +72,35 @@ jobs:
           PDF_SPEC=nav_spec python3 scripts/artifact_inventory.py guide-v2-ar.pdf
           python3 scripts/constructs.py guide-v2-ar.pdf
 
-      - name: veraPDF baseline — no NEW failing rule, no DEAD exception
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: veraPDF — the pinned distribution (URL + SHA-256, no brew)
         run: |
-          brew install verapdf
-          got="$(verapdf --version 2>&1 | head -1 | awk '{print $2}')"
+          set -euo pipefail
+          VP_ZIP="$RUNNER_TEMP/verapdf-installer.zip"
+          curl -sSL --fail --retry 3 \
+            https://software.verapdf.org/releases/1.30/verapdf-greenfield-1.30.4-installer.zip \
+            -o "$VP_ZIP"
+          echo "$VERAPDF_INSTALLER_SHA256  $VP_ZIP" | shasum -a 256 -c -
+          rm -rf "$RUNNER_TEMP/verapdf-installer" "$RUNNER_TEMP/verapdf"
+          mkdir -p "$RUNNER_TEMP/verapdf-installer"
+          unzip -q "$VP_ZIP" -d "$RUNNER_TEMP/verapdf-installer"
+          JAR="$(find "$RUNNER_TEMP/verapdf-installer" -name 'verapdf-izpack-installer-*.jar' | head -1)"
+          # Console install, CLI pack only: 1 continue · path · O create · 1 continue · N GUI · Y CLI ·
+          # N docs · N samples · 1 continue · N auto-install script. The final N is the installer's question.
+          printf '1\n%s\nO\n1\nN\nY\nN\nN\n1\nN\n' "$RUNNER_TEMP/verapdf" | java -jar "$JAR" -console
+          echo "$RUNNER_TEMP/verapdf" >> "$GITHUB_PATH"
+          # GITHUB_PATH applies to LATER steps; this step needs the absolute bin now.
+          export PATH="$RUNNER_TEMP/verapdf:$PATH"
+          got="$(verapdf --version 2>/dev/null | head -1 | awk '{print $2}')"
           if [ "$got" != "$VERAPDF_VERSION" ]; then
-            echo "veraPDF $got is installed; the baselines were measured on $VERAPDF_VERSION — refused by name"
+            echo "veraPDF $got is installed; the pinned distribution is $VERAPDF_VERSION — refused by name"
             exit 1
           fi
-          echo "veraPDF $got — the pinned validator"
+          echo "veraPDF $got — the pinned distribution"
           # 4f is the BINDING flavour for a file with attachments; plain 4 does not cover it.
           python3 scripts/verapdf_gate.py guide-v2-ar.pdf 3b ua1 4f
 
@@ -101,6 +125,7 @@ jobs:
           python3 scripts/test_digit_value.py
           python3 scripts/test_baseline_guard.py
           python3 scripts/test_pdf_model.py
+          python3 scripts/test_font_intake.py
           PDF_SPEC=report_spec python3 scripts/artifact_inventory.py report.pdf
           python3 scripts/constructs.py report.pdf
           # the tool ROADMAP cites for the responsible lines must run at this head (it broke once)
@@ -119,6 +144,9 @@ jobs:
           PDF_SPEC=report_print_spec python3 scripts/claim_probe.py report-print.pdf --check
           PDF_SPEC=report_print_spec python3 scripts/artifact_inventory.py report-print.pdf
           python3 scripts/constructs.py report-print.pdf
+
+      - name: Text-layer parity — the new ToUnicode parser reproduces the old layer
+        run: python3 scripts/test_fix_text_layer_parity.py
 
       - name: Claim probe — what remains if the file DECLARED conformance
         run: python3 scripts/claim_probe.py guide-v2-ar.pdf --check
@@ -170,12 +198,22 @@ jobs:
           python3 conformance/tests/test_a3b_claim.py
           python3 conformance/tests/test_private_keys.py
 
+      - name: Reader controls — run once, store; the check path reads them and never launches a tool
+        run: python3 -m arabic_pdf_check controls --refresh
+
       - name: The checker — isolation, schema, thresholds, pages, privacy, reference and blind acceptance
         run: |
           # The checker is a thin layer over conformance/: these steps prove it defines no reader, no metric,
           # no normalization and no second measurement path — and that the four planted files are high with
           # their named signal while no clean file is (docs/checker-v0/).
           python3 conformance/tests/test_declared.py
+          python3 conformance/tests/test_hashing.py
+          python3 conformance/tests/test_lexical.py
+          python3 conformance/tests/test_lcs.py
+          python3 conformance/tests/test_parse_tu.py
+          python3 conformance/tests/test_pdfium_close.py
+          python3 conformance/tests/test_reader_isolation.py
+          python3 conformance/tests/test_poppler_dash.py
           python3 arabic_pdf_check/tests/test_isolation.py
           python3 arabic_pdf_check/tests/test_fonts.py
           python3 arabic_pdf_check/tests/test_schema.py
@@ -183,7 +221,20 @@ jobs:
           python3 arabic_pdf_check/tests/test_pages.py
           python3 arabic_pdf_check/tests/test_privacy.py
           python3 arabic_pdf_check/tests/test_reference.py
+          python3 arabic_pdf_check/tests/test_controls.py
+          python3 arabic_pdf_check/tests/test_refusals.py
+          python3 arabic_pdf_check/tests/test_packaging.py
           python3 arabic_pdf_check/tests/test_blind.py
+
+      - name: Foreign producer set — LibreOffice output, measured by the checker
+        run: |
+          # A clean set from a DIFFERENT producer: an alarm here is a calibration failure, not a file failure.
+          SOFFICE="/Applications/LibreOffice.app/Contents/MacOS/soffice"
+          if [ ! -x "$SOFFICE" ]; then brew install --cask libreoffice; fi
+          mkdir -p "$RUNNER_TEMP/foreign-set"
+          "$SOFFICE" --headless --convert-to pdf --outdir "$RUNNER_TEMP/foreign-set" \
+            docs/checker-v0/foreign/lo-arabic-body.html docs/checker-v0/foreign/lo-arabic-table.html
+          python3 scripts/checker_foreign.py "$RUNNER_TEMP/foreign-set" --out "$RUNNER_TEMP/foreign.json"
 
       - name: The checker — measure the planted and clean sets (the acceptance numbers, produced here)
         run: |
@@ -216,6 +267,80 @@ jobs:
           name: guide-v2-pdf
           path: guide-v2-ar.pdf
           if-no-files-found: error
+
+  checker-linux:
+    # The checker on a Linux machine: four readers (PDFKit is macOS-only and must be declared missing), the
+    # same file, and no conformance ratchet. This job's poppler is the distribution's UNPINNED build — it is a
+    # smoke run of the checker, not the conformance floors (those pin 26.11.0 and refuse other builds; the
+    # floor job is macOS). The distinction is deliberate and named here.
+    runs-on: ubuntu-latest
+    env:
+      CHROME_VERSION: "157.0.8103.78"
+    steps:
+      - uses: actions/checkout@v5
+      - name: One cache root for the run (the checker reads stored controls)
+        run: echo "ARABIC_PDF_CHECK_CACHE=$RUNNER_TEMP/arabic-pdf-check" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --quiet -r requirements.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+      - name: Chrome for Testing — the pinned engine (the same CfT build as macOS, not a Chromium snapshot)
+        run: |
+          set -euo pipefail
+          Z="$RUNNER_TEMP/chrome-linux64.zip"
+          curl -sSL --fail --retry 3 \
+            "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip" \
+            -o "$Z"
+          unzip -q "$Z" -d "$RUNNER_TEMP"
+          echo "CHROME_PATH=$RUNNER_TEMP/chrome-linux64/chrome" >> "$GITHUB_ENV"
+      - name: Fonts and reader controls
+        run: |
+          python3 -m conformance.adapters.fetch_fonts
+          python3 -m arabic_pdf_check controls --refresh
+      - name: Checker unit tests on Linux
+        run: |
+          python3 conformance/tests/test_hashing.py
+          python3 conformance/tests/test_lexical.py
+          python3 conformance/tests/test_lcs.py
+          python3 conformance/tests/test_parse_tu.py
+          python3 conformance/tests/test_pdfium_close.py
+          python3 conformance/tests/test_reader_isolation.py
+          python3 conformance/tests/test_poppler_dash.py
+          python3 arabic_pdf_check/tests/test_pages.py
+          python3 arabic_pdf_check/tests/test_controls.py
+          python3 arabic_pdf_check/tests/test_packaging.py
+          python3 scripts/test_ci_wiring.py
+      - name: The checker with four Linux readers
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import tempfile
+          import fitz
+          from arabic_pdf_check import blind
+          # A clean LATIN file: the Arabic blind-acceptance set is the macOS job's, and this job's claim is the
+          # four-reader matrix on Linux (Chrome's Arabic fixture crashed a Chromium snapshot; the CfT control
+          # above still proves the browser works). A Latin layer triggers no Arabic signal and keeps the file low.
+          pdf = os.path.join(tempfile.mkdtemp(prefix="linux-check-"), "clean-latn.pdf")
+          doc = fitz.open()
+          page = doc.new_page()
+          page.insert_text((72, 72), "Invoice 2026-11-24  Total 1,234.56 SAR  Thank you for your business.",
+                           fontname="helv", fontsize=12)
+          doc.save(pdf)
+          doc.close()
+          thresholds = json.load(open("arabic_pdf_check/thresholds.json", encoding="utf-8"))
+          report = blind.check(pdf, thresholds)
+          expected = {"pdfium", "mupdf", "poppler", "pdfminer"}
+          assert set(report["readers"]) == expected, report["readers"]
+          assert "pdfkit" in report["missing_readers"], report["missing_readers"]
+          assert report["risk"]["file"]["level"] != "high", report["risk"]["file"]
+          print("readers:", ", ".join(sorted(report["readers"])), "· file:",
+                report["risk"]["file"]["level"], "· pdfkit:", report["missing_readers"]["pdfkit"])
+          PY
 
   release:
     # the only job with write access: publishes the file the build job has just gated

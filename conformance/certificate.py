@@ -25,6 +25,7 @@ import subprocess
 import pikepdf
 
 from .checks import metrics
+from .hashing import sha256_file
 
 MATTERHORN = {
     "source": "Matterhorn Protocol 1.1 (PDF Association, CC BY 4.0, 2021), «Matterhorn Protocol Checkpoints»",
@@ -48,8 +49,7 @@ class CertError(RuntimeError):
 
 
 def _sha256(path: str) -> str:
-    with open(path, "rb") as fh:
-        return hashlib.sha256(fh.read()).hexdigest()
+    return sha256_file(path)
 
 
 def _git(*args) -> str:

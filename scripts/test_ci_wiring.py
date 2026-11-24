@@ -19,7 +19,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJ = os.path.abspath(os.path.join(HERE, ".."))
 WORKFLOW = os.path.join(PROJ, ".github", "workflows", "build-pdf.yml")
-SEARCH_DIRS = ("scripts", "conformance/tests", ".")     # where a test file may live
+SEARCH_DIRS = ("scripts", "conformance/tests", "arabic_pdf_check/tests", ".")     # where a test file may live
 
 # name -> why CI must not run it. Empty is the goal: every entry here is a test that runs nowhere else.
 EXEMPT: dict[str, str] = {}
@@ -39,9 +39,14 @@ def discover(root: str) -> list[str]:
 
 
 def unwired(tests: list[str], workflow: str, exempt: dict[str, str]) -> tuple[list[str], list[str]]:
-    """(tests nobody runs, exemptions that no longer name a test). Reads the file's NAME in the workflow."""
+    """(tests nobody runs, exemptions that no longer name a test). Reads the file's FULL PATH in the workflow.
+
+    A basename match is not a wire: `test_isolation.py` exists under `conformance/tests/` and under
+    `arabic_pdf_check/tests/`, and a workflow line naming one of them used to satisfy the other. The path,
+    not the leaf, is the identity.
+    """
     names = {os.path.basename(t) for t in tests}
-    missing = [t for t in tests if os.path.basename(t) not in workflow and os.path.basename(t) not in exempt]
+    missing = [t for t in tests if t not in workflow and os.path.basename(t) not in exempt]
     stale = [n for n in exempt if n not in names]
     return missing, stale
 

@@ -15,6 +15,21 @@ reports the metrics and the file-level text facts only.
 """
 from .checks import metrics
 
+# Bidirectional control characters are removed from every excerpt: they are invisible, they can reorder the
+# report line they sit in, and a copied excerpt carrying them can hijack the paste target. They are not
+# evidence of a copy defect — the orientation signal carries its own scores and reader votes.
+BIDI_CONTROLS = frozenset(chr(c) for c in range(0x202A, 0x202F)) | frozenset(chr(c) for c in range(0x2066, 0x206A))
+
+
+def sanitize_line(line: str) -> str:
+    """The one rule for an excerpt: keep spaces, drop non-printables and bidi controls.
+
+    Shared by the blind report and the reference certificate so the two surfaces cannot drift on what an
+    excerpt may carry. A newline/tab/ESC is not text in a one-line report; U+202A…U+202E and U+2066…U+2069
+    are invisible controls that can reorder the line around them.
+    """
+    return "".join(ch for ch in (line or "") if ch == " " or (ch.isprintable() and ch not in BIDI_CONTROLS))
+
 
 def file_block(scan: dict) -> dict:
     """The file-level numbers read from the content stream — defined once, next to the scan that gives them."""
@@ -41,7 +56,7 @@ def measure_readings(scan: dict, readings: dict, truth_text: str) -> dict:
     for name, reading in readings.items():
         mod = load(name)
         version = mod.version()
-        limits, refused, controls = limitations.usable(name, version)
+        limits, refused, controls = limitations.usable(name, version, mode="live")
         result = metrics.measure(reading, truth_text,
                                  metrics.bidi_count("\n".join(scan["text"].values())))
         applied = [limitations.apply(lim, truth_text, reading, result, control)
@@ -83,9 +98,9 @@ def mismatch_examples(truth_text: str, reading: str, limit: int = 5) -> list[dic
         # Normalize THE LINE, not the whole reading: N also folds newlines into spaces, and a reading
         # normalized whole would collapse every line into one 80-character excerpt.
         line = " ".join(metrics.N(raw).split())
-        # Control characters (a PDFKit reading can carry U+0000) are not text: they would break the reader's
-        # display and are meaningless as evidence.
-        line = "".join(ch for ch in line if ch == " " or ch.isprintable())
+        # Control characters (a PDFKit reading can carry U+0000) and bidi controls are not text: they would
+        # break the reader's display and can reorder the line. One rule, shared with the blind report.
+        line = sanitize_line(line)
         if not line:
             continue
         if [w for w in line.split() if w not in want]:

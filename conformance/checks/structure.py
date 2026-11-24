@@ -129,7 +129,8 @@ def same_words(a: str, b: str) -> bool:
 
 
 def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = False,
-                  recovered: bool | None = None) -> list[dict]:
+                  recovered: bool | None = None,
+                  recovered_by_font: dict[str, bool] | None = None) -> list[dict]:
     """The ONE per-font ToUnicode rule, shared by the gate and the checker.
 
     · simple font, no /ToUnicode → declared (Matterhorn 31-027 allows it) **only** when its /Encoding is a
@@ -152,6 +153,55 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
         pua, codes = row.get("pua", 0), row.get("codes", 0)
         symbol = bool(re.search(r"(?i)wingdings|webdings|symbol|zapfdingbats|marlett|dingbat", family)
                       or (pua and pua >= codes))
+        # ONE status per font: the row's flags are evidence, `status` is the verdict. A synthetic row from a
+        # older caller may omit `status`; derive it with the same precedence the scanner uses, never a
+        # different order. The problems loop below still adds the surrogate/range/overlap evidence.
+        status = row.get("status")
+        if not status:
+            if row.get("unparsable"):
+                status = "unparsable"
+            elif row.get("capped"):
+                status = "capped"
+            elif row.get("width_mismatch"):
+                status = "width-mismatch"
+            elif any("usecmap" in p for p in row.get("problems") or []):
+                status = "usecmap"
+            else:
+                status = "ok"
+        if status == "unparsable":
+            problems.append("ToUnicode could not be parsed completely: "
+                            + (row.get("problem") or "named parse problem"))
+        elif status == "capped":
+            problems.append(f"{row['capped']} bfrange(s) exceeded 65,536 codes and were capped")
+        elif status == "width-mismatch":
+            warnings.append("ToUnicode parsed, but its code width does not match the font: "
+                            + (row.get("problem") or "named width mismatch")
+                            + " — a conforming reader may ignore the map")
+        # A non-fatal parser problem can still leave the map SHORT: a bfrange tail that overflows UTF-16, a
+        # count that disagrees with the entries, an array with fewer destinations than codes. The old parser
+        # threw on the first of these and the caller silently replaced the whole map with `{}`; this parser
+        # keeps the valid entries, so the remaining defect must be named instead of disappearing into a
+        # clean-looking font row. It is a warning (medium): the drawn codes were measured, and recovery is
+        # handled by the one `recovered` rule.
+        partial = [p for p in row.get("problems") or []
+                   if "mapping stops there" in p or "count says" in p or "array has" in p]
+        if partial:
+            warnings.append("ToUnicode map is incomplete: " + "; ".join(partial)[:240]
+                            + " — the mapped entries are used, the missing tail is not invented")
+        # The parser's other non-fatal problems are NOT cosmetic: a lone UTF-16 surrogate is a destination
+        # that cannot be shown (Matterhorn 31-029), a range wider than 256 codes is a range the spec bounds,
+        # and an overlap means one entry was silently superseded. Each gets a named home; the parser's
+        # `problems` list is the source, not a substring allowlist that can drift from it.
+        for p in row.get("problems") or []:
+            if "lone UTF-16 surrogate" in p:
+                problems.append("ToUnicode destination problem: " + p)
+            elif "wider than 256" in p:
+                warnings.append("ToUnicode range problem: " + p + " — the later entries may be lost")
+            elif "usecmap" in p.lower():
+                warnings.append("ToUnicode map inherits an unresolved /UseCMap: " + p
+                                + " — the local entries are used; the inherited map is not guessed")
+            elif "overlapping mapping" in p:
+                notes.append("ToUnicode note: " + p)
         if row.get("notdef"):
             problems.append(f"{row['notdef']} .notdef glyph(s) drawn")
         if not row["tounicode"]:
@@ -209,7 +259,8 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
         # RECOVER the text (lexical validity), the empty map is a declared warning: a reader that does not
         # infer from the font will still copy nothing. The certificate gate passes recovered=None and keeps
         # the strict rule (it has the truth text; the report has only readings).
-        if recovered is True and level == "high" and empty_mapping and all(
+        rec = recovered_by_font.get(key, recovered) if recovered_by_font else recovered
+        if rec is True and level == "high" and empty_mapping and all(
                 ("/ToUnicode" in p or "no Unicode value" in p) for p in problems):
             warnings.extend(problems)
             problems = []
@@ -226,6 +277,8 @@ def font_verdicts(scan: dict, gap_high: float = 0.0, inside_words_only: bool = F
                     "missing_examples": _gap_codes(row),
                     "notdef": row["notdef"], "pua": pua, "replacement": row["replacement"],
                     "zero_value": row["zero_value"], "bom": row["bom"], "symbol": symbol,
+                    "unparsable": bool(row.get("unparsable")), "capped": int(row.get("capped") or 0),
+                    "width_mismatch": bool(row.get("width_mismatch")), "status": status,
                     "level": level,
                     "problems": problems, "warnings": warnings, "note": " · ".join(notes) or None})
     return out

@@ -2,6 +2,24 @@
 
 آخر تحديث: ١٨ نوفمبر ٢٠٢٦ · آخر إصدار منشور: [`v2.3.5`](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/releases/tag/v2.3.5) — **يسبق `main`**: دمج ١٧ نوفمبر (`986fc79`) لم يُوسَم بعد
 
+## فاحص النسخ العربي v0.1 (جاهز للدمج، ٢٤ نوفمبر ٢٠٢٦)
+
+- **الحالة:** CI [`45438456585`](https://github.com/jahfaliabdulrahman-dev/pdf-gold-standard/actions/runs/45438456585)
+  أخضر على `d296f10` (macOS + Linux) · مراجعة `code-review-elite` بثلاثة مقاعد: 15 ملاحظة، كلها مغلقة
+  (`docs/checker-v0/reviews/2026-11-24-pr1-code-review.md`) · توزيع المالك ‎31/8/16 → 31/3/21‎.
+- **ما هو:** `arabic-pdf-check check FILE.pdf` تقرير تشخيصي بلا نصّ مرجعي: إشارات مسمّاة وخطر لكل قارئ
+  وللملف، بلا نسبة وبلا PASS؛ و`verify` شهادة `certificate/2` مقابل نصّ حرّ. كلّه طبقة رقيقة فوق
+  `conformance/` (لا قارئ ولا مقياس ولا تطبيع ثانٍ). المصادر والقياسات والمراجعات في `docs/checker-v0/`.
+- **PR-1 (`fix/checker-v0.1`):** إصلاحات تدقيق ٢٤ نوفمبر — `recovered` إيجابي والأغلبية على من قرأ، محلّل
+  ToUnicode حقيقي (bfchar/bfrange، تعليقات، مصفوفات، سقف 65,536، إشارة `tounicode-unparsable`)، تقطيع
+  المعجم بعد التطبيع، الضوابط في مخبأ `controls --refresh` (لا Chrome/Swift في `check`)، عزل كل قارئ في
+  عملية بمهلة، رفض بثلاث رسائل مسمّاة، تعقيم الأمثلة، `lcs` bit-parallel، وCI: veraPDF مثبّت بالرابط+sha256،
+  و`checker_foreign.py`، ووظيفة `ubuntu-latest` بأربعة قرّاء.
+- **PR-2 (`feat/lexicon-wiki50k`):** معجم ويكيبيديا 50k مقابل الحالي، يُقاس بالقرّاء الخمسة على 70 نظيفًا
+  والمزروعة وLibreOffice والـ55 (عبر `OWNER_CORPUS_DIR`) وZATCA 16؛ لا يُدمج إن لم يزد الفاصل.
+- **الخطة والقبول:** `docs/checker-v0/06-plan-2026-11-24.md`. لا دمج في `main` من الوكيل؛ الدمج للمالك بعد CI.
+
+
 ## دورة ١٨ نوفمبر — تنظيف السطح (مُنجز، بانتظار قرار الدمج)
 
 - **أُزيل سطح التعبئة** بقرار المالك: `fill.html` · `fill_server.py` · `report_fill_spec.py` · `scripts/test_fill_surface.py`،

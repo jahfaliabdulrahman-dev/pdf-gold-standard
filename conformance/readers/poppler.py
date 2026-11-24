@@ -53,7 +53,7 @@ def pages_many(paths: list[str]) -> list[list[str]]:
 def text_many(paths: list[str]) -> list[str]:
     out = []
     for path in paths:
-        r = subprocess.run([binary(), "-q", "-enc", "UTF-8", path, "-"],
+        r = subprocess.run([binary(), "-q", "-enc", "UTF-8", "--", os.path.abspath(path), "-"],
                            capture_output=True, text=True, timeout=120)
         if r.returncode != 0:
             # A tool that failed on a file is not a reader that read zero characters: an exact 0 attributed to

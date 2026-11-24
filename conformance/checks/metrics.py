@@ -105,16 +105,26 @@ def word_f1(out: str, truth: str) -> float:
 
 
 def lcs(a: list[str], b: list[str]) -> int:
-    """Length of the longest common subsequence — the order a reader actually returns words in."""
-    if not a or not b:
+    """Length of the longest common subsequence — the order a reader actually returns words in.
+
+    Bit-parallel, exact (Allison & Dix 1986; Hyyrö 2004), over Python's arbitrary-precision integers: one bit
+    per element of `b`, `V` holds the carry state of the DP row, and the answer is the number of zero bits.
+    The former implementation was a quadratic row DP: 4,000 words cost 1.27 s, and 30,000 words were minutes.
+    The result is the SAME integer — `conformance/tests/test_lcs.py` compares 1,000 random pairs against the
+    old DP, plus the empty/identical/single-element cases, before this function is trusted.
+    """
+    n = len(b)
+    if not a or not n:
         return 0
-    prev = [0] * (len(b) + 1)
+    masks: dict[str, int] = {}
+    for j, y in enumerate(b):
+        masks[y] = masks.get(y, 0) | (1 << j)
+    full = (1 << n) - 1
+    v = full
     for x in a:
-        cur = [0]
-        for j, y in enumerate(b, 1):
-            cur.append(prev[j - 1] + 1 if x == y else max(prev[j], cur[j - 1]))
-        prev = cur
-    return prev[-1]
+        u = v & masks.get(x, 0)
+        v = ((v + u) | (v - u)) & full
+    return n - v.bit_count()
 
 
 def order(out: str, truth: str) -> float:

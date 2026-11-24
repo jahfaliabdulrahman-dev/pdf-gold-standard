@@ -30,11 +30,11 @@ def check(name, ok, detail):
 original = L.load
 L.load = lambda: [{"id": "fake-no-control", "reader": "mupdf", "metric": "digit_runs",
                    "pattern": "reversed_truth_run"}]
-ok, refused, _controls = L.usable("mupdf", "2.1")
+ok, refused, _controls = L.usable("mupdf", "2.1", mode="live")
 check("no-control-refused", not ok and any("fake-no-control" in r for r in refused), "; ".join(refused))
 L.load = lambda: [{"id": "fake-missing-script", "reader": "mupdf", "metric": "digit_runs",
                    "pattern": "reversed_truth_run", "control_script": "controls/nope.py"}]
-ok, refused, _controls = L.usable("mupdf", "2.1")
+ok, refused, _controls = L.usable("mupdf", "2.1", mode="live")
 check("missing-script-refused", not ok and any("does not exist" in r for r in refused), "; ".join(refused))
 L.load = original
 
