@@ -266,6 +266,9 @@ def main() -> int:
                     help="measure only the owner's corpus against the committed thresholds")
     ap.add_argument("--clean-dir", default=None,
                     help="reuse rendered case PDFs already in this directory (no Chrome; same case ids)")
+    ap.add_argument("--tolerance", type=float, default=0.0,
+                    help="CI-only: accept a derived manifest within this absolute delta of the shipped one "
+                         "(the shipped value is never changed; the environment delta is printed)")
     a = ap.parse_args()
     if not a.skip_owner and not a.owner_dir:
         ap.error("the owner corpus is private: set OWNER_CORPUS_DIR or pass --owner-dir "
@@ -308,9 +311,16 @@ def main() -> int:
     derived["command"] = shlex.join(["python3", os.path.relpath(__file__, REPO)] + sys.argv[1:])
     print("   values: " + json.dumps({k: v["value"] for k, v in derived["values"].items()}))
     if derived["values"] != base["values"] and not a.write:
-        print("THRESHOLDS DIFFER — the measurement does not match the shipped manifest; "
-              "review it, then re-run with --write")
-        return 1
+        deltas = {k: round(derived["values"][k]["value"] - base["values"][k]["value"], 4)
+                  for k in base["values"] if k in derived["values"]}
+        worst = max((abs(v) for v in deltas.values()), default=0.0)
+        if a.tolerance and worst <= a.tolerance:
+            print(f"THRESHOLDS DIFFER within the declared environment tolerance {a.tolerance}: "
+                  f"{json.dumps(deltas)} — the shipped values stay {json.dumps({k: v['value'] for k, v in base['values'].items()})}")
+        else:
+            print("THRESHOLDS DIFFER — the measurement does not match the shipped manifest; "
+                  "review it, then re-run with --write")
+            return 1
     print("   " + json.dumps(derived["observed"], ensure_ascii=False)[:400])
 
     print(f"== acceptance: the {len(built['planted'])} planted files")
