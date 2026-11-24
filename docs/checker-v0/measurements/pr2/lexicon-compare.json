@@ -29,8 +29,8 @@
   "wiki_separation_reader_min": -0.072
  },
  "dirty": false,
- "generated_at": "2026-11-24T18:41:01Z",
- "head": "e99c80b",
+ "generated_at": "2026-11-24T19:36:13Z",
+ "head": "b1b16d4",
  "lexicons": {
   "current": {
    "path": "ar_words_50k.txt.gz",
@@ -149,7 +149,7 @@
      ]
     }
    ],
-   "threshold": 0.63
+   "threshold": 0.67
   }
  },
  "records": [
@@ -7917,7 +7917,7 @@
    "set": "zatca"
   }
  ],
- "script_sha256": "7b4e947d6be703bd9e1f408a2ffc6e3f8512a1db5e6e9f8ea250bffbb9794c88",
+ "script_sha256": "3cd4a0bac8e979cda5dbd4f8a4fbf9a3de565d05624a782b9b6211ec68d5fef6",
  "summary": {
   "current": {
    "broken_max": 0.806,
@@ -7959,6 +7959,7 @@
     }
    },
    "calibration_judged": 3,
+   "clean_docs_min": 0.7718,
    "clean_file_min": 0.7,
    "clean_judged": 8,
    "clean_median_by_reader": {
@@ -8049,6 +8050,7 @@
     }
    },
    "calibration_judged": 3,
+   "clean_docs_min": 0.8684,
    "clean_file_min": 0.8333,
    "clean_judged": 8,
    "clean_median_by_reader": {
@@ -8103,8 +8105,8 @@
  "thresholds": {
   "baseline": 0.5,
   "baseline_source": "docs/checker-v0/measurements/thresholds.json",
-  "candidate": 0.63,
-  "shipped": 0.63
+  "candidate": 0.67,
+  "shipped": 0.67
  },
  "zatca": {
   "current": {
@@ -8457,7 +8459,7 @@
      ]
     }
    ],
-   "threshold": 0.63
+   "threshold": 0.67
   }
  }
 }

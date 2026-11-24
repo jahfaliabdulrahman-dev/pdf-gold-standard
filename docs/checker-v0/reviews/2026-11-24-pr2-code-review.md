@@ -1,15 +1,15 @@
 # Code Review Closure — PR-2 (`feat/lexicon-wiki50k`)
 
-**Target:** `9ece554...11c0fad` (PR-2 commits `e1ba621`, `c2f1346`, `e99c80b`, `11c0fad`).
+**Target:** `9ece554...b1b16d4` (PR-2 commits `e1ba621`, `c2f1346`, `e99c80b`, `11c0fad`, `a36199a`, `b1b16d4`).
 **First round:** three isolated seats on `9ece554...e1ba621`; their full transcripts are the review of
 record. This report closes every P0–P3 item and names the declared limits. **The code measured is
-`e99c80b`**; `11c0fad` is evidence/docs only. The compare records `head: e99c80b`, `dirty: false`, and the
+`b1b16d4`**; the later commits are evidence/docs only. The compare records `head: b1b16d4`, `dirty: false`, and the
 measuring script sha256.
 
 ## Verdict
 
 **APPROVE** — no P0/P1/P2 open. The two blocking classes (private owner rows, and a checker whose report
-could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `e99c80b`.
+could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `b1b16d4`.
 
 ## Standards
 
@@ -51,8 +51,8 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `e9
 6. **P2 · the evidence's `head` predated the code it measured** ·
    `docs/checker-v0/measurements/pr2/lexicon-compare.json:23` said `9ece554`; at that commit neither the
    wiki list nor the comparison existed. Move: record head/dirty/script sha and re-run. Evidence: final
-   artifact `head: e99c80b`, `dirty: false`, `script_sha256: 7b4e947d…4c88`; `calibration.json`
-   regenerated from it. Tag: مُثبت. **Fixed** (`e99c80b`, artifact `11c0fad`).
+   artifact `head: b1b16d4`, `dirty: false`, `script_sha256` recorded at b1b16d4; `calibration.json`
+   regenerated from it. Tag: مُثبت. **Fixed** (`b1b16d4`, artifact docs).
 
 7. **P2 · the “current” arm was judged at the candidate's 0.67** · `scripts/lexicon_compare.py:290` read
    the live manifest after `--write`. Consequence: “current 0/16” was a counterfactual, not PR-1's 0.50

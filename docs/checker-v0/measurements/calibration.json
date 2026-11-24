@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-24T18:41:33Z",
- "head": "e99c80b",
+ "generated_at": "2026-11-24T19:38:25Z",
+ "head": "b1b16d4",
  "source": "docs/checker-v0/measurements/pr2/lexicon-compare.json",
  "note": "Three calibration names only; no text, no excerpts. The 51 ordinary owner files are aggregate in the compare artifact; the known-bad file is a label, not a name.",
  "files": [
