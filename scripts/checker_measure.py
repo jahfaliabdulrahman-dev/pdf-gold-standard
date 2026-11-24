@@ -107,8 +107,12 @@ def raw(path: str) -> dict:
     }
 
 
-def clean_files(cases_dir: str) -> list[tuple[str, str]]:
-    """The four documents (built by CI) and the whole corpus, built here with the pinned engine."""
+def clean_files(cases_dir: str, reuse: bool = False) -> list[tuple[str, str]]:
+    """The four documents (built by CI) and the whole corpus, built here with the pinned engine.
+
+    `reuse=True` accepts case PDFs that already exist in `cases_dir` (the same case ids); it is for a
+    re-measurement after Chrome has become flaky, not a different fixture.
+    """
     out = []
     for label, rel in DOCS.items():
         path = os.path.join(REPO, rel)
@@ -117,7 +121,8 @@ def clean_files(cases_dir: str) -> list[tuple[str, str]]:
     from conformance.adapters import chrome
     for case in corpus_cases.load_all():
         path = os.path.join(cases_dir, f"{case['id']}.pdf")
-        chrome.render_case(case, path, "chrome")
+        if not (reuse and os.path.exists(path)):
+            chrome.render_case(case, path, "chrome")
         out.append((f"case:{case['id']}", path))
     return out
 
@@ -167,9 +172,15 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     clean_gap = max(r["gap_ratio_max"] for r in clean_rows)
     clean_share = max(r["visual_share"] for r in clean_rows)   # a separation check, not a threshold
     clean_min = min(r["pair_min"] for r in clean_rows)
-    clean_lex = min((r["lexical_min"] for r in clean_rows if r["lexical_min"] is not None), default=None)
     judged_clean = [r for r in clean_rows if r["lexical_min"] is not None]
-    clean_min_case = min(judged_clean, key=lambda r: r["lexical_min"])["label"] if judged_clean else None
+    # The lexical floor is derived from the four REAL documents, not from a 24-run synthetic edge case:
+    # the synthetic cases are clean and must not alarm, but their lexical ratios are short-text artefacts
+    # and moved between macOS and the CI (0.8333 vs 0.78). The four documents are the substantive clean
+    # population; the 8-run judged set is reported, and the remaining 62 cases are below the 20-run floor.
+    threshold_clean = [r for r in judged_clean if r["label"].startswith("doc:")] or judged_clean
+    clean_lex = min(r["lexical_min"] for r in threshold_clean)
+    clean_min_case = min(threshold_clean, key=lambda r: r["lexical_min"])["label"] if threshold_clean else None
+    clean_lex_all = min(r["lexical_min"] for r in judged_clean) if judged_clean else None
 
     th["values"]["presentation_forms"]["value"] = round(max(th["values"]["presentation_forms"]["declared"],
                                                              clean_pf), 4)
@@ -188,15 +199,18 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
         # PR-2 calibration files are measured separately (docs/checker-v0/08-pr2-evidence-2026-11-24.md).
         th["values"]["lexical_validity"]["value"] = derive_lexical_threshold(clean_lex)
         th["values"]["lexical_validity"]["source"] = (
-            f"derived: clean_set_minimum - 0.20 (higher = better); clean minimum {clean_lex:.4f} over "
-            f"{len(judged_clean)} of {len(clean_rows)} clean files (governing {clean_min_case}); the "
-            f"planted letter-swap is the negative side. The 20-run floor leaves 62 clean cases unjudged; "
-            f"the PR-2 calibration file `٣ - درس - البايثون` measures above this floor and is not caught "
-            f"— declared in the PR-2 evidence, not repaired by lowering the threshold.")
+            f"derived: clean_set_minimum - 0.20 (higher = better); four real documents, clean minimum "
+            f"{clean_lex:.4f} (governing {clean_min_case}); {len(threshold_clean)} documents of "
+            f"{len(judged_clean)} judged clean files (the other 62 are below the 20-run floor; all judged "
+            f"minimum {clean_lex_all:.4f}). The planted letter-swap is the negative side. The PR-2 "
+            f"calibration file `٣ - درس - البايثون` measures above this floor and is not caught — declared "
+            f"in the PR-2 evidence, not repaired by lowering the threshold.")
     th["observed"] = {"clean_max_presentation_forms": round(clean_pf, 4),
                       "clean_min_lexical_validity": None if clean_lex is None else round(clean_lex, 4),
+                      "clean_min_lexical_all": None if clean_lex_all is None else round(clean_lex_all, 4),
                       "clean_min_lexical_case": clean_min_case,
                       "clean_judged_files": len(judged_clean),
+                      "clean_threshold_files": len(threshold_clean),
                       "clean_max_visual_share": round(clean_share, 4),
                       "clean_max_gap_ratio": round(clean_gap, 4),
                       "clean_min_pair_f1": round(clean_min, 4),
@@ -250,6 +264,8 @@ def main() -> int:
                     help="write the derived thresholds into arabic_pdf_check/thresholds.json (review first)")
     ap.add_argument("--owner-only", action="store_true",
                     help="measure only the owner's corpus against the committed thresholds")
+    ap.add_argument("--clean-dir", default=None,
+                    help="reuse rendered case PDFs already in this directory (no Chrome; same case ids)")
     a = ap.parse_args()
     if not a.skip_owner and not a.owner_dir:
         ap.error("the owner corpus is private: set OWNER_CORPUS_DIR or pass --owner-dir "
@@ -276,9 +292,9 @@ def main() -> int:
     planted_raw = {name: raw(path) for name, path in built["planted"].items()}
 
     print("== clean set (4 documents + the whole corpus, built with the pinned engine)")
-    cases_dir = tempfile.mkdtemp(prefix="checker-cases-")
+    cases_dir = a.clean_dir or tempfile.mkdtemp(prefix="checker-cases-")
     clean_rows = []
-    for label, path in clean_files(cases_dir):
+    for label, path in clean_files(cases_dir, reuse=bool(a.clean_dir)):
         row = raw(path)
         row["label"] = label
         clean_rows.append(row)

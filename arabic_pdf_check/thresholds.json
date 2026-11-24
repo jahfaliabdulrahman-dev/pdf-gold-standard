@@ -1,7 +1,7 @@
 {
   "schema_version": "arabic-pdf-check-thresholds/1",
-  "command": "python3 scripts/checker_measure.py --write --out docs/checker-v0/measurements/pr2",
-  "measured_at": "2026-11-24T18:26:16Z",
+  "command": "python3 scripts/checker_measure.py --write --clean-dir /var/folders/jf/2jjdkdv97p95nhwgnn9k0tp80000gn/T/pr2-cases-ohrh3sbh --out docs/checker-v0/measurements/pr2",
+  "measured_at": "2026-11-24T19:23:15Z",
   "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
   "values": {
     "presentation_forms": {
@@ -25,9 +25,9 @@
       "source": "declared policy: one unmapped drawn code in a hundred is a high risk; the clean set measures 0, so value = max(0.01, clean maximum)"
     },
     "lexical_validity": {
-      "value": 0.63,
+      "value": 0.67,
       "declared": 0.4,
-      "source": "derived: clean_set_minimum - 0.20 (higher = better); clean minimum 0.8333 over 8 of 70 clean files (governing case:pun-edge); the planted letter-swap is the negative side. The 20-run floor leaves 62 clean cases unjudged; the PR-2 calibration file `٣ - درس - البايثون` measures above this floor and is not caught — declared in the PR-2 evidence, not repaired by lowering the threshold."
+      "source": "derived: clean_set_minimum - 0.20 (higher = better); four real documents, clean minimum 0.8684 (governing doc:report); 4 documents of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The PR-2 calibration file `٣ - درس - البايثون` measures above this floor and is not caught — declared in the PR-2 evidence, not repaired by lowering the threshold."
     },
     "lexical_min_runs": {
       "value": 20,
@@ -37,9 +37,11 @@
   },
   "observed": {
     "clean_max_presentation_forms": 0.0,
-    "clean_min_lexical_validity": 0.8333,
-    "clean_min_lexical_case": "case:pun-edge",
+    "clean_min_lexical_validity": 0.8684,
+    "clean_min_lexical_all": 0.8333,
+    "clean_min_lexical_case": "doc:report",
     "clean_judged_files": 8,
+    "clean_threshold_files": 4,
     "clean_max_visual_share": 0.2,
     "clean_max_gap_ratio": 0.0,
     "clean_min_pair_f1": 0.0,

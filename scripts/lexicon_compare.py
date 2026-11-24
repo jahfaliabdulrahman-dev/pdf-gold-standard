@@ -115,11 +115,15 @@ def summarize(records: list[dict], key: str, min_runs: int) -> dict:
         clean_min_r[name] = min(vals) if vals else None
         clean_med_r[name] = st.median(vals) if vals else None
     file_mins = []
+    doc_mins = []
     for r in clean:
         vals = [r["scores"][key][n]["ratio"] for n in readers if judged(r, n)]
         if vals:
             file_mins.append(min(vals))
+            if r["label"].startswith("doc:"):
+                doc_mins.append(min(vals))
     clean_file_min = min(file_mins) if file_mins else None
+    clean_docs_min = min(doc_mins) if doc_mins else None
 
     def max_by_reader(rows: list[dict]) -> dict:
         out = {}
@@ -154,6 +158,7 @@ def summarize(records: list[dict], key: str, min_runs: int) -> dict:
         "clean_min_by_reader": clean_min_r,
         "clean_median_by_reader": clean_med_r,
         "clean_file_min": clean_file_min,
+        "clean_docs_min": clean_docs_min,
         "broken_max_by_reader": broken_max_r,
         "broken_max": broken_max,
         "lexical_broken_max_by_reader": lexical_max_r,
@@ -281,7 +286,7 @@ def main() -> int:
 
     summary = {k: summarize(records, k, min_runs) for k in ("current", "wiki")}
     owner_agg = {k: owner_summary(records, k, min_runs) for k in ("current", "wiki")}
-    candidate_threshold = checker_measure.derive_lexical_threshold(summary["wiki"]["clean_file_min"])
+    candidate_threshold = checker_measure.derive_lexical_threshold(summary["wiki"]["clean_docs_min"])
     shipped_threshold = base["values"]["lexical_validity"]["value"]
     decision = {
         "rule": "candidate is accepted only when its literal separation is not lower than the current lexicon's",

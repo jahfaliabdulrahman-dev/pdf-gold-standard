@@ -10,8 +10,8 @@
    "low": 23
   },
   "pdfium": {
-   "high": 17,
-   "low": 38
+   "high": 18,
+   "low": 37
   },
   "pdfkit": {
    "high": 32,
@@ -35,6 +35,6 @@
  },
  "errors": 0,
  "files": 55,
- "generated_at": "2026-11-24T18:32:21Z",
+ "generated_at": "2026-11-24T19:29:11Z",
  "measured": 55
 }

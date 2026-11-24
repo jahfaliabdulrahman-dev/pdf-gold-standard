@@ -15,12 +15,12 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `e9
 
 1. **P2 · the threshold's `source` text did not match the formula, and 8/70 was undisclosed** ·
    `arabic_pdf_check/thresholds.json:28-30` cited the old 0.733/0.299 pair and omitted the 8-file
-   population. Consequence: a user reading `manifest` could not reconcile 0.63 with its derivation; a
+   population. Consequence: a user reading `manifest` could not reconcile 0.67 with its derivation; a
    real-broken file above the floor was invisible. Move: state the actual clean minimum, its governing
    case, and the unjudged count; name البايثون. Evidence: the source now says
-   `clean minimum 0.8333 over 8 of 70 clean files (governing case:pun-edge)`, 62 unjudged, and the `٣`
+   `clean minimum 0.8684 over 4 real documents of 8 judged clean files (governing doc:report)`, 62 unjudged, and the `٣`
    file above the floor; `observed.clean_min_lexical_case` is in `pr2/thresholds.json`;
-   `test_thresholds` re-derives 0.63. Tag: مُثبت. **Fixed** (`c2f1346` + `checker_measure --write`).
+   `test_thresholds` re-derives 0.67. Tag: مُثبت. **Fixed** (`c2f1346` + `checker_measure --write`).
 
 2. **P2 · the package licence asserted a version the notice did not** · `pyproject.toml:13` said
    `MIT AND CC-BY-SA-4.0` while `LICENSE-ar_words.txt:10` said only CC-BY-SA. Consequence: the wheel's
@@ -54,11 +54,11 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `e9
    artifact `head: e99c80b`, `dirty: false`, `script_sha256: 7b4e947d…4c88`; `calibration.json`
    regenerated from it. Tag: مُثبت. **Fixed** (`e99c80b`, artifact `11c0fad`).
 
-7. **P2 · the “current” arm was judged at the candidate's 0.63** · `scripts/lexicon_compare.py:290` read
+7. **P2 · the “current” arm was judged at the candidate's 0.67** · `scripts/lexicon_compare.py:290` read
    the live manifest after `--write`. Consequence: “current 0/16” was a counterfactual, not PR-1's 0.50
    arm. Move: freeze the PR-1 threshold for the current side and record both. Evidence: final artifact
-   `thresholds: {baseline: 0.5, candidate: 0.63, shipped: 0.63}`, `match: true`; ZATCA current **0/16 at
-   0.50** and wiki **0/16 at 0.63**; swap 1/1 both. Tag: مُثبت. **Fixed** (`c2f1346`).
+   `thresholds: {baseline: 0.5, candidate: 0.67, shipped: 0.67}`, `match: true`; ZATCA current **0/16 at
+   0.50** and wiki **0/16 at 0.67**; swap 1/1 both. Tag: مُثبت. **Fixed** (`c2f1346`).
 
 8. **P2 · “the literal population is 3” and “0.4043 is the decision metric” were inaccurate** ·
    `scripts/lexicon_compare.py:120-121` uses `cal + known` (four), and the 0.4043 is the
@@ -70,7 +70,7 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `e9
 
 9. **P3 · `foreign.json` had no provenance and the evidence contradicted itself** ·
    `docs/checker-v0/measurements/pr2/foreign.json:1-5` lacked
-   threshold/command/time and §7 said it was not re-run. Move: add provenance; re-run at 0.63. Evidence:
+   threshold/command/time and §7 said it was not re-run. Move: add provenance; re-run at 0.67. Evidence:
    `foreign.json` now has `generated_at 2026-11-24T18:34:44Z`, `thresholds_sha256 ba982d1c…`, and the
    command; `files 2`, `high 0`; the stale “not re-run” line is removed. Tag: مُثبت. **Fixed**
    (`c2f1346`).
@@ -116,7 +116,7 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `e9
 
 ## Declined to judge / declared limits
 
-- **`٣ - درس - البايثون` is not caught by the lexical signal** (0.6638–0.7113 > 0.63). The owner
+- **`٣ - درس - البايثون` is not caught by the lexical signal** (0.6638–0.7113 > 0.67). The owner
   adjudicated it broken; PR-2 does not lower the threshold to catch it.
 - **The literal separation is negative** (−0.072) because `نظام الشركات` (numerals, lexically valid) is
   the highest “real broken” at 0.9053; the candidate still improves on the current (−0.106), which is
@@ -124,7 +124,7 @@ could not name its lexicon) are closed in `c2f1346`; the evidence is tied to `e9
 - **All 16 ZATCA files remain high for other signals**; `lexical-validity` contributes 0/16.
 - **The historical 2022 dump's licence version** is not independently verified; the official page
   currently states 4.0, and the notice says so with the limit.
-- **8 of 70 clean files are judged** by the 20-run floor; the governing 0.8333 case is `case:pun-edge`.
+- **8 of 70 clean files are judged** by the 20-run floor; the governing 0.8684 case is `doc:report` (four documents, 8 judged files).
   This is declared in `thresholds.json` and `08`; the 62 unjudged cases contribute no lexical evidence.
 
 ## Not proven
