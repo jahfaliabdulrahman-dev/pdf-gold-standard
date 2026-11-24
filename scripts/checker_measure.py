@@ -98,11 +98,16 @@ def raw(path: str) -> dict:
         "lexical_min": min((v["ratio"] for v in judged.values()), default=None),
         "lexical_max": max((v["ratio"] for v in judged.values()), default=None),
         "lexical_judged": len(judged),
+        "lexical_by_reader": {n: {"runs": v["runs"], "known": v["known"], "ratio": v["ratio"],
+                                  "reversed": v["reversed"], "lam_alef": v["lam_alef"]}
+                              for n, v in lex.items()},
+        "lam_alef_max": max((v["lam_alef"] for v in lex.values()), default=0),
         "pair_min": min(pairs) if pairs else 1.0,
         "empty_pages": {n: v for n, v in empty_pages.items() if v},
         "missing_unicode": scan["missing_unicode"],
         "notdef": scan["notdef"],
         "pua": scan["pua"],
+        "mixed_numbers": len(structure.mixed_numbers(file_text)),
         "readers": list(ok),
     }
 
@@ -203,14 +208,17 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
             f"{clean_lex:.4f} (governing {clean_min_case}); {len(threshold_clean)} documents of "
             f"{len(judged_clean)} judged clean files (the other 62 are below the 20-run floor; all judged "
             f"minimum {clean_lex_all:.4f}). The planted letter-swap is the negative side. The PR-2 "
-            f"calibration file `٣ - درس - البايثون` measures above this floor and is not caught — declared "
-            f"in the PR-2 evidence, not repaired by lowering the threshold.")
+            f"calibration file `٣ - درس - البايثون` is a measured lam-alef transposition (21 in pdfium, "
+            f"mupdf and poppler; 0 in PDFKit; PDFMiner reads reversed), so its defect is not lexical-only; "
+            f"its lexical ratio is above this floor and is NOT repaired by lowering the threshold.")
     th["observed"] = {"clean_max_presentation_forms": round(clean_pf, 4),
                       "clean_min_lexical_validity": None if clean_lex is None else round(clean_lex, 4),
                       "clean_min_lexical_all": None if clean_lex_all is None else round(clean_lex_all, 4),
                       "clean_min_lexical_case": clean_min_case,
                       "clean_judged_files": len(judged_clean),
                       "clean_threshold_files": len(threshold_clean),
+                      "clean_docs": {r["label"]: r.get("lexical_by_reader") for r in clean_rows
+                                     if r["label"].startswith("doc:")},
                       "clean_max_visual_share": round(clean_share, 4),
                       "clean_max_gap_ratio": round(clean_gap, 4),
                       "clean_min_pair_f1": round(clean_min, 4),

@@ -1,7 +1,157 @@
 {
  "command": "python3 scripts/checker_measure.py --write --clean-dir /var/folders/jf/2jjdkdv97p95nhwgnn9k0tp80000gn/T/pr2-cases-ohrh3sbh --out docs/checker-v0/measurements/pr2",
- "measured_at": "2026-11-24T19:23:15Z",
+ "measured_at": "2026-11-24T21:10:53Z",
  "observed": {
+  "clean_docs": {
+   "doc:guide": {
+    "mupdf": {
+     "known": 541,
+     "lam_alef": 0,
+     "ratio": 0.8797,
+     "reversed": 1,
+     "runs": 615
+    },
+    "pdfium": {
+     "known": 543,
+     "lam_alef": 0,
+     "ratio": 0.8844,
+     "reversed": 1,
+     "runs": 614
+    },
+    "pdfkit": {
+     "known": 541,
+     "lam_alef": 0,
+     "ratio": 0.8797,
+     "reversed": 1,
+     "runs": 615
+    },
+    "pdfminer": {
+     "known": 542,
+     "lam_alef": 0,
+     "ratio": 0.8827,
+     "reversed": 512,
+     "runs": 614
+    },
+    "poppler": {
+     "known": 541,
+     "lam_alef": 0,
+     "ratio": 0.8797,
+     "reversed": 1,
+     "runs": 615
+    }
+   },
+   "doc:najd": {
+    "mupdf": {
+     "known": 588,
+     "lam_alef": 0,
+     "ratio": 0.8816,
+     "reversed": 1,
+     "runs": 667
+    },
+    "pdfium": {
+     "known": 587,
+     "lam_alef": 0,
+     "ratio": 0.8801,
+     "reversed": 1,
+     "runs": 667
+    },
+    "pdfkit": {
+     "known": 588,
+     "lam_alef": 0,
+     "ratio": 0.8816,
+     "reversed": 1,
+     "runs": 667
+    },
+    "pdfminer": {
+     "known": 585,
+     "lam_alef": 0,
+     "ratio": 0.8784,
+     "reversed": 528,
+     "runs": 666
+    },
+    "poppler": {
+     "known": 587,
+     "lam_alef": 0,
+     "ratio": 0.8801,
+     "reversed": 1,
+     "runs": 667
+    }
+   },
+   "doc:print": {
+    "mupdf": {
+     "known": 997,
+     "lam_alef": 1,
+     "ratio": 0.8738,
+     "reversed": 2,
+     "runs": 1141
+    },
+    "pdfium": {
+     "known": 992,
+     "lam_alef": 1,
+     "ratio": 0.8694,
+     "reversed": 2,
+     "runs": 1141
+    },
+    "pdfkit": {
+     "known": 996,
+     "lam_alef": 1,
+     "ratio": 0.8729,
+     "reversed": 2,
+     "runs": 1141
+    },
+    "pdfminer": {
+     "known": 977,
+     "lam_alef": 0,
+     "ratio": 0.8708,
+     "reversed": 906,
+     "runs": 1122
+    },
+    "poppler": {
+     "known": 995,
+     "lam_alef": 1,
+     "ratio": 0.8743,
+     "reversed": 3,
+     "runs": 1138
+    }
+   },
+   "doc:report": {
+    "mupdf": {
+     "known": 995,
+     "lam_alef": 1,
+     "ratio": 0.8728,
+     "reversed": 2,
+     "runs": 1140
+    },
+    "pdfium": {
+     "known": 990,
+     "lam_alef": 1,
+     "ratio": 0.8684,
+     "reversed": 2,
+     "runs": 1140
+    },
+    "pdfkit": {
+     "known": 994,
+     "lam_alef": 1,
+     "ratio": 0.8719,
+     "reversed": 2,
+     "runs": 1140
+    },
+    "pdfminer": {
+     "known": 975,
+     "lam_alef": 0,
+     "ratio": 0.8698,
+     "reversed": 905,
+     "runs": 1121
+    },
+    "poppler": {
+     "known": 993,
+     "lam_alef": 1,
+     "ratio": 0.8734,
+     "reversed": 3,
+     "runs": 1137
+    }
+   }
+  },
   "clean_files": 70,
   "clean_judged_files": 8,
   "clean_max_gap_ratio": 0.0,
@@ -68,7 +218,7 @@
   },
   "lexical_validity": {
    "declared": 0.4,
-   "source": "derived: clean_set_minimum - 0.20 (higher = better); four real documents, clean minimum 0.8684 (governing doc:report); 4 documents of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The PR-2 calibration file `٣ - درس - البايثون` measures above this floor and is not caught — declared in the PR-2 evidence, not repaired by lowering the threshold.",
+   "source": "derived: clean_set_minimum - 0.20 (higher = better); four real documents, clean minimum 0.8684 (governing doc:report); 4 documents of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The PR-2 calibration file `٣ - درس - البايثون` is a measured lam-alef transposition (21 in pdfium, mupdf and poppler; 0 in PDFKit; PDFMiner reads reversed), so its defect is not lexical-only; its lexical ratio is above this floor and is NOT repaired by lowering the threshold.",
    "value": 0.67
   },
   "min_arabic_chars": {
