@@ -355,16 +355,25 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     th["observed"]["clean_segment_order_total"] = seg_total
     th["observed"]["clean_segment_order_files"] = seg_hits
     broken = _segment_order_artifact()
-    th["values"]["segment_order_min"]["source"] = (
-        f"derived: clean maximum + 1 (declared floor {seg_floor}). The clean set ({len(clean_rows)} files) "
-        f"measures at most {clean_seg} reversed segment(s) per reader, {seg_total} in {len(seg_hits)} file(s) "
-        f"across all readers — reader findings on clean files (a reader that reverses a segment around a "
-        f"number or a Latin run), not file defects. Broken side, measured in "
-        f"measurements/segment-order.json: PDFium returns {broken['total']} reversed segment(s) in "
-        f"{broken['files']} of the {broken['population']} samples, {broken['lo']}-{broken['hi']} per affected "
-        f"file, and the signal fires at count >= value, so {clean_seg} < "
-        f"{th['values']['segment_order_min']['value']} <= {broken['lo']} separates. A reader signal: it never "
-        f"raises the file")
+    lead = (f"derived: clean maximum + 1 (declared floor {seg_floor}). The clean set ({len(clean_rows)} files) "
+            f"measures at most {clean_seg} reversed segment(s) per reader, {seg_total} in {len(seg_hits)} "
+            f"file(s) across all readers — reader findings on clean files (a reader that reverses a segment "
+            f"around a number or a Latin run), not file defects. ")
+    if broken["artifact"] != "present":
+        # No artifact: the CLEAN half still holds (it is this run), but the separation claim needs the broken
+        # side. Inventing a range here produced «1 < 2 <= 0 separates» — a sentence with no referent.
+        th["values"]["segment_order_min"]["source"] = lead + (
+            f"Broken side NOT measured in this run: measurements/segment-order.json is {broken['artifact']}, so "
+            f"the separation between {clean_seg} and the affected files is not claimed here; "
+            f"scripts/segment_order_measure.py writes it once and this sentence quotes it. A reader signal: it "
+            f"never raises the file")
+    else:
+        th["values"]["segment_order_min"]["source"] = lead + (
+            f"Broken side, measured in measurements/segment-order.json: PDFium returns {broken['total']} "
+            f"reversed segment(s) in {broken['files']} of the {broken['population']} samples, "
+            f"{broken['lo']}-{broken['hi']} per affected file, and the signal fires at count >= value, so "
+            f"{clean_seg} < {th['values']['segment_order_min']['value']} <= {broken['lo']} separates. A reader "
+            f"signal: it never raises the file")
     # separation is required only for the signal a fixture is planted to trip
     for name, row in planted_rows.items():
         expected = checker_fixtures.PLANTED[name]

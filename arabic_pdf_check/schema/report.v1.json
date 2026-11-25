@@ -477,7 +477,9 @@
             "reader-disagreement",
             "numerals-persian",
             "numerals-mixed",
-            "no-text-layer"
+            "no-text-layer",
+            "lam-alef-transposition",
+            "segment-order"
           ]
         },
         "level": {

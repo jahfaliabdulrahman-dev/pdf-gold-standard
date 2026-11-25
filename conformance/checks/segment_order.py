@@ -18,9 +18,11 @@ The mechanism, and why it is a consensus:
   · A reader whose words are letter-reversed is NOT a voter: a visual reading is `visual-order`'s finding, and
     counting it here would report one defect twice.
 
-The comparison is on NORMALISED words (the checker's one normalisation, through `lexical.words`), but the
-evidence carries the words the reader actually returned: a report that prints a normalised excerpt is not
-quoting the file, and a customer comparing «مدرسه» against their «مدرسة» would be right to distrust it.
+The comparison is on NORMALISED words (the checker's one normalisation, through `lexical.tokens`), and the
+evidence carries each word AS DISPLAYED — presentation forms folded to base letters, marks stripped — which is
+not a byte quote and is never called one: `display`, never `raw`. A customer comparing «مدرسه» against their
+«مدرسة» would be right to distrust a report that printed the comparison key, so the key and the display are two
+fields and the report prints the second.
 
 It is a READER signal, never a file one: the file is allowed to store text in visual order (most producers
 do), so «this file stores visual order» is a fact, not a defect — only a reader that fails to reconstruct the
@@ -36,7 +38,7 @@ from conformance.checks import lexical
 
 
 def segments(text: str, vocab: frozenset[str]) -> list[dict]:
-    """One row per line with ≥2 Arabic words: canonical words, the raw words, and the letter-reversed count.
+    """One row per line with ≥2 Arabic words: canonical words, the words as displayed, and the letter-reversed count.
 
     The tokenizer is `lexical.words` — the checker's one definition of an Arabic run (≥3 letters, normalized).
     A word that is absent from the lexicon but whose reverse is present is canonicalised to its reverse and

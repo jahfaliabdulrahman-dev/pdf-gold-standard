@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """The segment-order rule: a reader is an outlier only against a strict reader majority, never by itself.
 
-The real population is deposited in `docs/checker-v0/measurements/segment-order.json` (PDFium 55 reversed
-segments in 11 of the 16 ZATCA samples; every other reader 0; the four clean documents 0). These are the
+The real population is deposited in `docs/checker-v0/measurements/segment-order.json`; this file quotes NO
+number from it — the counts, the range and the file total are read there by the tests that need them, so a
+regenerated artifact cannot leave a stale figure in a docstring. These are the
 synthetic controls the rule needs on every run, one per branch: a majority and an outlier, an agreement, a
 split, too few voters, a palindrome, and a letter-reversed reading that must not vote at all.
 """
@@ -77,8 +78,8 @@ def main() -> int:
     check("single word: one word is not a segment",
           segment_order.findings({"a": A, "b": A, "c": A}, VOCAB) == {})
 
-    # 8. the deposited population: the clean side is at most one hit per reader (a reader finding, not a file
-    #    defect) and the broken side is PDFium's, 3–7 per file
+    # 8. the deposited population: the clean side is a reader finding, not a file defect, and the broken side is
+    #    PDFium's — the range is READ here, never typed (a typed range went stale once: «3–7» vs 2–6).
     art = json.load(open(ARTIFACT, encoding="utf-8"))
     sets = art["sets"]
     must = json.load(open(os.path.join(REPO, "arabic_pdf_check", "thresholds.json"), encoding="utf-8"))
@@ -98,6 +99,12 @@ def main() -> int:
     # blind.py fires at `count >= value`, so the separation is clean_max < value <= smallest broken count
     check("separation: the clean maximum is below the value and every broken file reaches it",
           min(broken) >= value > worst_clean, f"clean {worst_clean}, value {value}, min broken {min(broken)}")
+    art_range = f"{min(broken)}-{max(broken)}"
+    shipped = must["values"]["segment_order_min"]["source"]
+    check("the shipped sentence quotes this artifact's range", f"{min(broken)}-{max(broken)} per affected" in shipped,
+          f"artifact {art_range} vs source: {shipped[:120]}")
+    check("the shipped sentence quotes this artifact's total", f"{sum(broken)} reversed segment(s)" in shipped,
+          f"total {sum(broken)}")
 
     print(f"\nSEGMENT-ORDER RULE PASSED — {passed} check(s); a majority of voters, one outlier, and no vote from "
           f"a visual reading")

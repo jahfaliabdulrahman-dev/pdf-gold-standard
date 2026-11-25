@@ -385,8 +385,8 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
             signals.append(_finding(
                 "segment-order", "medium", "reader", "high",
                 f"{len(seg)} line(s) whose Arabic segment is the exact reverse of the order {sample['agree']} of "
-                f"{sample['voters']} voting readers agree on — the letters are logical and the words are not: "
-                f"«{shown}»",
+                f"{sample['voters']} voting readers agree on — the letters are logical and the words are not "
+                f"(كما يعرضها القارئ، بأشكال العرض مطويّة إلى حروفه): «{shown}»",
                 lines=len(seg), voters=sample["voters"], agree=sample["agree"], page=sample["page"],
                 example={"words": sample["words"][:6], "display": sample["display"][:6],
                          "reversed_of": sample["reversed_of"][:6]},

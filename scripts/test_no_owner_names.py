@@ -90,6 +90,14 @@ def scan_text(rel: str, text: str) -> list[tuple[str, int, str]]:
     return bad
 
 
+def path_hit(rel: str) -> bool:
+    """Is this PATH a name the tree may not carry? A path is a claim about a name even when its bytes are binary."""
+    name = os.path.basename(rel)
+    if forbidden_terms(name):
+        return True
+    return name.lower().endswith(BINARY) and not name.isascii() and not allowed(name)
+
+
 def tracked(root: str) -> list[str]:
     """`git ls-files -z`: one entry per path, unquoted, spaces intact."""
     out = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True, check=True).stdout
@@ -100,9 +108,8 @@ def violations(root: str) -> tuple[list[tuple[str, int, str]], list[str]]:
     """(leaks in text, leaks in path names) — a path is a claim about a name even when its bytes are binary."""
     leaks, paths = [], []
     for rel in tracked(root):
-        name = os.path.basename(rel)
-        if name.lower().endswith(BINARY) and not name.isascii() and not allowed(name):
-            paths.append(rel)
+        if path_hit(rel):
+            paths.append(rel)          # a tracked PATH that is a removed name, extension or not
             continue
         if rel.lower().endswith(BINARY):
             continue
@@ -133,15 +140,26 @@ def main() -> int:
             "prose mention of an exempt name": ("see `٣ - درس - البايثون.pdf` for the case", False),
             "ASCII fixture": ("planted-lam-alef.pdf", False),
         }
+        # the two REAL entries are the mechanism's actual job: a synthetic probe alone would stay green after
+        # someone deleted them from the dict, so the list itself is asserted before the probe is added.
+        if len(FORBIDDEN_SHA256) != 2 or not all(re.fullmatch(r"[0-9a-f]{16}", k) for k in FORBIDDEN_SHA256):
+            print(f"GUARD FAILED — the forbidden-term list holds {len(FORBIDDEN_SHA256)} entr(ies): "
+                  f"{sorted(FORBIDDEN_SHA256)}")
+            return 1
+
         # the hash path is a mechanism of its own, so it gets its own control (a synthetic entry, not a real name)
         probe = "hash path control term"
         FORBIDDEN_SHA256[hashlib.sha256(probe.encode()).hexdigest()[:16]] = "self-test"
         try:
             caught = scan_text("fabricated.md", "prefix " + probe + " suffix")
+            path_ok = path_hit("docs/" + probe) and not path_hit("docs/planted-lam-alef.pdf")
         finally:
             FORBIDDEN_SHA256.pop(hashlib.sha256(probe.encode()).hexdigest()[:16], None)
         if len(caught) != 1:
             print(f"GUARD FAILED — a hashed term must be found as a word run, got {caught}")
+            return 1
+        if not path_ok:
+            print("GUARD FAILED — the PATH arm does not separate a removed name from an ASCII fixture")
             return 1
 
         for label, (text, must_bite) in cases.items():
