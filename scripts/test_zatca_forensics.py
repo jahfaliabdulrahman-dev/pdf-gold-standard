@@ -73,10 +73,17 @@ def main() -> int:
 
     # item 6, as a number: the layer says 16/16, the reader majority says 11/16
     layer = sum(1 for f in files if f["pf_file"] > 0)
-    majority = [n for n in ("pdfkit", "mupdf", "poppler", "pdfminer")
-                if sum(1 for f in files if f["readers"][n]["pf"] > 0) == 11]
+    four_of_five = sum(1 for f in files
+                       if sum(1 for n in ("pdfkit", "mupdf", "poppler", "pdfminer")
+                              if f["readers"][n]["pf"] > 0) >= 4)
+    # the five that do NOT reach a reader majority: fewer than three of the four readers show any form
+    below_majority = sum(1 for f in files
+                         if sum(1 for n in ("pdfkit", "mupdf", "poppler", "pdfminer")
+                                if f["readers"][n]["pf"] > 0) < 3)
     check("layer-is-16/16", layer == 16, str(layer))
-    check("three-readers-show-forms-in-11/16", len(majority) == 3, str(majority))
+    check("majority-is-11/16 (four of five readers)", four_of_five == 11, str(four_of_five))
+    check("the other five carry it in the layer only (below a reader majority)", below_majority == 5,
+          str(below_majority))
     check("pdfminer-shows-forms-in-16/16", sum(1 for f in files if f["readers"]["pdfminer"]["pf"] > 0) == 16)
 
     # the measured correlation: pdfium's letter reversal == Type3 fonts == /AF absent

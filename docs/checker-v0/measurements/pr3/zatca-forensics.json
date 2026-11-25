@@ -1,7 +1,24 @@
 {
- "schema_version": "zatca-forensics/1",
- "generated_at": "2026-11-24T21:17:34Z",
- "source": "zatca-einvoicing-sdk-Java-238-R3.4.8/Data/Samples/PDF-A3",
+ "schema_version": "zatca-forensics/2",
+ "generated_at": "2026-11-25T16:04:53Z",
+ "runs": [
+  {
+   "generated_at": "2026-11-25T16:04:13Z",
+   "measurements_sha256": "8fb41411de984a24d4300ea9d831f3abe4fd533aea7958358653e68f52040a3e",
+   "head": "ab5b1097d5254d1580b2fa11a08c85f3053cb002",
+   "dirty": false
+  },
+  {
+   "generated_at": "2026-11-25T16:04:53Z",
+   "measurements_sha256": "8fb41411de984a24d4300ea9d831f3abe4fd533aea7958358653e68f52040a3e",
+   "head": "ab5b1097d5254d1580b2fa11a08c85f3053cb002",
+   "dirty": false
+  }
+ ],
+ "head": "ab5b1097d5254d1580b2fa11a08c85f3053cb002",
+ "dirty": false,
+ "source": "Samples",
+ "samples_dir": "PDF-A3",
  "readers": [
   "pdfium",
   "pdfkit",
@@ -9,6 +26,20 @@
   "poppler",
   "pdfminer"
  ],
+ "missing_readers": [],
+ "reader_versions": {
+  "pdfium": "5.15.2",
+  "pdfkit": "PDFKit 27.2.1",
+  "mupdf": "2.1",
+  "poppler": "26.07.0",
+  "pdfminer": "pdfplumber 0.11.10 · pdfminer.six 20260107"
+ },
+ "environment": {
+  "platform": "macOS-27.2.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "python": "3.12.12",
+  "readers_declared": 5
+ },
  "summary": {
   "files": 16,
   "pf_file_positive": 16,
@@ -48,19 +79,23 @@
    12,
    13,
    14
-  ],
-  "type3_correlation": "the five Type3/no-/AF samples are exactly the five where pdfkit/mupdf/poppler return base letters; correlation measured, cause not proven"
+  ]
  },
  "files": [
   {
    "index": 1,
    "name": "Advance Payment adjustments with foreign currency invoice.pdf",
+   "sha256": "d2f30f0b0b310c5a68bb1659f4c5b83ced2d3ab70d26992cd7ca9ed24c2fa918",
    "pf_file": 839,
    "arabic_file": 196,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.8106,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 2584,
    "readers": {
     "pdfium": {
      "chars": 2825,
@@ -132,12 +167,17 @@
   {
    "index": 2,
    "name": "Advance Payment adjustments with rate change scenarios.pdf",
+   "sha256": "763f381669553d1b2648587e5a44848caec545ea0e6232c924730aef619e1fe2",
    "pf_file": 812,
    "arabic_file": 191,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.8096,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 2508,
    "readers": {
     "pdfium": {
      "chars": 2743,
@@ -209,12 +249,17 @@
   {
    "index": 3,
    "name": "Advance Payment adjustments.pdf",
+   "sha256": "c4ea556b4aba97e56d7dafa31c5e73910636114d38b62b68a4939fc8954317cd",
    "pf_file": 812,
    "arabic_file": 191,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.8096,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 2510,
    "readers": {
     "pdfium": {
      "chars": 2745,
@@ -286,12 +331,17 @@
   {
    "index": 4,
    "name": "Credit Note of a Simplified Tax Invoice.pdf",
+   "sha256": "9c6422699b841738c4f6e5b22b3183020a13f62ae660662c6dbf85df0e5711ad",
    "pf_file": 481,
    "arabic_file": 146,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.7671,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 1688,
    "readers": {
     "pdfium": {
      "chars": 1776,
@@ -363,12 +413,17 @@
   {
    "index": 5,
    "name": "Exempt Tax Invoice.pdf",
+   "sha256": "9065cb2d2b32d6ffb0034ccc3c497c9fbf4a12e18d07790d113ede63a2bbf830",
    "pf_file": 683,
    "arabic_file": 172,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.7988,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 2274,
    "readers": {
     "pdfium": {
      "chars": 2490,
@@ -440,12 +495,17 @@
   {
    "index": 6,
    "name": "Export invoice.pdf",
+   "sha256": "857ffd3ad08f3f97e7c7715772c5f77feaad4fe0cc2ab20b94bc11a927c78295",
    "pf_file": 692,
    "arabic_file": 171,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.8019,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 3,
+   "codes": 2158,
    "readers": {
     "pdfium": {
      "chars": 2362,
@@ -517,12 +577,17 @@
   {
    "index": 7,
    "name": "Nominal supply invoice.pdf",
+   "sha256": "d0e3b9298455e37e99e8d1321607b33cef384a6bda37d7bd3df34c8593d4f493",
    "pf_file": 386,
    "arabic_file": 99,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.7959,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 1267,
    "readers": {
     "pdfium": {
      "chars": 1338,
@@ -594,12 +659,17 @@
   {
    "index": 8,
    "name": "Out of Scope Standard Tax Invoice.pdf",
+   "sha256": "1ef4ce4c1f35de0d63b8debc19959441660eaf43983e720925259b20c5fb67ac",
    "pf_file": 694,
    "arabic_file": 186,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.7886,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 2255,
    "readers": {
     "pdfium": {
      "chars": 2469,
@@ -671,12 +741,17 @@
   {
    "index": 9,
    "name": "Self-billing invoice.pdf",
+   "sha256": "700c7aca568dc013562cc66afe8c801e9ba261a11b4f9529fe446584cfc539ce",
    "pf_file": 648,
    "arabic_file": 169,
+   "af_present": false,
+   "type3_fonts": 5,
    "pf_share": 0.7931,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 9,
+   "codes": 2059,
    "readers": {
     "pdfium": {
      "chars": 2262,
@@ -748,12 +823,17 @@
   {
    "index": 10,
    "name": "Simplified Tax Invoice with Zero Rated Item.pdf",
+   "sha256": "10c6bf8b67c246c4ed8f608738bda73557af8f97c3ba5b89d268c9e5e76b2bba",
    "pf_file": 451,
    "arabic_file": 120,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.7898,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 1476,
    "readers": {
     "pdfium": {
      "chars": 1646,
@@ -825,12 +905,17 @@
   {
    "index": 11,
    "name": "Simplified_Invoice.pdf",
+   "sha256": "e608fff54d6b88eee2f4ec68c79291e433b5971de4846806be3bb581b4aa5021",
    "pf_file": 445,
    "arabic_file": 112,
+   "af_present": false,
+   "type3_fonts": 5,
    "pf_share": 0.7989,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 9,
+   "codes": 1414,
    "readers": {
     "pdfium": {
      "chars": 1581,
@@ -902,12 +987,17 @@
   {
    "index": 12,
    "name": "Standard_Credit_Note.pdf",
+   "sha256": "f43ab98e6a1ba09924ef62ee1bb3dc8f8ca44d310b29d999941e70bd337fa011",
    "pf_file": 719,
    "arabic_file": 207,
+   "af_present": false,
+   "type3_fonts": 6,
    "pf_share": 0.7765,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 10,
+   "codes": 2382,
    "readers": {
     "pdfium": {
      "chars": 2606,
@@ -979,12 +1069,17 @@
   {
    "index": 13,
    "name": "Standard_Debit_Note.pdf",
+   "sha256": "7d0c71c828c5b6f5ea533501813695548e84da2de2e6568fed238d6757da32c6",
    "pf_file": 723,
    "arabic_file": 203,
+   "af_present": false,
+   "type3_fonts": 6,
    "pf_share": 0.7808,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 11,
+   "codes": 2386,
    "readers": {
     "pdfium": {
      "chars": 2610,
@@ -1056,12 +1151,17 @@
   {
    "index": 14,
    "name": "Standard_Invoice.pdf",
+   "sha256": "21efd17554d67051cb79940c8e7049859b1b6ca42cd3f1ec0b6f9d4edf16a304",
    "pf_file": 693,
    "arabic_file": 179,
+   "af_present": false,
+   "type3_fonts": 5,
    "pf_share": 0.7947,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 9,
+   "codes": 2135,
    "readers": {
     "pdfium": {
      "chars": 2342,
@@ -1133,12 +1233,17 @@
   {
    "index": 15,
    "name": "Summary Invoice.pdf",
+   "sha256": "d17f1ff19629fa159a1e101fb6b3de71dae6a5a193feb1119a9e6ded3ad38689",
    "pf_file": 643,
    "arabic_file": 172,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.789,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 2193,
    "readers": {
     "pdfium": {
      "chars": 2419,
@@ -1210,12 +1315,17 @@
   {
    "index": 16,
    "name": "Third party billing.pdf",
+   "sha256": "8b0ac8ab496bc9f92553355fc3e64b5b76d5ff2eb39bde4da799c159e16e65d9",
    "pf_file": 621,
    "arabic_file": 164,
+   "af_present": true,
+   "type3_fonts": 0,
    "pf_share": 0.7911,
    "missing_unicode": 0,
    "notdef": 0,
    "pua": 0,
+   "fonts": 2,
+   "codes": 1975,
    "readers": {
     "pdfium": {
      "chars": 2171,
