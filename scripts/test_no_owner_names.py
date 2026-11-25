@@ -60,10 +60,16 @@ def scanned_files(root: str) -> list[str]:
 
 
 def scan_text(rel: str, text: str) -> list[tuple[str, int, str]]:
+    """Violations in one file's text. A fragment of an exempt name is allowed only where the FULL exempt name
+    is also cited in the same file — otherwise «التواصل.pdf» alone would be a door any new owner file could
+    walk through by sharing its last word."""
+    cited = {name for name in EXEMPT_NAMES if name in text}
+    allowed_fragments = set().union(*(fragments({name}) for name in cited)) if cited else set()
+    allowed = set(EXEMPT_NAMES) | allowed_fragments
     bad = []
     for lineno, line in enumerate(text.splitlines(), 1):
         for token in TOKEN.findall(line):
-            if not token.isascii() and token not in ALLOWED_NON_ASCII:
+            if not token.isascii() and token not in allowed:
                 bad.append((rel, lineno, token))
     return bad
 
@@ -95,7 +101,13 @@ def main() -> int:
         if spared:
             print(f"GUARD FAILED — the scan flagged a declared exemption: {spared}")
             return 1
-        print("PASS self-test — an unlisted Arabic name is caught twice, an exempt name and its fragment are spared")
+        # and the door the fragment must NOT open: the same tail alone, with no full name in the file
+        orphan = scan_text("fabricated.md", "a bare tail `البايثون.pdf` with no full exempt name beside it")
+        if not orphan:
+            print("GUARD FAILED — a fragment without its full name was spared; that is an open door")
+            return 1
+        print("PASS self-test — the control is caught, the exemption and its cited fragment are spared, "
+              "and a fragment without its full name is caught")
     bad = violations(REPO)
     for rel, lineno, token in bad[:40]:
         print(f"  owner-name leak: {rel}:{lineno}: {token}")

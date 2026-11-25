@@ -261,7 +261,7 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
     lexical_th = th["lexical_validity"]["value"]
     lexical_min_runs = th["lexical_min_runs"]["value"]
     lexicon = lexical.lexicon(lexicon_path)
-    seg_findings = segment_order.findings({n: texts[n] for n in ok}, lexicon)
+    seg_findings = segment_order.findings({n: texts[n] for n in ok}, lexicon, pages)
     lex = {name: lexical.validity(text, lexicon) for name, text in texts.items()}
     # A short reading is not judged: 20 runs is the declared floor, below it a report about words is not
     # about this file. The map-recovery question is answered only by the readers that can judge words.
@@ -376,13 +376,16 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
         seg = seg_findings.get(name) or []
         if len(seg) >= th["segment_order_min"]["value"]:
             sample = seg[0]
-            shown = reference.sanitize_line(" ".join(sample["words"]))[:80]
+            # The evidence quotes the words the reader RETURNED (not the normalised forms the comparison used):
+            # an excerpt that is not the file's text is not an excerpt.
+            shown = reference.sanitize_line(" ".join(sample["raw"]))[:80]
             signals.append(_finding(
                 "segment-order", "medium", "reader", "high",
                 f"{len(seg)} line(s) whose Arabic segment is the exact reverse of {sample['voters']} readers' "
                 f"order — the letters are logical and the words are not: «{shown}»",
-                lines=len(seg), voters=sample["voters"],
-                example={"words": sample["words"][:6], "reversed_of": sample["reversed_of"][:6]},
+                lines=len(seg), voters=sample["voters"], page=sample["page"],
+                example={"words": sample["words"][:6], "raw": sample["raw"][:6],
+                         "reversed_of": sample["reversed_of"][:6]},
                 threshold=th["segment_order_min"]["value"]))
         if name in judged and judged[name]["ratio"] < lexical_th:
             signals.append(_finding(

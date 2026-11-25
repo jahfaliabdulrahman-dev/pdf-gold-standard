@@ -18,19 +18,25 @@ The mechanism, and why it is a consensus:
   · A reader whose words are letter-reversed is NOT a voter: a visual reading is `visual-order`'s finding, and
     counting it here would report one defect twice.
 
+The comparison is on NORMALISED words (the checker's one normalisation, through `lexical.words`), but the
+evidence carries the words the reader actually returned: a report that prints a normalised excerpt is not
+quoting the file, and a customer comparing «مدرسه» against their «مدرسة» would be right to distrust it.
+
 It is a READER signal, never a file one: the file is allowed to store text in visual order (most producers
 do), so «this file stores visual order» is a fact, not a defect — only a reader that fails to reconstruct the
 order is. Declared limit (in the report's `not_judged`): when every installed reader returns the same reversed
 order, there is no voter to disagree and the signal is silent; the file-level arm needs the source text
-(reference mode) or per-glyph geometry, and neither is this module.
+(reference mode) or per-glyph geometry, and neither is this module. A second declared limit: two readers are
+compared only when their word multisets agree, so a reader that merges or splits lines is not in the group it
+does not match — its silence there is not a clean reading.
 """
 from __future__ import annotations
 
-from conformance.checks import lexical
+from conformance.checks import lexical, visual_order
 
 
-def segments(text: str, vocab: frozenset[str]) -> list[tuple[tuple[str, ...], int]]:
-    """[(canonical words of the line's Arabic segment, letter-reversed count)] for lines with ≥2 Arabic words.
+def segments(text: str, vocab: frozenset[str]) -> list[dict]:
+    """One row per line with ≥2 Arabic words: canonical words, the raw words, and the letter-reversed count.
 
     The tokenizer is `lexical.words` — the checker's one definition of an Arabic run (≥3 letters, normalized).
     A word that is absent from the lexicon but whose reverse is present is canonicalised to its reverse and
@@ -38,38 +44,47 @@ def segments(text: str, vocab: frozenset[str]) -> list[tuple[tuple[str, ...], in
     """
     out = []
     for line in (text or "").splitlines():
-        runs = lexical.words(line)
-        if len(runs) < 2:
+        # `raw` is the line's words as READ — presentation forms folded to letters (the detector's one fold),
+        # but before the variant folding and mark stripping the comparison needs. `lexical.words` returns the
+        # fully normalised tokens, so it cannot serve as the excerpt.
+        # Marks and tatweel are stripped BEFORE tokenising, exactly as `lexical.words` does: a word carrying a
+        # mark would otherwise be cut into fragments and a line could fall below its two-word floor.
+        stripped = lexical.DIACRITICS.sub("", visual_order.fold(line))
+        raw = [w for w in lexical.ARABIC_RUN.findall(stripped) if len(w) >= lexical.MIN_LETTERS]
+        if len(raw) < 2:
             continue
-        words, reversed_count = [], 0
-        for word in runs:
-            if word in vocab:
-                words.append(word)
-            elif word[::-1] in vocab:
-                words.append(word[::-1])
+        canonical, reversed_count = [], 0
+        for word in raw:
+            n = lexical.normalize(word)
+            if n in vocab:
+                canonical.append(n)
+            elif n[::-1] in vocab:
+                canonical.append(n[::-1])
                 reversed_count += 1
             else:
-                words.append(word)
-        out.append((tuple(words), reversed_count))
+                canonical.append(n)
+        out.append({"words": tuple(canonical), "raw": tuple(raw), "letter_reversed": reversed_count})
     return out
 
 
-def findings(texts: dict[str, str], vocab: frozenset[str]) -> dict[str, list[dict]]:
-    """{reader: [{words, reversed_of, voters}]} — the readers whose segment order is a strict majority's reverse.
+def findings(texts: dict[str, str], vocab: frozenset[str],
+             pages: dict[str, list[str]] | None = None) -> dict[str, list[dict]]:
+    """{reader: [{words, raw, reversed_of, voters, page}]} — the readers whose segment order is a majority's reverse.
 
     Grouping is by the word MULTISET of the line, so two readers that wrap the line differently still compare,
     and a reader that dropped or invented a word does not silently enter a group it does not belong to.
+    `pages` is the checker's per-page reading, used only to name the page of an example.
     """
     per_reader = {name: segments(text, vocab) for name, text in (texts or {}).items()}
-    groups: dict[tuple[str, ...], list[tuple[str, tuple[str, ...]]]] = {}
+    groups: dict[tuple[str, ...], list[tuple[str, dict]]] = {}
     for name, rows in per_reader.items():
-        for words, reversed_count in rows:
-            if reversed_count:
+        for row in rows:
+            if row["letter_reversed"]:
                 continue                      # a visual reading is `visual-order`'s finding, not a voter here
-            groups.setdefault(tuple(sorted(words)), []).append((name, words))
+            groups.setdefault(tuple(sorted(row["words"])), []).append((name, row))
     out: dict[str, list[dict]] = {}
     for members in groups.values():
-        votes = [words for _name, words in members]
+        votes = [row["words"] for _name, row in members]
         if len(votes) < 3:
             continue                          # one or two readings are not a majority of anything
         majority = max(set(votes), key=votes.count)
@@ -78,8 +93,21 @@ def findings(texts: dict[str, str], vocab: frozenset[str]) -> dict[str, list[dic
             continue                          # a split has no ground truth, so it raises nothing
         if majority == majority[::-1]:
             continue                          # a palindrome cannot be told apart from its reverse
-        for name, words in members:
-            if words == majority[::-1]:
-                out.setdefault(name, []).append({"words": list(words), "reversed_of": list(majority),
-                                                 "voters": len(votes)})
+        for name, row in members:
+            if row["words"] == majority[::-1]:
+                out.setdefault(name, []).append({
+                    "words": list(row["words"]), "raw": list(row["raw"]),
+                    "reversed_of": list(majority), "voters": len(votes),
+                    "page": _page_of(pages, name, row["raw"])})
     return out
+
+
+def _page_of(pages: dict[str, list[str]] | None, reader: str, raw: tuple[str, ...]) -> int | None:
+    """The page whose text contains the line's raw words, in order — `None` when the reader has no page view."""
+    if not pages or not pages.get(reader):
+        return None
+    line = " ".join(raw)
+    for i, page in enumerate(pages[reader], 1):
+        if line and line in (page or ""):
+            return i
+    return None
