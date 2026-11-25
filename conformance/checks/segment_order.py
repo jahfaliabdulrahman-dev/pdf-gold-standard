@@ -32,7 +32,7 @@ does not match — its silence there is not a clean reading.
 """
 from __future__ import annotations
 
-from conformance.checks import lexical, visual_order
+from conformance.checks import lexical
 
 
 def segments(text: str, vocab: frozenset[str]) -> list[dict]:
@@ -44,18 +44,14 @@ def segments(text: str, vocab: frozenset[str]) -> list[dict]:
     """
     out = []
     for line in (text or "").splitlines():
-        # `raw` is the line's words as READ — presentation forms folded to letters (the detector's one fold),
-        # but before the variant folding and mark stripping the comparison needs. `lexical.words` returns the
-        # fully normalised tokens, so it cannot serve as the excerpt.
-        # Marks and tatweel are stripped BEFORE tokenising, exactly as `lexical.words` does: a word carrying a
-        # mark would otherwise be cut into fragments and a line could fall below its two-word floor.
-        stripped = lexical.DIACRITICS.sub("", visual_order.fold(line))
-        raw = [w for w in lexical.ARABIC_RUN.findall(stripped) if len(w) >= lexical.MIN_LETTERS]
-        if len(raw) < 2:
+        # ONE tokenisation pipeline: `lexical.tokens` returns each word as READ (presentation forms folded,
+        # marks stripped — this is the excerpt) and its normalised form (the comparison key). A second
+        # tokeniser here would be a second definition of an Arabic run, free to drift from `lexical.words`.
+        pairs = lexical.tokens(line)
+        if len(pairs) < 2:
             continue
-        canonical, reversed_count = [], 0
-        for word in raw:
-            n = lexical.normalize(word)
+        canonical, raw, reversed_count = [], [], 0
+        for word, n in pairs:
             if n in vocab:
                 canonical.append(n)
             elif n[::-1] in vocab:
@@ -63,37 +59,48 @@ def segments(text: str, vocab: frozenset[str]) -> list[dict]:
                 reversed_count += 1
             else:
                 canonical.append(n)
+            raw.append(word)
         out.append({"words": tuple(canonical), "raw": tuple(raw), "letter_reversed": reversed_count})
     return out
 
 
 def findings(texts: dict[str, str], vocab: frozenset[str],
              pages: dict[str, list[str]] | None = None) -> dict[str, list[dict]]:
-    """{reader: [{words, raw, reversed_of, voters, page}]} — the readers whose segment order is a majority's reverse.
+    """{reader: [{words, raw, reversed_of, voters, page}]} — readers whose segment order is a majority's reverse.
 
-    Grouping is by the word MULTISET of the line, so two readers that wrap the line differently still compare,
-    and a reader that dropped or invented a word does not silently enter a group it does not belong to.
-    `pages` is the checker's per-page reading, used only to name the page of an example.
+    The vote is ONE PER READER, not one per line: the rows are grouped by the word multiset, and inside a group
+    each reader casts a single vote — only if all of its readings of that multiset agree. A reader that returns
+    «A B» on one page and «B A» on another is ambiguous on that multiset and does not vote; a reader that
+    repeats the same line three times is still one voter, because a majority of one reader is not a majority.
+    `voters` therefore counts distinct readers, and the report's «the exact reverse of N readers' order» is
+    true. `pages` is the checker's per-page reading, used only to name the page of an example.
     """
     per_reader = {name: segments(text, vocab) for name, text in (texts or {}).items()}
-    groups: dict[tuple[str, ...], list[tuple[str, dict]]] = {}
+    groups: dict[tuple[str, ...], dict[str, list[dict]]] = {}
     for name, rows in per_reader.items():
         for row in rows:
             if row["letter_reversed"]:
                 continue                      # a visual reading is `visual-order`'s finding, not a voter here
-            groups.setdefault(tuple(sorted(row["words"])), []).append((name, row))
+            groups.setdefault(tuple(sorted(row["words"])), {}).setdefault(name, []).append(row)
     out: dict[str, list[dict]] = {}
-    for members in groups.values():
-        votes = [row["words"] for _name, row in members]
+    for by_reader in groups.values():
+        votes: dict[str, dict] = {}
+        for name, rows in by_reader.items():
+            sequences = {row["words"] for row in rows}
+            if len(sequences) != 1:
+                continue                      # this reader is ambiguous on this multiset: no vote, not a tie
+            votes[name] = rows[0]
         if len(votes) < 3:
-            continue                          # one or two readings are not a majority of anything
-        majority = max(set(votes), key=votes.count)
-        need = len(votes) // 2 + 1
-        if votes.count(majority) < need:
+            continue                          # one or two readers are not a majority of anything
+        counts: dict[tuple[str, ...], int] = {}
+        for row in votes.values():
+            counts[row["words"]] = counts.get(row["words"], 0) + 1
+        majority = max(counts, key=lambda seq: counts[seq])
+        if counts[majority] < len(votes) // 2 + 1:
             continue                          # a split has no ground truth, so it raises nothing
         if majority == majority[::-1]:
             continue                          # a palindrome cannot be told apart from its reverse
-        for name, row in members:
+        for name, row in votes.items():
             if row["words"] == majority[::-1]:
                 out.setdefault(name, []).append({
                     "words": list(row["words"]), "raw": list(row["raw"]),

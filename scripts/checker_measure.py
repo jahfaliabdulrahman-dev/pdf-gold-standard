@@ -271,14 +271,17 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
         # declared 0.20 SEPARATION above the floor. The planted letter-swap is the negative side; the
         # PR-2 calibration files are measured separately (docs/checker-v0/08-pr2-evidence-2026-11-24.md).
         th["values"]["lexical_validity"]["value"] = derive_lexical_threshold(clean_lex)
+        # Every count in this sentence is computed HERE: a manifest that prints a literal where a measurement
+        # belongs reads the same on a runner where the population is 69 files and 3 documents.
         th["values"]["lexical_validity"]["source"] = (
-            f"derived: clean_set_minimum - 0.20 (higher = better); four real documents, clean minimum "
-            f"{clean_lex:.4f} (governing {clean_min_case}); {len(threshold_clean)} documents of "
-            f"{len(judged_clean)} judged clean files (the other 62 are below the 20-run floor; all judged "
-            f"minimum {clean_lex_all:.4f}). The planted letter-swap is the negative side. The PR-2 "
-            f"calibration file `٣ - درس - البايثون` is a measured lam-alef transposition (21 in pdfium, "
-            f"mupdf and poppler; 0 in PDFKit; PDFMiner reads reversed), so its defect is not lexical-only; "
-            f"its lexical ratio is above this floor and is NOT repaired by lowering the threshold.")
+            f"derived: clean_set_minimum - 0.20 (higher = better); clean minimum "
+            f"{clean_lex:.4f} (governing {clean_min_case}); {len(threshold_clean)} document(s) of "
+            f"{len(judged_clean)} judged clean files (the other {len(clean_rows) - len(judged_clean)} are below "
+            f"the {int(th['values']['lexical_min_runs']['value'])}-run floor; all judged minimum "
+            f"{clean_lex_all:.4f}). The planted letter-swap is the negative side. The calibration lesson's "
+            f"defect is a measured lam-alef transposition, not lexical-only "
+            f"(measurements/lam-alef-separation.json); its lexical ratio is above this floor and is NOT "
+            f"repaired by lowering the threshold.")
     th["observed"] = {"clean_max_presentation_forms": round(clean_pf, 4),
                       "clean_min_lexical_validity": None if clean_lex is None else round(clean_lex, 4),
                       "clean_min_lexical_all": None if clean_lex_all is None else round(clean_lex_all, 4),
@@ -315,18 +318,29 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     if clean_lam >= th["values"]["lam_alef_rate_per_1000"]["value"]:
         failures.append(f"lam-alef transposition does not separate: clean maximum {clean_lam:.2f} per 1000 runs "
                         f">= threshold {th['values']['lam_alef_rate_per_1000']['value']}")
-    # Segment order: this is a READER signal, so the clean side is not a false-positive population — a reader
-    # that returns a segment in the exact reverse of every other reader has no benign version, and the measured
-    # clean-side hits (6 in 5 files) were checked against the corpus source text and are real reversals around
-    # numbers and Latin runs. The value therefore stays the declared 1, and raising it to the clean maximum + 1
-    # would hide the ZATCA files that carry 3–4 reversals. The measured separation is recorded, not tuned away.
+    # Segment order: a READER signal, so the clean side is a population of reader findings, not of file
+    # defects — but the value still follows the repo's one derivation rule (clean maximum + 1), because a single
+    # clean hit within a run must not become the floor. The separation is then checked against the measured
+    # broken side: every ZATCA sample that carries the defect carries >= 3, so 1 and 2 both separate, and the
+    # formula — not a story about «hiding» files — is what picks 2.
     seg_by_file = {r["label"]: r.get("segment_order") or {} for r in clean_rows}
     clean_seg = max([v for rows in seg_by_file.values() for v in rows.values()] or [0])
-    if th["values"]["segment_order_min"]["value"] != th["values"]["segment_order_min"]["declared"]:
-        failures.append("segment-order: the value moved off its declared 1 — it is a determinism floor, not a "
-                        "tuned threshold; the clean-side hits are reader findings, not calibration noise")
+    seg_floor = th["values"]["segment_order_min"]["declared"]
+    th["values"]["segment_order_min"]["value"] = max(seg_floor, clean_seg + 1)
+    seg_hits = {k: v for k, v in seg_by_file.items() if any(v.values())}
+    seg_total = sum(v for rows in seg_by_file.values() for v in rows.values())
     th["observed"]["clean_max_segment_order"] = clean_seg
-    th["observed"]["clean_segment_order_files"] = {k: v for k, v in seg_by_file.items() if any(v.values())}
+    th["observed"]["clean_segment_order_total"] = seg_total
+    th["observed"]["clean_segment_order_files"] = seg_hits
+    th["values"]["segment_order_min"]["source"] = (
+        f"derived: clean maximum + 1 (declared floor {seg_floor}). The clean set ({len(clean_rows)} files) "
+        f"measures at most {clean_seg} reversed segment(s) per reader, {seg_total} in {len(seg_hits)} file(s) "
+        f"across all readers — reader findings on clean files (a reader that reverses a segment around a "
+        f"number or a Latin run), not file defects. Broken side, measured: the ZATCA SDK's 16 PDF/A-3 samples "
+        f"give pdfium 2-7 per affected file (measurements/segment-order.json), and the signal fires at "
+        f"count >= value, so {clean_seg} < {th['values']['segment_order_min']['value']} separates. A reader "
+        f"signal: it never "
+        f"raises the file")
     # separation is required only for the signal a fixture is planted to trip
     for name, row in planted_rows.items():
         expected = checker_fixtures.PLANTED[name]
@@ -475,7 +489,7 @@ def main() -> int:
     accepted, clean_accept, high_files = accept(base, "shipped")
     derived_acc, derived_clean, derived_high = accept(derived, "derived")
     planted_fail = [n for n, r in {**accepted, **derived_acc}.items() if not r["pass"]]
-    high_all = high_files + [r for r in derived_high if r not in high_files]
+    high_all = high_files + [r for r in derived_high if r["label"] not in {h["label"] for h in high_files}]
 
     owner = None
     if not a.skip_owner:

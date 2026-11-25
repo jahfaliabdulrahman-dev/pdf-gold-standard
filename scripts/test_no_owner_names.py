@@ -5,17 +5,22 @@ The owner decided on 2026-11-25: the repository is public, the only filenames it
 calibration files (an explicit exemption, already published in `measurements/calibration.json`) and the names
 this project builds itself.
 
-The rule, and its two halves:
+What is scanned, and how a name is read:
 
-  · a NON-ASCII `*.pdf` name is allowed only if it is one of the declared exemptions below. The three exempt
-    names contain spaces, so the scan also produces their space-delimited tails («البايثون.pdf», …); those
-    tails are accepted as fragments OF the exemption, never as new names.
-  · an ASCII `*.pdf` name is accepted: the corpus cases, the built documents and the fixtures are ASCII by
-    convention. **Declared limit:** an owner file whose name is plain ASCII and shaped like a fixture
-    (`scan1.pdf`) would pass this guard; the owner-named set it was written for is Arabic or space-bearing.
+  · TRACKED PATHS as well as their contents (`git ls-files -z`, so a non-ASCII path is not mangled by quoting
+    and a path with spaces is one entry). A tracked `.pdf` is binary, so its NAME is the only thing there is to
+    check — and a name is exactly what this guard is about.
+  · a candidate name is taken from the last delimiter on the line to `.pdf`, so a name with SPACES is seen
+    whole (a spaced name is not reduced to its last word). A candidate is allowed only when it IS an
+    exempt name, or ENDS WITH one (a prose sentence that mentions the exempt file), or is pure ASCII (the
+    corpus cases, builds and fixtures are ASCII by convention).
+  · **Declared limit:** an owner file whose name is plain ASCII and shaped like a fixture (`scan1.pdf`) would
+    pass; the population this guard was written for is Arabic or space-bearing. The three calibration names
+    themselves are public by the owner's exemption.
 
-A guard that cannot fail is theatre, so `--self-test` plants a name the exemption list does not cover and
-requires the scan to catch it.
+A guard that cannot fail is theatre, so `--self-test` plants controls in both directions: an unlisted Arabic
+name must bite, a spaced name with an ASCII tail must bite, a spaced name sharing an exempt surname must bite,
+an exempt name and a prose mention of it must be spared.
 """
 import os
 import re
@@ -34,85 +39,87 @@ EXEMPT_NAMES = (
 )
 
 BINARY = (".pdf", ".png", ".jpg", ".jpeg", ".gz", ".zip", ".woff", ".woff2", ".ttf", ".otf", ".xcassets")
-TOKEN = re.compile(r"[^\s\"'`«»،:()\[\]<>|*]+\.pdf")
+# A candidate may contain spaces; it stops at the delimiters this repository's prose and tables use.
+CANDIDATE = re.compile(r"[^\n\"'`«»،:|()\[\]<>*]+\.pdf")
 
 
-def fragments(names):
-    """Every space-delimited tail of an exempt name that still ends in `.pdf` — its fragments, not new names."""
-    out = set()
-    for name in names:
-        parts = name.split(" ")
-        for i in range(len(parts)):
-            tail = " ".join(parts[i:])
-            if tail.endswith(".pdf"):
-                out.add(tail)
-                out.add(tail.split(" ")[-1])
-    return out
-
-
-ALLOWED_NON_ASCII = set(EXEMPT_NAMES) | fragments(EXEMPT_NAMES)
-
-
-def scanned_files(root: str) -> list[str]:
-    """Tracked text files only: a generated PDF's bytes are not a claim about the source tree."""
-    listed = subprocess.run(["git", "-C", root, "ls-files"], capture_output=True, text=True, check=True).stdout
-    return [p for p in listed.split() if not p.lower().endswith(BINARY)]
+def allowed(candidate: str) -> bool:
+    """Is this candidate a name the repository may carry? Exact exemption, a prose mention of one, or ASCII."""
+    candidate = candidate.strip().rstrip(".,;")
+    if candidate.isascii():
+        return True
+    if candidate in EXEMPT_NAMES:
+        return True
+    return any(candidate.endswith(" " + name) or candidate.endswith("`" + name) for name in EXEMPT_NAMES)
 
 
 def scan_text(rel: str, text: str) -> list[tuple[str, int, str]]:
-    """Violations in one file's text. A fragment of an exempt name is allowed only where the FULL exempt name
-    is also cited in the same file — otherwise «التواصل.pdf» alone would be a door any new owner file could
-    walk through by sharing its last word."""
-    cited = {name for name in EXEMPT_NAMES if name in text}
-    allowed_fragments = set().union(*(fragments({name}) for name in cited)) if cited else set()
-    allowed = set(EXEMPT_NAMES) | allowed_fragments
     bad = []
     for lineno, line in enumerate(text.splitlines(), 1):
-        for token in TOKEN.findall(line):
-            if not token.isascii() and token not in allowed:
-                bad.append((rel, lineno, token))
+        for candidate in CANDIDATE.findall(line):
+            if not allowed(candidate):
+                bad.append((rel, lineno, candidate.strip()))
     return bad
 
 
-def violations(root: str) -> list[tuple[str, int, str]]:
-    bad = []
-    for rel in scanned_files(root):
+def tracked(root: str) -> list[str]:
+    """`git ls-files -z`: one entry per path, unquoted, spaces intact."""
+    out = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True, check=True).stdout
+    return [p for p in out.decode("utf-8").split("\0") if p]
+
+
+def violations(root: str) -> tuple[list[tuple[str, int, str]], list[str]]:
+    """(leaks in text, leaks in path names) — a path is a claim about a name even when its bytes are binary."""
+    leaks, paths = [], []
+    for rel in tracked(root):
+        name = os.path.basename(rel)
+        if name.lower().endswith(BINARY) and not name.isascii() and not allowed(name):
+            paths.append(rel)
+            continue
+        if rel.lower().endswith(BINARY):
+            continue
         path = os.path.join(root, rel)
         try:
             with open(path, encoding="utf-8") as fh:
-                bad.extend(scan_text(rel, fh.read()))
-        except (UnicodeDecodeError, FileNotFoundError):
+                leaks.extend(scan_text(rel, fh.read()))
+        except UnicodeDecodeError:
             continue
-    return bad
+        except FileNotFoundError:
+            # A tracked file that cannot be opened means the scan is incomplete — that is a failure, not a skip.
+            leaks.append((rel, 0, "<tracked file is missing on disk>"))
+    return leaks, paths
 
 
 def main() -> int:
     if "--self-test" in sys.argv:
-        # The control goes through the SAME scan, in both directions: an unlisted Arabic name must bite, and an
-        # exempt name (and its fragment) must not. A control that only asserts membership proves nothing.
         # Built at run time: a literal control name would be a violation of this very guard (the file is
         # scanned like every other tracked file).
         control = "ملف-المالك-الخاص" + ".pdf"
-        caught = scan_text("fabricated.md", f"a table row: `{control}` and a bare {control}.")
-        if [t for _rel, _n, t in caught] != [control, control]:
-            print(f"GUARD FAILED — the scan did not catch its own control: {caught}")
-            return 1
-        spared = scan_text("fabricated.md", "the exempt `٣ - درس - البايثون.pdf` and its tail `البايثون.pdf`")
-        if spared:
-            print(f"GUARD FAILED — the scan flagged a declared exemption: {spared}")
-            return 1
-        # and the door the fragment must NOT open: the same tail alone, with no full name in the file
-        orphan = scan_text("fabricated.md", "a bare tail `البايثون.pdf` with no full exempt name beside it")
-        if not orphan:
-            print("GUARD FAILED — a fragment without its full name was spared; that is an open door")
-            return 1
-        print("PASS self-test — the control is caught, the exemption and its cited fragment are spared, "
-              "and a fragment without its full name is caught")
-    bad = violations(REPO)
-    for rel, lineno, token in bad[:40]:
+        spaced = "كشف حساب " + "2025" + ".pdf"
+        surname = "عقد " + "الخنفري" + ".pdf"
+        cases = {
+            "unlisted Arabic name": (control, True),
+            "spaced name with an ASCII tail": (spaced, True),
+            "spaced name sharing an exempt surname": (surname, True),
+            "exempt name": ("٣ - درس - البايثون.pdf", False),
+            "prose mention of an exempt name": ("see `٣ - درس - البايثون.pdf` for the case", False),
+            "ASCII fixture": ("planted-lam-alef.pdf", False),
+        }
+        for label, (text, must_bite) in cases.items():
+            caught = scan_text("fabricated.md", text)
+            if bool(caught) != must_bite:
+                print(f"GUARD FAILED — {label}: expected {'a violation' if must_bite else 'a pass'}, got {caught}")
+                return 1
+        print(f"PASS self-test — {len(cases)} controls: three unlisted names bite (including a spaced name and "
+              f"one sharing an exempt surname), three exempt/ASCII forms are spared")
+    leaks, paths = violations(REPO)
+    for rel, lineno, token in leaks[:40]:
         print(f"  owner-name leak: {rel}:{lineno}: {token}")
-    print(f"  {len(scanned_files(REPO))} tracked text file(s) scanned · {len(bad)} unlisted non-ASCII name(s)")
-    if bad:
+    for rel in paths[:40]:
+        print(f"  owner-name path: {rel}")
+    n_paths = len(tracked(REPO))
+    print(f"  {n_paths} tracked path(s) and their text scanned · {len(leaks)} leak(s) · {len(paths)} named path(s)")
+    if leaks or paths:
         print("OWNER-NAME GUARD FAILED — a filename outside the exemption list is in the tree")
         return 1
     print("OWNER-NAME GUARD PASSED — every non-ASCII PDF name in the tree is a declared exemption")

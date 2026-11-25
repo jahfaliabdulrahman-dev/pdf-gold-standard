@@ -84,16 +84,18 @@ def recovery_state(judged: dict, lexical_th: float) -> tuple[bool | None, str, i
     return None, "split", need, passing, failing
 
 
-def lam_alef_majority(judged: dict, rate: float, min_runs: int) -> tuple[dict[str, float], int | None]:
-    """({reader: rate per 1000 runs} for the readers at or above `rate`, majority needed) — the rule, one copy.
+def lam_alef_majority(judged: dict, rate: float, min_runs: int) -> tuple[dict[str, float], dict[str, float], int | None]:
+    """(all rates, the readers at or above `rate`, the majority needed) — the rule, one copy.
 
-    Only a reading with at least `min_runs` Arabic runs is judged: below it one quoted example is 1/n, not a
-    rate. `check` and `test_lam_alef_signal` call this function; a second copy of the arithmetic would let the
-    test certify a rule the report does not run.
+    Everything is returned because the report needs all three: «N of M judged readers» is a different claim
+    from «N of N», and a reader's own rate decides whether its single transposition is a near-miss or the
+    finding itself. Only a reading with at least `min_runs` Arabic runs is judged. `check` and
+    `test_lam_alef_signal` call this function; a second copy of the arithmetic would let the test certify a
+    rule the report does not run.
     """
     rates = {n: v["lam_alef"] / v["runs"] * 1000.0 for n, v in judged.items() if v["runs"] >= min_runs}
     over = {n: r for n, r in rates.items() if r >= rate}
-    return over, majority_needed(len(rates))
+    return rates, over, majority_needed(len(rates))
 
 
 def visual_orders(texts: dict, th: dict) -> dict:
@@ -347,18 +349,18 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
     # runs = 0.88/1000), while the calibration lesson measures 43.0–43.7/1000 in three readers. The shipped
     # value is the geometric midpoint of those two measured bounds (measurements/lam-alef-separation.json), and
     # the rate is judged only on a reading with enough runs for a rate to mean anything.
-    lam_rate, need_lam = lam_alef_majority(judged, th["lam_alef_rate_per_1000"]["value"],
-                                           th["lam_alef_min_runs"]["value"])
-    lam_over = lam_rate
+    lam_rates, lam_over, need_lam = lam_alef_majority(judged, th["lam_alef_rate_per_1000"]["value"],
+                                                      th["lam_alef_min_runs"]["value"])
     if need_lam is not None and len(lam_over) >= need_lam:
         file_signals.append(_finding(
             "lam-alef-transposition", "medium", "file", "high",
-            f"{len(lam_over)} of {len(lam_rate)} judged readers carry a lam-alef transposition density at or "
+            f"{len(lam_over)} of {len(lam_rates)} judged readers carry a lam-alef transposition density at or "
             f"above {th['lam_alef_rate_per_1000']['value']} per 1000 Arabic runs ("
             + ", ".join(f"{n} {r:.1f}" for n, r in sorted(lam_over.items()))
             + ") — a doubled alef is orthographically impossible: the words are shaped and the letters are "
               "transposed",
             readers=sorted(lam_over), rates={n: round(r, 2) for n, r in sorted(lam_over.items())},
+            judged=len(lam_rates),
             counts={n: judged[n]["lam_alef"] for n in lam_over},
             runs={n: judged[n]["runs"] for n in lam_over},
             threshold=th["lam_alef_rate_per_1000"]["value"],
@@ -394,17 +396,19 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
                 f"the lexicon — the remaining runs are shaped letters that do not make Arabic words",
                 runs=judged[name]["runs"], known=judged[name]["known"],
                 reversed_known=judged[name]["reversed"], threshold=lexical_th))
-        elif name in judged and judged[name].get("lam_alef"):
-            # A near-miss below the file-level density is RECORDED, never raised: the reading passes the lexical
-            # floor, and a single transposition in a document is evidence, not a verdict. The file-level rule
-            # above is the only one that raises this defect (a majority of readers at the measured density).
+        elif name in judged and judged[name].get("lam_alef") and name in lam_rates \
+                and lam_rates[name] < th["lam_alef_rate_per_1000"]["value"]:
+            # A near-miss is a reader whose OWN rate is BELOW the file-level density: the reading passes the
+            # floor and carries one or two transpositions (a document quoting the defect). A reader at or above
+            # the density is the file finding itself and must not be described as «below the threshold».
             signals.append(_finding(
                 "lam-alef-transposition", "low", "reader", "medium",
-                f"{judged[name]['lam_alef']} lam-alef transposition(s) (e.g. «األهداف» for «الأهداف») — below "
-                f"the file-level density of {th['lam_alef_rate_per_1000']['value']} per 1000 runs; recorded, "
-                f"not raised",
+                f"{judged[name]['lam_alef']} lam-alef transposition(s) (e.g. «األهداف» for «الأهداف») — "
+                f"{lam_rates[name]:.1f} per 1000 runs, below the file-level {th['lam_alef_rate_per_1000']['value']}"
+                f"; recorded, not raised",
                 runs=judged[name]["runs"], known=judged[name]["known"],
-                lam_alef=judged[name]["lam_alef"], threshold=th["lam_alef_rate_per_1000"]["value"]))
+                lam_alef=judged[name]["lam_alef"], rate=round(lam_rates[name], 2),
+                threshold=th["lam_alef_rate_per_1000"]["value"]))
         if order["visual"]:
             confidence = "high" if (order["confidence"] or 0) >= 0.9 else \
                          ("medium" if (order["confidence"] or 0) >= 0.6 else "low")

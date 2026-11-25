@@ -82,17 +82,20 @@ def main() -> int:
     must = json.load(open(os.path.join(REPO, "arabic_pdf_check", "thresholds.json"), encoding="utf-8"))
     clean_all = [f["readers"] for name in ("clean-documents", "clean-corpus-cases") for f in sets[name]["files"]]
     worst_clean = max([n for readers in clean_all for n in readers.values()] or [0])
-    check("artifact: no clean file carries more than one hit per reader", worst_clean <= 1, str(worst_clean))
+    check("artifact: the clean maximum is below the shipped value", worst_clean < must["values"]["segment_order_min"]["value"],
+          f"{worst_clean} vs {must['values']['segment_order_min']['value']}")
     broken = [f["readers"]["pdfium"] for f in sets["zatca"]["files"] if f["readers"]["pdfium"]]
     check("artifact: PDFium carries the ZATCA reversal and no other reader does",
           sum(broken) > 0
           and all(v == 0 for f in sets["zatca"]["files"] for k, v in f["readers"].items() if k != "pdfium"),
           str(sets["zatca"]["totals"]))
     value = must["values"]["segment_order_min"]["value"]
-    check("threshold: the value is the declared 1, not raised by clean-side reader findings",
-          value == must["values"]["segment_order_min"]["declared"] == 1, str(value))
-    check("separation: every file on the broken side is above the value", min(broken) > value,
-          f"min broken {min(broken)} vs value {value}")
+    check("threshold: the value is the clean maximum + 1 (the one derivation rule)",
+          value == max(must["values"]["segment_order_min"]["declared"], worst_clean + 1),
+          f"{value} vs clean {worst_clean}")
+    # blind.py fires at `count >= value`, so the separation is clean_max < value <= smallest broken count
+    check("separation: the clean maximum is below the value and every broken file reaches it",
+          min(broken) >= value > worst_clean, f"clean {worst_clean}, value {value}, min broken {min(broken)}")
 
     print(f"\nSEGMENT-ORDER RULE PASSED — {passed} check(s); a majority of voters, one outlier, and no vote from "
           f"a visual reading")

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Measure the segment-order signal on a directory of PDFs — the producer of measurements/segment-order.json.
 
-The signal is a READER one, so the artifact records one count per reader per file: how many lines carry an
-Arabic segment whose word order is the exact reverse of a strict majority of the other readers. No text is
+The signal is a READER one, so the artifact records one count per reader per file: how many Arabic segments
+that reader returns in the exact reverse order of a strict majority of the other readers. No text is
 deposited — only counts and the file's sha256 — so the artifact can hold vendor samples and the owner's
 documents without publishing either's content.
+
+Every set carries its own provenance (the command, the tree's `head`, `dirty`), because a measurement whose
+population cannot be traced is the gap the 2026-11-25 audit named for PR-3 — it should not be reproduced here.
 
 Usage:
   python3 scripts/segment_order_measure.py --dir ~/.cache/zatca-sdk/238-R3.4.8/*/Data/Samples/PDF-A3 \
@@ -13,12 +16,14 @@ Usage:
 import argparse
 import json
 import os
+import shlex
 import sys
 from datetime import datetime, timezone
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 sys.path.insert(0, REPO)
 
+from conformance import certificate as cert_mod                                  # noqa: E402
 from conformance.checks import lexical, segment_order                            # noqa: E402
 from conformance.hashing import sha256_file                                      # noqa: E402
 from conformance.readers import available, text_many                             # noqa: E402
@@ -53,16 +58,26 @@ def main() -> int:
         for name, n in row["readers"].items():
             totals[name] = totals.get(name, 0) + n
         print(f"   {row['label']}  " + "  ".join(f"{k}={v}" for k, v in row["readers"].items()))
-    payload = {"schema": "segment-order/1", "generated_at": _now(), "sets": {}}
+    try:
+        commit, dirty = cert_mod.pipeline_commit()
+    except cert_mod.CertError:
+        commit, dirty = "unknown", None
+    payload = {"schema": "segment-order/2", "generated_at": _now(), "sets": {}}
     if os.path.exists(a.out):
         with open(a.out, encoding="utf-8") as fh:
             payload = json.load(fh)
-        payload["generated_at"] = _now()
-        payload.setdefault("sets", {})
+        # Rebuild from `sets` only: an earlier schema kept `set`/`files`/`totals` at the top level, and a merge
+        # that leaves them beside `sets` publishes two copies of one measurement, only one of which is fresh.
+        payload = {"schema": "segment-order/2", "generated_at": _now(),
+                   "sets": payload.get("sets") or {}}
     payload["sets"][a.set] = {
+        "dir": os.path.basename(os.path.normpath(a.dir)),
+        "command": shlex.join(["python3", os.path.relpath(__file__, REPO)] + sys.argv[1:]),
+        "head": commit, "dirty": dirty, "measured_at": _now(),
         "files": rows, "totals": totals,
         "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict "
-                "majority of the readers' order; letter-reversed readings do not vote"}
+                "majority of the readers' order; one vote per reader per multiset; letter-reversed readings do "
+                "not vote"}
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     with open(a.out, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=1)
