@@ -59,7 +59,9 @@ def measure_file(path: str, ok: dict) -> dict:
     for name in ok:
         reading = text_many(name, [path])[0]
         order = visual_order.inspect(reading)
-        ids = [ln.strip() for ln in reading.splitlines() if ln.strip()][:SAMPLE_LINES]
+        # The artifact's sample is the first ARABIC-bearing lines (that is what the report publishes and
+        # what the PR-3 reader table compares) — not the first lines, which are often Latin headers.
+        ids = [ln.strip() for ln in reading.splitlines() if metrics.ARABIC.search(ln)][:SAMPLE_LINES]
         readers[name] = {
             "chars": len(reading),          # the reading as the reader returned it (the PR-3 artifact's definition)
             "pf": metrics.pf_count(reading),
