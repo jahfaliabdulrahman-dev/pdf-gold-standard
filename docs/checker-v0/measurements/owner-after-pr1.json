@@ -12,12 +12,17 @@
   "high": 31,
   "medium": 8
  },
+ "redaction": {
+  "date": "2026-11-25",
+  "rule": "the owner decided 2026-11-25 that no owner filename enters this repository; the 55 keys were replaced by positional ids (owner-01…owner-55) in their original order, every measured value is unchanged, and the name→id map is kept outside the repository",
+  "files": 55
+ },
  "files": {
-  " الإسبوع 11 - الموضوع 8 - درس - الإحصاء.pdf": {
+  "owner-01": {
    "level": "low",
    "signals": []
   },
-  " الإسبوع 3 - الموضوع 2 - درس - الإحصاء.pdf": {
+  "owner-02": {
    "level": "high",
    "signals": [
     {
@@ -37,23 +42,23 @@
     }
    ]
   },
-  " الإسبوع 4 - الموضوع 2 - درس - الإحصاء.pdf": {
+  "owner-03": {
    "level": "low",
    "signals": []
   },
-  " الإسبوع 6 - الموضوع 4 - درس - الإحصاء.pdf": {
+  "owner-04": {
    "level": "low",
    "signals": []
   },
-  " الإسبوع 7 - الموضوع 6 - درس - الإحصاء.pdf": {
+  "owner-05": {
    "level": "low",
    "signals": []
   },
-  " الإسبوع 8 - الموضوع 7 - درس - الإحصاء.pdf": {
+  "owner-06": {
    "level": "low",
    "signals": []
   },
-  "10  - درس - مفاهيم نظم التشغيل.pdf": {
+  "owner-07": {
    "level": "high",
    "signals": [
     {
@@ -73,19 +78,19 @@
     }
    ]
   },
-  "11  - درس - مفاهيم نظم التشغيل.pdf": {
+  "owner-08": {
    "level": "low",
    "signals": []
   },
-  "5 - درس - البايثون.pdf": {
+  "owner-09": {
    "level": "low",
    "signals": []
   },
-  "6 - درس - البايثون.pdf": {
+  "owner-10": {
    "level": "low",
    "signals": []
   },
-  "7  - درس - مفاهيم نظم التشغيل.pdf": {
+  "owner-11": {
    "level": "high",
    "signals": [
     {
@@ -105,7 +110,7 @@
     }
    ]
   },
-  "7  - درس - مهارات التواصل.pdf": {
+  "owner-12": {
    "level": "high",
    "signals": [
     {
@@ -115,11 +120,11 @@
     }
    ]
   },
-  "7 - درس - البايثون.pdf": {
+  "owner-13": {
    "level": "low",
    "signals": []
   },
-  "8  - درس - مفاهيم نظم التشغيل.pdf": {
+  "owner-14": {
    "level": "high",
    "signals": [
     {
@@ -139,7 +144,7 @@
     }
    ]
   },
-  "9  - درس - مفاهيم نظم التشغيل.pdf": {
+  "owner-15": {
    "level": "high",
    "signals": [
     {
@@ -159,11 +164,11 @@
     }
    ]
   },
-  "ANN202 L1.pdf": {
+  "owner-16": {
    "level": "low",
    "signals": []
   },
-  "ANN202 L11.pdf": {
+  "owner-17": {
    "level": "high",
    "signals": [
     {
@@ -203,7 +208,7 @@
     }
    ]
   },
-  "ANN202 L12.pdf": {
+  "owner-18": {
    "level": "high",
    "signals": [
     {
@@ -243,7 +248,7 @@
     }
    ]
   },
-  "ANN202 L13.pdf": {
+  "owner-19": {
    "level": "high",
    "signals": [
     {
@@ -273,19 +278,19 @@
     }
    ]
   },
-  "ANN202 L3.pdf": {
+  "owner-20": {
    "level": "low",
    "signals": []
   },
-  "ANN202 L4.pdf": {
+  "owner-21": {
    "level": "low",
    "signals": []
   },
-  "ANN202 L6.pdf": {
+  "owner-22": {
    "level": "low",
    "signals": []
   },
-  "ANN202 L8.pdf": {
+  "owner-23": {
    "level": "high",
    "signals": [
     {
@@ -325,43 +330,23 @@
     }
    ]
   },
-  "CNN205 L2.pdf": {
+  "owner-24": {
    "level": "low",
    "signals": []
   },
-  "CNN205 L4.pdf": {
+  "owner-25": {
    "level": "low",
    "signals": []
   },
-  "CNN205 L5.pdf": {
+  "owner-26": {
    "level": "low",
    "signals": []
   },
-  "NLP203 L1.pdf": {
+  "owner-27": {
    "level": "low",
    "signals": []
   },
-  "NLP203 L10.pdf": {
-   "level": "high",
-   "signals": [
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
-    {
-     "id": "presentation-forms",
-     "level": "high",
-     "cause": "file"
-    },
-    {
-     "id": "visual-order",
-     "level": "high",
-     "cause": "file"
-    }
-   ]
-  },
-  "NLP203 L11.pdf": {
+  "owner-28": {
    "level": "high",
    "signals": [
     {
@@ -381,64 +366,9 @@
     }
    ]
   },
-  "NLP203 L12.pdf": {
+  "owner-29": {
    "level": "high",
    "signals": [
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
-    {
-     "id": "tounicode-gaps",
-     "level": "high",
-     "cause": "file"
-    },
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
-    {
-     "id": "presentation-forms",
-     "level": "high",
-     "cause": "file"
-    }
-   ]
-  },
-  "NLP203 L2.pdf": {
-   "level": "high",
-   "signals": [
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
-    {
-     "id": "tounicode-gaps",
-     "level": "medium",
-     "cause": "file"
-    },
     {
      "id": "tounicode-gaps",
      "level": "medium",
@@ -456,9 +386,59 @@
     }
    ]
   },
-  "NLP203 L7.pdf": {
+  "owner-30": {
    "level": "high",
    "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "owner-31": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
     {
      "id": "tounicode-gaps",
      "level": "medium",
@@ -481,7 +461,32 @@
     }
    ]
   },
-  "NLP203 L8.pdf": {
+  "owner-32": {
+   "level": "high",
+   "signals": [
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "tounicode-gaps",
+     "level": "medium",
+     "cause": "file"
+    },
+    {
+     "id": "presentation-forms",
+     "level": "high",
+     "cause": "file"
+    },
+    {
+     "id": "visual-order",
+     "level": "high",
+     "cause": "file"
+    }
+   ]
+  },
+  "owner-33": {
    "level": "high",
    "signals": [
     {
@@ -501,7 +506,7 @@
     }
    ]
   },
-  "NLP203 L9.pdf": {
+  "owner-34": {
    "level": "high",
    "signals": [
     {
@@ -521,7 +526,7 @@
     }
    ]
   },
-  "RNN204 L2.pdf": {
+  "owner-35": {
    "level": "medium",
    "signals": [
     {
@@ -531,7 +536,7 @@
     }
    ]
   },
-  "RNN204 L5.pdf": {
+  "owner-36": {
    "level": "high",
    "signals": [
     {
@@ -551,7 +556,7 @@
     }
    ]
   },
-  "ادوات وتقنيات التحسين المستمر.pdf": {
+  "owner-37": {
    "level": "high",
    "signals": [
     {
@@ -566,7 +571,7 @@
     }
    ]
   },
-  "الاستثمار في سوق الاسهم.pdf": {
+  "owner-38": {
    "level": "medium",
    "signals": [
     {
@@ -576,7 +581,7 @@
     }
    ]
   },
-  "البنود والشروط في AppleCare-.pdf": {
+  "owner-39": {
    "level": "high",
    "signals": [
     {
@@ -601,7 +606,7 @@
     }
    ]
   },
-  "التسويق بالعمولة.pdf": {
+  "owner-40": {
    "level": "high",
    "signals": [
     {
@@ -611,7 +616,7 @@
     }
    ]
   },
-  "اللائحة-التنفيذية-وملحقاتها.pdf": {
+  "owner-41": {
    "level": "high",
    "signals": [
     {
@@ -651,7 +656,7 @@
     }
    ]
   },
-  "المنتج الناجح.pdf": {
+  "owner-42": {
    "level": "high",
    "signals": [
     {
@@ -666,7 +671,7 @@
     }
    ]
   },
-  "الموضوع الأول - أﺳﺎﺳﻴﺎت ﻫﻨﺪﺳﺔ اﻷواﻣﺮ.pdf": {
+  "owner-43": {
    "level": "high",
    "signals": [
     {
@@ -696,11 +701,11 @@
     }
    ]
   },
-  "الموضوع الثالث - التواصل المهني.pdf": {
+  "owner-44": {
    "level": "low",
    "signals": []
   },
-  "الموضوع الخامس - أﺳﺎﺳﻴﺎت ﻫﻨﺪﺳﺔ اﻷواﻣﺮ.pdf": {
+  "owner-45": {
    "level": "high",
    "signals": [
     {
@@ -730,11 +735,11 @@
     }
    ]
   },
-  "الموضوع الرابع - التواصل المهني.pdf": {
+  "owner-46": {
    "level": "low",
    "signals": []
   },
-  "خيارات الشحن والتوصيل.pdf": {
+  "owner-47": {
    "level": "high",
    "signals": [
     {
@@ -744,7 +749,7 @@
     }
    ]
   },
-  "ليش لازم تبدأ ولو ما كنت مستعد.pdf": {
+  "owner-48": {
    "level": "high",
    "signals": [
     {
@@ -754,7 +759,7 @@
     }
    ]
   },
-  "مالذي يصنع القائد.pdf": {
+  "owner-49": {
    "level": "high",
    "signals": [
     {
@@ -764,7 +769,7 @@
     }
    ]
   },
-  "مسابقة تحليل البيانات.pdf": {
+  "owner-50": {
    "level": "high",
    "signals": [
     {
@@ -814,7 +819,7 @@
     }
    ]
   },
-  "نظام الشركات 1439 سعد الخنفري.pdf": {
+  "owner-51": {
    "level": "medium",
    "signals": [
     {
@@ -824,7 +829,7 @@
     }
    ]
   },
-  "نظام ملكية الوحدات العقارية وفرزها وإدارتها.pdf": {
+  "owner-52": {
    "level": "low",
    "signals": [
     {
@@ -834,7 +839,7 @@
     }
    ]
   },
-  "٢  - درس - مفاهيم نظم التشغيل.pdf": {
+  "owner-53": {
    "level": "high",
    "signals": [
     {
@@ -854,7 +859,7 @@
     }
    ]
   },
-  "٢  - درس - مهارات التواصل.pdf": {
+  "owner-54": {
    "level": "high",
    "signals": [
     {
@@ -874,7 +879,7 @@
     }
    ]
   },
-  "٣ - درس - البايثون.pdf": {
+  "owner-55": {
    "level": "low",
    "signals": []
   }

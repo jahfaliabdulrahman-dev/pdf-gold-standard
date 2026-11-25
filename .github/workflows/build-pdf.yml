@@ -229,6 +229,7 @@ jobs:
           python3 scripts/test_build_wiki_lexicon.py
           python3 scripts/test_lexicon_compare.py
           python3 scripts/test_calibration.py
+          python3 scripts/test_no_owner_names.py --self-test
 
       - name: Foreign producer set — LibreOffice output, measured by the checker
         run: |
@@ -327,6 +328,7 @@ jobs:
           python3 scripts/test_build_wiki_lexicon.py
           python3 scripts/test_lexicon_compare.py
           python3 scripts/test_calibration.py
+          python3 scripts/test_no_owner_names.py --self-test
           python3 scripts/test_ci_wiring.py
       - name: The checker with four Linux readers
         run: |
