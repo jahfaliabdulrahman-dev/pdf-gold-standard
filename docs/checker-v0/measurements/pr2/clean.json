@@ -48,9 +48,6 @@
     "pdfminer"
    ],
    "reader_signals": {
-    "mupdf": [
-     "segment-order"
-    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -387,9 +384,6 @@
     "pdfminer"
    ],
    "reader_signals": {
-    "pdfkit": [
-     "segment-order"
-    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -404,9 +398,6 @@
     "pdfminer"
    ],
    "reader_signals": {
-    "pdfium": [
-     "segment-order"
-    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -499,9 +490,6 @@
     "pdfminer"
    ],
    "reader_signals": {
-    "mupdf": [
-     "segment-order"
-    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -614,9 +602,6 @@
     "pdfminer"
    ],
    "reader_signals": {
-    "mupdf": [
-     "segment-order"
-    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -631,9 +616,6 @@
     "pdfminer"
    ],
    "reader_signals": {
-    "mupdf": [
-     "segment-order"
-    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -648,9 +630,6 @@
     "pdfminer"
    ],
    "reader_signals": {
-    "mupdf": [
-     "segment-order"
-    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -990,7 +969,7 @@
    "thresholds": "shipped"
   }
  ],
- "generated_at": "2026-11-25T15:59:59Z",
+ "generated_at": "2026-11-25T16:31:12Z",
  "summary": {
   "file_high": 0,
   "files": 70,
