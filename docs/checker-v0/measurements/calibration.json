@@ -95,7 +95,7 @@
     "shipped_rule": {
      "level": "medium",
      "signal": "lam-alef-transposition",
-     "basis": "derived, not re-measured: 3 of 5 readers at 43.03-43.66 per 1000 Arabic runs (21 transpositions in 473-488 runs) against the shipped 6.2, and 3 of 5 is the majority (measurements/lam-alef-separation.json). The measured level at b1b16d4 — before the file signal existed — was low; the live re-check of the same sha256 under the shipped manifest returns medium.",
+     "basis": "derived, not re-measured: 3 of 5 readers at 43.03-43.66 per 1000 Arabic runs (21 transpositions in 473-488 runs) against the shipped 6.2, and 3 of 5 is the majority (measurements/lam-alef-separation.json). The level deposited at b1b16d4 — before the file signal existed — was low; the shipped rule returns medium for these numbers, and that rule is asserted (not re-measured here: the three calibration files are the owner's and are not in this tree) by scripts/test_calibration.py and its arithmetic by scripts/test_lam_alef_separation.py.",
      "measured_at": "b1b16d4"
     }
    }

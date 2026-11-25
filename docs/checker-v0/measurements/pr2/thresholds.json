@@ -1,6 +1,6 @@
 {
  "command": "python3 scripts/checker_measure.py --skip-owner --write --clean-dir /tmp/cases-a --out docs/checker-v0/measurements/pr2",
- "measured_at": "2026-11-25T16:27:47Z",
+ "measured_at": "2026-11-25T16:49:23Z",
  "missing_docs": {},
  "observed": {
   "clean_docs": {
@@ -306,7 +306,7 @@
   },
   "segment_order_min": {
    "declared": 2,
-   "source": "derived: clean maximum + 1 (declared floor 2). The clean set (70 files) measures at most 1 reversed segment(s) per reader, 7 in 7 file(s) across all readers — reader findings on clean files (a reader that reverses a segment around a number or a Latin run), not file defects. Broken side, measured: the ZATCA SDK's 16 PDF/A-3 samples give pdfium 2-7 per affected file (measurements/segment-order.json), and the signal fires at count >= value, so 1 < 2 separates. A reader signal: it never raises the file",
+   "source": "derived: clean maximum + 1 (declared floor 2). The clean set (70 files) measures at most 1 reversed segment(s) per reader, 7 in 7 file(s) across all readers — reader findings on clean files (a reader that reverses a segment around a number or a Latin run), not file defects. Broken side, measured in measurements/segment-order.json: PDFium returns 52 reversed segment(s) in 11 of the 16 samples, 2-6 per affected file, and the signal fires at count >= value, so 1 < 2 <= 2 separates. A reader signal: it never raises the file",
    "value": 2
   },
   "tounicode_gap_ratio": {

@@ -378,15 +378,17 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
         seg = seg_findings.get(name) or []
         if len(seg) >= th["segment_order_min"]["value"]:
             sample = seg[0]
-            # The evidence quotes the words the reader RETURNED (not the normalised forms the comparison used):
-            # an excerpt that is not the file's text is not an excerpt.
-            shown = reference.sanitize_line(" ".join(sample["raw"]))[:80]
+            # `display` is the reader's words with presentation forms folded to base letters and marks stripped
+            # — the report says «كما يعرضها القارئ», because it is not a byte-for-byte quote: a reader that
+            # returned U+FExx or a tashkeel is shown in its letters, not its codepoints.
+            shown = reference.sanitize_line(" ".join(sample["display"]))[:80]
             signals.append(_finding(
                 "segment-order", "medium", "reader", "high",
-                f"{len(seg)} line(s) whose Arabic segment is the exact reverse of {sample['voters']} readers' "
-                f"order — the letters are logical and the words are not: «{shown}»",
-                lines=len(seg), voters=sample["voters"], page=sample["page"],
-                example={"words": sample["words"][:6], "raw": sample["raw"][:6],
+                f"{len(seg)} line(s) whose Arabic segment is the exact reverse of the order {sample['agree']} of "
+                f"{sample['voters']} voting readers agree on — the letters are logical and the words are not: "
+                f"«{shown}»",
+                lines=len(seg), voters=sample["voters"], agree=sample["agree"], page=sample["page"],
+                example={"words": sample["words"][:6], "display": sample["display"][:6],
                          "reversed_of": sample["reversed_of"][:6]},
                 threshold=th["segment_order_min"]["value"]))
         if name in judged and judged[name]["ratio"] < lexical_th:

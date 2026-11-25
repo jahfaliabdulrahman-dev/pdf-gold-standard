@@ -44,8 +44,10 @@ def main() -> int:
     check("outlier: the one reversed reader is flagged", set(found) == {"d"}, str(found))
     check("outlier: the evidence names both orders", found["d"][0]["words"] == [NB, NA]
           and found["d"][0]["reversed_of"] == [NA, NB], str(found["d"]))
-    check("outlier: the excerpt is what the reader returned, not the normalised comparison key",
-          found["d"][0]["raw"] == [B, A], str(found["d"][0]["raw"]))
+    check("outlier: display is the reader's word, not the normalised comparison key",
+          found["d"][0]["display"] == [B, A], str(found["d"][0]["display"]))
+    check("outlier: agree counts the readers that hold the majority (3 of 4), not the voters (4)",
+          (found["d"][0]["agree"], found["d"][0]["voters"]) == (3, 4), str(found["d"][0]))
     check("outlier: no page is claimed when the caller passed none", found["d"][0]["page"] is None)
 
     # 2. agreement raises nothing

@@ -3,7 +3,7 @@
 The gap this closes (audit of 2026-11-25, item 10; first measured by PR-3): PDFium returns 11 of the 16 ZATCA
 PDF/A-3 samples with correct letters and REVERSED word order inside the Arabic segment («ضريبية فاتورة» for
 «فاتورة ضريبية»). `arafix` scores each reader's letters, so it returns −1.00 («logical») and the report says
-nothing — 55 segments in 11 files were invisible.
+nothing — the reversed segments were invisible.
 
 The mechanism, and why it is a consensus:
 
@@ -44,8 +44,9 @@ def segments(text: str, vocab: frozenset[str]) -> list[dict]:
     """
     out = []
     for line in (text or "").splitlines():
-        # ONE tokenisation pipeline: `lexical.tokens` returns each word as READ (presentation forms folded,
-        # marks stripped — this is the excerpt) and its normalised form (the comparison key). A second
+        # ONE tokenisation pipeline: `lexical.tokens` returns each word DISPLAYED (presentation forms folded
+        # to base letters, marks stripped — the report calls this `display`, not a quote of the file's bytes)
+        # and its normalised form (the comparison key). A second
         # tokeniser here would be a second definition of an Arabic run, free to drift from `lexical.words`.
         pairs = lexical.tokens(line)
         if len(pairs) < 2:
@@ -60,7 +61,7 @@ def segments(text: str, vocab: frozenset[str]) -> list[dict]:
             else:
                 canonical.append(n)
             raw.append(word)
-        out.append({"words": tuple(canonical), "raw": tuple(raw), "letter_reversed": reversed_count})
+        out.append({"words": tuple(canonical), "display": tuple(raw), "letter_reversed": reversed_count})
     return out
 
 
@@ -72,8 +73,8 @@ def findings(texts: dict[str, str], vocab: frozenset[str],
     each reader casts a single vote — only if all of its readings of that multiset agree. A reader that returns
     «A B» on one page and «B A» on another is ambiguous on that multiset and does not vote; a reader that
     repeats the same line three times is still one voter, because a majority of one reader is not a majority.
-    `voters` therefore counts distinct readers, and the report's «the exact reverse of N readers' order» is
-    true. `pages` is the checker's per-page reading, used only to name the page of an example.
+    `voters` counts the readers that voted — including the outlier — so it is NOT the number that agrees with the
+    majority; `agree` is, and the report prints `agree` of `voters`. `pages` is the checker's per-page reading, used only to name the page of an example.
     """
     per_reader = {name: segments(text, vocab) for name, text in (texts or {}).items()}
     groups: dict[tuple[str, ...], dict[str, list[dict]]] = {}
@@ -103,9 +104,9 @@ def findings(texts: dict[str, str], vocab: frozenset[str],
         for name, row in votes.items():
             if row["words"] == majority[::-1]:
                 out.setdefault(name, []).append({
-                    "words": list(row["words"]), "raw": list(row["raw"]),
-                    "reversed_of": list(majority), "voters": len(votes),
-                    "page": _page_of(pages, name, row["raw"])})
+                    "words": list(row["words"]), "display": list(row["display"]),
+                    "reversed_of": list(majority), "voters": len(votes), "agree": counts[majority],
+                    "page": _page_of(pages, name, row["display"])})
     return out
 
 

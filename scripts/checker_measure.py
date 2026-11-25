@@ -188,6 +188,28 @@ def _measure_owner(directory: str, thresholds: dict) -> dict:
             "by_file_level": by_file_level, "by_signal": by_signal, "by_reader_risk": by_reader_risk}
 
 
+def _segment_order_artifact() -> dict:
+    """The measured broken side, read from the deposited artifact — a number here is quoted, never typed.
+
+    If the artifact is absent the sentence says so rather than inventing a range; the derivation still holds
+    (it only uses the clean set), but the separation claim needs the artifact and must not be guessed.
+    """
+    path = os.path.join(REPO, "docs", "checker-v0", "measurements", "segment-order.json")
+    empty = {"total": 0, "files": 0, "lo": 0, "hi": 0, "population": 0, "artifact": "absent"}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError):
+        return empty
+    rows = (data.get("sets") or {}).get("zatca", {}).get("files") or []
+    counts = [r["readers"].get("pdfium", 0) for r in rows]
+    hit = [c for c in counts if c]
+    if not hit:
+        return {**empty, "artifact": "present but empty"}
+    return {"total": sum(hit), "files": len(hit), "lo": min(hit), "hi": max(hit),
+            "population": len(counts), "artifact": "present"}
+
+
 def derive_lexical_threshold(clean_min: float) -> float:
     """The one formula for the lexical floor: a clean reading must sit 0.20 above the floor.
 
@@ -320,9 +342,9 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
                         f">= threshold {th['values']['lam_alef_rate_per_1000']['value']}")
     # Segment order: a READER signal, so the clean side is a population of reader findings, not of file
     # defects — but the value still follows the repo's one derivation rule (clean maximum + 1), because a single
-    # clean hit within a run must not become the floor. The separation is then checked against the measured
-    # broken side: every ZATCA sample that carries the defect carries >= 3, so 1 and 2 both separate, and the
-    # formula — not a story about «hiding» files — is what picks 2.
+    # clean hit within a run must not become the floor. The separation is then read from the MEASURED broken
+    # side in the deposited artifact: its numbers are quoted here, never typed, so a regenerated artifact and
+    # this sentence cannot disagree.
     seg_by_file = {r["label"]: r.get("segment_order") or {} for r in clean_rows}
     clean_seg = max([v for rows in seg_by_file.values() for v in rows.values()] or [0])
     seg_floor = th["values"]["segment_order_min"]["declared"]
@@ -332,14 +354,16 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     th["observed"]["clean_max_segment_order"] = clean_seg
     th["observed"]["clean_segment_order_total"] = seg_total
     th["observed"]["clean_segment_order_files"] = seg_hits
+    broken = _segment_order_artifact()
     th["values"]["segment_order_min"]["source"] = (
         f"derived: clean maximum + 1 (declared floor {seg_floor}). The clean set ({len(clean_rows)} files) "
         f"measures at most {clean_seg} reversed segment(s) per reader, {seg_total} in {len(seg_hits)} file(s) "
         f"across all readers — reader findings on clean files (a reader that reverses a segment around a "
-        f"number or a Latin run), not file defects. Broken side, measured: the ZATCA SDK's 16 PDF/A-3 samples "
-        f"give pdfium 2-7 per affected file (measurements/segment-order.json), and the signal fires at "
-        f"count >= value, so {clean_seg} < {th['values']['segment_order_min']['value']} separates. A reader "
-        f"signal: it never "
+        f"number or a Latin run), not file defects. Broken side, measured in "
+        f"measurements/segment-order.json: PDFium returns {broken['total']} reversed segment(s) in "
+        f"{broken['files']} of the {broken['population']} samples, {broken['lo']}-{broken['hi']} per affected "
+        f"file, and the signal fires at count >= value, so {clean_seg} < "
+        f"{th['values']['segment_order_min']['value']} <= {broken['lo']} separates. A reader signal: it never "
         f"raises the file")
     # separation is required only for the signal a fixture is planted to trip
     for name, row in planted_rows.items():
