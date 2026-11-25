@@ -1,243 +1,13 @@
 {
- "schema": "segment-order/1",
- "generated_at": "2026-11-25T15:53:59Z",
- "set": "zatca",
- "files": [
-  {
-   "label": "zatca-01",
-   "sha256": "d2f30f0b0b310c5a68bb1659f4c5b83ced2d3ab70d26992cd7ca9ed24c2fa918",
-   "bytes": 2727152,
-   "readers": {
-    "pdfium": 5,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-02",
-   "sha256": "763f381669553d1b2648587e5a44848caec545ea0e6232c924730aef619e1fe2",
-   "bytes": 2636111,
-   "readers": {
-    "pdfium": 5,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-03",
-   "sha256": "c4ea556b4aba97e56d7dafa31c5e73910636114d38b62b68a4939fc8954317cd",
-   "bytes": 2634276,
-   "readers": {
-    "pdfium": 5,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-04",
-   "sha256": "9c6422699b841738c4f6e5b22b3183020a13f62ae660662c6dbf85df0e5711ad",
-   "bytes": 1356419,
-   "readers": {
-    "pdfium": 3,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-05",
-   "sha256": "9065cb2d2b32d6ffb0034ccc3c497c9fbf4a12e18d07790d113ede63a2bbf830",
-   "bytes": 2125435,
-   "readers": {
-    "pdfium": 7,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-06",
-   "sha256": "857ffd3ad08f3f97e7c7715772c5f77feaad4fe0cc2ab20b94bc11a927c78295",
-   "bytes": 2002732,
-   "readers": {
-    "pdfium": 6,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-07",
-   "sha256": "d0e3b9298455e37e99e8d1321607b33cef384a6bda37d7bd3df34c8593d4f493",
-   "bytes": 1197409,
-   "readers": {
-    "pdfium": 3,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-08",
-   "sha256": "1ef4ce4c1f35de0d63b8debc19959441660eaf43983e720925259b20c5fb67ac",
-   "bytes": 2146837,
-   "readers": {
-    "pdfium": 6,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-09",
-   "sha256": "700c7aca568dc013562cc66afe8c801e9ba261a11b4f9529fe446584cfc539ce",
-   "bytes": 543507,
-   "readers": {
-    "pdfium": 0,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-10",
-   "sha256": "10c6bf8b67c246c4ed8f608738bda73557af8f97c3ba5b89d268c9e5e76b2bba",
-   "bytes": 1372441,
-   "readers": {
-    "pdfium": 4,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-11",
-   "sha256": "e608fff54d6b88eee2f4ec68c79291e433b5971de4846806be3bb581b4aa5021",
-   "bytes": 475802,
-   "readers": {
-    "pdfium": 0,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-12",
-   "sha256": "f43ab98e6a1ba09924ef62ee1bb3dc8f8ca44d310b29d999941e70bd337fa011",
-   "bytes": 578407,
-   "readers": {
-    "pdfium": 0,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-13",
-   "sha256": "7d0c71c828c5b6f5ea533501813695548e84da2de2e6568fed238d6757da32c6",
-   "bytes": 589733,
-   "readers": {
-    "pdfium": 0,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-14",
-   "sha256": "21efd17554d67051cb79940c8e7049859b1b6ca42cd3f1ec0b6f9d4edf16a304",
-   "bytes": 537531,
-   "readers": {
-    "pdfium": 0,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-15",
-   "sha256": "d17f1ff19629fa159a1e101fb6b3de71dae6a5a193feb1119a9e6ded3ad38689",
-   "bytes": 2134647,
-   "readers": {
-    "pdfium": 6,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  },
-  {
-   "label": "zatca-16",
-   "sha256": "8b0ac8ab496bc9f92553355fc3e64b5b76d5ff2eb39bde4da799c159e16e65d9",
-   "bytes": 1880915,
-   "readers": {
-    "pdfium": 5,
-    "pdfkit": 0,
-    "mupdf": 0,
-    "poppler": 0,
-    "pdfminer": 0
-   },
-   "voters": 5,
-   "missing_readers": []
-  }
- ],
- "totals": {
-  "pdfium": 55,
-  "pdfkit": 0,
-  "mupdf": 0,
-  "poppler": 0,
-  "pdfminer": 0
- },
- "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; letter-reversed readings do not vote",
+ "schema": "segment-order/2",
+ "generated_at": "2026-11-25T16:36:12Z",
  "sets": {
   "zatca": {
+   "dir": "PDF-A3",
+   "command": "python3 scripts/segment_order_measure.py --dir /Users/abdurrahmanjahfali/.cache/zatca-sdk/238-R3.4.8/zatca-einvoicing-sdk-Java-238-R3.4.8/Data/Samples/PDF-A3 --set zatca --out /tmp/seg-final.json",
+   "head": "2d416362de1b90b755456794750e4e73228e483d",
+   "dirty": false,
+   "measured_at": "2026-11-25T16:35:31Z",
    "files": [
     {
      "label": "zatca-01",
@@ -286,7 +56,7 @@
      "sha256": "9c6422699b841738c4f6e5b22b3183020a13f62ae660662c6dbf85df0e5711ad",
      "bytes": 1356419,
      "readers": {
-      "pdfium": 3,
+      "pdfium": 2,
       "pdfkit": 0,
       "mupdf": 0,
       "poppler": 0,
@@ -300,7 +70,7 @@
      "sha256": "9065cb2d2b32d6ffb0034ccc3c497c9fbf4a12e18d07790d113ede63a2bbf830",
      "bytes": 2125435,
      "readers": {
-      "pdfium": 7,
+      "pdfium": 6,
       "pdfkit": 0,
       "mupdf": 0,
       "poppler": 0,
@@ -440,7 +210,7 @@
      "sha256": "d17f1ff19629fa159a1e101fb6b3de71dae6a5a193feb1119a9e6ded3ad38689",
      "bytes": 2134647,
      "readers": {
-      "pdfium": 6,
+      "pdfium": 5,
       "pdfkit": 0,
       "mupdf": 0,
       "poppler": 0,
@@ -465,15 +235,20 @@
     }
    ],
    "totals": {
-    "pdfium": 55,
+    "pdfium": 52,
     "pdfkit": 0,
     "mupdf": 0,
     "poppler": 0,
     "pdfminer": 0
    },
-   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; letter-reversed readings do not vote"
+   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; one vote per reader per multiset; letter-reversed readings do not vote"
   },
   "clean-documents": {
+   "dir": "clean-docs",
+   "command": "python3 scripts/segment_order_measure.py --dir /tmp/clean-docs --set clean-documents --out /tmp/seg-final.json",
+   "head": "2d416362de1b90b755456794750e4e73228e483d",
+   "dirty": false,
+   "measured_at": "2026-11-25T16:35:36Z",
    "files": [
     {
      "label": "clean-documents-01",
@@ -539,9 +314,14 @@
     "poppler": 0,
     "pdfminer": 0
    },
-   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; letter-reversed readings do not vote"
+   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; one vote per reader per multiset; letter-reversed readings do not vote"
   },
   "clean-corpus-cases": {
+   "dir": "cases-a",
+   "command": "python3 scripts/segment_order_measure.py --dir /tmp/cases-a --set clean-corpus-cases --out /tmp/seg-final.json",
+   "head": "2d416362de1b90b755456794750e4e73228e483d",
+   "dirty": false,
+   "measured_at": "2026-11-25T16:36:12Z",
    "files": [
     {
      "label": "clean-corpus-cases-01",
@@ -1475,7 +1255,7 @@
     "poppler": 0,
     "pdfminer": 0
    },
-   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; letter-reversed readings do not vote"
+   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; one vote per reader per multiset; letter-reversed readings do not vote"
   }
  }
 }
