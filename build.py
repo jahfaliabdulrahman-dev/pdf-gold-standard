@@ -70,13 +70,11 @@ def build_html() -> str:
 
 
 def print_pdf() -> None:
+    # ONE definition of the renderer's flags: `launch_args` owns the headless profile and the declared CI-Linux
+    # exception (no sandbox on the hosted runner). A copy here would drift the moment either side changed.
+    from conformance.adapters.chrome import launch_args
     r = subprocess.run(
-        [
-            CHROME,
-            "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
-            "--virtual-time-budget=20000",
-            f"--print-to-pdf={TMP_PDF}", "file://" + TMP_HTML,
-        ],
+        [CHROME, *launch_args(), f"--print-to-pdf={TMP_PDF}", "file://" + TMP_HTML],
         capture_output=True, text=True, timeout=240,
     )
     assert os.path.exists(TMP_PDF), f"chrome failed: {r.stderr[-400:]}"
