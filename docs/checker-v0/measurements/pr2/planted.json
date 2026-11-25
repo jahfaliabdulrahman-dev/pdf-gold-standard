@@ -1,15 +1,30 @@
 {
+ "derived_pass": true,
  "files": {
   "planted-chrome-raw": {
+   "expected_level": "high",
    "expected_signal": "presentation-forms",
    "file_level": "high",
    "file_signals": [
     "presentation-forms"
    ],
    "overall": "high",
-   "pass": true
+   "pass": true,
+   "thresholds": "shipped"
+  },
+  "planted-lam-alef": {
+   "expected_level": "medium",
+   "expected_signal": "lam-alef-transposition",
+   "file_level": "medium",
+   "file_signals": [
+    "lam-alef-transposition"
+   ],
+   "overall": "high",
+   "pass": true,
+   "thresholds": "shipped"
   },
   "planted-letter-swap": {
+   "expected_level": "high",
    "expected_signal": "lexical-validity",
    "file_level": "high",
    "file_signals": [
@@ -17,18 +32,22 @@
     "lexical-validity"
    ],
    "overall": "high",
-   "pass": true
+   "pass": true,
+   "thresholds": "shipped"
   },
   "planted-mupdf-logical": {
+   "expected_level": "high",
    "expected_signal": "visual-order",
    "file_level": "high",
    "file_signals": [
     "visual-order"
    ],
    "overall": "high",
-   "pass": true
+   "pass": true,
+   "thresholds": "shipped"
   },
   "planted-no-tounicode": {
+   "expected_level": "high",
    "expected_signal": "tounicode-gaps",
    "file_level": "high",
    "file_signals": [
@@ -36,9 +55,11 @@
     "no-text-layer"
    ],
    "overall": "high",
-   "pass": true
+   "pass": true,
+   "thresholds": "shipped"
   },
   "planted-presentation-forms": {
+   "expected_level": "high",
    "expected_signal": "presentation-forms",
    "file_level": "high",
    "file_signals": [
@@ -46,8 +67,10 @@
     "visual-order"
    ],
    "overall": "high",
-   "pass": true
+   "pass": true,
+   "thresholds": "shipped"
   }
  },
- "generated_at": "2026-11-24T21:16:57Z"
+ "generated_at": "2026-11-25T15:59:59Z",
+ "thresholds": "shipped"
 }

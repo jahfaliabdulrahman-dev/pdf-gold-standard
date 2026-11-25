@@ -225,6 +225,8 @@ jobs:
           python3 arabic_pdf_check/tests/test_refusals.py
           python3 arabic_pdf_check/tests/test_packaging.py
           python3 arabic_pdf_check/tests/test_blind.py
+          python3 arabic_pdf_check/tests/test_lam_alef_signal.py
+          python3 arabic_pdf_check/tests/test_segment_order.py
           python3 scripts/build_wiki_lexicon.py --verify-source
           python3 scripts/test_build_wiki_lexicon.py
           python3 scripts/test_lexicon_compare.py
@@ -324,6 +326,8 @@ jobs:
           python3 conformance/tests/test_poppler_dash.py
           python3 arabic_pdf_check/tests/test_pages.py
           python3 arabic_pdf_check/tests/test_controls.py
+          python3 arabic_pdf_check/tests/test_lam_alef_signal.py
+          python3 arabic_pdf_check/tests/test_segment_order.py
           python3 arabic_pdf_check/tests/test_packaging.py
           python3 scripts/test_build_wiki_lexicon.py
           python3 scripts/test_lexicon_compare.py

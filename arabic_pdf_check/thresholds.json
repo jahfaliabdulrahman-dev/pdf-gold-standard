@@ -1,7 +1,7 @@
 {
   "schema_version": "arabic-pdf-check-thresholds/1",
-  "command": "python3 scripts/checker_measure.py --write --clean-dir /var/folders/jf/2jjdkdv97p95nhwgnn9k0tp80000gn/T/pr2-cases-ohrh3sbh --out docs/checker-v0/measurements/pr2",
-  "measured_at": "2026-11-24T21:10:53Z",
+  "command": "python3 scripts/checker_measure.py --skip-owner --write --clean-dir /tmp/cases-a --out docs/checker-v0/measurements/pr2",
+  "measured_at": "2026-11-25T15:56:27Z",
   "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
   "values": {
     "presentation_forms": {
@@ -33,6 +33,21 @@
       "value": 20,
       "declared": 20,
       "source": "declared policy: a reading with fewer than 20 Arabic runs is not judged for lexical validity (it can be neither passed nor failed)"
+    },
+    "lam_alef_rate_per_1000": {
+      "value": 6.2,
+      "declared": 6.2,
+      "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 0.88 per 1000 runs (doc:report, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12). sqrt(0.8795*43.03)=6.15 -> 6.2. Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact"
+    },
+    "lam_alef_min_runs": {
+      "value": 200,
+      "declared": 200,
+      "source": "declared policy: a transposition density is judged only on a reading with at least 200 Arabic runs; both measured populations are inside it (calibration 473-488 runs, clean 1121-1141), and below it one quoted example is 1/n, not a rate"
+    },
+    "segment_order_min": {
+      "value": 1,
+      "declared": 1,
+      "source": "declared 1 — determinism, not a tuned floor: a line whose Arabic segment is the exact reverse of a strict majority of the other readers' order has no benign version. The measured clean side is NOT zero (6 hits in 5 files: mupdf 4, pdfkit 1, pdfium 1) and each was checked against the corpus source text and is that reader's real reversal (e.g. mupdf «ريال الاجمالي» for «الإجمالي: 1,200.00 ريال»); raising the value to clean_max+1 would therefore hide the ZATCA files carrying 3-4 reversals. Broken population: the ZATCA SDK's 16 PDF/A-3 samples give pdfium 3-7 per file, 55 in 11 files, and pdfkit/mupdf/poppler/pdfminer 0 (docs/checker-v0/measurements/segment-order.json). A reader signal: it never raises the file"
     }
   },
   "observed": {
@@ -239,7 +254,69 @@
         "pair_min": 1.0,
         "lexical_max": 0.0,
         "missing_unicode": 0
+      },
+      "planted-lam-alef": {
+        "forms": 0,
+        "arabic": 1672,
+        "visual_share": 0.2,
+        "pair_min": 1.0,
+        "lexical_max": 0.8473,
+        "missing_unicode": 0
+      }
+    },
+    "clean_max_lam_alef_rate": 0.88,
+    "clean_max_segment_order": 1,
+    "clean_segment_order_files": {
+      "doc:najd": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:mix-email-url": {
+        "pdfium": 0,
+        "pdfkit": 1,
+        "mupdf": 0,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:mix-latin-sentence": {
+        "pdfium": 1,
+        "pdfkit": 0,
+        "mupdf": 0,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:mon-negative-hindi": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:num-invoice-kv-table": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:num-invoice-latn": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:num-negative-arab": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
       }
     }
-  }
+  },
+  "missing_docs": {}
 }

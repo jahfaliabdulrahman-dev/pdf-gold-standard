@@ -41,7 +41,12 @@ PLANTED = {
     "planted-presentation-forms": "presentation-forms",
     "planted-no-tounicode": "tounicode-gaps",
     "planted-letter-swap": "lexical-validity",
+    "planted-lam-alef": "lam-alef-transposition",
 }
+
+#: The level each fixture is DECLARED to reach; absent = "high". A fixture whose signal is deliberately
+#: medium is named here rather than by weakening the default rule — «planted ⇒ high» stays the rule.
+PLANTED_LEVEL: dict[str, str] = {"planted-lam-alef": "medium"}
 
 SWAP_WORDS = ("الكتاب المدرسي يحتوي الدروس الجديدة الفصل الطلاب يقرؤون النصوص بسهولة المعلم الشرح "
               "الواضح أمثلة تدريب نتائج الاختبار المراجعة الأسئلة الواجبات المنزلية المكتبة الحاسوب "
@@ -76,6 +81,29 @@ def _swap_text() -> str:
     order and nonexistent words. The word list is 36; the range is its length, not a guessed 40."""
     lines = [" ".join(SWAP_WORDS[i:i + 5]) for i in range(0, len(SWAP_WORDS), 5)]
     return "\n".join(_letter_swapped(line) for line in lines)
+
+
+#: The lam-alef fixture: what it tests is the SIGNAL and the reader vote — a text whose doubled alef («اال»)
+#: is read as such by a majority of the readers, at a density above the measured threshold. What it does NOT
+#: test is the real cause (a ligature decomposed and the line reversed by a producer): that population is the
+#: owner's calibration lesson, measured into `measurements/lam-alef-separation.json` (43 per 1000 runs).
+LAM_BASE = ("الكتاب المدرسي يحتوي الدروس الجديدة الفصل الطلاب يقرؤون النصوص بسهولة المعلم الشرح الواضح "
+            "أمثلة تدريب نتائج الاختبار المراجعة الأسئلة الواجبات المنزلية المكتبة الحاسوب الشبكة البرمجة")
+LAM_BROKEN = ("االهداف", "االول", "االخير", "االساسي", "االجتماع", "االسبوع", "االدارة")
+
+
+def _lam_alef_text(n: int = 30) -> str:
+    """`n` lines, each nine sound words plus one transposed one: n*10 Arabic runs, n sure transpositions.
+
+    30, not 21: the printed page fits ~18 of them (181 runs measured at 21 lines), and the density is judged
+    only on a reading with at least `lam_alef_min_runs` (200) — a fixture below its own floor tests nothing.
+    """
+    base = LAM_BASE.split()
+    lines = []
+    for i in range(n):
+        chunk = base[(i * 9) % len(base):][:9]
+        lines.append(" ".join(chunk + [LAM_BROKEN[i % len(LAM_BROKEN)]]))
+    return "\n".join(lines)
 
 
 def _mupdf_pdf(body: str, path: str) -> str:
@@ -117,6 +145,19 @@ def _strip_tounicode(source: str, path: str) -> str:
     return path
 
 
+def _chrome_text(text: str, path: str) -> str:
+    """One paragraph of `text`, printed by the pinned engine — the pipeline's own producer, not MuPDF.
+
+    The fixture is read by four of the five readers in logical order (PDFMiner reads visual), which is what the
+    majority rule needs; a MuPDF-written fixture is read reversed by four of five and would invert the vote.
+    """
+    case = {"id": "lam-alef-density", "category": "arabic-body", "lang": "ar", "font": "plex",
+            "blocks": [{"type": "paragraph", "text": text}],
+            "note": "the lam-alef density fixture: 21 sure transpositions in 210+ Arabic runs"}
+    chrome.render_case(case, path, "chrome")
+    return path
+
+
 def build_all(out_dir: str | None = None) -> dict:
     """{'clean': path, 'planted': {name: path}} — refuses if the pipeline's own engine is unavailable."""
     out_dir = out_dir or tempfile.mkdtemp(prefix="checker-fixtures-")
@@ -133,6 +174,7 @@ def build_all(out_dir: str | None = None) -> dict:
                                                  os.path.join(out_dir, "planted-presentation-forms.pdf")),
         "planted-no-tounicode": _strip_tounicode(clean, os.path.join(out_dir, "planted-no-tounicode.pdf")),
         "planted-letter-swap": _mupdf_pdf(_swap_text(), os.path.join(out_dir, "planted-letter-swap.pdf")),
+        "planted-lam-alef": _chrome_text(_lam_alef_text(), os.path.join(out_dir, "planted-lam-alef.pdf")),
     }
     return {"clean": clean, "planted": planted, "dir": out_dir}
 

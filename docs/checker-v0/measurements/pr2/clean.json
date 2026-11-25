@@ -11,7 +11,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -22,21 +23,22 @@
    ],
    "reader_signals": {
     "mupdf": [
-     "lexical-validity"
+     "lam-alef-transposition"
     ],
     "pdfium": [
-     "lexical-validity"
+     "lam-alef-transposition"
     ],
     "pdfkit": [
-     "lexical-validity"
+     "lam-alef-transposition"
     ],
     "pdfminer": [
      "visual-order"
     ],
     "poppler": [
-     "lexical-validity"
+     "lam-alef-transposition"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -46,10 +48,14 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "mupdf": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -60,21 +66,22 @@
    ],
    "reader_signals": {
     "mupdf": [
-     "lexical-validity"
+     "lam-alef-transposition"
     ],
     "pdfium": [
-     "lexical-validity"
+     "lam-alef-transposition"
     ],
     "pdfkit": [
-     "lexical-validity"
+     "lam-alef-transposition"
     ],
     "pdfminer": [
      "visual-order"
     ],
     "poppler": [
-     "lexical-validity"
+     "lam-alef-transposition"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -87,7 +94,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -100,7 +108,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -113,7 +122,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -126,7 +136,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -139,7 +150,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -152,7 +164,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -165,7 +178,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -178,7 +192,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -191,7 +206,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -204,14 +220,16 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
    "label": "case:dig-phone",
    "overall": "low",
    "reader_high": [],
-   "reader_signals": {}
+   "reader_signals": {},
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -224,7 +242,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -237,7 +256,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -250,7 +270,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -263,7 +284,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -276,7 +298,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -289,7 +312,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -302,7 +326,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -315,7 +340,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -328,7 +354,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -341,14 +368,16 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
    "label": "case:mix-acronym",
    "overall": "low",
    "reader_high": [],
-   "reader_signals": {}
+   "reader_signals": {},
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -358,10 +387,14 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "pdfkit": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -371,10 +404,14 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "pdfium": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -387,7 +424,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -400,7 +438,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -413,7 +452,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -426,7 +466,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -439,14 +480,16 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
    "label": "case:mon-iban",
    "overall": "low",
    "reader_high": [],
-   "reader_signals": {}
+   "reader_signals": {},
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -456,10 +499,14 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "mupdf": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -472,7 +519,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -485,7 +533,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -498,7 +547,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -511,7 +561,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -524,7 +575,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -537,7 +589,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -550,7 +603,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -560,10 +614,14 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "mupdf": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -573,10 +631,14 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "mupdf": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -586,10 +648,14 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "mupdf": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -602,7 +668,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -615,7 +682,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -628,7 +696,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -641,7 +710,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -654,7 +724,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -667,7 +738,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -680,7 +752,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -693,7 +766,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -706,7 +780,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -719,7 +794,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -732,7 +808,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -745,7 +822,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -758,7 +836,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -771,7 +850,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -784,7 +864,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -797,7 +878,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -810,7 +892,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -823,14 +906,16 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
    "label": "case:voc-full",
    "overall": "low",
    "reader_high": [],
-   "reader_signals": {}
+   "reader_signals": {},
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -843,14 +928,16 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
    "label": "case:voc-no-heading",
    "overall": "low",
    "reader_high": [],
-   "reader_signals": {}
+   "reader_signals": {},
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -863,7 +950,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -876,7 +964,8 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
@@ -889,20 +978,23 @@
     "pdfminer": [
      "visual-order"
     ]
-   }
+   },
+   "thresholds": "shipped"
   },
   {
    "file_level": "low",
    "label": "case:voc-tanween",
    "overall": "low",
    "reader_high": [],
-   "reader_signals": {}
+   "reader_signals": {},
+   "thresholds": "shipped"
   }
  ],
- "generated_at": "2026-11-24T21:16:57Z",
+ "generated_at": "2026-11-25T15:59:59Z",
  "summary": {
   "file_high": 0,
   "files": 70,
   "files_with_reader_high": 64
- }
+ },
+ "thresholds": "shipped"
 }

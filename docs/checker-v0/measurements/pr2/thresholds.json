@@ -1,6 +1,7 @@
 {
- "command": "python3 scripts/checker_measure.py --write --clean-dir /var/folders/jf/2jjdkdv97p95nhwgnn9k0tp80000gn/T/pr2-cases-ohrh3sbh --out docs/checker-v0/measurements/pr2",
- "measured_at": "2026-11-24T21:10:53Z",
+ "command": "python3 scripts/checker_measure.py --skip-owner --write --clean-dir /tmp/cases-a --out docs/checker-v0/measurements/pr2",
+ "measured_at": "2026-11-25T15:56:27Z",
+ "missing_docs": {},
  "observed": {
   "clean_docs": {
    "doc:guide": {
@@ -155,12 +156,65 @@
   "clean_files": 70,
   "clean_judged_files": 8,
   "clean_max_gap_ratio": 0.0,
+  "clean_max_lam_alef_rate": 0.88,
   "clean_max_presentation_forms": 0.0,
+  "clean_max_segment_order": 1,
   "clean_max_visual_share": 0.2,
   "clean_min_lexical_all": 0.8333,
   "clean_min_lexical_case": "doc:report",
   "clean_min_lexical_validity": 0.8684,
   "clean_min_pair_f1": 0.0,
+  "clean_segment_order_files": {
+   "case:mix-email-url": {
+    "mupdf": 0,
+    "pdfium": 0,
+    "pdfkit": 1,
+    "pdfminer": 0,
+    "poppler": 0
+   },
+   "case:mix-latin-sentence": {
+    "mupdf": 0,
+    "pdfium": 1,
+    "pdfkit": 0,
+    "pdfminer": 0,
+    "poppler": 0
+   },
+   "case:mon-negative-hindi": {
+    "mupdf": 1,
+    "pdfium": 0,
+    "pdfkit": 0,
+    "pdfminer": 0,
+    "poppler": 0
+   },
+   "case:num-invoice-kv-table": {
+    "mupdf": 1,
+    "pdfium": 0,
+    "pdfkit": 0,
+    "pdfminer": 0,
+    "poppler": 0
+   },
+   "case:num-invoice-latn": {
+    "mupdf": 1,
+    "pdfium": 0,
+    "pdfkit": 0,
+    "pdfminer": 0,
+    "poppler": 0
+   },
+   "case:num-negative-arab": {
+    "mupdf": 1,
+    "pdfium": 0,
+    "pdfkit": 0,
+    "pdfminer": 0,
+    "poppler": 0
+   },
+   "doc:najd": {
+    "mupdf": 1,
+    "pdfium": 0,
+    "pdfkit": 0,
+    "pdfminer": 0,
+    "poppler": 0
+   }
+  },
   "clean_threshold_files": 4,
   "planted": {
    "planted-chrome-raw": {
@@ -169,6 +223,14 @@
     "lexical_max": null,
     "missing_unicode": 0,
     "pair_min": 0.4,
+    "visual_share": 0.2
+   },
+   "planted-lam-alef": {
+    "arabic": 1672,
+    "forms": 0,
+    "lexical_max": 0.8473,
+    "missing_unicode": 0,
+    "pair_min": 1.0,
     "visual_share": 0.2
    },
    "planted-letter-swap": {
@@ -211,6 +273,16 @@
  "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
  "schema_version": "arabic-pdf-check-thresholds/1",
  "values": {
+  "lam_alef_min_runs": {
+   "declared": 200,
+   "source": "declared policy: a transposition density is judged only on a reading with at least 200 Arabic runs; both measured populations are inside it (calibration 473-488 runs, clean 1121-1141), and below it one quoted example is 1/n, not a rate",
+   "value": 200
+  },
+  "lam_alef_rate_per_1000": {
+   "declared": 6.2,
+   "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 0.88 per 1000 runs (doc:report, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12). sqrt(0.8795*43.03)=6.15 -> 6.2. Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact",
+   "value": 6.2
+  },
   "lexical_min_runs": {
    "declared": 20,
    "source": "declared policy: a reading with fewer than 20 Arabic runs is not judged for lexical validity (it can be neither passed nor failed)",
@@ -230,6 +302,11 @@
    "declared": 0.02,
    "source": "arafix DEFAULT_THRESHOLDS[\"presentation_forms\"] (MIT)",
    "value": 0.02
+  },
+  "segment_order_min": {
+   "declared": 1,
+   "source": "declared 1 — determinism, not a tuned floor: a line whose Arabic segment is the exact reverse of a strict majority of the other readers' order has no benign version. The measured clean side is NOT zero (6 hits in 5 files: mupdf 4, pdfkit 1, pdfium 1) and each was checked against the corpus source text and is that reader's real reversal (e.g. mupdf «ريال الاجمالي» for «الإجمالي: 1,200.00 ريال»); raising the value to clean_max+1 would therefore hide the ZATCA files carrying 3-4 reversals. Broken population: the ZATCA SDK's 16 PDF/A-3 samples give pdfium 3-7 per file, 55 in 11 files, and pdfkit/mupdf/poppler/pdfminer 0 (docs/checker-v0/measurements/segment-order.json). A reader signal: it never raises the file",
+   "value": 1
   },
   "tounicode_gap_ratio": {
    "declared": 0.01,
