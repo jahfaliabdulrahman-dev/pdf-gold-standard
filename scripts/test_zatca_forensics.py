@@ -44,13 +44,16 @@ def main() -> int:
     check("head-recorded", bool(re.fullmatch(r"[0-9a-f]{7,40}", art.get("head") or "")), str(art.get("head")))
     check("dirty-recorded", isinstance(art.get("dirty"), bool), str(art.get("dirty")))
     check("dirty-is-false", art.get("dirty") is False, "the artifact must come from a clean tree")
-    check("reader-versions", len(art.get("reader_versions") or {}) == 5, str(art.get("reader_versions")))
+    check("reader-versions", len(art.get("reader_versions") or {}) == 6, str(art.get("reader_versions")))
+    check("arafix-version-recorded", "arafix" in (art.get("reader_versions") or {}), str(art.get("reader_versions")))
+    check("sdk-recorded", bool((art.get("sdk") or {}).get("declared")), str(art.get("sdk")))
 
     runs = art.get("runs") or []
     check("two-runs", len(runs) >= 2, str(len(runs)))
     digests = {r.get("measurements_sha256") for r in runs}
     live = digest(art["summary"], art["files"])
     check("runs-agree", len(digests) == 1, str(digests))
+    check("runs-record-where-they-wrote", all(r.get("out") for r in runs), str([r.get("out") for r in runs]))
     check("digest-matches-the-artifact", digests == {live}, f"{sorted(digests)} vs {live}")
 
     files = art["files"]
@@ -71,29 +74,37 @@ def main() -> int:
           == (sum(f["missing_unicode"] for f in files), sum(f["notdef"] for f in files),
               sum(f["pua"] for f in files)))
 
-    # item 6, as a number: the layer says 16/16, the reader majority says 11/16
+    # item 6, as a number — ONE definition, the artifact's own: a reader «copies all forms» when
+    # pf == pf_file > 0, and a file reaches a reader majority when >= 3 of the five do.
     layer = sum(1 for f in files if f["pf_file"] > 0)
-    four_of_five = sum(1 for f in files
-                       if sum(1 for n in ("pdfkit", "mupdf", "poppler", "pdfminer")
-                              if f["readers"][n]["pf"] > 0) >= 4)
-    # the five that do NOT reach a reader majority: fewer than three of the four readers show any form
-    below_majority = sum(1 for f in files
-                         if sum(1 for n in ("pdfkit", "mupdf", "poppler", "pdfminer")
-                                if f["readers"][n]["pf"] > 0) < 3)
+    copying = {n: sum(1 for f in files if f["readers"][n]["pf"] == f["pf_file"] > 0) for n in art["readers"]}
+    check("summary-readers-copying-all-forms-is-the-count", copying == s["readers_copying_all_forms"],
+          f"{copying} vs {s['readers_copying_all_forms']}")
+    by_majority = sum(1 for f in files
+                      if sum(1 for n in art["readers"] if f["readers"][n]["pf"] == f["pf_file"] > 0) >= 3)
     check("layer-is-16/16", layer == 16, str(layer))
-    check("majority-is-11/16 (four of five readers)", four_of_five == 11, str(four_of_five))
-    check("the other five carry it in the layer only (below a reader majority)", below_majority == 5,
-          str(below_majority))
-    check("pdfminer-shows-forms-in-16/16", sum(1 for f in files if f["readers"]["pdfminer"]["pf"] > 0) == 16)
+    check("majority-is-11/16 (>=3 of 5 readers copy all forms)", by_majority == 11, str(by_majority))
+    check("the other five carry it in the layer only", layer - by_majority == 5, str(layer - by_majority))
 
-    # the measured correlation: pdfium's letter reversal == Type3 fonts == /AF absent
+    # the measured correlation, computed from the ROWS: pdfium's letter reversal == Type3 fonts == /AF absent.
+    # The summary's two lists are only accepted when they equal what the rows say.
     reversed_letters = [f["index"] for f in files if f["readers"]["pdfium"]["visual"]]
-    check("type3-set-is-recorded", s["type3_samples"] == reversed_letters,
-          f"{s['type3_samples']} vs {reversed_letters}")
-    check("af-absent-set-is-the-same", s["af_absent_samples"] == reversed_letters,
-          f"{s['af_absent_samples']} vs {reversed_letters}")
-    check("every-type3-set-file-has-a-type3-font",
-          all(f["type3_fonts"] > 0 for f in files if f["index"] in reversed_letters))
+    type3 = [f["index"] for f in files if f["type3_fonts"] > 0]
+    af_absent = [f["index"] for f in files if not f["af_present"]]
+    check("type3-set-is-the-rows", s["type3_samples"] == type3, f"{s['type3_samples']} vs {type3}")
+    check("af-absent-set-is-the-rows", s["af_absent_samples"] == af_absent, f"{s['af_absent_samples']} vs {af_absent}")
+    check("the three sets are equal", type3 == af_absent == reversed_letters,
+          f"{type3} / {af_absent} / {reversed_letters}")
+    check("producer-is-read-from-the-files", bool(s.get("producer")) and ", " not in s["producer"],
+          str(s.get("producer")))
+
+    # the report and the artifact are ONE claim: the headline numbers must be in both, and the removed claim
+    # must be gone. A document that drifts from its artifact is the stale-line defect this repo keeps paying for.
+    doc = os.path.join(REPO, "docs", "checker-v0", "09-pr3-zatca-forensics-2026-11-24.md")
+    text = open(doc, encoding="utf-8").read()
+    check("doc-states-both-standards", "11/16" in text and "16/16" in text)
+    check("doc-names-the-correlation", "9، 11" in text or "9, 11" in text, "the Type3 set is not named")
+    check("doc-drops-the-recovered-claim", "يستعيدها" not in text)
 
     print(f"\nZATCA FORENSICS PASSED — {passed} check(s); {len(runs)} runs, one digest, head {art['head']}, "
           f"dirty {art['dirty']}")

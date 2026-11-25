@@ -38,7 +38,6 @@ from conformance.readers import available, text_many, MATRIX                    
 
 SAMPLES = 16                     # the SDK's PDF-A3 population, declared: a partial directory measures nothing
 SAMPLE_LINES = 3
-PRODUCER = "iText 7.1.16"        # measured from the files' /Producer (see the 09 report); asserted below
 
 
 def _now() -> str:
@@ -49,7 +48,20 @@ def canonical(payload: dict) -> str:
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
-def measure_file(path: str, ok: dict) -> dict:
+def checker_thresholds() -> dict:
+    """The shipped manifest's arafix keys — the producer must judge orientation with the checker's numbers.
+
+    Calling `visual_order.inspect` without them uses arafix's published defaults, which happen to be equal
+    today; a second measurement path that only *happens* to agree is the drift this repository forbids.
+    """
+    with open(os.path.join(REPO, "arabic_pdf_check", "thresholds.json"), encoding="utf-8") as fh:
+        th = json.load(fh)["values"]
+    return {"visual_order": th["visual_order"]["value"],
+            "presentation_forms": th["presentation_forms"]["value"],
+            "min_arabic_chars": th["min_arabic_chars"]["value"]}
+
+
+def measure_file(path: str, ok: dict, thresholds: dict) -> dict:
     scan = mcid_text.scan(path)
     text = "\n".join(scan["text"].values())
     pf = metrics.pf_count(text)
@@ -58,7 +70,7 @@ def measure_file(path: str, ok: dict) -> dict:
     readers = {}
     for name in ok:
         reading = text_many(name, [path])[0]
-        order = visual_order.inspect(reading)
+        order = visual_order.inspect(reading, thresholds)
         # The artifact's sample is the first ARABIC-bearing lines (that is what the report publishes and
         # what the PR-3 reader table compares) — not the first lines, which are often Latin headers.
         ids = [ln.strip() for ln in reading.splitlines() if metrics.ARABIC.search(ln)][:SAMPLE_LINES]
@@ -74,7 +86,8 @@ def measure_file(path: str, ok: dict) -> dict:
     import pikepdf
     with pikepdf.open(path) as pdf:
         af = pdf.Root.get("/AF") is not None
-    return {"pf_file": pf, "arabic_file": arabic, "af_present": bool(af),
+        producer = str((pdf.docinfo or {}).get("/Producer") or "")
+    return {"pf_file": pf, "arabic_file": arabic, "af_present": bool(af), "producer": producer,
             "type3_fonts": sum(1 for row in scan["fonts"].values() if row.get("subtype") == "/Type3"),
             "pf_share": round(pf / (pf + arabic), 4) if pf + arabic else 0.0,
             "missing_unicode": scan["missing_unicode"], "notdef": scan["notdef"], "pua": scan["pua"],
@@ -86,7 +99,10 @@ def main() -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--samples", required=True, help="the PDF-A3 sample directory (16 PDFs)")
     ap.add_argument("--out", default=None, help="the artifact to write or extend")
-    ap.add_argument("--verify", default=None, help="refuse unless every recorded run has one digest")
+    ap.add_argument("--sdk", default=None, help="the SDK's name and release, e.g. 'zatca-einvoicing-sdk-Java 238-R3.4.8'")
+    ap.add_argument("--expect", default=None,
+                    help="a deposite artifact whose per-sample sha256 values pin this population; a mismatch refuses")
+    ap.add_argument("--verify", default=None, help="re-measure, then refuse unless the fresh digest is a recorded one")
     a = ap.parse_args()
 
     if not os.path.isdir(a.samples):
@@ -95,12 +111,24 @@ def main() -> int:
     if len(files) != SAMPLES:
         raise SystemExit(f"REFUSED — {len(files)} PDF(s) in {a.samples}; the declared population is {SAMPLES}")
     ok, missing = available()
+    if missing:
+        raise SystemExit(f"REFUSED — readers missing: {sorted(missing)}; the declared population is five readers")
     if "pdfkit" not in ok:
         raise SystemExit("REFUSED — PDFKit is missing: this measurement is the macOS five-reader population")
 
+    expected = {}
+    if a.expect:
+        with open(a.expect, encoding="utf-8") as fh:
+            expected = {r["name"]: r["sha256"] for r in json.load(fh)["files"]}
+    thresholds = checker_thresholds()
     rows, per_file = [], {}
     for i, path in enumerate(files, 1):
-        row = {"index": i, "name": os.path.basename(path), "sha256": sha256_file(path), **measure_file(path, ok)}
+        name = os.path.basename(path)
+        sha = sha256_file(path)
+        if expected and expected.get(name) != sha:
+            raise SystemExit(f"REFUSED — {name}: sha256 {sha[:16]}… is not the pinned {str(expected.get(name))[:16]}…; "
+                             f"this is not the declared population")
+        row = {"index": i, "name": name, "sha256": sha, **measure_file(path, ok, thresholds)}
         rows.append(row)
         per_file[os.path.basename(path)] = row
         print(f"   {i:02}/{len(files)} {os.path.basename(path)[:52]:54} pf={row['pf_share']:.4f}")
@@ -120,7 +148,7 @@ def main() -> int:
         "tounicode_gap_signal": sum(1 for r in rows if r["missing_unicode"] > 0),
         "drawn_codes_total": sum(r["codes"] for r in rows),
         "fonts_total": sum(r["fonts"] for r in rows),
-        "producer": PRODUCER,
+        "producer": ", ".join(sorted({r["producer"] for r in rows if r["producer"]})),
         "type3_samples": [r["index"] for r in rows if r["type3_fonts"]],
         "af_absent_samples": [r["index"] for r in rows if not r["af_present"]],
     }
@@ -128,14 +156,18 @@ def main() -> int:
     digest = hashlib.sha256(canonical(measurements).encode("utf-8")).hexdigest()
 
     if a.verify:
+        # VERIFY RE-MEASURES. Comparing the artifact to its own hash proves only that someone recomputed a
+        # hash of the edited numbers — the fresh `digest` above is the measurement, and it must be a recorded one.
         art = json.load(open(a.verify, encoding="utf-8"))
         digests = {run["measurements_sha256"] for run in art.get("runs", [])}
-        live = hashlib.sha256(canonical({"summary": art["summary"], "files": art["files"]}).encode()).hexdigest()
-        if len(digests) != 1 or digests != {live}:
-            print(f"VERIFY FAILED — recorded runs {sorted(digests)} vs the artifact's own measurements {live}")
+        if len(digests) != 1:
+            print(f"VERIFY FAILED — the artifact records {len(digests)} different measurement digests: {sorted(digests)}")
             return 1
-        print(f"VERIFY PASSED — {len(art['runs'])} run(s), one digest {live[:16]}…, head {art['head']}, "
-              f"dirty {art['dirty']}")
+        if digest not in digests:
+            print(f"VERIFY FAILED — the fresh measurement {digest[:16]}… is not a recorded run {sorted(digests)}")
+            return 1
+        print(f"VERIFY PASSED — the fresh re-measurement equals the recorded digest {digest[:16]}…, "
+              f"{len(art['runs'])} run(s), head {art['head']}, dirty {art['dirty']}")
         return 0
 
     payload = {"schema_version": "zatca-forensics/2", "generated_at": _now(), "runs": []}
@@ -147,17 +179,24 @@ def main() -> int:
         commit, dirty = cert_mod.pipeline_commit()
     except cert_mod.CertError:
         commit, dirty = "unknown", None
-    payload.update({"head": commit, "dirty": dirty, "source": os.path.basename(os.path.dirname(a.samples)),
-                    "samples_dir": os.path.basename(a.samples), "readers": list(ok),
-                    "missing_readers": sorted(missing),
-                    "reader_versions": {n: ok[n].version() for n in ok},
+    sdk = (a.sdk or "").strip()
+    if not sdk:
+        raise SystemExit("REFUSED — --sdk '<name> <release>' is required: per-file sha256 identifies content, not "
+                         "the release the content came from")
+    payload.update({"head": commit, "dirty": dirty,
+                    "sdk": {"declared": sdk, "directory": os.path.basename(os.path.normpath(a.samples)),
+                            "parent": os.path.basename(os.path.dirname(os.path.normpath(a.samples)))},
+                    "readers": list(ok), "missing_readers": sorted(missing),
+                    "reader_versions": {**{n: ok[n].version() for n in ok},
+                                        "arafix": visual_order.VERSION},
                     "environment": {"platform": platform.platform(), "machine": platform.machine(),
                                     "python": platform.python_version(), "readers_declared": len(MATRIX)},
                     "summary": summary, "files": rows})
     # Every run is kept: two runs agreeing is the fact the artifact exists to carry, and replacing a run with
     # its own digest would leave exactly one — a claim that the numbers are stable, with nothing behind it.
     payload["runs"] = payload["runs"] + [{"generated_at": payload["generated_at"],
-                                          "measurements_sha256": digest, "head": commit, "dirty": dirty}]
+                                          "measurements_sha256": digest, "head": commit, "dirty": dirty,
+                                          "out": os.path.abspath(a.out or "")}]
     payload["runs"] = payload["runs"][-5:]
     if not a.out:
         raise SystemExit("REFUSED — --out is required to deposit a run (or use --verify)")
