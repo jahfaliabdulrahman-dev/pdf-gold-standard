@@ -231,6 +231,8 @@ jobs:
           python3 scripts/test_build_wiki_lexicon.py
           python3 scripts/test_lexicon_compare.py
           python3 scripts/test_calibration.py
+          python3 scripts/test_measure_guards.py
+          python3 scripts/test_lam_alef_separation.py
           python3 scripts/test_no_owner_names.py --self-test
 
       - name: Foreign producer set — LibreOffice output, measured by the checker
@@ -245,10 +247,17 @@ jobs:
 
       - name: The checker — measure the planted and clean sets (the acceptance numbers, produced here)
         run: |
-          # The acceptance numbers are PRODUCED here, not trusted from a committed file: the four planted
-          # files must be high with their named signal, and no clean file may be high. --skip-owner: the
-          # owner's corpus is not on this machine and is never downloaded, never deposited.
-          python3 scripts/checker_measure.py --skip-owner --tolerance 0.05 --out /tmp/checker-measure
+          # The acceptance numbers are PRODUCED here, not trusted from a committed file: every planted file
+          # must be at its declared level with its named signal, and no clean file may be high. The acceptance
+          # runs on the SHIPPED manifest and the DERIVED one; the tolerance is per key, and `lexical_validity`
+          # carries the one measured drift (CI's PDFKit on macos-15: derived 0.64 vs shipped 0.67, −0.03 on run
+          # 45490733095). `najd.pdf` is not built on the runner (its font is not shipped) — declared by name, and
+          # the gap is recorded in the artifact instead of silently shrinking the clean set.
+          # --skip-owner: the owner's corpus is not on this machine and is never downloaded, never deposited.
+          python3 scripts/checker_measure.py --skip-owner \
+            --tolerance lexical_validity=0.03 \
+            --allow-missing 'najd=font not shipped; built locally only' \
+            --out /tmp/checker-measure
 
       - name: Upload the checker measurement (the environment's raw thresholds)
         if: always()
@@ -287,6 +296,9 @@ jobs:
     # same file, and no conformance ratchet. This job's poppler is the distribution's UNPINNED build — it is a
     # smoke run of the checker, not the conformance floors (those pin 26.11.0 and refuse other builds; the
     # floor job is macOS). The distinction is deliberate and named here.
+    # `needs: build` is deliberate: the Arabic acceptance below runs on `guide-v2-ar.pdf`, the document the
+    # macOS job builds. If that job fails this one does not run at all — a skipped job is not a pass.
+    needs: build
     runs-on: ubuntu-latest
     env:
       CHROME_VERSION: "157.0.8103.78"
@@ -332,35 +344,25 @@ jobs:
           python3 scripts/test_build_wiki_lexicon.py
           python3 scripts/test_lexicon_compare.py
           python3 scripts/test_calibration.py
+          python3 scripts/test_measure_guards.py
+          python3 scripts/test_lam_alef_separation.py
           python3 scripts/test_no_owner_names.py --self-test
           python3 scripts/test_ci_wiring.py
-      - name: The checker with four Linux readers
+      - name: Download the built guide (the Arabic document this job judges)
+        uses: actions/download-artifact@v5
+        with:
+          name: guide-v2-pdf
+
+      - name: The Arabic acceptance — the guide the build job wrote, four Linux readers
         run: |
-          python3 - <<'PY'
-          import json
-          import os
-          import tempfile
-          import fitz
-          from arabic_pdf_check import blind
-          # A clean LATIN file: the Arabic blind-acceptance set is the macOS job's, and this job's claim is the
-          # four-reader matrix on Linux (Chrome's Arabic fixture crashed a Chromium snapshot; the CfT control
-          # above still proves the browser works). A Latin layer triggers no Arabic signal and keeps the file low.
-          pdf = os.path.join(tempfile.mkdtemp(prefix="linux-check-"), "clean-latn.pdf")
-          doc = fitz.open()
-          page = doc.new_page()
-          page.insert_text((72, 72), "Invoice 2026-11-24  Total 1,234.56 SAR  Thank you for your business.",
-                           fontname="helv", fontsize=12)
-          doc.save(pdf)
-          doc.close()
-          thresholds = json.load(open("arabic_pdf_check/thresholds.json", encoding="utf-8"))
-          report = blind.check(pdf, thresholds)
-          expected = {"pdfium", "mupdf", "poppler", "pdfminer"}
-          assert set(report["readers"]) == expected, report["readers"]
-          assert "pdfkit" in report["missing_readers"], report["missing_readers"]
-          assert report["risk"]["file"]["level"] != "high", report["risk"]["file"]
-          print("readers:", ", ".join(sorted(report["readers"])), "· file:",
-                report["risk"]["file"]["level"], "· pdfkit:", report["missing_readers"]["pdfkit"])
-          PY
+          # Audit 2026-11-25, item 1: this job used to prove the reader matrix on a LATIN file and never ran an
+          # Arabic acceptance on the API's target platform. Now every planted fixture must be at its declared
+          # level with its named signal, and the guide must stay file != high. PDFKit is macOS-only here and
+          # must be DECLARED missing: a Linux run that silently has it, or silently lacks poppler, is not this run.
+          python3 scripts/checker_acceptance.py --build --fixtures "$RUNNER_TEMP/fixtures" \
+            --clean guide-v2-ar.pdf \
+            --require-readers pdfium,mupdf,poppler,pdfminer \
+            --require-missing pdfkit
 
   release:
     # the only job with write access: publishes the file the build job has just gated
