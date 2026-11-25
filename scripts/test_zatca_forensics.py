@@ -95,6 +95,12 @@ def main() -> int:
     check("af-absent-set-is-the-rows", s["af_absent_samples"] == af_absent, f"{s['af_absent_samples']} vs {af_absent}")
     check("the three sets are equal", type3 == af_absent == reversed_letters,
           f"{type3} / {af_absent} / {reversed_letters}")
+    # the five Type3 files: pdfminer copies every form, PDFKit copies SOME (3-9) in each of the five, and
+    # mupdf/poppler show base letters — the sentence 09 prints must be this, not «none» and not «all»
+    pfkit = [f["readers"]["pdfkit"]["pf"] for f in files if f["type3_fonts"] > 0]
+    check("type3: PDFKit copies some forms in every one of the five", all(3 <= x <= 9 for x in pfkit), str(pfkit))
+    check("type3: mupdf and poppler show base letters in all five",
+          all(f["readers"][n]["pf"] == 0 for f in files if f["type3_fonts"] > 0 for n in ("mupdf", "poppler")))
     check("producer-is-read-from-the-files", bool(s.get("producer")) and ", " not in s["producer"],
           str(s.get("producer")))
 
@@ -105,6 +111,8 @@ def main() -> int:
     check("doc-states-both-standards", "11/16" in text and "16/16" in text)
     check("doc-names-the-correlation", "9، 11" in text or "9, 11" in text, "the Type3 set is not named")
     check("doc-drops-the-recovered-claim", "يستعيدها" not in text)
+    check("doc-has-no-55-segment-claim", "55 مقطعًا" not in text)
+    check("doc-cites-52", "52 مقطعًا" in text)
 
     print(f"\nZATCA FORENSICS PASSED — {passed} check(s); {len(runs)} runs, one digest, head {art['head']}, "
           f"dirty {art['dirty']}")
