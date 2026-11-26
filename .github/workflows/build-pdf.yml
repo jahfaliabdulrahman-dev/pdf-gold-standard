@@ -234,6 +234,7 @@ jobs:
           python3 scripts/test_measure_guards.py
           python3 scripts/test_lam_alef_separation.py
           python3 scripts/test_no_owner_names.py --self-test
+          python3 scripts/test_zatca_forensics.py
 
       - name: Foreign producer set — LibreOffice output, measured by the checker
         run: |
@@ -347,6 +348,7 @@ jobs:
           python3 scripts/test_measure_guards.py
           python3 scripts/test_lam_alef_separation.py
           python3 scripts/test_no_owner_names.py --self-test
+          python3 scripts/test_zatca_forensics.py
           python3 scripts/test_ci_wiring.py
       - name: Download the built guide (the Arabic document this job judges)
         uses: actions/download-artifact@v5

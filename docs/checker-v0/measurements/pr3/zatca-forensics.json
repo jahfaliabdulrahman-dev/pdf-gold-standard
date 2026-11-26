@@ -1,0 +1,1420 @@
+{
+ "schema_version": "zatca-forensics/2",
+ "generated_at": "2026-11-25T16:26:26Z",
+ "runs": [
+  {
+   "generated_at": "2026-11-25T16:25:48Z",
+   "measurements_sha256": "115f3cf0198e527e510744ebe14645d1608ac861b4808847deb71a6ba790e3cb",
+   "head": "c62c92930035f2247f4b448e6b26e95bdc3809c7",
+   "dirty": false,
+   "out": "/tmp/zatca-art2.json"
+  },
+  {
+   "generated_at": "2026-11-25T16:26:26Z",
+   "measurements_sha256": "115f3cf0198e527e510744ebe14645d1608ac861b4808847deb71a6ba790e3cb",
+   "head": "c62c92930035f2247f4b448e6b26e95bdc3809c7",
+   "dirty": false,
+   "out": "/tmp/zatca-art2.json"
+  }
+ ],
+ "head": "c62c92930035f2247f4b448e6b26e95bdc3809c7",
+ "dirty": false,
+ "sdk": {
+  "declared": "zatca-einvoicing-sdk-Java 238-R3.4.8",
+  "directory": "PDF-A3",
+  "parent": "Samples"
+ },
+ "readers": [
+  "pdfium",
+  "pdfkit",
+  "mupdf",
+  "poppler",
+  "pdfminer"
+ ],
+ "missing_readers": [],
+ "reader_versions": {
+  "pdfium": "5.15.2",
+  "pdfkit": "PDFKit 27.2.1",
+  "mupdf": "2.1",
+  "poppler": "26.07.0",
+  "pdfminer": "pdfplumber 0.11.10 · pdfminer.six 20260107",
+  "arafix": "1.2.0"
+ },
+ "environment": {
+  "platform": "macOS-27.2.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "python": "3.12.12",
+  "readers_declared": 5
+ },
+ "summary": {
+  "files": 16,
+  "pf_file_positive": 16,
+  "readers_copying_all_forms": {
+   "pdfium": 0,
+   "pdfkit": 11,
+   "mupdf": 11,
+   "poppler": 11,
+   "pdfminer": 16
+  },
+  "readers_reading_reversed": {
+   "pdfium": 5,
+   "pdfkit": 0,
+   "mupdf": 0,
+   "poppler": 0,
+   "pdfminer": 16
+  },
+  "missing_unicode_total": 0,
+  "notdef_total": 0,
+  "pua_total": 0,
+  "file_level_high_signal": "presentation-forms (16/16)",
+  "visual_order_file_level": 0,
+  "tounicode_gap_signal": 0,
+  "drawn_codes_total": 33264,
+  "fonts_total": 71,
+  "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+  "type3_samples": [
+   9,
+   11,
+   12,
+   13,
+   14
+  ],
+  "af_absent_samples": [
+   9,
+   11,
+   12,
+   13,
+   14
+  ]
+ },
+ "files": [
+  {
+   "index": 1,
+   "name": "Advance Payment adjustments with foreign currency invoice.pdf",
+   "sha256": "d2f30f0b0b310c5a68bb1659f4c5b83ced2d3ab70d26992cd7ca9ed24c2fa918",
+   "pf_file": 839,
+   "arabic_file": 196,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.8106,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 2584,
+   "readers": {
+    "pdfium": {
+     "chars": 2825,
+     "pf": 0,
+     "arabic": 1039,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2670,
+     "pf": 839,
+     "arabic": 196,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2745,
+     "pf": 839,
+     "arabic": 196,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 3126,
+     "pf": 839,
+     "arabic": 196,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2670,
+     "pf": 839,
+     "arabic": 196,
+     "visual": true,
+     "score": 0.9222,
+     "confidence": 0.922,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 2,
+   "name": "Advance Payment adjustments with rate change scenarios.pdf",
+   "sha256": "763f381669553d1b2648587e5a44848caec545ea0e6232c924730aef619e1fe2",
+   "pf_file": 812,
+   "arabic_file": 191,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.8096,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 2508,
+   "readers": {
+    "pdfium": {
+     "chars": 2743,
+     "pf": 0,
+     "arabic": 1007,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2591,
+     "pf": 812,
+     "arabic": 191,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2666,
+     "pf": 812,
+     "arabic": 191,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 3035,
+     "pf": 812,
+     "arabic": 191,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2591,
+     "pf": 812,
+     "arabic": 191,
+     "visual": true,
+     "score": 0.9221,
+     "confidence": 0.922,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 3,
+   "name": "Advance Payment adjustments.pdf",
+   "sha256": "c4ea556b4aba97e56d7dafa31c5e73910636114d38b62b68a4939fc8954317cd",
+   "pf_file": 812,
+   "arabic_file": 191,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.8096,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 2510,
+   "readers": {
+    "pdfium": {
+     "chars": 2745,
+     "pf": 0,
+     "arabic": 1007,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2593,
+     "pf": 812,
+     "arabic": 191,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2668,
+     "pf": 812,
+     "arabic": 191,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 3037,
+     "pf": 812,
+     "arabic": 191,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2593,
+     "pf": 812,
+     "arabic": 191,
+     "visual": true,
+     "score": 0.9221,
+     "confidence": 0.922,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 4,
+   "name": "Credit Note of a Simplified Tax Invoice.pdf",
+   "sha256": "9c6422699b841738c4f6e5b22b3183020a13f62ae660662c6dbf85df0e5711ad",
+   "pf_file": 481,
+   "arabic_file": 146,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.7671,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 1688,
+   "readers": {
+    "pdfium": {
+     "chars": 1776,
+     "pf": 0,
+     "arabic": 635,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Credit Note دائن إشعار",
+      "الرقم التسلسلي",
+      "نوع الإشعار"
+     ]
+    },
+    "pdfkit": {
+     "chars": 1688,
+     "pf": 481,
+     "arabic": 146,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "إﺷﻌﺎر داﺋﻦ Credit Note",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﻧﻮع اﻹﺷﻌﺎر"
+     ]
+    },
+    "mupdf": {
+     "chars": 1774,
+     "pf": 481,
+     "arabic": 146,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Credit Note إﺷﻌﺎر داﺋﻦ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﻧﻮع اﻹﺷﻌﺎر"
+     ]
+    },
+    "poppler": {
+     "chars": 1837,
+     "pf": 481,
+     "arabic": 146,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Credit Note ‫إﺷﻌﺎر داﺋﻦ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﻧﻮع اﻹﺷﻌﺎر‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 1688,
+     "pf": 481,
+     "arabic": 146,
+     "visual": true,
+     "score": 0.9266,
+     "confidence": 0.927,
+     "sample": [
+      "Credit Note ﻦﺋاد رﺎﻌﺷإ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Type of note رﺎﻌﺷﻹا عﻮﻧ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 5,
+   "name": "Exempt Tax Invoice.pdf",
+   "sha256": "9065cb2d2b32d6ffb0034ccc3c497c9fbf4a12e18d07790d113ede63a2bbf830",
+   "pf_file": 683,
+   "arabic_file": 172,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.7988,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 2274,
+   "readers": {
+    "pdfium": {
+     "chars": 2490,
+     "pf": 0,
+     "arabic": 859,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2347,
+     "pf": 683,
+     "arabic": 172,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2424,
+     "pf": 683,
+     "arabic": 172,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 2758,
+     "pf": 683,
+     "arabic": 172,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2347,
+     "pf": 683,
+     "arabic": 172,
+     "visual": true,
+     "score": 0.9252,
+     "confidence": 0.925,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 6,
+   "name": "Export invoice.pdf",
+   "sha256": "857ffd3ad08f3f97e7c7715772c5f77feaad4fe0cc2ab20b94bc11a927c78295",
+   "pf_file": 692,
+   "arabic_file": 171,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.8019,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 3,
+   "codes": 2158,
+   "readers": {
+    "pdfium": {
+     "chars": 2362,
+     "pf": 0,
+     "arabic": 867,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2225,
+     "pf": 692,
+     "arabic": 171,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2298,
+     "pf": 692,
+     "arabic": 171,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 2585,
+     "pf": 692,
+     "arabic": 171,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2227,
+     "pf": 692,
+     "arabic": 171,
+     "visual": true,
+     "score": 0.9244,
+     "confidence": 0.924,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 7,
+   "name": "Nominal supply invoice.pdf",
+   "sha256": "d0e3b9298455e37e99e8d1321607b33cef384a6bda37d7bd3df34c8593d4f493",
+   "pf_file": 386,
+   "arabic_file": 99,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.7959,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 1267,
+   "readers": {
+    "pdfium": {
+     "chars": 1338,
+     "pf": 0,
+     "arabic": 488,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Simplified Tax invoice مبسطة ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 1266,
+     "pf": 386,
+     "arabic": 99,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ ﻣﺒﺴﻄﺔ Simplified Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 1340,
+     "pf": 386,
+     "arabic": 99,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Simplified Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ ﻣﺒﺴﻄﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 1583,
+     "pf": 386,
+     "arabic": 99,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ ﻣﺒﺴﻄﺔ ‪Simplified Tax invoice‬‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 1266,
+     "pf": 386,
+     "arabic": 99,
+     "visual": true,
+     "score": 0.9213,
+     "confidence": 0.921,
+     "sample": [
+      "Simplified Tax invoice ﺔﻄﺴﺒﻣ ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 8,
+   "name": "Out of Scope Standard Tax Invoice.pdf",
+   "sha256": "1ef4ce4c1f35de0d63b8debc19959441660eaf43983e720925259b20c5fb67ac",
+   "pf_file": 694,
+   "arabic_file": 186,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.7886,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 2255,
+   "readers": {
+    "pdfium": {
+     "chars": 2469,
+     "pf": 0,
+     "arabic": 884,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2326,
+     "pf": 694,
+     "arabic": 186,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2404,
+     "pf": 694,
+     "arabic": 186,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 2730,
+     "pf": 694,
+     "arabic": 186,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2326,
+     "pf": 694,
+     "arabic": 186,
+     "visual": true,
+     "score": 0.9237,
+     "confidence": 0.924,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 9,
+   "name": "Self-billing invoice.pdf",
+   "sha256": "700c7aca568dc013562cc66afe8c801e9ba261a11b4f9529fe446584cfc539ce",
+   "pf_file": 648,
+   "arabic_file": 169,
+   "af_present": false,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 5,
+   "pf_share": 0.7931,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 9,
+   "codes": 2059,
+   "readers": {
+    "pdfium": {
+     "chars": 2262,
+     "pf": 0,
+     "arabic": 821,
+     "visual": true,
+     "score": 0.6108,
+     "confidence": 0.611,
+     "sample": [
+      "Self Billed tax invoice ةيبيرض ةيتاذ فاتورة",
+      "مقرلا يلسلستلا",
+      "خيرات اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2184,
+     "pf": 4,
+     "arabic": 813,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "فاتورة ذاتية ضريبية Self Billed tax invoice",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2196,
+     "pf": 0,
+     "arabic": 819,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Self Billed tax invoice فاتورة ذاتية ضريبية",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "poppler": {
+     "chars": 2490,
+     "pf": 0,
+     "arabic": 821,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Self Billed tax invoice ‫فاتورة ذاتية ضريبية‬",
+      "‫الرقم التسلسلي‬",
+      "‫تاريخ اصدار الفاتورة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2126,
+     "pf": 648,
+     "arabic": 169,
+     "visual": true,
+     "score": 0.9223,
+     "confidence": 0.922,
+     "sample": [
+      "Self Billed tax invoice ﺔﻴﺒﻳﺮﺿ ﺔﻴﺗاذ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 10,
+   "name": "Simplified Tax Invoice with Zero Rated Item.pdf",
+   "sha256": "10c6bf8b67c246c4ed8f608738bda73557af8f97c3ba5b89d268c9e5e76b2bba",
+   "pf_file": 451,
+   "arabic_file": 120,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.7898,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 1476,
+   "readers": {
+    "pdfium": {
+     "chars": 1646,
+     "pf": 0,
+     "arabic": 575,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Simplified Tax invoice مبسطة ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 1487,
+     "pf": 451,
+     "arabic": 120,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ ﻣﺒﺴﻄﺔ Simplified Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 1560,
+     "pf": 451,
+     "arabic": 120,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Simplified Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ ﻣﺒﺴﻄﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 1840,
+     "pf": 451,
+     "arabic": 120,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ ﻣﺒﺴﻄﺔ ‪Simplified Tax invoice‬‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 1487,
+     "pf": 451,
+     "arabic": 120,
+     "visual": true,
+     "score": 0.9246,
+     "confidence": 0.925,
+     "sample": [
+      "Simplified Tax invoice ﺔﻄﺴﺒﻣ ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 11,
+   "name": "Simplified_Invoice.pdf",
+   "sha256": "e608fff54d6b88eee2f4ec68c79291e433b5971de4846806be3bb581b4aa5021",
+   "pf_file": 445,
+   "arabic_file": 112,
+   "af_present": false,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 5,
+   "pf_share": 0.7989,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 9,
+   "codes": 1414,
+   "readers": {
+    "pdfium": {
+     "chars": 1581,
+     "pf": 0,
+     "arabic": 560,
+     "visual": true,
+     "score": 0.6598,
+     "confidence": 0.66,
+     "sample": [
+      "Simplified Tax invoice ةطسبم ةيبيرض فاتورة",
+      "مقرلا يلسلستلا",
+      "خيرات اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 1474,
+     "pf": 3,
+     "arabic": 554,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "فاتورة ضريبية مبسطة Simplified Tax invoice",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "mupdf": {
+     "chars": 1499,
+     "pf": 0,
+     "arabic": 559,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Simplified Tax invoice فاتورة ضريبية مبسطة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "poppler": {
+     "chars": 1791,
+     "pf": 0,
+     "arabic": 560,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "‫فاتورة ضريبية مبسطة ‪Simplified Tax invoice‬‬",
+      "‫الرقم التسلسلي‬",
+      "‫تاريخ اصدار الفاتورة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 1429,
+     "pf": 445,
+     "arabic": 112,
+     "visual": true,
+     "score": 0.9255,
+     "confidence": 0.926,
+     "sample": [
+      "Simplified Tax invoice ﺔﻄﺴﺒﻣ ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 12,
+   "name": "Standard_Credit_Note.pdf",
+   "sha256": "f43ab98e6a1ba09924ef62ee1bb3dc8f8ca44d310b29d999941e70bd337fa011",
+   "pf_file": 719,
+   "arabic_file": 207,
+   "af_present": false,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 6,
+   "pf_share": 0.7765,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 10,
+   "codes": 2382,
+   "readers": {
+    "pdfium": {
+     "chars": 2606,
+     "pf": 0,
+     "arabic": 935,
+     "visual": true,
+     "score": 0.5501,
+     "confidence": 0.55,
+     "sample": [
+      "Credit Note نئاد إشعار",
+      "مقرلا يلسلستلا",
+      "نوع الإشعار"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2519,
+     "pf": 9,
+     "arabic": 917,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "إشعار دائن Credit Note",
+      "الرقم التسلسلي",
+      "نوع اﻹشعار"
+     ]
+    },
+    "mupdf": {
+     "chars": 2534,
+     "pf": 0,
+     "arabic": 933,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Credit Note إشعار دائن",
+      "الرقم التسلسلي",
+      "نوع اإلشعار"
+     ]
+    },
+    "poppler": {
+     "chars": 2865,
+     "pf": 0,
+     "arabic": 935,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Credit Note ‫إشعار دائن‬",
+      "‫الرقم التسلسلي‬",
+      "‫نوع اإلشعار‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2457,
+     "pf": 719,
+     "arabic": 207,
+     "visual": true,
+     "score": 0.9251,
+     "confidence": 0.925,
+     "sample": [
+      "Credit Note ﻦﺋاد رﺎﻌﺷإ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Type of note رﺎﻌﺷﻹا عﻮﻧ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 13,
+   "name": "Standard_Debit_Note.pdf",
+   "sha256": "7d0c71c828c5b6f5ea533501813695548e84da2de2e6568fed238d6757da32c6",
+   "pf_file": 723,
+   "arabic_file": 203,
+   "af_present": false,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 6,
+   "pf_share": 0.7808,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 11,
+   "codes": 2386,
+   "readers": {
+    "pdfium": {
+     "chars": 2610,
+     "pf": 0,
+     "arabic": 935,
+     "visual": true,
+     "score": 0.5501,
+     "confidence": 0.55,
+     "sample": [
+      "Debit Note نيدم إشعار",
+      "مقرلا يلسلستلا",
+      "نوع الإشعار"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2523,
+     "pf": 9,
+     "arabic": 917,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "إشعار مدين Debit Note",
+      "الرقم التسلسلي",
+      "نوع اﻹشعار"
+     ]
+    },
+    "mupdf": {
+     "chars": 2538,
+     "pf": 0,
+     "arabic": 933,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Debit Note إشعار مدين",
+      "الرقم التسلسلي",
+      "نوع اإلشعار"
+     ]
+    },
+    "poppler": {
+     "chars": 2869,
+     "pf": 0,
+     "arabic": 935,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Debit Note ‫إشعار مدين‬",
+      "‫الرقم التسلسلي‬",
+      "‫نوع اإلشعار‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2461,
+     "pf": 723,
+     "arabic": 203,
+     "visual": true,
+     "score": 0.9247,
+     "confidence": 0.925,
+     "sample": [
+      "Debit Note ﻦﻳﺪﻣ رﺎﻌﺷإ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Type of note رﺎﻌﺷﻹا عﻮﻧ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 14,
+   "name": "Standard_Invoice.pdf",
+   "sha256": "21efd17554d67051cb79940c8e7049859b1b6ca42cd3f1ec0b6f9d4edf16a304",
+   "pf_file": 693,
+   "arabic_file": 179,
+   "af_present": false,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 5,
+   "pf_share": 0.7947,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 9,
+   "codes": 2135,
+   "readers": {
+    "pdfium": {
+     "chars": 2342,
+     "pf": 0,
+     "arabic": 876,
+     "visual": true,
+     "score": 0.6443,
+     "confidence": 0.644,
+     "sample": [
+      "Tax invoice ةيبيرض فاتورة",
+      "مقرلا يلسلستلا",
+      "خيرات اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2265,
+     "pf": 4,
+     "arabic": 868,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "فاتورة ضريبية Tax invoice",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2273,
+     "pf": 0,
+     "arabic": 874,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice فاتورة ضريبية",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "poppler": {
+     "chars": 2580,
+     "pf": 0,
+     "arabic": 876,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫فاتورة ضريبية‬",
+      "‫الرقم التسلسلي‬",
+      "‫تاريخ اصدار الفاتورة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2205,
+     "pf": 693,
+     "arabic": 179,
+     "visual": true,
+     "score": 0.9238,
+     "confidence": 0.924,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 15,
+   "name": "Summary Invoice.pdf",
+   "sha256": "d17f1ff19629fa159a1e101fb6b3de71dae6a5a193feb1119a9e6ded3ad38689",
+   "pf_file": 643,
+   "arabic_file": 172,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.789,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 2193,
+   "readers": {
+    "pdfium": {
+     "chars": 2419,
+     "pf": 0,
+     "arabic": 820,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2272,
+     "pf": 643,
+     "arabic": 172,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2349,
+     "pf": 643,
+     "arabic": 172,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 2713,
+     "pf": 643,
+     "arabic": 172,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2272,
+     "pf": 643,
+     "arabic": 172,
+     "visual": true,
+     "score": 0.9225,
+     "confidence": 0.922,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  },
+  {
+   "index": 16,
+   "name": "Third party billing.pdf",
+   "sha256": "8b0ac8ab496bc9f92553355fc3e64b5b76d5ff2eb39bde4da799c159e16e65d9",
+   "pf_file": 621,
+   "arabic_file": 164,
+   "af_present": true,
+   "producer": "iText® 7.1.16 ©2000-2021 iText Group NV (AGPL-version)",
+   "type3_fonts": 0,
+   "pf_share": 0.7911,
+   "missing_unicode": 0,
+   "notdef": 0,
+   "pua": 0,
+   "fonts": 2,
+   "codes": 1975,
+   "readers": {
+    "pdfium": {
+     "chars": 2171,
+     "pf": 0,
+     "arabic": 790,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ضريبية فاتورة",
+      "الرقم التسلسلي",
+      "تاريخ اصدار الفاتورة"
+     ]
+    },
+    "pdfkit": {
+     "chars": 2036,
+     "pf": 621,
+     "arabic": 164,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ Tax invoice",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "mupdf": {
+     "chars": 2112,
+     "pf": 621,
+     "arabic": 164,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ",
+      "اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ",
+      "ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة"
+     ]
+    },
+    "poppler": {
+     "chars": 2384,
+     "pf": 621,
+     "arabic": 164,
+     "visual": false,
+     "score": -1.0,
+     "confidence": null,
+     "sample": [
+      "Tax invoice ‫ﻓﺎﺗﻮرة ﺿﺮﻳﺒﻴﺔ‬",
+      "‫اﻟﺮﻗﻢ اﻟﺘﺴﻠﺴﻠﻲ‬",
+      "‫ﺗﺎرﻳﺦ اﺻﺪار اﻟﻔﺎﺗﻮرة‬"
+     ]
+    },
+    "pdfminer": {
+     "chars": 2036,
+     "pf": 621,
+     "arabic": 164,
+     "visual": true,
+     "score": 0.9222,
+     "confidence": 0.922,
+     "sample": [
+      "Tax invoice ﺔﻴﺒﻳﺮﺿ ةرﻮﺗﺎﻓ",
+      "Invoice reference number (IRN) ﻲﻠﺴﻠﺴﺘﻟا ﻢﻗﺮﻟا",
+      "Issue Date ةرﻮﺗﺎﻔﻟا راﺪﺻا ﺦﻳرﺎﺗ"
+     ]
+    }
+   }
+  }
+ ]
+}
