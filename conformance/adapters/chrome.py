@@ -61,6 +61,23 @@ def _patch(module, name: str, value):
         setattr(module, name, old)
 
 
+def launch_args() -> list[str]:
+    """The renderer's flags, with the one declared environment exception.
+
+    On the hosted Ubuntu runner Chrome aborts before printing (measured 2026-11-25: `num-invoice-latn` →
+    crashpad stack, exit 1) because the runner does not grant unprivileged user namespaces, so Chrome's SUID
+    zygote sandbox cannot start. `--no-sandbox` is a real loss of isolation, so it is granted ONLY on Linux
+    under `CI` — an ephemeral machine rendering a case this repository wrote — and never on a developer's
+    machine. `--disable-dev-shm-usage` covers the runner's small /dev/shm, which crashes the renderer the same
+    way. `PDF_GOLD_CHROME_ARGS` is the escape hatch for a one-off run, and it is additive.
+    """
+    args = ["--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--no-first-run",
+            "--virtual-time-budget=20000"]
+    if sys.platform.startswith("linux") and os.environ.get("CI"):
+        args += ["--no-sandbox", "--disable-dev-shm-usage"]
+    return args + os.environ.get("PDF_GOLD_CHROME_ARGS", "").split()
+
+
 def render_case(case: dict, out_pdf: str, engine: str = "chrome") -> dict:
     """Build one case. Returns the producer facts the certificate needs (no timings, no paths)."""
     if engine not in ("chrome", "chrome-raw"):
@@ -74,9 +91,8 @@ def render_case(case: dict, out_pdf: str, engine: str = "chrome") -> dict:
         raw = os.path.join(work, "raw.pdf")
         with open(src, "w", encoding="utf-8") as fh:
             fh.write(markup)
-        r = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
-                            f"--user-data-dir={os.path.join(work, 'profile')}", "--no-first-run",
-                            "--virtual-time-budget=20000", f"--print-to-pdf={raw}", "file://" + src],
+        r = subprocess.run([chrome, *launch_args(), f"--user-data-dir={os.path.join(work, 'profile')}",
+                            f"--print-to-pdf={raw}", "file://" + src],
                            capture_output=True, text=True, timeout=240)
         if not os.path.exists(raw) or os.path.getsize(raw) == 0:
             raise BuildError(f"chrome produced no file for {case['id']}: {(r.stderr or r.stdout)[-300:]}")

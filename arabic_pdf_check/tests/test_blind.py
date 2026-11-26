@@ -9,6 +9,7 @@ and the fixture cannot drift from its generator. Expectation per file:
   · planted-presentation-forms   → presentation-forms
   · planted-no-tounicode         → tounicode-gaps (every drawn code lost its Unicode value)
   · planted-letter-swap          → lexical-validity (letters shaped, order correct, words nonexistent)
+  · planted-lam-alef             → lam-alef-transposition (a density; declared `medium`, not `high`)
 
 A clean file may have a READER at high risk (pdfminer returns the stored order on our files — a true
 finding about that reader); its `risk.file.level` must never be high. That is the assignment's
@@ -49,8 +50,10 @@ for name, path in built["planted"].items():
     report = blind.check(path, thresholds)
     ids = [s["id"] for s in report["signals"]]
     expected = checker_fixtures.PLANTED[name]
-    check(f"planted:{name}:file-high", report["risk"]["file"]["level"] == "high",
-          f"file={report['risk']['file']['level']} signals={ids}")
+    declared = checker_fixtures.PLANTED_LEVEL.get(name, "high")
+    check(f"planted:{name}:file-level",
+          blind.LEVELS[report["risk"]["file"]["level"]] >= blind.LEVELS[declared],
+          f"declared {declared} file={report['risk']['file']['level']} signals={ids}")
     check(f"planted:{name}:named-signal", expected in ids, f"expected {expected}, got {ids}")
 
 clean = blind.check(built["clean"], thresholds)
@@ -144,5 +147,5 @@ print()
 if FAILS:
     print(f"BLIND ACCEPTANCE FAILED — {FAILS}")
     raise SystemExit(1)
-print(f"BLIND ACCEPTANCE PASSED — {len(built['planted'])}/{len(built['planted'])} planted high with their "
-      f"named signal; the clean file is not high")
+print(f"BLIND ACCEPTANCE PASSED — {len(built['planted'])}/{len(built['planted'])} planted at their declared "
+      f"level with their named signal; the clean file is not high")

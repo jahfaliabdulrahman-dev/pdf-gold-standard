@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Every report has the shape it declares — the blind report against `report.v1.json`, a free-text
 certificate against `certificate.v2.json`."""
+import ast
 import json
 import os
 import sys
@@ -33,6 +34,27 @@ try:
     check("blind-report-schema", True)
 except jsonschema.ValidationError as exc:
     check("blind-report-schema", False, f"{exc.message} at {list(exc.absolute_path)}")
+# Every id the checker can EMIT must be in the schema's enum. The blind report built above exercises one file and
+# never trips the newer signals, so it cannot see this drift: a shipped report carrying `segment-order` failed
+# validation while the suite stayed green (2026-11-25). The ids are read from the SOURCE, not from a list here —
+# a list would be a second registry, free to drift with the first.
+def emitted_ids(path: str) -> set[str]:
+    tree = ast.parse(open(path, encoding="utf-8").read())
+    out = set()
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "_finding"
+                and node.args):
+            for sub in ast.walk(node.args[0]):
+                if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and "-" in sub.value:
+                    out.add(sub.value)
+    return out
+
+
+emitted = emitted_ids(os.path.join(REPO, "arabic_pdf_check", "blind.py"))
+declared = set(schema["$defs"]["signal"]["properties"]["id"]["enum"])
+check("every-emitted-signal-id-is-declared", emitted <= declared, f"undeclared: {sorted(emitted - declared)}")
+check("signal-ids-are-read-from-source", len(emitted) >= 10, f"{sorted(emitted)}")
+
 check("blind-mode-is-blind", report["mode"] == "blind" and "verdict" not in report, str(report.get("mode")))
 check("blind-no-percentage-key", not any(k in report for k in ("score", "ratio", "percentage", "pass")), "")
 

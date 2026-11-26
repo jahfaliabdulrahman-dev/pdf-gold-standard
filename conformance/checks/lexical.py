@@ -45,15 +45,35 @@ ARABIC_RUN = re.compile(r"[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FF]
 DIACRITICS = re.compile(r"[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]")
 
 
+VARIANT_FOLDS = (("أ", "ا"), ("إ", "ا"), ("آ", "ا"), ("ٱ", "ا"), ("ى", "ي"), ("ة", "ه"),
+                 ("ؤ", "و"), ("ئ", "ي"))
+
+
+def _fold_letters(word: str) -> str:
+    """The letter-variant fold only — the last step of `normalize`, and the whole of a token's key."""
+    for src, dst in VARIANT_FOLDS:
+        word = word.replace(src, dst)
+    return word
+
+
 def normalize(word: str) -> str:
     """The one normalization — declared above, applied to the text AND to the lexicon at load time."""
     word = fold(word)                            # arafix's fold, through the one wrapper (visual_order.fold)
     word = unicodedata.normalize("NFC", word)
     word = DIACRITICS.sub("", word)
-    for src, dst in (("أ", "ا"), ("إ", "ا"), ("آ", "ا"), ("ٱ", "ا"), ("ى", "ي"), ("ة", "ه"),
-                     ("ؤ", "و"), ("ئ", "ي")):
-        word = word.replace(src, dst)
-    return word
+    return _fold_letters(word)
+
+
+def tokens(text: str) -> list[tuple[str, str]]:
+    """[(word as read, its normalised key)] — the ONE tokenisation pipeline.
+
+    `words()` is this function's keys; `segment_order` needs the two forms side by side: the comparison runs on
+    the key, and the report's excerpt must quote the word as read (a printed normalised word is not a quote of
+    the file). Two pipelines would let an Arabic run mean two things in one report.
+    """
+    folded = unicodedata.normalize("NFC", fold(text or ""))
+    stripped = DIACRITICS.sub("", folded)
+    return [(w, _fold_letters(w)) for w in ARABIC_RUN.findall(stripped) if len(w) >= MIN_LETTERS]
 
 
 @lru_cache(maxsize=2)
@@ -73,7 +93,7 @@ def words(text: str) -> list[str]:
     variants): cutting first broke every word that carried a mark or a kashida, and turned presentation
     forms into `[]`. The lexicon is normalized the same way at load, so a token and an entry are comparable.
     """
-    return [w for w in ARABIC_RUN.findall(normalize(text or "")) if len(w) >= MIN_LETTERS]
+    return [key for _raw, key in tokens(text)]
 
 
 def validity(text: str, vocab: frozenset[str] | None = None) -> dict:

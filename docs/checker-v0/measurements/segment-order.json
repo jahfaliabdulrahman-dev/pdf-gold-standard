@@ -1,0 +1,1261 @@
+{
+ "schema": "segment-order/2",
+ "generated_at": "2026-11-25T16:36:12Z",
+ "sets": {
+  "zatca": {
+   "dir": "PDF-A3",
+   "command": "python3 scripts/segment_order_measure.py --dir /Users/abdurrahmanjahfali/.cache/zatca-sdk/238-R3.4.8/zatca-einvoicing-sdk-Java-238-R3.4.8/Data/Samples/PDF-A3 --set zatca --out /tmp/seg-final.json",
+   "head": "2d416362de1b90b755456794750e4e73228e483d",
+   "dirty": false,
+   "measured_at": "2026-11-25T16:35:31Z",
+   "files": [
+    {
+     "label": "zatca-01",
+     "sha256": "d2f30f0b0b310c5a68bb1659f4c5b83ced2d3ab70d26992cd7ca9ed24c2fa918",
+     "bytes": 2727152,
+     "readers": {
+      "pdfium": 5,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-02",
+     "sha256": "763f381669553d1b2648587e5a44848caec545ea0e6232c924730aef619e1fe2",
+     "bytes": 2636111,
+     "readers": {
+      "pdfium": 5,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-03",
+     "sha256": "c4ea556b4aba97e56d7dafa31c5e73910636114d38b62b68a4939fc8954317cd",
+     "bytes": 2634276,
+     "readers": {
+      "pdfium": 5,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-04",
+     "sha256": "9c6422699b841738c4f6e5b22b3183020a13f62ae660662c6dbf85df0e5711ad",
+     "bytes": 1356419,
+     "readers": {
+      "pdfium": 2,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-05",
+     "sha256": "9065cb2d2b32d6ffb0034ccc3c497c9fbf4a12e18d07790d113ede63a2bbf830",
+     "bytes": 2125435,
+     "readers": {
+      "pdfium": 6,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-06",
+     "sha256": "857ffd3ad08f3f97e7c7715772c5f77feaad4fe0cc2ab20b94bc11a927c78295",
+     "bytes": 2002732,
+     "readers": {
+      "pdfium": 6,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-07",
+     "sha256": "d0e3b9298455e37e99e8d1321607b33cef384a6bda37d7bd3df34c8593d4f493",
+     "bytes": 1197409,
+     "readers": {
+      "pdfium": 3,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-08",
+     "sha256": "1ef4ce4c1f35de0d63b8debc19959441660eaf43983e720925259b20c5fb67ac",
+     "bytes": 2146837,
+     "readers": {
+      "pdfium": 6,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-09",
+     "sha256": "700c7aca568dc013562cc66afe8c801e9ba261a11b4f9529fe446584cfc539ce",
+     "bytes": 543507,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-10",
+     "sha256": "10c6bf8b67c246c4ed8f608738bda73557af8f97c3ba5b89d268c9e5e76b2bba",
+     "bytes": 1372441,
+     "readers": {
+      "pdfium": 4,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-11",
+     "sha256": "e608fff54d6b88eee2f4ec68c79291e433b5971de4846806be3bb581b4aa5021",
+     "bytes": 475802,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-12",
+     "sha256": "f43ab98e6a1ba09924ef62ee1bb3dc8f8ca44d310b29d999941e70bd337fa011",
+     "bytes": 578407,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-13",
+     "sha256": "7d0c71c828c5b6f5ea533501813695548e84da2de2e6568fed238d6757da32c6",
+     "bytes": 589733,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-14",
+     "sha256": "21efd17554d67051cb79940c8e7049859b1b6ca42cd3f1ec0b6f9d4edf16a304",
+     "bytes": 537531,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-15",
+     "sha256": "d17f1ff19629fa159a1e101fb6b3de71dae6a5a193feb1119a9e6ded3ad38689",
+     "bytes": 2134647,
+     "readers": {
+      "pdfium": 5,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "zatca-16",
+     "sha256": "8b0ac8ab496bc9f92553355fc3e64b5b76d5ff2eb39bde4da799c159e16e65d9",
+     "bytes": 1880915,
+     "readers": {
+      "pdfium": 5,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    }
+   ],
+   "totals": {
+    "pdfium": 52,
+    "pdfkit": 0,
+    "mupdf": 0,
+    "poppler": 0,
+    "pdfminer": 0
+   },
+   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; one vote per reader per multiset; letter-reversed readings do not vote"
+  },
+  "clean-documents": {
+   "dir": "clean-docs",
+   "command": "python3 scripts/segment_order_measure.py --dir /tmp/clean-docs --set clean-documents --out /tmp/seg-final.json",
+   "head": "2d416362de1b90b755456794750e4e73228e483d",
+   "dirty": false,
+   "measured_at": "2026-11-25T16:35:36Z",
+   "files": [
+    {
+     "label": "clean-documents-01",
+     "sha256": "10af891fe838c9726100df5dcb6cfde91b92ae07da89adb920b67b13543a5bcc",
+     "bytes": 1790793,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-documents-02",
+     "sha256": "72f41bbedace37037ec1f7b5c7d2bb6d192d79579b38130915ec0a0a353e5f37",
+     "bytes": 1032522,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 1,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-documents-03",
+     "sha256": "b7a219c022613c9c0ecf4360ff57eddb8a12eac1fdfc16c4f5920643d388f8b0",
+     "bytes": 2372546,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-documents-04",
+     "sha256": "083f133efd2dff8fe1c991b9d031d2d9fc600d886932c90c1fe03bfe3951b69d",
+     "bytes": 2391018,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    }
+   ],
+   "totals": {
+    "pdfium": 0,
+    "pdfkit": 0,
+    "mupdf": 1,
+    "poppler": 0,
+    "pdfminer": 0
+   },
+   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; one vote per reader per multiset; letter-reversed readings do not vote"
+  },
+  "clean-corpus-cases": {
+   "dir": "cases-a",
+   "command": "python3 scripts/segment_order_measure.py --dir /tmp/cases-a --set clean-corpus-cases --out /tmp/seg-final.json",
+   "head": "2d416362de1b90b755456794750e4e73228e483d",
+   "dirty": false,
+   "measured_at": "2026-11-25T16:36:12Z",
+   "files": [
+    {
+     "label": "clean-corpus-cases-01",
+     "sha256": "bc61952915cb03fc8933b6a2560765be5166518b46be0e80996a0ac4862ece76",
+     "bytes": 21660,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-02",
+     "sha256": "3cea5720025dfd5d61f956675d537ec16f8abedf6c8946cbbae278f1f67e399f",
+     "bytes": 19099,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-03",
+     "sha256": "c11b42fca157844193e570b7a11af7b3b6b372063c5d2ab3c2990d2666847d9a",
+     "bytes": 17504,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-04",
+     "sha256": "9c21b4d463265603049f0bac8706371091147441a87855d317165440b27ed8a7",
+     "bytes": 16610,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-05",
+     "sha256": "a17672caa06630a05302c1656c486e881046507b05131aca5790fbb258a5a41e",
+     "bytes": 12986,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-06",
+     "sha256": "fe938d41b2602b105a8e606f9870e1b62741b839cfaaa9738f58a79b7a7a3a8d",
+     "bytes": 23566,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-07",
+     "sha256": "69b2af8dbb57df87c970500219d89a547968de34afb36c74d139d5a8a9902288",
+     "bytes": 16399,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-08",
+     "sha256": "b8f2355e7c531df865938677549d2fcd10cf8958f5c1ca2b238a2cdc0a566693",
+     "bytes": 17138,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-09",
+     "sha256": "95a1a52ebbd04f74b00ab0cd48f735e47c3eaa16728065e20cf240cc3e1baa85",
+     "bytes": 20210,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-10",
+     "sha256": "b83306d87de66fbc204b2049cd884d1ef2d6d72d8fdd1f864d516fee1cb0d3c6",
+     "bytes": 17235,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-11",
+     "sha256": "02123c6210ecfdb7c9b1802ca82fdfe5ef5f45b48ff9e2d4ff6b81d1c069d5ae",
+     "bytes": 16479,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-12",
+     "sha256": "a7457511566cb1ee65d5fd27c930c1de0467943aaa9168b7d693863e0e4e8928",
+     "bytes": 16663,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-13",
+     "sha256": "60a48721075cbd999053bcd92c472e11b2a6a79e581c604ee53cfa1c49ad58a6",
+     "bytes": 15297,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-14",
+     "sha256": "5a26615b3bb78476807aee4a34ee0b074636cf1f9f716f399926b18b5ec9d029",
+     "bytes": 19395,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-15",
+     "sha256": "8a81d61e65a3065da37d9520aa60ed575afc0badcdf7595ac91785573254533a",
+     "bytes": 17929,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-16",
+     "sha256": "59bca6bf25cac3bfd468a031aa36107c17ee28c9cbdd9d7182be6591ec713f08",
+     "bytes": 13403,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-17",
+     "sha256": "d4f64e27ef65b30f86c5bea040c859309c5d1bf9026bf9a42be68993d24e4424",
+     "bytes": 17312,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-18",
+     "sha256": "c75bf127862d6d3b668de68c20a22d30d8f04493070046758fb2ca99fa956cb5",
+     "bytes": 20939,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-19",
+     "sha256": "32b7422fb21734e84ae8f7485ff9de85e033cd4f479880684b2ff7cbea15a13a",
+     "bytes": 33021,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-20",
+     "sha256": "70ace798cf0cdf704afec98e9503121461edb37b9ce72fe6c3b1e8a514cfe3c9",
+     "bytes": 16901,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-21",
+     "sha256": "ad81b8ea61ba81f804b7ed33b5ffd747094b31321713273aac3de9f7488e5947",
+     "bytes": 18018,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-22",
+     "sha256": "29b7cb0169c009dfd929d7de07867923ae0b505f84d149fd91629b107027bdf0",
+     "bytes": 16486,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-23",
+     "sha256": "07fe3504e49cb00975b800b30ccca5b06797fab9aeba62b121ab5116eb7bea15",
+     "bytes": 16794,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 1,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-24",
+     "sha256": "3a1edad8fd7cc889ad8f4134ea9d1daea59d87c0ccb251e9ea693320fc24a0b2",
+     "bytes": 18960,
+     "readers": {
+      "pdfium": 1,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-25",
+     "sha256": "f33b4f382fc898335a76819bb918307280aff215427a633a9b382c8c9d4621ca",
+     "bytes": 17379,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-26",
+     "sha256": "6a4dd832e3ae75112b33e146bdaa897b1e9cc2c7bcc07d12bad0860e7ef7e672",
+     "bytes": 16894,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-27",
+     "sha256": "bfc54e93a8079b645e635af9d8a0edf915c1bb4b9cba1d769157f26c26b9db98",
+     "bytes": 18393,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-28",
+     "sha256": "4fc643b403d1269769dc37b43610e545a746efc77215ff38d7702e75cb05f0de",
+     "bytes": 16692,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-29",
+     "sha256": "a9351030839284f7a0d0bb2ebf50a5e6416fec59f4a309a0ffc4a6795389f4ab",
+     "bytes": 23798,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-30",
+     "sha256": "e5db9df5098dc66adafc2d487fcd31d8dbab18b51a7613170e825fdfd29585ff",
+     "bytes": 13018,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-31",
+     "sha256": "c6266ad228238fda3ff86ff5ac9717815002bcbaed4e7149b8816466c4b02a5c",
+     "bytes": 13303,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 1,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-32",
+     "sha256": "aaf74da2b1687da8d1f2d41da8958c3dfedf97ad10feeb1a73cc351596355b0b",
+     "bytes": 16716,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-33",
+     "sha256": "fc81fbd88ae4c27ecc752eb2e9c0af1cd5226ccc02e0bc12a81d46125df8655a",
+     "bytes": 22044,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-34",
+     "sha256": "4a2bafa7759c1dd1dff558b9b27285aa2c54947fa476cc4e36a2d4fb945093b7",
+     "bytes": 15282,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-35",
+     "sha256": "1ea8c7bc62ce9a6c272ef191624cfbbad093c9435cf49f8b19b023b3b3721c07",
+     "bytes": 16879,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-36",
+     "sha256": "8941d290b77d370dbde5935609173037b9ec1ea147308433cc21170da41a3004",
+     "bytes": 17528,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-37",
+     "sha256": "fe84ebc4968dfece199c9c02a8cdc3014dc3b8a1c21f1b15a3659643033f43f9",
+     "bytes": 22254,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-38",
+     "sha256": "5fcfdff74e6468b10e005c1ff6ba38d235c9b73154d1df2f8a723d6044c2a194",
+     "bytes": 17202,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-39",
+     "sha256": "ed9fd00f5914fa0115d85196ffd66ae83160d9336ac5f156f9220fae355170b5",
+     "bytes": 26512,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 1,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-40",
+     "sha256": "8ad59d618c2fcda29460afd9c8f062e6c131a23d1866376ee8f61ca6ff0cf0dc",
+     "bytes": 20169,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 1,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-41",
+     "sha256": "35c94d7967e78fe35c9dc552b44b16976b7f44df731392ac608a18f8584748e2",
+     "bytes": 17469,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 1,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-42",
+     "sha256": "333e1fb48e867fdabfe782c45a1317b2c81f19f0f8f6ae3b45dac05da0c6c898",
+     "bytes": 16784,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-43",
+     "sha256": "9db2d3ecc913785c2387f16d454d668858d3781b2fd055a86af9923193cea32e",
+     "bytes": 19868,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-44",
+     "sha256": "5090eadc94fae74ce0849cd53b67e4a899853961473cbed45692eac1fdb7f8bc",
+     "bytes": 16223,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-45",
+     "sha256": "39f5cf08deabad1e8a0707f6a8590ed3a8b050fbb4f2491168c7a737e73c648d",
+     "bytes": 18134,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-46",
+     "sha256": "395257c049da6175dd617aa24b3f0cf1228a99455cb7c2ae5595a43d7e9a7aa6",
+     "bytes": 18838,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-47",
+     "sha256": "b263c77be07501c15ee9cca57ed0cfb720343e4934a6338d03c56231d7d84b1e",
+     "bytes": 14662,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-48",
+     "sha256": "5d6bbb304c3465e271594318e552958e0651caac543ee2e3b1e06865928ac04d",
+     "bytes": 13504,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-49",
+     "sha256": "ef01b5c4434d5800cb1984818ee4ed544d10f6f9c4a2f169e5fdb5c1f5d6437c",
+     "bytes": 18401,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-50",
+     "sha256": "333d4bcd61cfd86b3e2dcc66c046224298fdfde1925cb37ee6825e6e591d132e",
+     "bytes": 16752,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-51",
+     "sha256": "f9b75cb31663d84ba7e862b83e67380baff4ac1e72dff5a90a989f0916522087",
+     "bytes": 13244,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-52",
+     "sha256": "e7dcb078e3e59701d409d0edb66483aaeac635d96ba674c751ccd31090a63fa1",
+     "bytes": 21995,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-53",
+     "sha256": "b3deb13bd801acf34adf3b00c334fa84cbb39f101b6710e30a9751ca42d52d31",
+     "bytes": 29099,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-54",
+     "sha256": "4dcf174b740208c5d49a108ee883dc17cc6f932c32337ad9d2a0d4bb59a0caee",
+     "bytes": 23201,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-55",
+     "sha256": "fadd4d9ad56d3a39b0164058aaca56a1197f77fae94a903a8cfdd3938af68b0e",
+     "bytes": 60119,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-56",
+     "sha256": "8701956fb626143afe4115afad5434927f79c20b4b14a120d77f43029194b659",
+     "bytes": 21957,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-57",
+     "sha256": "3b5646849d3e62850a3a4e876cb7060b3372a200841eba9d86b8e73a31c6fbed",
+     "bytes": 24058,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-58",
+     "sha256": "8c67c8757610c1f9e8be9406adc895b72c6f20f082a4166b09e233c5444285d6",
+     "bytes": 21810,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-59",
+     "sha256": "034a07ee464260bbf07db7f77ea4c13284bce987797078f8d64164290b6f952d",
+     "bytes": 18913,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-60",
+     "sha256": "e3f11262b9a655fe320f1005388a29d373f2c02a5e750e2d0021250b35551c63",
+     "bytes": 22419,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-61",
+     "sha256": "848edbc6c57ea3e678763e6335ae6528706de60c7f7d712ad5c47fc3f6a5fc46",
+     "bytes": 25734,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-62",
+     "sha256": "6c6354788d2e2552a1223bc8fd716bb783bbd4c7e08c99fe666395cebde49d6d",
+     "bytes": 16036,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-63",
+     "sha256": "0291166b1e5a13f4fc77229efd6cc7e31befc87034188807234e73a5b3c3bb1b",
+     "bytes": 19710,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-64",
+     "sha256": "bc7264462de1e19af6cc74cf23dab52e84bdb134d6221b179a976d0f9aeb3730",
+     "bytes": 21417,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-65",
+     "sha256": "400fd63516f57d148686363cd9b65116c8526939b94f59af038c7474a510f2f8",
+     "bytes": 25576,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    },
+    {
+     "label": "clean-corpus-cases-66",
+     "sha256": "efbbd1394d27d3f2976ab491aad85ebcd26ae8def957fe0efdc93959462fe977",
+     "bytes": 21296,
+     "readers": {
+      "pdfium": 0,
+      "pdfkit": 0,
+      "mupdf": 0,
+      "poppler": 0,
+      "pdfminer": 0
+     },
+     "voters": 5,
+     "missing_readers": []
+    }
+   ],
+   "totals": {
+    "pdfium": 1,
+    "pdfkit": 1,
+    "mupdf": 4,
+    "poppler": 0,
+    "pdfminer": 0
+   },
+   "rule": "a reader is counted when a line's Arabic segment (>=2 words) is the exact reverse of a strict majority of the readers' order; one vote per reader per multiset; letter-reversed readings do not vote"
+  }
+ }
+}

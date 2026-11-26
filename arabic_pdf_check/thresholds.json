@@ -1,7 +1,7 @@
 {
   "schema_version": "arabic-pdf-check-thresholds/1",
-  "command": "python3 scripts/checker_measure.py --write --clean-dir /var/folders/jf/2jjdkdv97p95nhwgnn9k0tp80000gn/T/pr2-cases-ohrh3sbh --out docs/checker-v0/measurements/pr2",
-  "measured_at": "2026-11-24T21:10:53Z",
+  "command": "python3 scripts/checker_measure.py --skip-owner --write --clean-dir /tmp/cases-a --out docs/checker-v0/measurements/pr2",
+  "measured_at": "2026-11-25T16:49:23Z",
   "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
   "values": {
     "presentation_forms": {
@@ -27,12 +27,27 @@
     "lexical_validity": {
       "value": 0.67,
       "declared": 0.4,
-      "source": "derived: clean_set_minimum - 0.20 (higher = better); four real documents, clean minimum 0.8684 (governing doc:report); 4 documents of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The PR-2 calibration file `٣ - درس - البايثون` is a measured lam-alef transposition (21 in pdfium, mupdf and poppler; 0 in PDFKit; PDFMiner reads reversed), so its defect is not lexical-only; its lexical ratio is above this floor and is NOT repaired by lowering the threshold."
+      "source": "derived: clean_set_minimum - 0.20 (higher = better); clean minimum 0.8684 (governing doc:report); 4 document(s) of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The calibration lesson's defect is a measured lam-alef transposition, not lexical-only (measurements/lam-alef-separation.json); its lexical ratio is above this floor and is NOT repaired by lowering the threshold."
     },
     "lexical_min_runs": {
       "value": 20,
       "declared": 20,
       "source": "declared policy: a reading with fewer than 20 Arabic runs is not judged for lexical validity (it can be neither passed nor failed)"
+    },
+    "lam_alef_rate_per_1000": {
+      "value": 6.2,
+      "declared": 6.2,
+      "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 0.88 per 1000 runs (doc:report, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12). sqrt(0.8795*43.03)=6.15 -> 6.2. Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact"
+    },
+    "lam_alef_min_runs": {
+      "value": 200,
+      "declared": 200,
+      "source": "declared policy: a transposition density is judged only on a reading with at least 200 Arabic runs; both measured populations are inside it (calibration 473-488 runs, clean 1121-1141), and below it one quoted example is 1/n, not a rate"
+    },
+    "segment_order_min": {
+      "value": 2,
+      "declared": 2,
+      "source": "derived: clean maximum + 1 (declared floor 2). The clean set (70 files) measures at most 1 reversed segment(s) per reader, 7 in 7 file(s) across all readers — reader findings on clean files (a reader that reverses a segment around a number or a Latin run), not file defects. Broken side, measured in measurements/segment-order.json: PDFium returns 52 reversed segment(s) in 11 of the 16 samples, 2-6 per affected file, and the signal fires at count >= value, so 1 < 2 <= 2 separates. A reader signal: it never raises the file"
     }
   },
   "observed": {
@@ -239,7 +254,70 @@
         "pair_min": 1.0,
         "lexical_max": 0.0,
         "missing_unicode": 0
+      },
+      "planted-lam-alef": {
+        "forms": 0,
+        "arabic": 1672,
+        "visual_share": 0.2,
+        "pair_min": 1.0,
+        "lexical_max": 0.8473,
+        "missing_unicode": 0
+      }
+    },
+    "clean_max_lam_alef_rate": 0.88,
+    "clean_max_segment_order": 1,
+    "clean_segment_order_total": 7,
+    "clean_segment_order_files": {
+      "doc:najd": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:mix-email-url": {
+        "pdfium": 0,
+        "pdfkit": 1,
+        "mupdf": 0,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:mix-latin-sentence": {
+        "pdfium": 1,
+        "pdfkit": 0,
+        "mupdf": 0,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:mon-negative-hindi": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:num-invoice-kv-table": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:num-invoice-latn": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:num-negative-arab": {
+        "pdfium": 0,
+        "pdfkit": 0,
+        "mupdf": 1,
+        "poppler": 0,
+        "pdfminer": 0
       }
     }
-  }
+  },
+  "missing_docs": {}
 }
