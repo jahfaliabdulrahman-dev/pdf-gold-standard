@@ -8,7 +8,7 @@
 نحتاج تحليل الـ diff. المطلوب: عيّنة نجد بخمسة أوزان، ألوان من الموقع، كل الميزات عدا الكتابة، ونسخة طباعة بلا أزرار. السياق إصلاح ToUnicode للمسافة بشرط cmap+عرض، وVOCALISED_CLAIM=False.
 
 الفرق يظهر:
-- build.py أضاف نسخ خام لـ raw.kept.pdf. لا علاقة مباشر بالميزات، قد يكون جزئي؟
+- build.py أضاف نسخ خام لـ `raw.kept.pdf`. لا علاقة مباشر بالميزات، قد يكون جزئي؟
 - docs/reviews/najd-qwen-consult.md ملف جديد فارغ تقريباً (عنوان فقط). قد يكون ناقص/غير مثبت.
 - najd.html أضاف بطاقة "لا ادّعاء لنسخ التشكيل" تقول البسملة معروضة لكن ترتيب علاماتها لا يُنسخ حرفيًا في MuPDF — قِسنا ذلك.
 - najd_spec.py: أضاف VOCALISED_CLAIM=False وVOCALISED_REASON. عبّأ PAGE_INK, PAGE_WORDS, EXPECTED_LINKS=43. غيّر REF_LABELS "محرّك Chrome Headless".

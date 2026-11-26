@@ -21,6 +21,7 @@ import re
 from conformance import certificate as cert_mod
 from conformance import reference
 from conformance.checks import lexical, mcid_text, metrics, structure, visual_order
+from conformance.checks import segment_order
 from conformance.checks.metrics import arabic_count, pf_count, pf_share
 from conformance.hashing import sha256_file
 from conformance.readers import MATRIX, available, declared, isolate, limitations
@@ -81,6 +82,20 @@ def recovery_state(judged: dict, lexical_th: float) -> tuple[bool | None, str, i
     if len(failing) >= need:
         return False, "failed", need, passing, failing
     return None, "split", need, passing, failing
+
+
+def lam_alef_majority(judged: dict, rate: float, min_runs: int) -> tuple[dict[str, float], dict[str, float], int | None]:
+    """(all rates, the readers at or above `rate`, the majority needed) — the rule, one copy.
+
+    Everything is returned because the report needs all three: «N of M judged readers» is a different claim
+    from «N of N», and a reader's own rate decides whether its single transposition is a near-miss or the
+    finding itself. Only a reading with at least `min_runs` Arabic runs is judged. `check` and
+    `test_lam_alef_signal` call this function; a second copy of the arithmetic would let the test certify a
+    rule the report does not run.
+    """
+    rates = {n: v["lam_alef"] / v["runs"] * 1000.0 for n, v in judged.items() if v["runs"] >= min_runs}
+    over = {n: r for n, r in rates.items() if r >= rate}
+    return rates, over, majority_needed(len(rates))
 
 
 def visual_orders(texts: dict, th: dict) -> dict:
@@ -248,6 +263,7 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
     lexical_th = th["lexical_validity"]["value"]
     lexical_min_runs = th["lexical_min_runs"]["value"]
     lexicon = lexical.lexicon(lexicon_path)
+    seg_findings = segment_order.findings({n: texts[n] for n in ok}, lexicon, pages)
     lex = {name: lexical.validity(text, lexicon) for name, text in texts.items()}
     # A short reading is not judged: 20 runs is the declared floor, below it a report about words is not
     # about this file. The map-recovery question is answered only by the readers that can judge words.
@@ -328,6 +344,27 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
             readers=lexical_failing,
             counts={n: {"runs": judged[n]["runs"], "known": judged[n]["known"]} for n in lexical_failing},
             threshold=lexical_th, min_runs=lexical_min_runs))
+    # Lam-alef: a doubled alef is orthographically impossible («اال»), so the measure is a DENSITY, not a
+    # count — the clean population's only hit is `report.pdf` quoting the defect itself («األتمتة», 1 of 1140
+    # runs = 0.88/1000), while the calibration lesson measures 43.0–43.7/1000 in three readers. The shipped
+    # value is the geometric midpoint of those two measured bounds (measurements/lam-alef-separation.json), and
+    # the rate is judged only on a reading with enough runs for a rate to mean anything.
+    lam_rates, lam_over, need_lam = lam_alef_majority(judged, th["lam_alef_rate_per_1000"]["value"],
+                                                      th["lam_alef_min_runs"]["value"])
+    if need_lam is not None and len(lam_over) >= need_lam:
+        file_signals.append(_finding(
+            "lam-alef-transposition", "medium", "file", "high",
+            f"{len(lam_over)} of {len(lam_rates)} judged readers carry a lam-alef transposition density at or "
+            f"above {th['lam_alef_rate_per_1000']['value']} per 1000 Arabic runs ("
+            + ", ".join(f"{n} {r:.1f}" for n, r in sorted(lam_over.items()))
+            + ") — a doubled alef is orthographically impossible: the words are shaped and the letters are "
+              "transposed",
+            readers=sorted(lam_over), rates={n: round(r, 2) for n, r in sorted(lam_over.items())},
+            judged=len(lam_rates),
+            counts={n: judged[n]["lam_alef"] for n in lam_over},
+            runs={n: judged[n]["runs"] for n in lam_over},
+            threshold=th["lam_alef_rate_per_1000"]["value"],
+            min_runs=th["lam_alef_min_runs"]["value"]))
     # Reader disagreement: ONLY the deterministic form ships. The metric form (`content_f1` between
     # readers) was measured on the clean set and REFUSED: single-word and digit-only corpus cases reach 0.0
     # between clean readers (docs/checker-v0/measurements/clean.json), so no threshold above zero separates
@@ -338,6 +375,22 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
     for name, text in texts.items():
         signals = []
         order = orders[name]
+        seg = seg_findings.get(name) or []
+        if len(seg) >= th["segment_order_min"]["value"]:
+            sample = seg[0]
+            # `display` is the reader's words with presentation forms folded to base letters and marks stripped
+            # — the report says «كما يعرضها القارئ», because it is not a byte-for-byte quote: a reader that
+            # returned U+FExx or a tashkeel is shown in its letters, not its codepoints.
+            shown = reference.sanitize_line(" ".join(sample["display"]))[:80]
+            signals.append(_finding(
+                "segment-order", "medium", "reader", "high",
+                f"{len(seg)} line(s) whose Arabic segment is the exact reverse of the order {sample['agree']} of "
+                f"{sample['voters']} voting readers agree on — the letters are logical and the words are not "
+                f"(كما يعرضها القارئ، بأشكال العرض مطويّة إلى حروفه): «{shown}»",
+                lines=len(seg), voters=sample["voters"], agree=sample["agree"], page=sample["page"],
+                example={"words": sample["words"][:6], "display": sample["display"][:6],
+                         "reversed_of": sample["reversed_of"][:6]},
+                threshold=th["segment_order_min"]["value"]))
         if name in judged and judged[name]["ratio"] < lexical_th:
             signals.append(_finding(
                 "lexical-validity", "high", "file" if lexical_file_high else "reader", "high",
@@ -345,15 +398,19 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
                 f"the lexicon — the remaining runs are shaped letters that do not make Arabic words",
                 runs=judged[name]["runs"], known=judged[name]["known"],
                 reversed_known=judged[name]["reversed"], threshold=lexical_th))
-        elif name in judged and judged[name].get("lam_alef"):
-            # The owner's P3: a word near a lexicon word with a decomposed lam-alef (e.g. «األهداف») is
-            # RECORDED, never raised. The reading still passes the lexical floor; the case is evidence.
+        elif name in judged and judged[name].get("lam_alef") and name in lam_rates \
+                and lam_rates[name] < th["lam_alef_rate_per_1000"]["value"]:
+            # A near-miss is a reader whose OWN rate is BELOW the file-level density: the reading passes the
+            # floor and carries one or two transpositions (a document quoting the defect). A reader at or above
+            # the density is the file finding itself and must not be described as «below the threshold».
             signals.append(_finding(
-                "lexical-validity", "low", "reader", "medium",
-                f"{judged[name]['lam_alef']} lam-alef transposition(s) (e.g. «األهداف» for «الأهداف») — the "
-                f"reading is above the lexical floor; recorded as a near-miss, not raised",
+                "lam-alef-transposition", "low", "reader", "medium",
+                f"{judged[name]['lam_alef']} lam-alef transposition(s) (e.g. «األهداف» for «الأهداف») — "
+                f"{lam_rates[name]:.1f} per 1000 runs, below the file-level {th['lam_alef_rate_per_1000']['value']}"
+                f"; recorded, not raised",
                 runs=judged[name]["runs"], known=judged[name]["known"],
-                lam_alef=judged[name]["lam_alef"], threshold=lexical_th))
+                lam_alef=judged[name]["lam_alef"], rate=round(lam_rates[name], 2),
+                threshold=th["lam_alef_rate_per_1000"]["value"]))
         if order["visual"]:
             confidence = "high" if (order["confidence"] or 0) >= 0.9 else \
                          ("medium" if (order["confidence"] or 0) >= 0.6 else "low")
@@ -469,6 +526,10 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
             "المحارف لا تُتحقَّق هنا — قيد معلن، لا حكم",
             "صحة الكلمات تُحكم على 20 تشكيلة عربية على الأقل في نص القارئ؛ ما دونها لا يُحكم عليه (لا يُعدّ "
             "مرورًا ولا فشلًا)",
+            (f"كثافة انقلاب لام-ألف (لكل 1000 تشكيلة) تُحكم على قراءة تحمل {th['lam_alef_min_runs']['value']} "
+             f"تشكيلة على الأقل وبأغلبية القرّاء؛ الانقلاب المفرد (مستند يقتبس العيب) يُسجَّل ولا يُرفع"),
+            "ترتيب المقاطع يُحكم بأغلبية القرّاء: ملف يخزّن الترتيب البصري حقّ لا عيب، وقارئ يعيد ترتيب الكلمات "
+            "عكس الأغلبية هو الإشارة؛ فإن عكس القرّاء كلهم الترتيب نفسه فلا ناخب يخالف ولا ترفع الإشارة (حدّ معلن)",
             "الكلمة الموصولة بجاراتها في نصّ القارئ تُعدّ تشكيلة واحدة (لا تُجزَّأ بالمعجم)؛ نصّ كثير الوصل قد "
             "يخفض النسبة — لذلك العتبة مشتقة بهامش 0.20 ولا يرفع الحكم إلا فشل الأغلبية",
             f"الأغلبية تُحسب على القرّاء الذين قرؤوا: {len(ok)} من {len(MATRIX)} للاتجاه، و{len(judged)} "

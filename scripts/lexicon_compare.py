@@ -46,8 +46,11 @@ OWNER_DIR = os.path.expanduser(os.environ.get("OWNER_CORPUS_DIR", ""))
 ZATCA_GLOB = os.path.expanduser("~/.cache/zatca-sdk/238-R3.4.8/*/Data/Samples/PDF-A3")
 BASELINE_THRESHOLDS = os.path.join(REPO, "docs", "checker-v0", "measurements", "thresholds.json")
 CALIBRATION = ["نظام الشركات 1439 سعد الخنفري.pdf", "٣ - درس - البايثون.pdf", "7  - درس - مهارات التواصل.pdf"]
-KNOWN_BAD = "اللائحة-التنفيذية-وملحقاتها.pdf"
-LEXICAL_BROKEN = {CALIBRATION[2], KNOWN_BAD}
+# The known-bad file's NAME is the machine's business, not the code's: the repository is public and the owner
+# decided (2026-11-25) that no owner filename enters it. The comparison is refused when the variable is unset,
+# because a silent empty name would measure the wrong file.
+KNOWN_BAD = os.environ.get("OWNER_KNOWN_BAD", "")
+LEXICAL_BROKEN = {CALIBRATION[2]}          # the known-bad row arrives through `known` below
 
 
 def now() -> str:
@@ -270,7 +273,10 @@ def main() -> int:
                 raise SystemExit(f"REFUSED — calibration file not found: {name}")
         calibration_paths[path] = name
     known_path = os.path.join(a.owner_dir, KNOWN_BAD)
-    if not os.path.exists(known_path):
+    if not KNOWN_BAD:
+        raise SystemExit("REFUSED — set OWNER_KNOWN_BAD to the known-bad file's name; the name is the "
+                         "machine's business, not the code's (and the repository is public)")
+    if not os.path.exists(known_path) or not os.path.isfile(known_path):
         raise SystemExit(f"REFUSED — known bad file not found: {KNOWN_BAD}")
     calibration_paths[known_path] = KNOWN_BAD
     for i, path in enumerate(owner, 1):

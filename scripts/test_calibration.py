@@ -67,7 +67,17 @@ def main() -> int:
     check("python:lam-alef-21", py["defect_evidence"]["lam_alef"] ==
           {"pdfium": 21, "pdfkit": 0, "mupdf": 21, "poppler": 21, "pdfminer": 0},
           str(py["defect_evidence"]["lam_alef"]))
-    check("python:file-low", py["defect_evidence"]["file_level"] == "low", str(py["defect_evidence"]["file_level"]))
+    # The measurement stays what it was — a level recorded and then re-derived is two claims, not one edited
+    # number. `file_level` is the measured value at the artifact's head; `shipped_rule` is the level the shipped
+    # lam-alef density rule gives the same counts, and its basis must name the rule and the artifact.
+    check("python:file-level-as-measured", py["defect_evidence"]["file_level"] == "low",
+          str(py["defect_evidence"]["file_level"]))
+    rule = py["defect_evidence"].get("shipped_rule") or {}
+    check("python:shipped-rule-raises-to-medium", rule.get("level") == "medium"
+          and rule.get("signal") == "lam-alef-transposition", str(rule))
+    check("python:shipped-rule-names-its-evidence",
+          "lam-alef-separation.json" in (rule.get("basis") or "") and "per 1000" in (rule.get("basis") or ""),
+          str(rule.get("basis")))
     check("python:no-threshold-claim", "not lowered" in py["defect_evidence"]["note"].lower()
           or "not lowered" in py["defect"].lower() or "لا" in py["defect_evidence"]["note"],
           "the note must state the floor is not lowered")
