@@ -61,7 +61,11 @@ def render_blind(report: dict) -> str:
         lines += ["", "**بلا رقم صفحة:** " + "، ".join(f"`{n}`" for n in nos)
                   + " — يقرأ النص لكنه لا يسمّي صفحاته، فأمثلته بلا رقم صفحة."]
     if report["missing_readers"]:
-        lines += ["", "**لم يعمل:** " + "؛ ".join(f"`{n}`: {why}" for n, why in report["missing_readers"].items())]
+        # The class alone («ImportError») tells a customer nothing they can act on; the reason does, and it is
+        # the path-scrubbed one (`why_reason`), so the privacy rule still holds.
+        reasons = report.get("missing_reasons") or {}
+        lines += ["", "**لم يعمل:** " + "؛ ".join(
+            f"`{n}`: {reasons.get(n) or why}" for n, why in report["missing_readers"].items())]
     lines += ["", "## إشارات الملف", ""]
     if report["signals"]:
         lines += ["| الإشارة | المستوى | الثقة | البيان |", "|---|---|---|---|"]

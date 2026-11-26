@@ -66,12 +66,10 @@ def pipeline_commit() -> tuple[str, bool]:
 
 
 def _pages(path: str) -> int:
-    import pymupdf
-    doc = pymupdf.open(path)
-    try:
-        return doc.page_count
-    finally:
-        doc.close()
+    # pikepdf, not PyMuPDF: this is the only other place the shipped graph reached for the AGPL engine, and a
+    # certificate must be issuable by a customer who never installed it.
+    with pikepdf.open(path) as pdf:
+        return len(pdf.pages)
 
 
 def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",

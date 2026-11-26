@@ -12,6 +12,7 @@
     "tool",
     "readers",
     "missing_readers",
+    "missing_reasons",
     "failed_readers",
     "majority",
     "fonts",
@@ -87,10 +88,19 @@
         "lexicon": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["file", "sha256"],
+          "required": [
+            "file",
+            "sha256"
+          ],
           "properties": {
-            "file": {"type": "string", "minLength": 1},
-            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            "file": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
           }
         }
       }
@@ -194,20 +204,67 @@
     "majority": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["declared", "readers", "lexical", "recovery"],
+      "required": [
+        "declared",
+        "readers",
+        "lexical",
+        "recovery"
+      ],
       "properties": {
-        "declared": {"type": "integer", "minimum": 1},
+        "declared": {
+          "type": "integer",
+          "minimum": 1
+        },
         "readers": {
-          "type": "object", "additionalProperties": false, "required": ["read", "needed"],
-          "properties": {"read": {"type": "integer", "minimum": 0},
-                         "needed": {"type": ["integer", "null"], "minimum": 0}}
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "read",
+            "needed"
+          ],
+          "properties": {
+            "read": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "needed": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            }
+          }
         },
         "lexical": {
-          "type": "object", "additionalProperties": false, "required": ["read", "needed"],
-          "properties": {"read": {"type": "integer", "minimum": 0},
-                         "needed": {"type": ["integer", "null"], "minimum": 0}}
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "read",
+            "needed"
+          ],
+          "properties": {
+            "read": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "needed": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            }
+          }
         },
-        "recovery": {"enum": ["recovered", "failed", "split", "no-voters"]}
+        "recovery": {
+          "enum": [
+            "recovered",
+            "failed",
+            "split",
+            "no-voters"
+          ]
+        }
       }
     },
     "fonts": {
@@ -315,7 +372,13 @@
             "type": "boolean"
           },
           "status": {
-            "enum": ["ok", "usecmap", "width-mismatch", "capped", "unparsable"]
+            "enum": [
+              "ok",
+              "usecmap",
+              "width-mismatch",
+              "capped",
+              "unparsable"
+            ]
           }
         }
       }
@@ -451,6 +514,13 @@
         "type": "string",
         "minLength": 1
       }
+    },
+    "missing_reasons": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Why each missing reader is missing, in words the customer can act on (no absolute paths)."
     }
   },
   "$defs": {

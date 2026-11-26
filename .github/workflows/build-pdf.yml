@@ -208,6 +208,9 @@ jobs:
           # their named signal while no clean file is (docs/checker-v0/).
           python3 conformance/tests/test_declared.py
           python3 conformance/tests/test_hashing.py
+          # The outline is read by pikepdf now (PyMuPDF is an optional extra): parity where it holds, a
+          # refusal with a reason where pikepdf would have silently truncated or invented an entry.
+          python3 conformance/tests/test_outline.py
           python3 conformance/tests/test_lexical.py
           python3 conformance/tests/test_lcs.py
           python3 conformance/tests/test_parse_tu.py
@@ -365,6 +368,63 @@ jobs:
             --clean guide-v2-ar.pdf \
             --require-readers pdfium,mupdf,poppler,pdfminer \
             --require-missing pdfkit
+
+  checker-bare:
+    # The licence claim, proven PHYSICALLY: a fresh venv installed from `pyproject.toml` alone — no
+    # requirements.txt, no extra — must contain no PyMuPDF, and the checker must still run and name what it
+    # lacks. An in-process "block the import" test cannot show this: every reader runs in a CHILD interpreter
+    # (`conformance/readers/isolate.py`), and a blocker in the parent's `sys.meta_path` never reaches it.
+    # PyMuPDF is AGPLv3-or-commercial (pymupdf.io/licensing); a customer who installs this wheel must not be
+    # handed that obligation, and `test_packaging.py` fails if it ever comes back through the closure.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install the shipped set only (no requirements.txt, no mupdf extra)
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/bare"
+          "$RUNNER_TEMP/bare/bin/python" -m pip install --quiet --upgrade pip
+          "$RUNNER_TEMP/bare/bin/python" -m pip install --quiet -e .
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+      - name: There is no PyMuPDF in the shipped environment
+        run: |
+          "$RUNNER_TEMP/bare/bin/python" - <<'PY'
+          import importlib.util
+          for name in ("pymupdf", "fitz"):
+              assert importlib.util.find_spec(name) is None, f"{name} is installed in the shipped environment"
+          print("no pymupdf, no fitz: the shipped set is AGPL-free")
+          PY
+      - name: The checker runs, and says in words what is missing
+        run: |
+          set -euo pipefail
+          export ARABIC_PDF_CHECK_CACHE="$RUNNER_TEMP/bare-cache"
+          "$RUNNER_TEMP/bare/bin/python" -m arabic_pdf_check check tests/vocalised_raw.pdf -o "$RUNNER_TEMP/r.json"
+          "$RUNNER_TEMP/bare/bin/python" - "$RUNNER_TEMP/r.json" <<'PY'
+          import json, sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          missing = report.get("missing_readers") or {}
+          reason = str((report.get("missing_reasons") or {}).get("mupdf") or "")
+          assert ".[mupdf]" in reason, f"mupdf must be declared missing with its install line, got: {reason!r}"
+          ran = sorted(k for k in (report.get("readers") or {}))
+          assert "mupdf" not in ran, f"mupdf cannot have run: {ran}"
+          assert {"pdfium", "pdfminer", "poppler"} <= set(ran), f"the shipped readers must run: {ran}"
+          print(f"readers ran: {ran} · mupdf declared missing: {reason[:90]}")
+          PY
+      - name: A certificate is issued without the AGPL engine
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/bare/bin/python" - <<'PY'
+          from conformance.certificate import _pages, certify
+          path = "tests/vocalised_raw.pdf"
+          assert _pages(path) == 1
+          cert = certify(path, truth_text="بِسْمِ اللَّهِ", truth_name="bare-environment smoke")
+          assert cert["checks"], "the certificate must carry the checks that ran"
+          print(f"certificate issued: {len(cert['checks'])} check(s), pages read with pikepdf")
+          PY
 
   release:
     # the only job with write access: publishes the file the build job has just gated

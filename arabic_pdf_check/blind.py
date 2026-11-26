@@ -503,7 +503,10 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
                            "signals": reader_signals[name],
                            "examples": examples[name]}
                     for name in ok},
+        # The class is what the schema promises; the REASON is what a customer can act on («pip install .[mupdf]»),
+        # and `why_reason` scrubs absolute paths so the privacy rule still holds. Two fields, not one string.
         "missing_readers": {n: why_class(w) for n, w in missing.items()},
+        "missing_reasons": {n: why_reason(w) for n, w in missing.items()},
         "failed_readers": dict(sorted(failed.items())),
         "majority": {
             "declared": len(MATRIX),

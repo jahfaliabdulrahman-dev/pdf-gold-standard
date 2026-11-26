@@ -15,14 +15,19 @@ PDFium (Chrome/Edge) · PDFKit (Preview على macOS) · MuPDF · poppler · pdf
 
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate
-python3 -m pip install -r requirements.txt           # القائمة الوحيدة للتبعيات
-python3 -m pip install -e .                          # يضيف الأمر arabic-pdf-check (تشغيل من نسخة مستودع)
+python3 -m pip install -e .                          # التبعيات المشحونة وحدها + الأمر arabic-pdf-check
+# اختياري: قارئ MuPDF (PyMuPDF بترخيص AGPLv3 أو تجاري — ليس جزءًا من التبعيات المشحونة)
+python3 -m pip install -e '.[mupdf]'
 
 arabic-pdf-check check invoice.pdf -o invoice.report.json --md invoice.report.md
 arabic-pdf-check verify invoice.pdf --truth invoice.txt -o invoice.cert.json --md invoice.cert.md
 arabic-pdf-check controls --refresh                   # يشغّل الضوابط مرة ويخزّنها؛ `check` لا يشغّلها
 arabic-pdf-check manifest                            # العتبات وأمر إنتاجها + حالة ضوابط الحدود
 ```
+
+`requirements.txt` في جذر المستودع هو قائمة **المنتِج** (بناء PDF، ومولّد الملفات المزروعة، وضوابط MuPDF)،
+وفيها PyMuPDF. **لا تستعمله لتثبيت الفاحص:** `pip install -e .` وحدها تكفي، ويصير قارئ MuPDF «غير متاح»
+بسببه المعلن في كل تقرير. `test_packaging.py` يفشل إن عاد أي ترخيص AGPL إلى التبعيات المشحونة.
 
 `check` يطبع تقرير Markdown العربي إن لم تُعطِ `-o`/`--md`. `verify` يعيد 0 عند `PASS` و1 عند `FAIL`
 و2 عند الرفض — كشهادة `conformance certify`.
