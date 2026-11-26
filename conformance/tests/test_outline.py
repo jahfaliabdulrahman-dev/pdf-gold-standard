@@ -161,7 +161,7 @@ with tempfile.TemporaryDirectory(prefix="outline-") as tmp:
             with pikepdf.open(real) as pdf:
                 check("open-document-form-is-the-same", outline.entries(pdf) == got)
     else:
-        print("SKIP a-built-document-has-its-outline — guide-v2-ar.pdf is not in this checkout")
+        print("SKIP a-built-document-has-its-outline — `guide-v2-ar.pdf` is not in this checkout")
 
 print()
 if fails:

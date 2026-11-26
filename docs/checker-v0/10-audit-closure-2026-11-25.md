@@ -18,7 +18,7 @@
 | ٦ | حكم presentation-forms = ١١/١٦ بالأغلبية و١٦/١٦ على الطبقة، والارتباط: عكس pdfium = مجموعة Type3 = غياب `/AF`، وحذف «Chrome/PDFium يستعيدها» | منفَّذ | `d57ec78` (فرع ZATCA) | `python3 scripts/test_zatca_forensics.py` ← `ZATCA FORENSICS PASSED — 34 check(s)`؛ ومنها `majority-is-11/16`، `layer-is-16/16`، `the three sets are equal` |
 | ٧ | قسم «صياغات علنية مسموحة/ممنوعة»، وإزالة «المولّد الرسمي» | منفَّذ | `3cc96a1`/`d57ec78` | §«الصياغات» في `09-pr3-zatca-forensics-2026-11-24.md`؛ والاختبار يرفض `يستعيدها` ويشترط الرقمين |
 | ٨ | تحديث سطر حالة `08` («لم يُدمج») | منفَّذ | `1787443` | `08-pr2-evidence…md:243` ← «**دُمج PR-2.1 في `main` عند `7e7574d` (PR #31)**» |
-| ٩ | لا اسم ملف للمالك في المستودع العام، مع حارس في CI | منفَّذ | `1787443` ثم `17ddd4f` | `python3 scripts/test_no_owner_names.py --self-test` ← ٦ ضوابط + مسبار بصمة، و`433 tracked path(s) … 0 leak(s)`؛ و`owner-after-pr1.json`: ٥٥ مفتاحًا `owner-01…owner-55`، صفر فرق في القيم |
+| ٩ | لا اسم ملف للمالك في المستودع العام، مع حارس في CI | منفَّذ | `1787443` ثم `17ddd4f` | `python3 scripts/test_no_owner_names.py --self-test` ← ٦ ضوابط + مسبار بصمة، و`441 tracked path(s) … 0 leak(s)` (الرقم يتبع الشجرة؛ ٤٣٣ كان لحظة الإغلاق)؛ و`owner-after-pr1.json`: ٥٥ مفتاحًا `owner-01…owner-55`، صفر فرق في القيم |
 | ١٠ | كاشف عكس المقاطع في الأسطر المختلطة (ثغرة كشفها PR-3) | منفَّذ | `4e97e65` → `690e96b` → `17ddd4f` | `python3 arabic_pdf_check/tests/test_segment_order.py` ← `SEGMENT-ORDER RULE PASSED — 15 check(s)`؛ والقياس المودع: pdfium ٥٢ مقطعًا في ١١ من ١٦ عيّنة، ٢–٦ لكل ملف متأثر |
 
 ---

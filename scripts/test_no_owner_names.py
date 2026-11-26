@@ -52,7 +52,9 @@ FORBIDDEN_SHA256 = {
 
 BINARY = (".pdf", ".png", ".jpg", ".jpeg", ".gz", ".zip", ".woff", ".woff2", ".ttf", ".otf", ".xcassets")
 # A candidate may contain spaces; it stops at the delimiters this repository's prose and tables use.
-CANDIDATE = re.compile(r"[^\n\"'`«»،:|()\[\]<>*]+\.pdf")
+# `—`, `–` and `→` are prose glue, not part of a name: without them a sentence like «the fixture — x.pdf» made
+# the ASCII filename look like a non-ASCII candidate and the guard failed on its own evidence line.
+CANDIDATE = re.compile(r"[^\n\"'`«»،:|()\[\]<>*—–→]+\.pdf")
 
 
 def allowed(candidate: str) -> bool:
