@@ -20,7 +20,6 @@ import sys
 import tempfile
 
 import pikepdf
-import pymupdf as fitz
 
 import chrome_pin
 
@@ -206,6 +205,10 @@ def set_outline(pdf_path: str, case: dict) -> str:
         raise BuildError(f"{case['id']}: the structure tree carries headings {levels} at pages "
                          f"{pages}, the case declares {[lvl for lvl, _ in want]}")
     toc = [[lvl, text, int(page) + 1] for (lvl, text), page in zip(want, pages)]
+    # Imported here, not at module level: this is the PRODUCER writing an outline into a document it just built,
+    # and the AGPL engine must not become a prerequisite for importing the adapter (the pdfium row-order control
+    # imports it for Chrome alone).
+    import pymupdf as fitz
     doc = fitz.open(pdf_path)
     doc.set_toc(toc)
     tmp = pdf_path + ".toc.pdf"

@@ -142,6 +142,12 @@ check("examples:code-span", span.startswith("``") and span.endswith("``"), span)
 # into a customer's document).
 check("why-class-drops-path", blind.why_class("ImportError: /Users/secret/libpdfkit.dylib") == "ImportError",
       blind.why_class("ImportError: /Users/secret/libpdfkit.dylib"))
+# The reason is the field the report now carries, so it carries the same rule — on every platform a customer
+# might run: a POSIX home and a Windows drive, both replaced by `<path>`.
+_posix = blind.why_reason("ImportError: cannot open /Users/secret/doc.pdf")
+_win = blind.why_reason("ImportError: cannot open C:\\Users\\secret\\doc.pdf")
+check("why-reason-drops-a-posix-path", "<path>" in _posix and "secret" not in _posix, _posix)
+check("why-reason-drops-a-windows-path", "<path>" in _win and "secret" not in _win, _win)
 
 print()
 if FAILS:

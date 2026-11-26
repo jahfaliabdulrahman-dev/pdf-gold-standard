@@ -72,12 +72,20 @@ def dist_name(requirement: str) -> str:
     return re.split(r"[\s<>=!~;\[(@]", requirement.strip(), maxsplit=1)[0]
 
 
+def normalise(name: str) -> str:
+    """PEP 503: `pdfminer.six`, `pdfminer_six` and `pdfminer-six` are one distribution, not three scans."""
+    return re.sub(r"[-_.]+", "-", name).lower()
+
+
 def closure(roots: list[str]) -> dict[str, list[str]]:
     """{name: [who required it]} over the INSTALLED metadata — bounded by what is installed, not by the network."""
-    seen, why, queue = set(), {}, [dist_name(r) for r in roots]
+    seen, why = set(), {}
+    queue = [dist_name(r) for r in roots]
+    for name in queue:                      # the ROOTS are part of the closure: a licence gate that skips the
+        why.setdefault(name, ["(direct)"]).append("(direct)")   # packages we choose cannot see the one we added
     while queue:
         name = queue.pop(0)
-        key = name.lower().replace("_", "-")
+        key = normalise(name)
         if key in seen:
             continue
         seen.add(key)
@@ -128,7 +136,7 @@ who = closure(deps)
 directs = [dist_name(d) for d in deps]
 agpl, gpl, unknown, scanned = [], [], [], 0
 for name in sorted(who):
-    if who[name] == ["not installed here"]:
+    if "not installed here" in who[name] and len(who[name]) == 1:
         continue
     try:
         meta = md.metadata(name)

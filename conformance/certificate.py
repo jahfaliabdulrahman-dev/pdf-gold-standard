@@ -65,13 +65,6 @@ def pipeline_commit() -> tuple[str, bool]:
     return commit, dirty
 
 
-def _pages(path: str) -> int:
-    # pikepdf, not PyMuPDF: this is the only other place the shipped graph reached for the AGPL engine, and a
-    # certificate must be issuable by a customer who never installed it.
-    with pikepdf.open(path) as pdf:
-        return len(pdf.pages)
-
-
 def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
             truth_text: str | None = None, truth_name: str | None = None) -> dict:
     """Issue a certificate for a corpus case OR for a free text — one rule, one measurement path.
@@ -85,6 +78,7 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
     from .checks import structure
     from .corpus import cases as corpus_cases, manifest
     from .readers import TIER1
+    from . import readers as readers_mod
 
     if (case_id is None) == (truth_text is None):
         raise CertError("certify takes exactly one of a corpus case and a truth text — "
@@ -151,7 +145,7 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
     verdict, detail = decide(checks, readers, unavailable, floors, case_id)
     cert = {
         "schema_version": "certificate/2",
-        "file": {"sha256": _sha256(pdf_path), "bytes": os.path.getsize(pdf_path), "pages": _pages(pdf_path)},
+        "file": {"sha256": _sha256(pdf_path), "bytes": os.path.getsize(pdf_path), "pages": reference.page_count(pdf_path)},
         "producer": {"engine": producer["engine"], "engine_version": str(producer["engine_version"]),
                      "pipeline_commit": commit, "postprocess": bool(producer["postprocess"])},
         "source": source,
@@ -164,8 +158,10 @@ def certify(pdf_path: str, case_id: str | None = None, engine: str = "unknown",
         "claims": claims,
         "checks": checks,
         "readers": readers,
-        "missing_readers": {n: (str(why).split(":")[0].strip() or "unavailable")[:60]
-                            for n, why in measured["missing"].items()},
+        "missing_readers": {n: readers_mod.why_class(why) for n, why in measured["missing"].items()},
+        # The class is the machine token; the reason is what a customer can act on («pip install ...»). The
+        # certificate is the document a customer forwards, so it carries both — same two functions as the report.
+        "missing_reasons": {n: readers_mod.why_reason(why) for n, why in measured["missing"].items()},
         "tier1_unavailable": unavailable,
         "not_checked": dict(MATTERHORN, **({} if case is not None else {
             "note": MATTERHORN["note"] + " · the free truth has no page structure: an example's page is null"})),

@@ -12,9 +12,9 @@ requires-python = ">=3.11"
 # notice is shipped inside the wheel). The aggregate is therefore the conjunction, not MIT alone.
 license = "MIT AND CC-BY-SA-4.0"
 license-files = ["LICENSE", "conformance/data/LICENSE-ar_words.txt"]
-# The dependency list is requirements.txt, one file, the one CI installs. `test_packaging.py` parses both and
-# checks that requirements == dependencies ∪ every declared extra — so the two cannot become two truths without a
-# red test, and an extra cannot be shipped by accident.
+# `requirements.txt` is the PRODUCER's list (it is what CI installs for build.py and the MuPDF controls), and
+# `test_packaging.py` requires requirements == dependencies ∪ every declared extra — so the two cannot become two
+# truths without a red test, and an extra cannot reach the shipped set by accident.
 dependencies = [
     "pypdfium2==5.15.2",
     "pikepdf==10.18.1",
@@ -31,7 +31,8 @@ dependencies = [
 # PyMuPDF is AGPLv3-or-commercial (pymupdf.io/licensing). It renders the `mupdf` reader and the producer
 # (`build.py`, the fixture writer, the MuPDF controls) needs it, but the SHIPPED checker must install and run
 # without it: a customer who never installed it is never running AGPL code, and the report names the reader as
-# unavailable with this extra's install line. `pip install '.[mupdf]'` is what CI and the producer use.
+# unavailable with this extra's install line. CI does not install the extra: it installs requirements.txt, which
+# carries pymupdf for the producer, and the `checker-bare` job proves the checker runs without either.
 mupdf = ["pymupdf==2.1"]
 
 [project.scripts]

@@ -20,6 +20,7 @@ import re
 
 from conformance import certificate as cert_mod
 from conformance import reference
+from conformance import readers
 from conformance.checks import lexical, mcid_text, metrics, structure, visual_order
 from conformance.checks import segment_order
 from conformance.checks.metrics import arabic_count, pf_count, pf_share
@@ -204,25 +205,17 @@ def _font_signals(scan: dict, gap_high: float = 0.01,
 
 
 def why_class(why) -> str:
-    """The failure CLASS only, never the exception text: an ImportError message can carry a local path, and
-    this string goes into a customer's report and certificate."""
-    if isinstance(why, BaseException):
-        return type(why).__name__
-    return (str(why).split(":")[0].strip() or "unavailable")[:60]
-
-
-_PATH = re.compile(r"(?:[A-Za-z]:)?(?:/[^\s:;]+){2,}")
+    """The failure CLASS only, never the exception text — one definition, in `conformance.readers`."""
+    return readers.why_class(why)
 
 
 def why_reason(why) -> str:
-    """A one-line reason with absolute paths replaced by `<path>`; the class and the reason are two fields.
+    """A one-line reason with absolute paths replaced by `<path>` — one definition, in `conformance.readers`.
 
-    The class alone answers "did it hang or crash?" with nothing — the assignment asks for `reader-failed`
-    «مع السبب بسطر». The reason is sanitized with the same excerpt rule as the report and never carries a
-    local path, so a customer's report can name a timeout without leaking the home directory.
+    The class alone answers "did it hang or crash?" with nothing; the assignment asks for `reader-failed`
+    «مع السبب بسطر», and a report may name a timeout without leaking the home directory.
     """
-    raw = reference.sanitize_line(str(why) if why is not None else "")
-    return " ".join(_PATH.sub("<path>", raw).split())[:160]
+    return readers.why_reason(why)
 
 
 def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_DATA) -> dict:

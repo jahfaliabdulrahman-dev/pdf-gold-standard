@@ -83,6 +83,25 @@ def deep(tmp, levels):
     return path
 
 
+def not_a_dictionary(tmp, kind):
+    """`/Outlines` as something that is not a dictionary, or `/First` as a string — pikepdf raises ValueError or
+    AttributeError from inside; the module must turn that into a refusal, not let it escape into `certify`."""
+    path = blank(tmp, f"outlines-{kind}.pdf")
+    with pikepdf.open(path, allow_overwriting_input=True) as pdf:
+        if kind == "int":
+            pdf.Root["/Outlines"] = 5
+        elif kind == "string":
+            pdf.Root["/Outlines"] = String("not a tree")
+        elif kind == "array":
+            pdf.Root["/Outlines"] = pikepdf.Array([1, 2])
+        elif kind == "first-string":
+            root = pdf.make_indirect(Dictionary(Type=Name.Outlines))
+            root["/First"] = String("nope")
+            pdf.Root["/Outlines"] = root
+        pdf.save()
+    return path
+
+
 def nested(tmp):
     path = blank(tmp, "nested.pdf")
     with pikepdf.open(path, allow_overwriting_input=True) as pdf:
@@ -103,7 +122,11 @@ with tempfile.TemporaryDirectory(prefix="outline-") as tmp:
     got = outline.entries(nested(tmp))
     check("levels-start-at-one-and-nest", got == [(1, "المستوى الأول"), (2, "الثاني"), (3, "الثالث")], str(got))
 
-    for name, path in (("titleless", titleless(tmp)), ("cycle", cycle(tmp)), ("66 levels", deep(tmp, 66))):
+    for name, path in (("titleless", titleless(tmp)), ("cycle", cycle(tmp)), ("66 levels", deep(tmp, 66)),
+                       ("non-dictionary /Outlines", not_a_dictionary(tmp, "int")),
+                       ("string /Outlines", not_a_dictionary(tmp, "string")),
+                       ("array /Outlines", not_a_dictionary(tmp, "array")),
+                       ("string /First", not_a_dictionary(tmp, "first-string"))):
         try:
             got = outline.entries(path)
             check(f"refuses-a-{name}-outline", False, f"returned {len(got)} entries instead of raising")
@@ -120,6 +143,23 @@ with tempfile.TemporaryDirectory(prefix="outline-") as tmp:
     if os.path.isfile(real):
         got = outline.entries(real)
         check("a-built-document-has-its-outline", len(got) > 0 and all(lvl >= 1 for lvl, _ in got), str(got[:3]))
+        # Parity against the engine that used to read this — the ONE place it can be checked, and only where
+        # PyMuPDF happens to be installed (the macOS conformance job). A pikepdf bump that changes the walk
+        # fails here instead of silently moving a certificate.
+        try:
+            import pymupdf
+        except ImportError:
+            print("SKIP parity-against-mupdf — PyMuPDF is not installed here (it is an optional extra)")
+        else:
+            doc = pymupdf.open(real)
+            try:
+                want = [(int(lvl), title) for lvl, title, _ in doc.get_toc()]
+            finally:
+                doc.close()
+            check("parity-against-mupdf", got == want, f"ours {got[:2]} vs mupdf {want[:2]}")
+            # The same document through the OPEN-document form: one parse, identical answer.
+            with pikepdf.open(real) as pdf:
+                check("open-document-form-is-the-same", outline.entries(pdf) == got)
     else:
         print("SKIP a-built-document-has-its-outline — guide-v2-ar.pdf is not in this checkout")
 

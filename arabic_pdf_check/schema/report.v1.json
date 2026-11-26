@@ -12,7 +12,6 @@
     "tool",
     "readers",
     "missing_readers",
-    "missing_reasons",
     "failed_readers",
     "majority",
     "fonts",
@@ -520,7 +519,7 @@
       "additionalProperties": {
         "type": "string"
       },
-      "description": "Why each missing reader is missing, in words the customer can act on (no absolute paths)."
+      "description": "Why each missing reader is missing, in words the customer can act on (no absolute paths). OPTIONAL in v1: a report written before this field existed must still validate."
     }
   },
   "$defs": {

@@ -22,7 +22,7 @@ from collections import Counter
 import pikepdf
 
 import pdfops
-from ..adapters import fonts
+from ..adapters import fonts, html
 from .. import outline
 from . import mcid_text, verapdf as verapdf_mod
 from . import metrics
@@ -585,12 +585,13 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
         # nothing on the checker's path may depend on it. A malformed outline is a failed check with its reason,
         # not an exception that kills the certificate.
         try:
-            toc = [(level, unicodedata.normalize("NFC", title)) for level, title in outline.entries(pdf_path)]
+            # `pdf` is the document already open above: one parse per certificate, and the outline is read from
+            # the same object every other check judges.
+            toc = [(level, unicodedata.normalize("NFC", title)) for level, title in outline.entries(pdf)]
             outline_error = None
         except outline.OutlineError as exc:
             toc, outline_error = [], str(exc)
-        want_toc = [(lvl, unicodedata.normalize("NFC", t)) for lvl, t in
-                    [(b["level"], b["text"]) for b in case["blocks"] if b["type"] == "heading"]]
+        want_toc = [(lvl, unicodedata.normalize("NFC", t)) for lvl, t in html.outline(case)]
         ok_toc = outline_error is None and len(toc) == len(want_toc) and all(
             int(entry[0]) == lvl and metrics.N(entry[1]) == metrics.N(text)
             for entry, (lvl, text) in zip(toc, want_toc))

@@ -35,7 +35,32 @@ FIXTURE_SHA256 = "c231376694b13f14878e03b6ce0235ec30053e88581d92d0edae6ea1f01f67
 PRODUCED_BY = "PyMuPDF 2.1 · insert_text · Amiri · committed as the fixture"
 
 
+def write_fixture() -> int:
+    """Re-create the input — the only reason PyMuPDF is still nameable here, and only on demand.
+
+    Run it deliberately: a new font version or a new PyMuPDF changes the bytes, so the constant below must be
+    updated in the same commit, and the measurement re-read. The hash is the identity of the input; this function
+    is its provenance.
+    """
+    import pymupdf                                   # optional extra, imported only for this branch
+    from conformance.adapters import fonts
+    line = "سطر عربي واحد بلا محارف اتجاه في المصدر."
+    doc = pymupdf.open()
+    page = doc.new_page(width=595, height=842)
+    page.insert_text((72, 120), line, fontname="Amiri", fontfile=fonts.path("amiri"), fontsize=14)
+    doc.subset_fonts(verbose=False)
+    doc.save(FIXTURE, garbage=4, deflate=True)
+    doc.close()
+    digest = hashlib.sha256(open(FIXTURE, "rb").read()).hexdigest()
+    print(json.dumps({"written": FIXTURE, "sha256": digest, "bytes": os.path.getsize(FIXTURE),
+                      "producer": f"PyMuPDF {pymupdf.__version__}", "note":
+                      "update FIXTURE_SHA256 and re-measure per_line in the same commit"}, ensure_ascii=False))
+    return 0
+
+
 def main() -> int:
+    if "--write-fixture" in sys.argv[1:]:
+        return write_fixture()
     if not os.path.isfile(FIXTURE):
         print(json.dumps({"reproduces": False, "detail": {"error": f"fixture missing: {FIXTURE}"}}))
         return 0

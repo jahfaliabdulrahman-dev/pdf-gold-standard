@@ -9,12 +9,16 @@ When it is absent the import below raises with that sentence rather than a bare 
 `readers.available()` prints this reason into every report — a reader that cannot run says WHY, in words the
 customer can act on, instead of a traceback's.
 """
+from . import MUPDF_INSTALL
+
 try:
     import pymupdf
-except ImportError as exc:      # the declared absence — the matrix carries this sentence into the report
-    raise ImportError(
-        "optional extra not installed — pip install 'arabic-pdf-check[mupdf]' "
-        "(PyMuPDF is AGPLv3 or commercial; the shipped checker runs without it)") from exc
+except ModuleNotFoundError as exc:   # the declared absence — the matrix carries this sentence into the report
+    if (exc.name or "").split(".")[0] != "pymupdf":
+        raise                        # a BROKEN pymupdf is not an absent one: name the real cause, do not send
+    raise ModuleNotFoundError(       # the customer to install what they already have
+        f"optional extra not installed — {MUPDF_INSTALL} "
+        f"(PyMuPDF is AGPLv3 or commercial; the shipped checker runs without it)", name="pymupdf") from exc
 
 NAME = "mupdf"
 
