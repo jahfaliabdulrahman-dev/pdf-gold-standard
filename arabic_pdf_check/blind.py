@@ -66,7 +66,12 @@ FILE_CLAIM_MIN_VOTERS = 4
 # The signals whose ACCUSATION is a majority vote (as opposed to a fact the file itself carries, like
 # `no-text-layer` or `numerals-persian`). Only these can be withdrawn when the jury is too small: the facts keep
 # their level on any jury, the votes do not.
-_MAJORITY_SIGNALS = ("visual-order", "tounicode-gaps", "lexical-validity", "lam-alef-transposition")
+_MAJORITY_SIGNALS = ("visual-order", "lexical-validity", "lam-alef-transposition")
+# `tounicode-gaps` is deliberately NOT here. A composite font with no `/ToUnicode`, a code mapped to U+0000,
+# U+FFFD or a PUA, a drawn `.notdef` — those are facts the FILE carries, whatever jury is installed; hiding them
+# because three readers happened to vote would hide the one defect a silent layer is actually made of. What the
+# vote decides is only whether the GAP IS RECOVERED (the downgrade), and that grant is withheld when the jury is
+# short: below the floor the verdict keeps its unrecovered level.
 
 
 def majority_needed(voters: int) -> int | None:
@@ -286,8 +291,13 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
     text_fonts = [k for k, row in scan["fonts"].items() if row.get("codes")]
     recovered_by_font = ({text_fonts[0]: recovered}
                          if len(text_fonts) == 1 and recovered is not None else None)
+    # The recovery DOWNGRADE is a vote outcome («a majority of readers still produce the word»), so it is granted
+    # only by a jury that could carry a file claim. Below the floor the gap keeps its unrecovered level: the fact
+    # is not withheld, the leniency is.
+    jury_now = len(ok) >= FILE_CLAIM_MIN_VOTERS
     file_signals, font_rows = _font_signals(scan, th["tounicode_gap_ratio"]["value"],
-                                            recovered=recovered, recovered_by_font=recovered_by_font)
+                                            recovered=recovered if jury_now else None,
+                                            recovered_by_font=recovered_by_font if jury_now else None)
     # A reader that crashed or timed out is a fact about this file's parser-hostility: the file is not clean.
     # The signal is medium, and the majority is computed after the reader is dropped (and says so).
     for name, why in sorted(failed.items()):
@@ -467,6 +477,12 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
     jury = len(ok) >= FILE_CLAIM_MIN_VOTERS
     withheld = None
     if not jury:
+        for _name, _sigs in reader_signals.items():
+            for _i, _sig in enumerate(_sigs):
+                if _sig["id"] in _MAJORITY_SIGNALS and _sig["cause"] == "file":
+                    _sigs[_i] = {**_sig, "cause": "reader",
+                                 "withheld_from_file_level": f"{len(ok)} reader(s) voted; a file verdict needs "
+                                                             f"{FILE_CLAIM_MIN_VOTERS}"}
         kept = []
         for sig in file_signals:
             if sig["cause"] == "file" and sig["id"] in _MAJORITY_SIGNALS:

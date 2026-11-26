@@ -135,10 +135,18 @@ check("jury:three-readers-withhold-the-file-verdict",
 check("jury:withheld-is-not-a-low-verdict", three["risk"]["file"]["level"] != "low", str(three["risk"]["file"]))
 # The file-level list keeps the signals but names them reader-level, with the reason attached — so a consumer
 # that shows «إشارات الملف» can print the withholding instead of an accusation the jury could not carry.
-check("jury:the-accusation-stays-at-reader-level",
-      all(s.get("cause") != "file" for s in three["signals"]) and
+# A VOTE is withheld; a FACT is not (PR-4.2). The majority-derived signals drop to reader level with the
+# reason attached, while the ToUnicode gap keeps `cause: file` — it is a property of the document, not of the
+# number of readers installed.
+_VOTED = ("visual-order", "lexical-validity", "lam-alef-transposition")
+check("jury:the-vote-derived-accusation-stays-at-reader-level",
+      all(s.get("cause") != "file" for s in three["signals"] if s["id"] in _VOTED) and
       any(s.get("withheld_from_file_level") for s in three["signals"]),
       str([(s["id"], s["cause"], s.get("withheld_from_file_level")) for s in three["signals"]]))
+check("jury:a-structural-fact-survives-the-shrunken-jury",
+      all(s["cause"] == "file" and not s.get("withheld_from_file_level")
+          for s in three["signals"] if s["id"].startswith("tounicode-")),
+      str([(s["id"], s["cause"]) for s in three["signals"]]))
 four = withheld(["pdfium", "poppler", "pdfminer", "mupdf"])
 check("jury:four-readers-make-a-verdict", four["risk"]["file"]["level"] in ("low", "medium", "high"),
       str(four["risk"]["file"]))
