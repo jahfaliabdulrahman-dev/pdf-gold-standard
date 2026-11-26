@@ -1,0 +1,552 @@
+{
+ "keep": [
+  "pdfium",
+  "poppler",
+  "pdfminer",
+  "pdfjs"
+ ],
+ "changed": 5,
+ "files": [
+  {
+   "file": "base:clean-chrome",
+   "all": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "planted:planted-chrome-raw",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "planted:planted-lam-alef",
+   "all": {
+    "level": "medium",
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "medium",
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "planted:planted-letter-swap",
+   "all": {
+    "level": "high",
+    "signals": [
+     "visual-order",
+     "lexical-validity"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "visual-order",
+     "lexical-validity"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "planted:planted-mupdf-logical",
+   "all": {
+    "level": "high",
+    "signals": [
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "planted:planted-no-tounicode",
+   "all": {
+    "level": "high",
+    "signals": [
+     "tounicode-gaps"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "tounicode-gaps"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "planted:planted-presentation-forms",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "doc:guide-v2-ar.pdf",
+   "all": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "doc:report.pdf",
+   "all": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "doc:najd.pdf",
+   "all": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "doc:report-print.pdf",
+   "all": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "low",
+    "signals": [],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Advance Payment adjustments with foreign currency invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Advance Payment adjustments with rate change scenarios.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Advance Payment adjustments.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Credit Note of a Simplified Tax Invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Exempt Tax Invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Export invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Nominal supply invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Out of Scope Standard Tax Invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Self-billing invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": true
+  },
+  {
+   "file": "zatca:Simplified Tax Invoice with Zero Rated Item.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Simplified_Invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": true
+  },
+  {
+   "file": "zatca:Standard_Credit_Note.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": true
+  },
+  {
+   "file": "zatca:Standard_Debit_Note.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": true
+  },
+  {
+   "file": "zatca:Standard_Invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": true
+  },
+  {
+   "file": "zatca:Summary Invoice.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  },
+  {
+   "file": "zatca:Third party billing.pdf",
+   "all": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 5
+   },
+   "shipped": {
+    "level": "high",
+    "signals": [
+     "presentation-forms"
+    ],
+    "needed": 3,
+    "voters": 4
+   },
+   "changed": false
+  }
+ ],
+ "counts": {
+  "all|presentation-forms": 18,
+  "shipped|presentation-forms": 18,
+  "all|lam-alef-transposition": 1,
+  "shipped|lam-alef-transposition": 1,
+  "all|visual-order": 3,
+  "all|lexical-validity": 1,
+  "shipped|visual-order": 8,
+  "shipped|lexical-validity": 1,
+  "all|tounicode-gaps": 1,
+  "shipped|tounicode-gaps": 1
+ }
+}
