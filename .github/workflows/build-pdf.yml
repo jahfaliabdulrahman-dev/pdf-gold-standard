@@ -208,6 +208,9 @@ jobs:
           # their named signal while no clean file is (docs/checker-v0/).
           python3 conformance/tests/test_declared.py
           python3 conformance/tests/test_hashing.py
+          # The outline is read by pikepdf now (PyMuPDF is an optional extra): parity where it holds, a
+          # refusal with a reason where pikepdf would have silently truncated or invented an entry.
+          python3 conformance/tests/test_outline.py
           python3 conformance/tests/test_lexical.py
           python3 conformance/tests/test_lcs.py
           python3 conformance/tests/test_parse_tu.py
@@ -219,6 +222,7 @@ jobs:
           python3 arabic_pdf_check/tests/test_schema.py
           python3 arabic_pdf_check/tests/test_thresholds.py
           python3 arabic_pdf_check/tests/test_pages.py
+          python3 arabic_pdf_check/tests/test_paths.py
           python3 arabic_pdf_check/tests/test_privacy.py
           python3 arabic_pdf_check/tests/test_reference.py
           python3 arabic_pdf_check/tests/test_controls.py
@@ -366,9 +370,112 @@ jobs:
             --require-readers pdfium,mupdf,poppler,pdfminer \
             --require-missing pdfkit
 
+  checker-bare:
+    # The licence claim, proven PHYSICALLY: a fresh venv installed from `pyproject.toml` alone — no
+    # requirements.txt, no extra — must contain no PyMuPDF, and the checker must still run and name what it
+    # lacks. An in-process "block the import" test cannot show this: every reader runs in a CHILD interpreter
+    # (`conformance/readers/isolate.py`), and a blocker in the parent's `sys.meta_path` never reaches it.
+    # PyMuPDF is AGPLv3-or-commercial (pymupdf.io/licensing); a customer who installs this wheel must not be
+    # handed that obligation, and `test_packaging.py` fails if it ever comes back through the closure.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install the shipped set only (no requirements.txt, no mupdf extra)
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/bare"
+          "$RUNNER_TEMP/bare/bin/python" -m pip install --quiet --upgrade pip
+          "$RUNNER_TEMP/bare/bin/python" -m pip install --quiet -e .
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+      - name: There is no PyMuPDF in the shipped environment
+        run: |
+          "$RUNNER_TEMP/bare/bin/python" - <<'PY'
+          import importlib.util
+          for name in ("pymupdf", "fitz"):
+              assert importlib.util.find_spec(name) is None, f"{name} is installed in the shipped environment"
+          print("no pymupdf, no fitz: the shipped set is AGPL-free")
+          PY
+      - name: The checker runs, and says in words what is missing
+        run: |
+          set -euo pipefail
+          export ARABIC_PDF_CHECK_CACHE="$RUNNER_TEMP/bare-cache"
+          "$RUNNER_TEMP/bare/bin/python" -m arabic_pdf_check check tests/vocalised_raw.pdf -o "$RUNNER_TEMP/r.json"
+          "$RUNNER_TEMP/bare/bin/python" - "$RUNNER_TEMP/r.json" <<'PY'
+          import json, sys
+          from conformance.readers import MUPDF_INSTALL
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          missing = report.get("missing_readers") or {}
+          reason = str((report.get("missing_reasons") or {}).get("mupdf") or "")
+          # The sentence is imported, never retyped: the first version of this step asserted ".[mupdf]", a form
+          # no code emits, so it could not pass on any run.
+          assert MUPDF_INSTALL in reason, f"mupdf must name {MUPDF_INSTALL!r}, got: {reason!r}"
+          ran = sorted(k for k in (report.get("readers") or {}))
+          assert "mupdf" not in ran, f"mupdf cannot have run: {ran}"
+          assert {"pdfium", "pdfminer", "poppler"} <= set(ran), f"the shipped readers must run: {ran}"
+          print(f"readers ran: {ran} · mupdf declared missing: {reason[:90]}")
+
+          # The shrunken jury must NOT accuse the file. Three readers cannot carry a file-level verdict (a
+          # majority of three is two, and the readers that disagree are the ones not installed), so the report
+          # withholds it and says so — «withheld» must never read as «low» (a PASS this mode forbids).
+          file = report["risk"]["file"]
+          assert len(ran) == 3, f"this install is the three-reader case: {ran}"
+          assert file.get("level") is None, f"a three-reader jury cannot convict a file: {file}"
+          assert "no file-level verdict" in str(file.get("withheld") or ""), f"the withholding must be named: {file}"
+          assert all(s.get("cause") != "file" for s in report.get("signals") or []), \
+              "a majority-derived accusation must stay at reader level on a shrunken jury"
+          print(f"file verdict withheld: {str(file['withheld'])[:110]}")
+          PY
+      - name: The file a customer names is the file every reader opens (relative path, from another directory)
+        run: |
+          set -euo pipefail
+          export ARABIC_PDF_CHECK_CACHE="$RUNNER_TEMP/bare-cache"
+          mkdir -p "$RUNNER_TEMP/elsewhere" && cp tests/vocalised_raw.pdf "$RUNNER_TEMP/elsewhere/invoice.pdf"
+          cd "$RUNNER_TEMP/elsewhere"
+          "$RUNNER_TEMP/bare/bin/python" -m arabic_pdf_check check invoice.pdf -o "$RUNNER_TEMP/rel.json"
+          "$RUNNER_TEMP/bare/bin/python" - "$RUNNER_TEMP/rel.json" <<'PY'
+          import json, sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          # The readers run in a child process started with `cwd=REPO`; before the fix, a relative path was
+          # opened as REPO/invoice.pdf and four of five readers "failed" — the product's first command lied.
+          failed = report.get("failed_readers") or {}
+          bad = {k: v for k, v in failed.items() if "No such file" in str(v) or "FileNotFound" in str(v)}
+          assert not bad, f"a reader could not find the file the customer named: {bad}"
+          assert sorted(report.get("readers") or {}), "no reader read the relative path"
+          print(f"relative path read by {sorted(report.get('readers') or {})}")
+          PY
+      - name: The replaced code runs — page count, outline reader, certificate
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/bare/bin/python" - <<'PY'
+          from conformance import outline, reference
+          from conformance.certificate import certify
+          from conformance.checks import structure
+
+          path = "tests/vocalised_raw.pdf"
+          assert reference.page_count(path) == 1          # certificate.py used to import PyMuPDF for this
+          outlines = outline.entries(path)                # structure.evaluate used to call pymupdf.get_toc()
+          assert isinstance(outlines, list)
+
+          # A case with no headings still walks the outline path — the code this change rewrote, executed here.
+          case = {"id": "bare-outline", "category": "headings", "lang": "ar", "font": "amiri", "blocks": []}
+          checks = structure.evaluate(path, case, {"engine": "none", "engine_version": "0"}, run_verapdf=False)
+          row = [c for c in checks if c["id"] == "outline"]
+          assert row and row[0]["status"] in ("pass", "fail"), row
+
+          cert = certify(path, truth_text="بِسْمِ اللَّهِ", truth_name="bare-environment smoke")
+          assert cert["checks"], "the certificate must carry the checks that ran"
+          print(f"pages {reference.page_count(path)} · outline {len(outlines)} · "
+                f"structure {len(checks)} check(s) · certificate {len(cert['checks'])} check(s)")
+          PY
+
   release:
-    # the only job with write access: publishes the file the build job has just gated
-    needs: build
+    # the only job with write access: publishes the file the build job has just gated. `checker-bare` is in the
+    # dependencies on purpose: the licence claim is a gate, not a report — a red proof must block the artifact.
+    needs: [build, checker-bare, checker-linux]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:

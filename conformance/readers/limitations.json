@@ -18,7 +18,7 @@
     "claim": "pdftotext wraps every RTL line in U+202A/U+202B … U+202C embedding marks. They are the extractor's own decorations, not characters the file carries: the same file read by PDFium has none. Re-measured on the pinned build 26.11.0 after the reader's supply was pinned; the control runs against the same binary the run measures with.",
     "reader_version_measured": "26.11.0",
     "control_script": "controls/poppler_bidi.py",
-    "control_evidence": "python3 -m conformance.readers.controls.poppler_bidi → a PyMuPDF-written file with one Arabic line: pdftotext (the pinned conda-forge build, resolved by CONFORMANCE_PDFTOTEXT) returns 4 controls, PDFium 0, reproduces=true",
+    "control_evidence": "python3 -m conformance.readers.controls.poppler_bidi → the committed fixture `poppler-bidi-fixture.pdf` (sha256 c231376694b1…, written once by PyMuPDF 2.1, so the control needs no AGPL extra) with one Arabic line: pdftotext (the pinned conda-forge build, resolved by CONFORMANCE_PDFTOTEXT) returns 4 controls, PDFium 0, reproduces=true",
     "narrowing": "Excuses bidi controls in pdftotext's output only, and only up to the number the control shows it adds per line. Presentation Forms, PUA, U+FFFD and tatweel excess stay counted."
   }
 ]

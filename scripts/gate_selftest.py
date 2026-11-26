@@ -17,7 +17,13 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-import pymupdf as fitz  # noqa: E402
+try:
+    import pymupdf as fitz  # noqa: E402
+except ModuleNotFoundError as _exc:                      # a producer tool, not the shipped checker
+    if _exc.name not in ("pymupdf", "fitz"):
+        raise
+    from conformance.readers import MUPDF_INSTALL        # one sentence, imported — never retyped
+    raise SystemExit(f"the mutation selftest builds its inputs with the optional engine — {MUPDF_INSTALL}") from None
 import pikepdf  # noqa: E402
 
 import pdfops  # noqa: E402  (the key name the producer writes and this mutation must plant)

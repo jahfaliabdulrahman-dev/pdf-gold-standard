@@ -495,12 +495,14 @@ def main() -> int:
             expected = checker_fixtures.PLANTED[name]
             want = checker_fixtures.PLANTED_LEVEL.get(name, "high")
             file_ids = [s["id"] for s in rep["signals"]]
-            ok = (blind.LEVELS[rep["risk"]["file"]["level"]] >= blind.LEVELS[want]
-                  and expected in file_ids)
+            level = rep["risk"]["file"]["level"]
+            # A withheld file verdict (too few readers) is not a pass and not a low: the measurement needs the
+            # full matrix, so it fails here with the report's own reason rather than raising KeyError on None.
+            ok = (level is not None and blind.LEVELS[level] >= blind.LEVELS[want] and expected in file_ids)
             rows[name] = {"expected_signal": expected, "expected_level": want, "file_signals": file_ids,
                           "file_level": rep["risk"]["file"]["level"],
                           "overall": rep["risk"]["level"], "thresholds": tag, "pass": ok}
-            print(f"   [{tag:7}] {name:28} file={rep['risk']['file']['level']:6} signals={file_ids} "
+            print(f"   [{tag:7}] {name:28} file={(level or 'withheld'):8} signals={file_ids} "
                   f"{'PASS' if ok else 'FAIL'}")
         clean = []
         for row in clean_rows:

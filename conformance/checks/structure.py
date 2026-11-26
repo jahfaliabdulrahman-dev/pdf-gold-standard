@@ -22,7 +22,8 @@ from collections import Counter
 import pikepdf
 
 import pdfops
-from ..adapters import fonts
+from ..adapters import fonts, html
+from .. import outline
 from . import mcid_text, verapdf as verapdf_mod
 from . import metrics
 
@@ -580,16 +581,22 @@ def evaluate(pdf_path: str, case: dict, producer: dict, run_verapdf: bool = True
             f"{len(scan['fonts'])} font(s) used for text, all embedded; every composite font has /ToUnicode")
 
         # --- the outline says what the headings say -------------------------------------------------
-        import pymupdf
-        doc_ = pymupdf.open(pdf_path)
-        toc = doc_.get_toc()
-        doc_.close()
-        want_toc = [(lvl, unicodedata.normalize("NFC", t)) for lvl, t in
-                    [(b["level"], b["text"]) for b in case["blocks"] if b["type"] == "heading"]]
-        ok_toc = len(toc) == len(want_toc) and all(
+        # Read with pikepdf (`conformance/outline.py`), not PyMuPDF: the AGPL engine is an optional extra and
+        # nothing on the checker's path may depend on it. A malformed outline is a failed check with its reason,
+        # not an exception that kills the certificate.
+        try:
+            # `pdf` is the document already open above: one parse per certificate, and the outline is read from
+            # the same object every other check judges.
+            toc = [(level, unicodedata.normalize("NFC", title)) for level, title in outline.entries(pdf)]
+            outline_error = None
+        except outline.OutlineError as exc:
+            toc, outline_error = [], str(exc)
+        want_toc = [(lvl, unicodedata.normalize("NFC", t)) for lvl, t in html.outline(case)]
+        ok_toc = outline_error is None and len(toc) == len(want_toc) and all(
             int(entry[0]) == lvl and metrics.N(entry[1]) == metrics.N(text)
             for entry, (lvl, text) in zip(toc, want_toc))
-        add("outline", ok_toc, f"{len(toc)} entr(y/ies)" + ("" if ok_toc else
+        add("outline", ok_toc, (f"the outline could not be read: {outline_error}" if outline_error else
+                                f"{len(toc)} entr(y/ies)") + ("" if ok_toc else
             f" — the case declares {[(l, t[:16]) for l, t in want_toc]}"))
 
     if run_verapdf:

@@ -41,14 +41,19 @@ def render_blind(report: dict) -> str:
              "",
              f"**الملف:** `{report['file']['sha256'][:16]}…` · {report['file']['bytes']:,} بايت · "
              f"{report['file']['pages']} صفحة",
-             f"**حكم الملف:** {LEVEL_AR[risk['file']['level']]} · **الثقة:** {CONF_AR[risk['file']['confidence']]}",
+             (f"**حكم الملف:** {LEVEL_AR[risk['file']['level']]} · "
+              f"**الثقة:** {CONF_AR[risk['file']['confidence']]}"
+              if risk["file"].get("level") is not None else
+              # A withheld verdict is NOT «low»: a reader that prints «منخفض» for «we could not judge» is the
+              # PASS this mode forbids. It says what is missing and how many readers voted.
+              f"**حكم الملف:** لا حكم — {risk['file'].get('withheld', 'قرّاء أقل من اللازم')}"),
              (f"**أعلى خطر لدى قارئ:** {LEVEL_AR[reader_top]}"
               + (" · السبب: " + " و".join(
                   sorted({("الملف" if s.get("cause") == "file" else "قارئ")
                           for r in report["readers"].values() if r["risk"] == reader_top
                           for s in r["signals"] if s["level"] == reader_top}))
                  if reader_top != "low" else "")),
-             ("" if risk["file"]["level"] == "high"
+             ("" if risk["file"].get("level") == "high"
               else "**ملاحظة:** إشارات القرّاء أدناه تُحسب على أداة النسخ، لا على الملف."),
              ""]
     lines += ["## القرّاء", "", "| القارئ | الإصدار | الخطر | الثقة | الإشارات |", "|---|---|---|---|---|"]
@@ -61,7 +66,11 @@ def render_blind(report: dict) -> str:
         lines += ["", "**بلا رقم صفحة:** " + "، ".join(f"`{n}`" for n in nos)
                   + " — يقرأ النص لكنه لا يسمّي صفحاته، فأمثلته بلا رقم صفحة."]
     if report["missing_readers"]:
-        lines += ["", "**لم يعمل:** " + "؛ ".join(f"`{n}`: {why}" for n, why in report["missing_readers"].items())]
+        # The class alone («ImportError») tells a customer nothing they can act on; the reason does, and it is
+        # the path-scrubbed one (`why_reason`), so the privacy rule still holds.
+        reasons = report.get("missing_reasons") or {}
+        lines += ["", "**لم يعمل:** " + "؛ ".join(
+            f"`{n}`: {reasons.get(n) or why}" for n, why in report["missing_readers"].items())]
     lines += ["", "## إشارات الملف", ""]
     if report["signals"]:
         lines += ["| الإشارة | المستوى | الثقة | البيان |", "|---|---|---|---|"]

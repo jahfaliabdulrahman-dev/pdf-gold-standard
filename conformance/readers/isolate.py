@@ -53,7 +53,13 @@ def _run_child(command: list[str], timeout: float) -> subprocess.CompletedProces
 
 
 def read(name: str, path: str, timeout: float = TIMEOUT) -> tuple[list[str] | None, str]:
-    """(pages or None, text) from a fresh process. Raises `ReaderFailed` with a one-line reason."""
+    """(pages or None, text) from a fresh process. Raises `ReaderFailed` with a one-line reason.
+
+    The path is made absolute HERE, not trusted from the caller: the child starts with `cwd=REPO`, so a
+    relative path would be resolved against the repository and the reader would report a file that exists as
+    missing — with a message that blames the reader.
+    """
+    path = os.path.abspath(path)
     r_fd, w_fd = os.pipe()
     try:
         proc = subprocess.Popen([sys.executable, "-m", CHILD, name, path, str(w_fd)], cwd=REPO,

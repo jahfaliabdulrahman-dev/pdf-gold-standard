@@ -8,6 +8,30 @@ Two rules the code enforces:
     with PDFium alone cannot be mistaken for one that ran both.
 """
 import importlib
+import re
+
+# The one sentence a customer is told when the optional readercannot run. It lives HERE, in a module that
+# imports nothing optional, because three places print it (the reader's ImportError, the manifest, the CI proof)
+# and a second copy is how the sentence drifts from the command it names.
+MUPDF_INSTALL = "pip install 'arabic-pdf-check[mupdf]'"
+
+# A reason travels into a customer's report and certificate, so it is one function, not three copies. A path is
+# two segments or a drive letter (a bare `/tmp` is a directory, not somebody's file); `<path>` replaces it.
+_PATH = re.compile(r"(?:[A-Za-z]:)?(?:[\\/][^\s:;\"'<>|]+){2,}")
+
+
+def why_class(why) -> str:
+    """The failure CLASS only — a machine-stable token, never free text."""
+    if isinstance(why, BaseException):
+        return type(why).__name__
+    return (str(why).split(":")[0].strip() or "unavailable")[:60]
+
+
+def why_reason(why) -> str:
+    """The same failure in words, path-scrubbed: what a customer can act on."""
+    from ..reference import sanitize_line
+    raw = sanitize_line(str(why) if why is not None else "")
+    return " ".join(_PATH.sub("<path>", raw).split())[:160]
 
 MATRIX = ("pdfium", "pdfkit", "mupdf", "poppler", "pdfminer")     # order: tier-1 first
 TIER1 = ("pdfium", "pdfkit")

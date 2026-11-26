@@ -106,9 +106,18 @@ def controls_command(a) -> int:
 
 
 def manifest_command(a) -> int:
-    from conformance.readers import available, declared, limitations
+    from conformance.readers import MUPDF_INSTALL, available, declared, limitations
     ok, missing = available()
-    payload = {"thresholds": load_thresholds(), "readers": {}, "missing_readers": missing}
+    payload = {"thresholds": load_thresholds(), "readers": {}, "missing_readers": missing,
+               # The licence of what this tool does NOT install, named where a customer looks. PyMuPDF is the one
+               # optional reader with obligations; the shipped set is AGPL-free (`test_packaging.py` proves it,
+               # the `checker-bare` CI job proves it physically).
+               "optional_readers": {"mupdf": {
+                   "licence": "AGPLv3 or commercial (pymupdf.io/licensing)",
+                   "installed": "mupdf" in ok,
+                   "install": MUPDF_INSTALL,
+                   "remove": "pip uninstall pymupdf",
+                   "shipped": False}}}
     for name, mod in ok.items():
         version = mod.version()
         limits, refused, controls = limitations.usable(name, version, mode="cached")

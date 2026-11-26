@@ -480,6 +480,13 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "missing_reasons": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Why each missing reader is missing, in words the customer can act on (no absolute paths). Optional: a certificate written before this field existed stays valid."
     }
   }
 }

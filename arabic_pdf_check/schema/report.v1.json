@@ -87,10 +87,19 @@
         "lexicon": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["file", "sha256"],
+          "required": [
+            "file",
+            "sha256"
+          ],
           "properties": {
-            "file": {"type": "string", "minLength": 1},
-            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            "file": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
           }
         }
       }
@@ -194,20 +203,70 @@
     "majority": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["declared", "readers", "lexical", "recovery"],
+      "required": [
+        "declared",
+        "readers",
+        "lexical",
+        "recovery"
+      ],
       "properties": {
-        "declared": {"type": "integer", "minimum": 1},
+        "declared": {
+          "type": "integer",
+          "minimum": 1
+        },
         "readers": {
-          "type": "object", "additionalProperties": false, "required": ["read", "needed"],
-          "properties": {"read": {"type": "integer", "minimum": 0},
-                         "needed": {"type": ["integer", "null"], "minimum": 0}}
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "read",
+            "needed"
+          ],
+          "properties": {
+            "read": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "needed": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "floor": {
+              "type": "integer"
+            }
+          }
         },
         "lexical": {
-          "type": "object", "additionalProperties": false, "required": ["read", "needed"],
-          "properties": {"read": {"type": "integer", "minimum": 0},
-                         "needed": {"type": ["integer", "null"], "minimum": 0}}
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "read",
+            "needed"
+          ],
+          "properties": {
+            "read": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "needed": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            }
+          }
         },
-        "recovery": {"enum": ["recovered", "failed", "split", "no-voters"]}
+        "recovery": {
+          "enum": [
+            "recovered",
+            "failed",
+            "split",
+            "no-voters"
+          ]
+        }
       }
     },
     "fonts": {
@@ -315,7 +374,13 @@
             "type": "boolean"
           },
           "status": {
-            "enum": ["ok", "usecmap", "width-mismatch", "capped", "unparsable"]
+            "enum": [
+              "ok",
+              "usecmap",
+              "width-mismatch",
+              "capped",
+              "unparsable"
+            ]
           }
         }
       }
@@ -373,15 +438,26 @@
               "enum": [
                 "low",
                 "medium",
-                "high"
-              ]
+                "high",
+                null
+              ],
+              "description": "null = withheld: fewer readers voted than a file-level claim needs (a majority of one is not a jury). Never read null as 'clean'."
             },
             "confidence": {
               "enum": [
                 "low",
                 "medium",
-                "high"
+                "high",
+                null
               ]
+            },
+            "withheld": {
+              "type": "string",
+              "description": "Why there is no file-level verdict, in words (e.g. «3 readers voted; a file verdict needs 4»). Present only when level is null."
+            },
+            "voters": {
+              "type": "integer",
+              "minimum": 0
             }
           }
         },
@@ -394,6 +470,10 @@
               "high"
             ]
           }
+        },
+        "floor": {
+          "type": "integer",
+          "description": "The minimum number of voting readers a file-level claim needs."
         }
       }
     },
@@ -451,6 +531,13 @@
         "type": "string",
         "minLength": 1
       }
+    },
+    "missing_reasons": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Why each missing reader is missing, in words the customer can act on (no absolute paths). OPTIONAL in v1: a report written before this field existed must still validate."
     }
   },
   "$defs": {

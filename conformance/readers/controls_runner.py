@@ -39,6 +39,21 @@ def _one_line(text, limit: int = 300) -> str:
     return " ".join(str(text).replace("\r", " ").replace("\n", " ").split())[:limit]
 
 
+def _why_line(text, limit: int = 300) -> str:
+    """The REASON a control failed: the last line of a traceback, not the whole dump.
+
+    A refusal is read by a person deciding whether to trust a reader, and the frames above the exception are the
+    control's own plumbing. `CHROME_PATH is not set…` is the answer; `Traceback (most recent call last): File
+    "…/pdfium_row_order.py", line 59, in <module>` is not.
+    """
+    lines = [" ".join(line.split()) for line in str(text or "").replace("\r", "\n").splitlines() if line.strip()]
+    for line in reversed(lines):
+        if line.startswith(("Traceback (", 'File "', "^^^", "During handling", "The above exception")):
+            continue
+        return line[:limit]
+    return "no output"
+
+
 def cache_root() -> str:
     root = os.environ.get("ARABIC_PDF_CHECK_CACHE")
     if not root:
@@ -125,7 +140,7 @@ def run_control(entry: dict, controls_dir: str) -> dict:
     except OSError as exc:
         raise ControlRefused(f"{entry['id']}: control could not start — {type(exc).__name__}") from None
     if r.returncode != 0:
-        raise ControlRefused(f"{entry['id']}: control failed — {_one_line(r.stderr or r.stdout)}")
+        raise ControlRefused(f"{entry['id']}: control failed — {_why_line(r.stderr or r.stdout)}")
     try:
         out = json.loads(r.stdout.strip().splitlines()[-1])
     except json.JSONDecodeError as exc:

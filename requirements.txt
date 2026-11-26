@@ -1,5 +1,9 @@
 # The one list of build dependencies: CI installs from this file and README points to it.
 # Exact versions = what the macOS CI ran green with. Raise them in a PR; CI decides.
+# PyMuPDF is here for the PRODUCER (`build.py`, the fixture writer, the MuPDF controls) and for the MuPDF
+# reader — never for the shipped checker. It is AGPLv3-or-commercial, so it is declared as the extra
+# `[mupdf]` in pyproject.toml and never in `dependencies`; `test_packaging.py` enforces that this file equals
+# `dependencies` ∪ the extras and that no AGPL package sits in `dependencies`.
 pymupdf==2.1
 pypdfium2==5.15.2
 pikepdf==10.18.1
