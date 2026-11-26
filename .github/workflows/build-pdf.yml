@@ -426,7 +426,8 @@ jobs:
           assert len(ran) == 3, f"this install is the three-reader case: {ran}"
           assert file.get("level") is None, f"a three-reader jury cannot convict a file: {file}"
           assert "no file-level verdict" in str(file.get("withheld") or ""), f"the withholding must be named: {file}"
-          assert all(s.get("cause") != "file" for s in report.get("signals") or []), \
+          VOTED = ("visual-order", "lexical-validity", "lam-alef-transposition")
+          assert all(s.get("cause") != "file" for s in report.get("signals") or [] if s["id"] in VOTED), \
               "a majority-derived accusation must stay at reader level on a shrunken jury"
           # A structural fact is not a vote: the ToUnicode gap stays a file cause on any jury, and only the
           # vote-derived signal is withheld. (The Markdown face of this is `test_report_language.py`.)
