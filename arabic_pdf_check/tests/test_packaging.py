@@ -182,12 +182,15 @@ print(f"     licences read for {scanned} installed distribution(s) reachable fro
 NODEMODULES = os.path.join(REPO, "conformance", "readers", "node_modules")
 if os.path.isdir(NODEMODULES):
     npm_bad, npm_seen = [], []
-    for pkg_dir in sorted(os.listdir(NODEMODULES)):
-        meta_path = os.path.join(NODEMODULES, pkg_dir, "package.json")
-        if not os.path.isfile(meta_path):
+    # A closure, not a listing: `os.listdir` sees `@napi-rs` as one directory and would have claimed «1 package»
+    # while `pdfjs-dist` pulls its own tree. Every `package.json` under node_modules/ is read, scopes included.
+    for root, dirs, files in os.walk(NODEMODULES):
+        dirs[:] = [d for d in dirs if d != ".bin"]
+        if "package.json" not in files:
             continue
+        meta_path = os.path.join(root, "package.json")
         meta = json.load(open(meta_path, encoding="utf-8"))
-        name, lic = meta.get("name", pkg_dir), str(meta.get("license") or meta.get("licenses") or "")
+        name, lic = meta.get("name", os.path.basename(root)), str(meta.get("license") or meta.get("licenses") or "")
         npm_seen.append(f"{name} {meta.get('version', '?')}")
         if AGPL.search(lic) or GPL.search(lic) or not lic.strip():
             npm_bad.append(f"{name}: {lic or 'NO LICENCE FIELD'}")
