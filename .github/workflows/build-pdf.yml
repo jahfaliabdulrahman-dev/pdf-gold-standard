@@ -222,6 +222,7 @@ jobs:
           python3 arabic_pdf_check/tests/test_schema.py
           python3 arabic_pdf_check/tests/test_thresholds.py
           python3 arabic_pdf_check/tests/test_pages.py
+          python3 arabic_pdf_check/tests/test_paths.py
           python3 arabic_pdf_check/tests/test_privacy.py
           python3 arabic_pdf_check/tests/test_reference.py
           python3 arabic_pdf_check/tests/test_controls.py
@@ -416,6 +417,35 @@ jobs:
           assert "mupdf" not in ran, f"mupdf cannot have run: {ran}"
           assert {"pdfium", "pdfminer", "poppler"} <= set(ran), f"the shipped readers must run: {ran}"
           print(f"readers ran: {ran} · mupdf declared missing: {reason[:90]}")
+
+          # The shrunken jury must NOT accuse the file. Three readers cannot carry a file-level verdict (a
+          # majority of three is two, and the readers that disagree are the ones not installed), so the report
+          # withholds it and says so — «withheld» must never read as «low» (a PASS this mode forbids).
+          file = report["risk"]["file"]
+          assert len(ran) == 3, f"this install is the three-reader case: {ran}"
+          assert file.get("level") is None, f"a three-reader jury cannot convict a file: {file}"
+          assert "no file-level verdict" in str(file.get("withheld") or ""), f"the withholding must be named: {file}"
+          assert all(s.get("cause") != "file" for s in report.get("signals") or []), \
+              "a majority-derived accusation must stay at reader level on a shrunken jury"
+          print(f"file verdict withheld: {str(file['withheld'])[:110]}")
+          PY
+      - name: The file a customer names is the file every reader opens (relative path, from another directory)
+        run: |
+          set -euo pipefail
+          export ARABIC_PDF_CHECK_CACHE="$RUNNER_TEMP/bare-cache"
+          mkdir -p "$RUNNER_TEMP/elsewhere" && cp tests/vocalised_raw.pdf "$RUNNER_TEMP/elsewhere/invoice.pdf"
+          cd "$RUNNER_TEMP/elsewhere"
+          "$RUNNER_TEMP/bare/bin/python" -m arabic_pdf_check check invoice.pdf -o "$RUNNER_TEMP/rel.json"
+          "$RUNNER_TEMP/bare/bin/python" - "$RUNNER_TEMP/rel.json" <<'PY'
+          import json, sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          # The readers run in a child process started with `cwd=REPO`; before the fix, a relative path was
+          # opened as REPO/invoice.pdf and four of five readers "failed" — the product's first command lied.
+          failed = report.get("failed_readers") or {}
+          bad = {k: v for k, v in failed.items() if "No such file" in str(v) or "FileNotFound" in str(v)}
+          assert not bad, f"a reader could not find the file the customer named: {bad}"
+          assert sorted(report.get("readers") or {}), "no reader read the relative path"
+          print(f"relative path read by {sorted(report.get('readers') or {})}")
           PY
       - name: The replaced code runs — page count, outline reader, certificate
         run: |

@@ -22,11 +22,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 
 fails = []
-# AGPL is the one licence this project refuses in the shipped set: network use of an AGPL library is the
-# obligation the product cannot pass on to a closed-source customer. A name deny-list would be a word list that
-# the next AGPL package walks past, so the test reads the installed METADATA — the licence itself, not the name.
+# Copyleft is refused in the shipped set — AGPL because network use is the obligation the product cannot pass
+# on, and plain GPL because a closed product cannot ship it either (this repository already refused `qalam` for
+# being GPL-3). LGPL is a different obligation (relinking) and is explicitly out, as is AGPL inside GPL's arm.
+# A name deny-list would be a word list the next package walks past, so the test reads the installed METADATA —
+# the licence itself, not the name — and both spells the common forms: `GPLv3`, `GPL-3.0`,
+# `GNU General Public License v3.0` all match, `LGPL-2.1` and `GNU Lesser General Public License` do not.
 AGPL = re.compile(r"agpl|affero", re.I)
-GPL = re.compile(r"(?<!l)(?<!a)\bgpl\b|gpl-?[23]", re.I)      # plain GPL: reported, not failed (see doc 11)
+GPL = re.compile(r"(?<![la])(?:\bgpl\b|gpl-?v?[23])"
+                 r"|(?<![Ll]esser )(?<![Aa]ffero )general public license", re.I)
 
 
 def check(name, ok, detail=""):
@@ -160,10 +164,15 @@ for name in sorted(who):
     elif GPL.search(joined):
         gpl.append(f"{name}: {joined[:60]}")
 check("no-agpl-in-the-installed-closure", not agpl, "; ".join(agpl))
+check("no-gpl-in-the-installed-closure", not gpl, "; ".join(gpl))
+# The expression itself is the gate, so it is proved against the five spellings before it is trusted.
+SPELLINGS = {("GPL-3.0", True), ("GPLv3", True), ("GNU General Public License v3.0", True),
+             ("LGPL-2.1", False), ("AGPL-3.0", False)}
+check("gpl-expression-catches-the-five-spellings",
+      all(bool(GPL.search(text)) == want for text, want in SPELLINGS),
+      str({text: bool(GPL.search(text)) for text, _ in SPELLINGS}))
 check("every-distribution-declares-its-licence", not unknown,
       f"no licence metadata (add a pinned override): {unknown}")
-if gpl:
-    print(f"NOTE gpl-in-closure (reported, doc 11): {'; '.join(gpl)}")
 print(f"     licences read for {scanned} installed distribution(s) reachable from {len(directs)} direct "
       f"dependencies, extras excluded")
 notice = os.path.join(REPO, "conformance", "data", "LICENSE-ar_words.txt")

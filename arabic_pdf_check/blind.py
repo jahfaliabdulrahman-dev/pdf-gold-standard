@@ -56,12 +56,29 @@ def _preflight(pdf_path: str) -> None:
         raise Refused("unreadable PDF") from None
 
 
+# A file-level verdict is an accusation about somebody's document, so it needs a real jury: a majority of the
+# readers that voted AND at least this many of them. Measured 2026-11-26 on the shipped Linux install (three
+# readers, no `mupdf` extra): the ZATCA set gained a file-level `visual-order` on 5 documents that the five-reader
+# jury does not convict — two voters, one of them `pdfminer`, which also rates the CLEAN base file `high`. Dropping
+# the readers that disagreed turned their absence into a vote. With this floor the three-reader install makes no
+# file-level claim at all and says so; four readers (Linux + the extra) reach the same verdicts as five.
+FILE_CLAIM_MIN_VOTERS = 4
+# The signals whose ACCUSATION is a majority vote (as opposed to a fact the file itself carries, like
+# `no-text-layer` or `numerals-persian`). Only these can be withdrawn when the jury is too small: the facts keep
+# their level on any jury, the votes do not.
+_MAJORITY_SIGNALS = ("visual-order", "tounicode-gaps", "lexical-validity", "lam-alef-transposition")
+
+
 def majority_needed(voters: int) -> int | None:
     """A majority of the readers that actually vote — `None` when fewer than two can.
 
     The assignment's item 1 (`len(lexical_passing) >= need`) and item 5 («الأغلبية تُحسب على القرّاء الذين
     قرؤوا») replace the earlier declared-matrix rule: the two-reader test (both failing ⇒ high) cannot be met
-    by a fixed 3 of 5. A majority of one is not a majority, so one voter withholds a file-level claim.
+    by a fixed 3 of 5. A majority of one is not a majority.
+
+    This is the RECOVERY rule, and it stays a majority of whoever voted: saying «these readers recover the text»
+    is a statement about the readers that ran. A file-level ACCUSATION needs more — see `FILE_CLAIM_MIN_VOTERS`
+    and the jury gate in `check`, because dropping readers must not turn their absence into a vote.
     """
     return voters // 2 + 1 if voters >= 2 else None
 
@@ -219,6 +236,10 @@ def why_reason(why) -> str:
 
 
 def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_DATA) -> dict:
+    # ABSOLUTE before anything touches it. Every reader runs in a child process started with `cwd=REPO`
+    # (`readers/isolate.py`), so `check invoice.pdf` from the customer's own directory had four readers open
+    # `REPO/invoice.pdf`, fail, and the surviving one accuse a clean file — the first command a customer types.
+    pdf_path = os.path.abspath(pdf_path)
     _preflight(pdf_path)
     ok, missing = available()
     if not ok:
@@ -438,9 +459,31 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
         reader_signals[name] = signals
 
     # ---- risk, both claims ---------------------------------------------------------------------
-    file_level = _top(file_signals)
+    # A file-level claim is an accusation, so it needs a jury: a majority of those who voted AND
+    # FILE_CLAIM_MIN_VOTERS of them. Measured 2026-11-26: on the three-reader Linux install the ZATCA set gained a
+    # file-level `visual-order` on five documents the five-reader jury does not convict — two voters, one of them
+    # `pdfminer`, which also rates the CLEAN base file `high`. Removing the readers that disagreed turned their
+    # absence into a vote, which is the accuracy paradox this repository refuses to ship.
+    jury = len(ok) >= FILE_CLAIM_MIN_VOTERS
+    withheld = None
+    if not jury:
+        kept = []
+        for sig in file_signals:
+            if sig["cause"] == "file" and sig["id"] in _MAJORITY_SIGNALS:
+                sig = {**sig, "cause": "reader",
+                       "withheld_from_file_level": f"{len(ok)} reader(s) voted; a file verdict needs "
+                                                   f"{FILE_CLAIM_MIN_VOTERS}"}
+            kept.append(sig)
+        file_signals = kept
+        withheld = (f"no file-level verdict: {len(ok)} of {len(MATRIX)} readers voted and a file-level claim "
+                    f"needs {FILE_CLAIM_MIN_VOTERS} — the majority-of-voters rule on a shrunken jury convicts a "
+                    f"file for the readers that are missing (install the absent readers, or read the per-reader "
+                    f"levels)")
+    file_level = _top(file_signals) if jury else None
+    file_conf = _confidence(file_signals) if jury else None
     reader_levels = {n: _top(s) for n, s in reader_signals.items()}
-    total = max([file_level] + list(reader_levels.values()), key=lambda lv: LEVELS[lv])
+    total = max([lv for lv in [file_level, *reader_levels.values()] if lv is not None] or ["low"],
+                key=lambda lv: LEVELS[lv])
     all_signals = file_signals + [s for n in reader_signals for s in reader_signals[n]]
     at_top = [s for s in all_signals if s["level"] == total]
     causes = sorted({s["cause"] for s in at_top})
@@ -503,14 +546,15 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
         "failed_readers": dict(sorted(failed.items())),
         "majority": {
             "declared": len(MATRIX),
-            "readers": {"read": len(ok), "needed": need_visual},
+            "readers": {"read": len(ok), "needed": need_visual, "floor": FILE_CLAIM_MIN_VOTERS},
             "lexical": {"read": len(judged), "needed": need_lex},
             "recovery": recovery,
         },
         "fonts": font_rows,
         "signals": file_signals,
-        "risk": {"level": total, "confidence": _confidence(at_top), "causes": causes,
-                 "file": {"level": file_level, "confidence": _confidence(file_signals)},
+        "risk": {"level": total, "confidence": _confidence(at_top), "causes": causes, "floor": FILE_CLAIM_MIN_VOTERS,
+                 "file": {"level": file_level, "confidence": file_conf, "voters": len(ok),
+                          **({"withheld": withheld} if withheld else {})},
                  "readers": reader_levels},
         "known_limits": known_limits,
         "not_judged": [s for s in [

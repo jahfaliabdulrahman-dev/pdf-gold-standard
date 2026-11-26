@@ -108,6 +108,41 @@ check("recovered:one-voter", state(0.9)[0] is None and state(0.9)[1] == "no-vote
 check("majority:one-voter-none", blind.majority_needed(1) is None, str(blind.majority_needed(1)))
 check("majority:five-readers-three", blind.majority_needed(5) == 3, str(blind.majority_needed(5)))
 
+# A file-level ACCUSATION needs a jury. The shipped Linux install has three readers, and a majority of three is
+# two — measured 2026-11-26, that convicted five ZATCA documents of `visual-order` that the five-reader jury does
+# not convict, because the readers that disagreed were the ones not installed. Below the floor the verdict is
+# withheld, and «withheld» is not «low»: the report says why, and the accusation stays at reader level.
+check("jury:floor-is-four", blind.FILE_CLAIM_MIN_VOTERS == 4, str(blind.FILE_CLAIM_MIN_VOTERS))
+check("jury:recovery-rule-is-untouched", blind.majority_needed(3) == 2, "recovery is a majority of voters")
+def withheld(names):
+    """The report `check` builds for a given voting set — the real modules, only the set is narrowed."""
+    ok_all, missing = blind.available()
+    ok = {n: m for n, m in ok_all.items() if n in names}
+    dropped = {n: why for n, why in missing.items() if n not in names}
+    dropped.update({n: "NotInTheShippedSet: not installed by `pip install -e .`" for n in ok_all if n not in names})
+    real = blind.available
+    blind.available = lambda: (ok, dropped)
+    try:
+        rep = blind.check(os.path.join(REPO, "tests", "vocalised_raw.pdf"),
+                          json.load(open(os.path.join(REPO, "arabic_pdf_check", "thresholds.json"))))
+    finally:
+        blind.available = real
+    return rep
+three = withheld(["pdfium", "poppler", "pdfminer"])
+check("jury:three-readers-withhold-the-file-verdict",
+      three["risk"]["file"]["level"] is None and "no file-level verdict" in three["risk"]["file"]["withheld"],
+      str(three["risk"]["file"]))
+check("jury:withheld-is-not-a-low-verdict", three["risk"]["file"]["level"] != "low", str(three["risk"]["file"]))
+# The file-level list keeps the signals but names them reader-level, with the reason attached — so a consumer
+# that shows «إشارات الملف» can print the withholding instead of an accusation the jury could not carry.
+check("jury:the-accusation-stays-at-reader-level",
+      all(s.get("cause") != "file" for s in three["signals"]) and
+      any(s.get("withheld_from_file_level") for s in three["signals"]),
+      str([(s["id"], s["cause"], s.get("withheld_from_file_level")) for s in three["signals"]]))
+four = withheld(["pdfium", "poppler", "pdfminer", "mupdf"])
+check("jury:four-readers-make-a-verdict", four["risk"]["file"]["level"] in ("low", "medium", "high"),
+      str(four["risk"]["file"]))
+
 # A reader that crashes is named, dropped from the majority, and the file is not clean.
 real_read = blind.isolate.read
 def crash(name, path):

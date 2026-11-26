@@ -20,7 +20,6 @@ import sys
 import tempfile
 
 import pikepdf
-import pymupdf
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if REPO not in sys.path:
@@ -332,6 +331,15 @@ def m_th_to_td(src, dst):
 
 
 def m_outline_mismatch(src, dst):
+    # The one mutation that needs the optional engine. Imported here, not at module scope, so a bare install can
+    # import this module and read the refusal instead of dying on an ImportError that names no remedy.
+    try:
+        import pymupdf
+    except ModuleNotFoundError as exc:
+        if exc.name not in ("pymupdf", "fitz"):
+            raise
+        from conformance.readers import MUPDF_INSTALL
+        raise _NA(f"outline mutation needs the optional engine: {MUPDF_INSTALL}") from None
     doc = pymupdf.open(src)
     toc = doc.get_toc()
     if not toc:

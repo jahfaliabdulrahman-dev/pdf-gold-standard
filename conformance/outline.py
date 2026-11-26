@@ -17,6 +17,9 @@ measured one:
     66 nested levels           MuPDF 66 entries       · we raise (pikepdf cuts at `max_depth`, no error)
     `/Outlines` not a dict     MuPDF 0 entries        · we raise (pikepdf raises ValueError/AttributeError)
     `/First` not a dict        MuPDF 1 blank entry    · we raise
+    a whitespace-only `/Title` MuPDF returns `' '`     · we return `''` (the title is stripped; nothing is lost:
+                                                      a title with no text is no title, and the check compares
+                                                      text, not padding)
 
 So `entries()` has exactly two outcomes — a list, or `OutlineError` — and the caller's `except OutlineError`
 covers everything a file can do. That totality is the point: a check that crashes is not a check.
@@ -79,6 +82,8 @@ def _walk(items, level: int, out: list[tuple[int, str]]) -> None:
         if "/First" in item.obj and not item.children:
             raise OutlineError(f"outline cut at level {level}: the item is deeper than {MAX_DEPTH} levels, "
                                f"or its /First is not a dictionary — refusing a truncated outline")
-        out.append((level, str(item.title)))
+        # Stripped, not trusted: a `/Title` holding only whitespace is `''` here and `' '` in MuPDF (measured on
+        # 300 generated trees, 2026-11-26) — the sixth declared divergence, and the only one in the text itself.
+        out.append((level, str(item.title or "").strip()))
         if item.children:
             _walk(item.children, level + 1, out)

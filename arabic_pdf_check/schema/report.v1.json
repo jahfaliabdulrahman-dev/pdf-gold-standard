@@ -232,6 +232,9 @@
                 "null"
               ],
               "minimum": 0
+            },
+            "floor": {
+              "type": "integer"
             }
           }
         },
@@ -435,15 +438,26 @@
               "enum": [
                 "low",
                 "medium",
-                "high"
-              ]
+                "high",
+                null
+              ],
+              "description": "null = withheld: fewer readers voted than a file-level claim needs (a majority of one is not a jury). Never read null as 'clean'."
             },
             "confidence": {
               "enum": [
                 "low",
                 "medium",
-                "high"
+                "high",
+                null
               ]
+            },
+            "withheld": {
+              "type": "string",
+              "description": "Why there is no file-level verdict, in words (e.g. «3 readers voted; a file verdict needs 4»). Present only when level is null."
+            },
+            "voters": {
+              "type": "integer",
+              "minimum": 0
             }
           }
         },
@@ -456,6 +470,10 @@
               "high"
             ]
           }
+        },
+        "floor": {
+          "type": "integer",
+          "description": "The minimum number of voting readers a file-level claim needs."
         }
       }
     },

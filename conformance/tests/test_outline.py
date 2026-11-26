@@ -153,7 +153,7 @@ with tempfile.TemporaryDirectory(prefix="outline-") as tmp:
         else:
             doc = pymupdf.open(real)
             try:
-                want = [(int(lvl), title) for lvl, title, _ in doc.get_toc()]
+                want = [(int(lvl), title.strip()) for lvl, title, _ in doc.get_toc()]
             finally:
                 doc.close()
             check("parity-against-mupdf", got == want, f"ours {got[:2]} vs mupdf {want[:2]}")
