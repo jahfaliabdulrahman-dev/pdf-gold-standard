@@ -1,0 +1,10 @@
+{
+  "name": "arabic-pdf-check-readers",
+  "private": true,
+  "description": "The optional pdf.js reader: one pinned dependency, no install script, Apache-2.0.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "dependencies": {
+    "pdfjs-dist": "6.5.438"
+  }
+}
