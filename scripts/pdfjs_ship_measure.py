@@ -64,10 +64,19 @@ def side_patch(names: tuple[str, ...]):
     blind_available = blind.available
     readers_mod.available = lambda: (ok, dropped)
     blind.available = lambda: (ok, dropped)
+    # `checker_measure` did `from conformance.readers import available` at import time, so patching the module
+    # attribute alone would leave the separation phase measuring the FULL matrix while labelling it «ship» — a
+    # number that claims a reader set it did not use. Patch the bound name and the denominator too.
+    cm.available = lambda: (ok, dropped)
+    cm.MATRIX = names
+
+    real_cm_available, real_cm_matrix = cm.available, cm.MATRIX
 
     def restore():
         readers_mod.available = real_available
         blind.available = blind_available
+        cm.available = real_cm_available
+        cm.MATRIX = real_cm_matrix
     return restore
 
 
@@ -130,9 +139,22 @@ def excerpt(name: str, path: str, want: int = 90) -> str:
 def phase_verdicts(args, built, foreign_dir) -> int:
     th = thresholds()
     rows, changed = [], []
+    # Append-only progress: a long run that is interrupted must not lose the files it already measured.
+    partial = args.out + "l"                            # `verdicts.jsonl`
+    done = set()
+    if os.path.exists(partial):
+        with open(partial, encoding="utf-8") as fh:
+            for line in fh:
+                try:
+                    done.add(json.loads(line)["label"])
+                except Exception:                        # noqa: BLE001 — a torn last line is not progress
+                    pass
+        print(f"resuming: {len(done)} file(s) already measured")
     for group, label, path in groups(built, foreign_dir):
         if not path:
             rows.append({"group": group, "label": label, "missing": True})
+            continue
+        if label in done:
             continue
         row: dict = {"group": group, "label": label}
         per_side = {}
@@ -154,6 +176,8 @@ def phase_verdicts(args, built, foreign_dir) -> int:
             for side, names in SIDES.items():
                 row["excerpts"][side] = {n: excerpt(n, path) for n in names if n in per_side[side]["readers"]}
         rows.append(row)
+        with open(partial, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
         flag = "  MOVED" if moved else ("  +" + ",".join(added) if added else "")
         print(f"{group:12} {label:28} all={per_side['all']['level']!s:6} ship={per_side['ship']['level']!s:6}{flag}")
         if moved:
