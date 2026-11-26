@@ -223,6 +223,7 @@ jobs:
           python3 arabic_pdf_check/tests/test_thresholds.py
           python3 arabic_pdf_check/tests/test_pages.py
           python3 arabic_pdf_check/tests/test_paths.py
+          python3 arabic_pdf_check/tests/test_report_language.py
           python3 arabic_pdf_check/tests/test_privacy.py
           python3 arabic_pdf_check/tests/test_reference.py
           python3 arabic_pdf_check/tests/test_controls.py
@@ -425,8 +426,14 @@ jobs:
           assert len(ran) == 3, f"this install is the three-reader case: {ran}"
           assert file.get("level") is None, f"a three-reader jury cannot convict a file: {file}"
           assert "no file-level verdict" in str(file.get("withheld") or ""), f"the withholding must be named: {file}"
-          assert all(s.get("cause") != "file" for s in report.get("signals") or []), \
+          VOTED = ("visual-order", "lexical-validity", "lam-alef-transposition")
+          assert all(s.get("cause") != "file" for s in report.get("signals") or [] if s["id"] in VOTED), \
               "a majority-derived accusation must stay at reader level on a shrunken jury"
+          # A structural fact is not a vote: the ToUnicode gap stays a file cause on any jury, and only the
+          # vote-derived signal is withheld. (The Markdown face of this is `test_report_language.py`.)
+          gaps = [x for x in (report.get("signals") or []) if x["id"] == "tounicode-gaps"]
+          assert gaps and all(x["cause"] == "file" for x in gaps), f"a fact must survive the shrunken jury: {gaps}"
+          assert not any(x.get("withheld_from_file_level") for x in gaps), "the fact cannot be withheld"
           print(f"file verdict withheld: {str(file['withheld'])[:110]}")
           PY
       - name: The file a customer names is the file every reader opens (relative path, from another directory)

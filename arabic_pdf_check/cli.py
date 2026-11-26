@@ -36,11 +36,21 @@ def check_command(a) -> int:
     else:
         # The file's verdict first, the highest reader risk second: a reader's known behaviour is not the
         # file's grade (the assignment's «تُعلَن ولا تُحسب على الملف»). One line, two different claims.
-        reader_top = max(list(report["risk"]["readers"].values()) + ["low"],
-                         key=lambda lv: {"low": 0, "medium": 1, "high": 2}[lv])
-        print(f"حكم الملف: {report['risk']['file']['level']} · الثقة: {report['risk']['file']['confidence']} · "
-              f"أعلى خطر لدى قارئ: {reader_top} · "
-              f"القرّاء: {', '.join(report['readers'])}")
+        from .markdown import LEVEL_AR
+        reader_top = LEVEL_AR[max(list(report["risk"]["readers"].values()) + ["low"],
+                                  key=lambda lv: {"low": 0, "medium": 1, "high": 2}[lv])]
+        # `null` is not a level: the console line says why there is no verdict instead of printing «None».
+        file_claim = report["risk"]["file"]
+        if file_claim.get("level") is None:
+            floor = report["risk"].get("floor")
+            print(f"حكم الملف: لا حكم — قرأ {file_claim.get('voters')} من "
+                  f"{report['majority']['declared']}، والحكم يحتاج {floor} قرّاء · "
+                  f"أعلى خطر لدى قارئ: {reader_top} · "
+                  f"القرّاء: {', '.join(report['readers'])}")
+        else:
+            print(f"حكم الملف: {file_claim['level']} · الثقة: {file_claim['confidence']} · "
+                  f"أعلى خطر لدى قارئ: {reader_top} · "
+                  f"القرّاء: {', '.join(report['readers'])}")
         if a.out:
             print(f"JSON: {a.out}")
         if a.md:

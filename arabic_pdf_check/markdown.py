@@ -36,6 +36,18 @@ def _code(text) -> str:
 
 def render_blind(report: dict) -> str:
     risk = report["risk"]
+    file_claim = risk["file"]
+    withheld = file_claim.get("level") is None
+    voters, floor, declared = file_claim.get("voters"), risk.get("floor"), (report.get("majority") or {}).get("declared")
+    # The report's own sentence for a withheld verdict is English (it is the machine field); the Markdown is
+    # Arabic and composes its own from the numbers, because a customer reads this page, not the JSON.
+    withheld_ar = (f"لا حكم — قرأ {voters} من {declared or '؟'}، والحكم على الملف يحتاج {floor or '؟'} قرّاء"
+                   if withheld else "")
+    def cause_ar(signal: dict) -> str:
+        # With no file verdict there is no «file cause» to print: a withheld signal is judged per reader.
+        if signal.get("cause") == "file" and not withheld:
+            return "الملف"
+        return "القارئ"
     reader_top = max(list(risk["readers"].values()) + ["low"], key=lambda lv: {"low": 0, "medium": 1, "high": 2}[lv])
     lines = [f"# فحص النسخ العربي — تقرير تشخيصي",
              "",
@@ -43,18 +55,20 @@ def render_blind(report: dict) -> str:
              f"{report['file']['pages']} صفحة",
              (f"**حكم الملف:** {LEVEL_AR[risk['file']['level']]} · "
               f"**الثقة:** {CONF_AR[risk['file']['confidence']]}"
-              if risk["file"].get("level") is not None else
+              if not withheld else
               # A withheld verdict is NOT «low»: a reader that prints «منخفض» for «we could not judge» is the
-              # PASS this mode forbids. It says what is missing and how many readers voted.
-              f"**حكم الملف:** لا حكم — {risk['file'].get('withheld', 'قرّاء أقل من اللازم')}"),
+              # PASS this mode forbids. The sentence is Arabic and built from the numbers.
+              f"**حكم الملف:** {withheld_ar}"),
              (f"**أعلى خطر لدى قارئ:** {LEVEL_AR[reader_top]}"
               + (" · السبب: " + " و".join(
-                  sorted({("الملف" if s.get("cause") == "file" else "قارئ")
+                  sorted({cause_ar(s)
                           for r in report["readers"].values() if r["risk"] == reader_top
                           for s in r["signals"] if s["level"] == reader_top}))
                  if reader_top != "low" else "")),
              ("" if risk["file"].get("level") == "high"
-              else "**ملاحظة:** إشارات القرّاء أدناه تُحسب على أداة النسخ، لا على الملف."),
+              else ("**ملاحظة:** لا حكم على الملف؛ الإشارات أدناه تُحسب على أداة النسخ، وثبّت القرّاء الغائبين "
+                    "ليصدر الحكم." if withheld else
+                    "**ملاحظة:** إشارات القرّاء أدناه تُحسب على أداة النسخ، لا على الملف.")),
              ""]
     lines += ["## القرّاء", "", "| القارئ | الإصدار | الخطر | الثقة | الإشارات |", "|---|---|---|---|---|"]
     for name, r in report["readers"].items():
@@ -72,21 +86,32 @@ def render_blind(report: dict) -> str:
         lines += ["", "**لم يعمل:** " + "؛ ".join(
             f"`{n}`: {reasons.get(n) or why}" for n, why in report["missing_readers"].items())]
     lines += ["", "## إشارات الملف", ""]
-    if report["signals"]:
+    held = [s for s in report["signals"] if not s.get("withheld_from_file_level")]
+    withheld_here = [s for s in report["signals"] if s.get("withheld_from_file_level")]
+    if held:
         lines += ["| الإشارة | المستوى | الثقة | البيان |", "|---|---|---|---|"]
-        for s in report["signals"]:
+        for s in held:
             lines.append(f"| `{s['id']}` | {LEVEL_AR[s['level']]} | {CONF_AR[s['confidence']]} | "
                          f"{_cell(s['detail'])} |")
-    else:
+    elif not withheld_here:
         lines.append("لا إشارة على الملف: غطاء ToUnicode مكتمل، ولا أشكال عرض، ولا أرقام مخالفة.")
+    if withheld_here:
+        # Its own section, not a footnote: a signal nobody was allowed to promote to the file must not be read
+        # as a file verdict that merely looks quiet.
+        lines += ["", f"### إشارات محجوبة عن حكم الملف — محجوب: {voters} من {floor} قرّاء", "",
+                  "| الإشارة | مستوى القارئ | البيان |", "|---|---|---|"]
+        for s in withheld_here:
+            lines.append(f"| `{s['id']}` | {LEVEL_AR[s['level']]} | {_cell(s['detail'])} |")
     per_reader = [(n, r) for n, r in report["readers"].items() if r["signals"]]
     if per_reader:
         lines += ["", "## إشارات القرّاء وأمثلة", ""]
         for name, r in per_reader:
             lines.append(f"### {name} — {LEVEL_AR[r['risk']]}")
             for s in r["signals"]:
-                lines.append(f"- `{s['id']}` ({LEVEL_AR[s['level']]}, "
-                             f"{'الملف' if s['cause'] == 'file' else 'القارئ'}): {s['detail']}")
+                tag = cause_ar(s)
+                if s.get("withheld_from_file_level"):
+                    tag = f"{tag} — محجوب عن حكم الملف: {voters} من {floor}"
+                lines.append(f"- `{s['id']}` ({LEVEL_AR[s['level']]}, {tag}): {s['detail']}")
             for ex in r["examples"]:
                 where = f"ص {ex['page']}" if ex["page"] else "صفحة غير محددة"
                 lines.append(f"  - {where}: {_code(ex['text'])}")

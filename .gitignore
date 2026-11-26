@@ -52,3 +52,6 @@ guide-v2-ar.pdf
 # wheel build scratch (test_packaging writes here; the wheel is the artifact)
 build/
 dist/
+
+# the optional pdf.js reader installs its pinned dependency with `npm ci` (never committed)
+conformance/readers/node_modules/
