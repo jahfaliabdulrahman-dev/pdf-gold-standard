@@ -82,7 +82,7 @@ def closure(roots: list[str]) -> dict[str, list[str]]:
     seen, why = set(), {}
     queue = [dist_name(r) for r in roots]
     for name in queue:                      # the ROOTS are part of the closure: a licence gate that skips the
-        why.setdefault(name, ["(direct)"]).append("(direct)")   # packages we choose cannot see the one we added
+        why.setdefault(normalise(name), ["(direct)"])  # packages we choose cannot see the one we added
     while queue:
         name = queue.pop(0)
         key = normalise(name)
@@ -92,13 +92,13 @@ def closure(roots: list[str]) -> dict[str, list[str]]:
         try:
             dist = md.distribution(name)
         except md.PackageNotFoundError:
-            why.setdefault(name, ["not installed here"]).append("not installed here")
+            why.setdefault(key, []).append("not installed here")
             continue
         for req in (dist.requires or []):
             if "extra ==" in req or "extra==" in req:
                 continue          # an OPTIONAL requirement of a dependency is not installed by `pip install` of it
             child = dist_name(req)
-            why.setdefault(child, []).append(name)
+            why.setdefault(normalise(child), []).append(name)
             queue.append(child)
     return why
 
@@ -133,6 +133,9 @@ LICENCE_OVERRIDES: dict[str, tuple[str, str, str]] = {
     # name: (version, SPDX, where it was read)
 }
 who = closure(deps)
+# One distribution, one scan: `who` is keyed by PEP 503, so `Pillow`/`pillow` cannot be two keys, two metadata
+# reads, or 21 distributions in a count of 20. The parent lists keep the spelling the requirement used, for the
+# message a human reads.
 directs = [dist_name(d) for d in deps]
 agpl, gpl, unknown, scanned = [], [], [], 0
 for name in sorted(who):

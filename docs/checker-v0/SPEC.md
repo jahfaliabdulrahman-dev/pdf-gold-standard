@@ -24,7 +24,10 @@
 
 ## مصفوفة القرّاء
 
-- **Linux (افتراضي):** PDFium وpoppler وMuPDF وpdfminer، بالإصدارات المثبّتة في `requirements.txt`.
+- **Linux (افتراضي):** PDFium وpoppler وpdfminer، من `dependencies` في `pyproject.toml` — وهو ما يُثبَّته
+  `pip install -e .`. **MuPDF** صار extra اختياريًا (`mupdf`) لأن ترخيصه AGPLv3 أو تجاري، فلا يُشحن مع الأداة؛
+  يُعدّ مشاركًا حين يُثبَّت، ويُعلَن غائبًا حين لا. (تعديل ٢٦ نوفمبر — التفصيل والأدلة في
+  `11-licensing-2026-11-26.md`.)
 - **macOS:** Preview (PDFKit) يُضاف تلقائيًا حين يتوفر، ويُعلَن إصداره.
 - **خارج v0:** Acrobat.
 - **التقرير يذكر دائمًا أي القرّاء شاركوا وأيهم غاب.**
