@@ -31,7 +31,7 @@
 
 ## ٣) الشروط أ–و على ١٤٩ ملفًا (العتبة 8.7)
 
-`python3 scripts/pr5c_verify.py` → **PR-5C CONDITIONS PASSED — 18/18**
+`.venv/bin/python scripts/pr5c_verify.py --value 8.7` → **PR-5C CONDITIONS PASSED — 18/18، value 8.7**
 
 | # | الشرط | النتيجة |
 |---|---|---|
@@ -74,7 +74,7 @@
 .venv/bin/python scripts/pdfjs_ship_measure.py --phase lamalef --out docs/checker-v0/measurements/pr5c/signal-bounds.json
 .venv/bin/python scripts/test_lam_alef_separation.py     # 10 checks
 # الشروط أ–و
-.venv/bin/python scripts/pr5c_verify.py                  # 18/18
+.venv/bin/python scripts/pr5c_verify.py --value 8.7      # 18/18 at the derived band
 # البوابة (تحتاج نص Firefox)
 .venv/bin/python scripts/firefox_compare.py --copies /tmp/ff/copies.json \
   --out docs/checker-v0/measurements/pr5c/firefox-compare.json

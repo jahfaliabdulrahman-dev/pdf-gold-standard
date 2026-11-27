@@ -33,9 +33,18 @@ ACCEPTED_CALIBRATION = {"calibration-55": "high"}
 
 
 def main() -> int:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--value", type=float, default=None,
+                    help="lam-alef band to evaluate the straddle checks against (default: the shipped manifest)")
+    args = ap.parse_args()
     v = json.load(open(os.path.join(REPO, "docs/checker-v0/measurements/pr5c/verdicts.json"), encoding="utf-8"))
     b = json.load(open(os.path.join(REPO, "docs/checker-v0/measurements/pr5c/signal-bounds.json"), encoding="utf-8"))
     th = json.load(open(os.path.join(REPO, "arabic_pdf_check/thresholds.json"), encoding="utf-8"))["values"]
+    # The band the 149 verdicts were measured with is the derived one, not necessarily the one in the manifest yet:
+    # pass it explicitly so the straddle checks and the numbers they print are about the same run.
+    if args.value is not None:
+        th["lam_alef_rate_per_1000"] = {"value": args.value}
     rows, failures = v["files"], []
 
     def check(name, ok, detail=""):
