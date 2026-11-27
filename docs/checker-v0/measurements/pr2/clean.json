@@ -8,6 +8,9 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "pdfjs": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -27,6 +30,10 @@
     ],
     "pdfium": [
      "lam-alef-transposition"
+    ],
+    "pdfjs": [
+     "lam-alef-transposition",
+     "segment-order"
     ],
     "pdfkit": [
      "lam-alef-transposition"
@@ -48,6 +55,9 @@
     "pdfminer"
    ],
    "reader_signals": {
+    "pdfjs": [
+     "segment-order"
+    ],
     "pdfminer": [
      "visual-order"
     ]
@@ -67,6 +77,10 @@
     ],
     "pdfium": [
      "lam-alef-transposition"
+    ],
+    "pdfjs": [
+     "lam-alef-transposition",
+     "segment-order"
     ],
     "pdfkit": [
      "lam-alef-transposition"
@@ -969,7 +983,7 @@
    "thresholds": "shipped"
   }
  ],
- "generated_at": "2026-11-25T16:52:49Z",
+ "generated_at": "2026-11-27T14:50:53Z",
  "summary": {
   "file_high": 0,
   "files": 70,

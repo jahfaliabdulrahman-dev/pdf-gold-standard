@@ -13,7 +13,30 @@ Rules it enforces by construction:
 import re
 
 LEVEL_AR = {"low": "منخفض", "medium": "متوسط", "high": "عالٍ"}
+# The reader's working name, in the words a customer knows it by. Used when a statement has to name who voted.
+READER_AR = {"pdfium": "PDFium (Chrome)", "pdfjs": "pdf.js (Firefox)", "pdfminer": "pdfminer",
+             "poppler": "poppler", "mupdf": "MuPDF", "pdfkit": "PDFKit (Preview)"}
+
+
+def _visual_order_ar(sig: dict) -> str:
+    """The visual-order statement, in Arabic, naming the readers — built from the vote, never from a literal."""
+    ev = sig.get("evidence") or {}
+    rev = [READER_AR.get(n, n) for n in ev.get("readers") or []]
+    log = [READER_AR.get(n, n) for n in ev.get("logical_readers") or []]
+    voters = ev.get("voters") or (len(rev) + len(log))
+    head = f"يُنسخ النص معكوسًا في {len(rev)} من {voters} قرّاء: {'، '.join(rev) or 'لا أحد'}"
+    tail = f"؛ ويُقرأ منطقيًا في: {'، '.join(log)}" if log else "؛ ولم يقرأه منطقيًا أحد"
+    return head + tail + " — والطبقة البصرية ليست عيبًا في الملف، بل طريقة أكثر المنتجين في تخزين العربية"
+
+
 CONF_AR = {"low": "منخفضة", "medium": "متوسطة", "high": "عالية"}
+
+
+def _statement(sig: dict) -> str:
+    """A signal's sentence for a human: Arabic where a sentence is a claim, the machine's `detail` elsewhere."""
+    if sig["id"] == "visual-order" and sig.get("cause") == "file" and (sig.get("evidence") or {}).get("readers"):
+        return _visual_order_ar(sig)
+    return sig["detail"]
 
 
 def _cell(text) -> str:
@@ -92,7 +115,7 @@ def render_blind(report: dict) -> str:
         lines += ["| الإشارة | المستوى | الثقة | البيان |", "|---|---|---|---|"]
         for s in held:
             lines.append(f"| `{s['id']}` | {LEVEL_AR[s['level']]} | {CONF_AR[s['confidence']]} | "
-                         f"{_cell(s['detail'])} |")
+                         f"{_cell(_statement(s))} |")
     elif not withheld_here:
         lines.append("لا إشارة على الملف: غطاء ToUnicode مكتمل، ولا أشكال عرض، ولا أرقام مخالفة.")
     if withheld_here:
@@ -101,7 +124,7 @@ def render_blind(report: dict) -> str:
         lines += ["", f"### إشارات محجوبة عن حكم الملف — محجوب: {voters} من {floor} قرّاء", "",
                   "| الإشارة | مستوى القارئ | البيان |", "|---|---|---|"]
         for s in withheld_here:
-            lines.append(f"| `{s['id']}` | {LEVEL_AR[s['level']]} | {_cell(s['detail'])} |")
+            lines.append(f"| `{s['id']}` | {LEVEL_AR[s['level']]} | {_cell(_statement(s))} |")
     per_reader = [(n, r) for n, r in report["readers"].items() if r["signals"]]
     if per_reader:
         lines += ["", "## إشارات القرّاء وأمثلة", ""]
@@ -111,7 +134,7 @@ def render_blind(report: dict) -> str:
                 tag = cause_ar(s)
                 if s.get("withheld_from_file_level"):
                     tag = f"{tag} — محجوب عن حكم الملف: {voters} من {floor}"
-                lines.append(f"- `{s['id']}` ({LEVEL_AR[s['level']]}, {tag}): {s['detail']}")
+                lines.append(f"- `{s['id']}` ({LEVEL_AR[s['level']]}, {tag}): {_statement(s)}")
             for ex in r["examples"]:
                 where = f"ص {ex['page']}" if ex["page"] else "صفحة غير محددة"
                 lines.append(f"  - {where}: {_code(ex['text'])}")

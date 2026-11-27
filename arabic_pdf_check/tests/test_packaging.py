@@ -10,6 +10,7 @@ It builds the wheel with pip (about two seconds, no install) and reads the archi
 the artifact a user receives, not about the source tree.
 """
 import importlib.metadata as md
+import json
 import os
 import re
 import subprocess
@@ -175,6 +176,30 @@ check("every-distribution-declares-its-licence", not unknown,
       f"no licence metadata (add a pinned override): {unknown}")
 print(f"     licences read for {scanned} installed distribution(s) reachable from {len(directs)} direct "
       f"dependencies, extras excluded")
+# The same refusal for the OPTIONAL JavaScript reader: `pdfjs-dist` is npm, not PyPI, so its licence is read from
+# the installed package's own `package.json` — the licence itself, not a name list. Not installed is not a pass:
+# it says «not installed» and names the command.
+NODEMODULES = os.path.join(REPO, "conformance", "readers", "node_modules")
+if os.path.isdir(NODEMODULES):
+    npm_bad, npm_seen = [], []
+    # A closure, not a listing: `os.listdir` sees `@napi-rs` as one directory and would have claimed «1 package»
+    # while `pdfjs-dist` pulls its own tree. Every `package.json` under node_modules/ is read, scopes included.
+    for root, dirs, files in os.walk(NODEMODULES):
+        dirs[:] = [d for d in dirs if d != ".bin"]
+        if "package.json" not in files:
+            continue
+        meta_path = os.path.join(root, "package.json")
+        meta = json.load(open(meta_path, encoding="utf-8"))
+        name, lic = meta.get("name", os.path.basename(root)), str(meta.get("license") or meta.get("licenses") or "")
+        npm_seen.append(f"{name} {meta.get('version', '?')}")
+        if AGPL.search(lic) or GPL.search(lic) or not lic.strip():
+            npm_bad.append(f"{name}: {lic or 'NO LICENCE FIELD'}")
+    check("no-copyleft-in-the-node-closure", not npm_bad, "; ".join(npm_bad))
+    print(f"     npm licences read for {len(npm_seen)} package(s): {', '.join(npm_seen)}")
+else:
+    print("SKIP no-copyleft-in-the-node-closure — conformance/readers/node_modules is absent "
+          "(run `npm ci` in conformance/readers)")
+
 notice = os.path.join(REPO, "conformance", "data", "LICENSE-ar_words.txt")
 check("notice-exists", os.path.isfile(notice))
 text = open(notice, encoding="utf-8").read()

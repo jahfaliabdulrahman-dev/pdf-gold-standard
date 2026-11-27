@@ -92,7 +92,7 @@ check("runtime-check-runs", r.returncode == 0, (r.stderr or r.stdout).strip()[-3
 if r.returncode == 0:
     payload = json.loads(r.stdout.strip().splitlines()[-1])
     check("runtime-readers-from-conformance", set(payload["readers"]) <= {"pdfium", "pdfkit", "mupdf", "poppler",
-                                                                          "pdfminer"} and payload["readers"],
+                                                                          "pdfminer", "pdfjs"} and payload["readers"],
           str(payload))
 
 # the wrapper is the only door to arafix: it must exist and be imported from conformance

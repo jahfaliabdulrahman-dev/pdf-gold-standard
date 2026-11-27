@@ -1,7 +1,7 @@
 {
   "schema_version": "arabic-pdf-check-thresholds/1",
-  "command": "python3 scripts/checker_measure.py --skip-owner --write --clean-dir /tmp/cases-a --out docs/checker-v0/measurements/pr2",
-  "measured_at": "2026-11-25T16:49:23Z",
+  "command": "python3 scripts/checker_measure.py --skip-owner --clean-dir /tmp/cases-a --out docs/checker-v0/measurements/pr2 --write",
+  "measured_at": "2026-11-27T14:46:50Z",
   "rule": "value = max(declared floor, clean-set maximum); a separation of at least 0.20 between the clean set and the planted set is required, and a signal that does not separate is refused and not shipped",
   "values": {
     "presentation_forms": {
@@ -27,7 +27,7 @@
     "lexical_validity": {
       "value": 0.67,
       "declared": 0.4,
-      "source": "derived: clean_set_minimum - 0.20 (higher = better); clean minimum 0.8684 (governing doc:report); 4 document(s) of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The calibration lesson's defect is a measured lam-alef transposition, not lexical-only (measurements/lam-alef-separation.json); its lexical ratio is above this floor and is NOT repaired by lowering the threshold."
+      "source": "derived: clean_set_minimum - 0.20 (higher = better); clean minimum 0.8665 (governing doc:report); 4 document(s) of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The calibration lesson's defect is a measured lam-alef transposition, not lexical-only (measurements/lam-alef-separation.json); its lexical ratio is above this floor and is NOT repaired by lowering the threshold."
     },
     "lexical_min_runs": {
       "value": 20,
@@ -35,9 +35,9 @@
       "source": "declared policy: a reading with fewer than 20 Arabic runs is not judged for lexical validity (it can be neither passed nor failed)"
     },
     "lam_alef_rate_per_1000": {
-      "value": 6.2,
-      "declared": 6.2,
-      "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 0.88 per 1000 runs (doc:report, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12). sqrt(0.8795*43.03)=6.15 -> 6.2. Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact"
+      "value": 8.7,
+      "declared": 8.7,
+      "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 1.77 per 1000 runs (doc:report read by pdfjs, which joins the matrix on 2026-11-27; 0.88 for every other reader, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12, pdfjs 56.21). sqrt(1.7683*43.03)=8.72 -> 8.7 (was 6.2 before pdfjs; re-run of 149 files at 8.7 vs 6.2: zero level or signal change, docs/checker-v0/measurements/pr5c). Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact"
     },
     "lam_alef_min_runs": {
       "value": 200,
@@ -47,12 +47,12 @@
     "segment_order_min": {
       "value": 2,
       "declared": 2,
-      "source": "derived: clean maximum + 1 (declared floor 2). The clean set (70 files) measures at most 1 reversed segment(s) per reader, 7 in 7 file(s) across all readers — reader findings on clean files (a reader that reverses a segment around a number or a Latin run), not file defects. Broken side, measured in measurements/segment-order.json: PDFium returns 52 reversed segment(s) in 11 of the 16 samples, 2-6 per affected file, and the signal fires at count >= value, so 1 < 2 <= 2 separates. A reader signal: it never raises the file"
+      "source": "derived: clean maximum + 1 (declared floor 2). The clean set (70 files) measures at most 1 reversed segment(s) per reader, 7 in 6 file(s) across all readers — reader findings on clean files (a reader that reverses a segment around a number or a Latin run), not file defects. pdf.js is outside this maximum: it reverses 25 segment(s) in 13 clean file(s), and its text equals a hand copy from Firefox (measurements/pr5c/firefox-compare.json, which includes a reversed mixed line on guide page 5), so these are Firefox copy defects on clean files that the signal reports at reader level. Broken side, measured in measurements/segment-order.json: PDFium returns 52 reversed segment(s) in 11 of the 16 samples, 2-6 per affected file, and the signal fires at count >= value, so 1 < 2 <= 2 separates. A reader signal: it never raises the file"
     }
   },
   "observed": {
     "clean_max_presentation_forms": 0.0,
-    "clean_min_lexical_validity": 0.8684,
+    "clean_min_lexical_validity": 0.8665,
     "clean_min_lexical_all": 0.8333,
     "clean_min_lexical_case": "doc:report",
     "clean_judged_files": 8,
@@ -93,6 +93,13 @@
           "ratio": 0.8827,
           "reversed": 512,
           "lam_alef": 0
+        },
+        "pdfjs": {
+          "runs": 613,
+          "known": 541,
+          "ratio": 0.8825,
+          "reversed": 1,
+          "lam_alef": 0
         }
       },
       "doc:report": {
@@ -130,6 +137,13 @@
           "ratio": 0.8698,
           "reversed": 905,
           "lam_alef": 0
+        },
+        "pdfjs": {
+          "runs": 1131,
+          "known": 980,
+          "ratio": 0.8665,
+          "reversed": 2,
+          "lam_alef": 2
         }
       },
       "doc:najd": {
@@ -166,6 +180,13 @@
           "known": 585,
           "ratio": 0.8784,
           "reversed": 528,
+          "lam_alef": 0
+        },
+        "pdfjs": {
+          "runs": 658,
+          "known": 574,
+          "ratio": 0.8723,
+          "reversed": 1,
           "lam_alef": 0
         }
       },
@@ -204,10 +225,17 @@
           "ratio": 0.8708,
           "reversed": 906,
           "lam_alef": 0
+        },
+        "pdfjs": {
+          "runs": 1132,
+          "known": 982,
+          "ratio": 0.8675,
+          "reversed": 2,
+          "lam_alef": 2
         }
       }
     },
-    "clean_max_visual_share": 0.2,
+    "clean_max_visual_share": 0.1667,
     "clean_max_gap_ratio": 0.0,
     "clean_min_pair_f1": 0.0,
     "clean_files": 70,
@@ -218,7 +246,7 @@
       "planted-mupdf-logical": {
         "forms": 0,
         "arabic": 44,
-        "visual_share": 0.8,
+        "visual_share": 0.833,
         "pair_min": 0.6667,
         "lexical_max": null,
         "missing_unicode": 0
@@ -226,15 +254,15 @@
       "planted-chrome-raw": {
         "forms": 39,
         "arabic": 17,
-        "visual_share": 0.2,
-        "pair_min": 0.4,
+        "visual_share": 0.167,
+        "pair_min": 0.2286,
         "lexical_max": null,
         "missing_unicode": 0
       },
       "planted-presentation-forms": {
         "forms": 40,
         "arabic": 4,
-        "visual_share": 0.8,
+        "visual_share": 0.833,
         "pair_min": 0.5556,
         "lexical_max": null,
         "missing_unicode": 0
@@ -242,7 +270,7 @@
       "planted-no-tounicode": {
         "forms": 0,
         "arabic": 0,
-        "visual_share": 0.2,
+        "visual_share": 0.167,
         "pair_min": 0.0,
         "lexical_max": null,
         "missing_unicode": 128
@@ -250,7 +278,7 @@
       "planted-letter-swap": {
         "forms": 0,
         "arabic": 241,
-        "visual_share": 0.8,
+        "visual_share": 0.833,
         "pair_min": 1.0,
         "lexical_max": 0.0,
         "missing_unicode": 0
@@ -258,13 +286,28 @@
       "planted-lam-alef": {
         "forms": 0,
         "arabic": 1672,
-        "visual_share": 0.2,
+        "visual_share": 0.167,
         "pair_min": 1.0,
         "lexical_max": 0.8473,
         "missing_unicode": 0
       }
     },
-    "clean_max_lam_alef_rate": 0.88,
+    "clean_max_lam_alef_rate": 1.77,
+    "clean_segment_order_true_on_clean": {
+      "doc:guide": 2,
+      "doc:report": 6,
+      "doc:najd": 2,
+      "doc:print": 6,
+      "case:dig-date-hindi": 1,
+      "case:dig-phone": 1,
+      "case:mix-version": 1,
+      "case:mon-riyal-sign": 1,
+      "case:mon-rs-abbrev": 1,
+      "case:num-ids-latn-in-arab": 1,
+      "case:num-invoice-arab": 1,
+      "case:num-invoice-kv-table": 1,
+      "case:num-invoice-latn": 1
+    },
     "clean_max_segment_order": 1,
     "clean_segment_order_total": 7,
     "clean_segment_order_files": {
@@ -273,6 +316,13 @@
         "pdfkit": 0,
         "mupdf": 1,
         "poppler": 0,
+        "pdfminer": 0
+      },
+      "case:mix-acronym": {
+        "pdfium": 0,
+        "pdfkit": 1,
+        "mupdf": 0,
+        "poppler": 1,
         "pdfminer": 0
       },
       "case:mix-email-url": {
@@ -289,13 +339,6 @@
         "poppler": 0,
         "pdfminer": 0
       },
-      "case:mon-negative-hindi": {
-        "pdfium": 0,
-        "pdfkit": 0,
-        "mupdf": 1,
-        "poppler": 0,
-        "pdfminer": 0
-      },
       "case:num-invoice-kv-table": {
         "pdfium": 0,
         "pdfkit": 0,
@@ -304,13 +347,6 @@
         "pdfminer": 0
       },
       "case:num-invoice-latn": {
-        "pdfium": 0,
-        "pdfkit": 0,
-        "mupdf": 1,
-        "poppler": 0,
-        "pdfminer": 0
-      },
-      "case:num-negative-arab": {
         "pdfium": 0,
         "pdfkit": 0,
         "mupdf": 1,

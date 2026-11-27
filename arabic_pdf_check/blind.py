@@ -350,11 +350,19 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
         conf = min(("high" if (o["confidence"] or 0) >= 0.9 else
                     "medium" if (o["confidence"] or 0) >= 0.6 else "low")
                    for o in (orders[n] for n in visual_readers))
+        # The statement NAMES the readers and counts them from the vote: «3 of 4: pdfium, pdfjs, pdfminer;
+        # logical: poppler». A bare «N readers disagree» invites the reader to guess which, and the answer is the
+        # whole point — a visual layer is a property of the copy, not a defect of the file. `logical_readers` is
+        # carried so the Arabic page can be built from the vote instead of re-deriving it.
+        logical_readers = [n for n in orders if n not in visual_readers]
         file_signals.append(_finding(
             "visual-order", "high", "file", conf,
-            f"{len(visual_readers)} of {len(ok)} readers that read return reversed text — the copied text "
-            f"keeps the opposite order for those readers (the layer itself is not judged as a defect; a visual "
-            f"layer is how most producers store Arabic)", readers=visual_readers,
+            f"{len(visual_readers)} of {len(orders)} readers that read return reversed text "
+            f"({', '.join(visual_readers) or 'none'}); read logically by "
+            f"({', '.join(logical_readers) or 'none'}) — the copied text keeps the opposite order for that "
+            f"group, and a visual layer is how most producers store Arabic, so this describes the copy rather "
+            f"than a defect of the file",
+            readers=visual_readers, logical_readers=logical_readers, voters=len(orders),
             scores={n: orders[n]["score"] for n in visual_readers}))
     # Lexical validity: the words themselves. A majority of the readers that can judge words is a file
     # finding; one failing reader is that reader's risk and never the file's.

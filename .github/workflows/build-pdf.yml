@@ -436,6 +436,34 @@ jobs:
           assert not any(x.get("withheld_from_file_level") for x in gaps), "the fact cannot be withheld"
           print(f"file verdict withheld: {str(file['withheld'])[:110]}")
           PY
+      - name: The fourth reader — pdf.js (Apache-2.0), installed from the lockfile
+        # Without it the shipped Linux install has three readers and withholds the file verdict (the step above
+        # proves that face). With it the jury is four and the verdict is given: measured over 149 files in
+        # docs/checker-v0/measurements/pr5b + pr5c, and gated on a copy from Firefox (pr5c/firefox-compare.json).
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pdf.js and assert the four-reader verdict
+        run: |
+          set -euo pipefail
+          npm ci --prefix conformance/readers --ignore-scripts
+          export ARABIC_PDF_CHECK_CACHE="$RUNNER_TEMP/bare-cache"
+          "$RUNNER_TEMP/bare/bin/python" -m arabic_pdf_check check tests/vocalised_raw.pdf \
+            -o "$RUNNER_TEMP/r4.json" --md "$RUNNER_TEMP/r4.md"
+          "$RUNNER_TEMP/bare/bin/python" - "$RUNNER_TEMP/r4.json" "$RUNNER_TEMP/r4.md" <<'PY'
+          import json, sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          md = open(sys.argv[2], encoding="utf-8").read()
+          ran = sorted(report.get("readers") or {})
+          assert ran == ["pdfium", "pdfjs", "pdfminer", "poppler"], f"the shipped Linux jury is these four: {ran}"
+          file = report["risk"]["file"]
+          assert file.get("level") == "high" and not file.get("withheld"), f"four readers carry a verdict: {file}"
+          assert file.get("voters") == 4, file
+          ids = {s["id"]: s for s in report.get("signals") or []}
+          assert ids.get("tounicode-gaps", {}).get("cause") == "file", f"the planted gap is a file fact: {ids}"
+          assert "لا حكم" not in md.split("\n## ")[0], "the Markdown header must carry the verdict, not withhold it"
+          print(f"readers {ran} · file {file['level']} · signals {sorted(ids)}")
+          PY
       - name: The file a customer names is the file every reader opens (relative path, from another directory)
         run: |
           set -euo pipefail

@@ -170,8 +170,11 @@ check("reader-failure:signal", any(s["id"] == "reader-failure" for s in crashed[
       str([s["id"] for s in crashed["signals"]]))
 check("reader-failure:not-clean", crashed["risk"]["file"]["level"] != "low",
       crashed["risk"]["file"]["level"])
-check("reader-failure:majority-dropped", crashed["majority"]["readers"]["read"] == 4,
-      str(crashed["majority"]))
+# The crashed reader leaves the majority: one fewer voter than this machine has installed. Derived from the
+# installed set, not typed — with pdf.js in MATRIX the count is 5 on a full Mac and 4 on Linux with MuPDF.
+_installed = len(blind.available()[0])
+check("reader-failure:majority-dropped", crashed["majority"]["readers"]["read"] == _installed - 1,
+      f"installed {_installed}, majority {crashed['majority']}")
 
 # Examples: no bidi override, no ESC, and a code span that survives a backtick.
 examples = blind._examples("نص `مكسور` ‮عكس\x1b[31m", [])

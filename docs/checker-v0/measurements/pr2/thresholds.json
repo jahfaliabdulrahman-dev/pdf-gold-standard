@@ -1,6 +1,6 @@
 {
- "command": "python3 scripts/checker_measure.py --skip-owner --write --clean-dir /tmp/cases-a --out docs/checker-v0/measurements/pr2",
- "measured_at": "2026-11-25T16:49:23Z",
+ "command": "python3 scripts/checker_measure.py --skip-owner --clean-dir /tmp/cases-a --out docs/checker-v0/measurements/pr2 --write",
+ "measured_at": "2026-11-27T14:46:50Z",
  "missing_docs": {},
  "observed": {
   "clean_docs": {
@@ -18,6 +18,13 @@
      "ratio": 0.8844,
      "reversed": 1,
      "runs": 614
+    },
+    "pdfjs": {
+     "known": 541,
+     "lam_alef": 0,
+     "ratio": 0.8825,
+     "reversed": 1,
+     "runs": 613
     },
     "pdfkit": {
      "known": 541,
@@ -56,6 +63,13 @@
      "reversed": 1,
      "runs": 667
     },
+    "pdfjs": {
+     "known": 574,
+     "lam_alef": 0,
+     "ratio": 0.8723,
+     "reversed": 1,
+     "runs": 658
+    },
     "pdfkit": {
      "known": 588,
      "lam_alef": 0,
@@ -92,6 +106,13 @@
      "ratio": 0.8694,
      "reversed": 2,
      "runs": 1141
+    },
+    "pdfjs": {
+     "known": 982,
+     "lam_alef": 2,
+     "ratio": 0.8675,
+     "reversed": 2,
+     "runs": 1132
     },
     "pdfkit": {
      "known": 996,
@@ -130,6 +151,13 @@
      "reversed": 2,
      "runs": 1140
     },
+    "pdfjs": {
+     "known": 980,
+     "lam_alef": 2,
+     "ratio": 0.8665,
+     "reversed": 2,
+     "runs": 1131
+    },
     "pdfkit": {
      "known": 994,
      "lam_alef": 1,
@@ -156,15 +184,22 @@
   "clean_files": 70,
   "clean_judged_files": 8,
   "clean_max_gap_ratio": 0.0,
-  "clean_max_lam_alef_rate": 0.88,
+  "clean_max_lam_alef_rate": 1.77,
   "clean_max_presentation_forms": 0.0,
   "clean_max_segment_order": 1,
-  "clean_max_visual_share": 0.2,
+  "clean_max_visual_share": 0.1667,
   "clean_min_lexical_all": 0.8333,
   "clean_min_lexical_case": "doc:report",
-  "clean_min_lexical_validity": 0.8684,
+  "clean_min_lexical_validity": 0.8665,
   "clean_min_pair_f1": 0.0,
   "clean_segment_order_files": {
+   "case:mix-acronym": {
+    "mupdf": 0,
+    "pdfium": 0,
+    "pdfkit": 1,
+    "pdfminer": 0,
+    "poppler": 1
+   },
    "case:mix-email-url": {
     "mupdf": 0,
     "pdfium": 0,
@@ -175,13 +210,6 @@
    "case:mix-latin-sentence": {
     "mupdf": 0,
     "pdfium": 1,
-    "pdfkit": 0,
-    "pdfminer": 0,
-    "poppler": 0
-   },
-   "case:mon-negative-hindi": {
-    "mupdf": 1,
-    "pdfium": 0,
     "pdfkit": 0,
     "pdfminer": 0,
     "poppler": 0
@@ -200,13 +228,6 @@
     "pdfminer": 0,
     "poppler": 0
    },
-   "case:num-negative-arab": {
-    "mupdf": 1,
-    "pdfium": 0,
-    "pdfkit": 0,
-    "pdfminer": 0,
-    "poppler": 0
-   },
    "doc:najd": {
     "mupdf": 1,
     "pdfium": 0,
@@ -216,6 +237,21 @@
    }
   },
   "clean_segment_order_total": 7,
+  "clean_segment_order_true_on_clean": {
+   "case:dig-date-hindi": 1,
+   "case:dig-phone": 1,
+   "case:mix-version": 1,
+   "case:mon-riyal-sign": 1,
+   "case:mon-rs-abbrev": 1,
+   "case:num-ids-latn-in-arab": 1,
+   "case:num-invoice-arab": 1,
+   "case:num-invoice-kv-table": 1,
+   "case:num-invoice-latn": 1,
+   "doc:guide": 2,
+   "doc:najd": 2,
+   "doc:print": 6,
+   "doc:report": 6
+  },
   "clean_threshold_files": 4,
   "planted": {
    "planted-chrome-raw": {
@@ -223,8 +259,8 @@
     "forms": 39,
     "lexical_max": null,
     "missing_unicode": 0,
-    "pair_min": 0.4,
-    "visual_share": 0.2
+    "pair_min": 0.2286,
+    "visual_share": 0.167
    },
    "planted-lam-alef": {
     "arabic": 1672,
@@ -232,7 +268,7 @@
     "lexical_max": 0.8473,
     "missing_unicode": 0,
     "pair_min": 1.0,
-    "visual_share": 0.2
+    "visual_share": 0.167
    },
    "planted-letter-swap": {
     "arabic": 241,
@@ -240,7 +276,7 @@
     "lexical_max": 0.0,
     "missing_unicode": 0,
     "pair_min": 1.0,
-    "visual_share": 0.8
+    "visual_share": 0.833
    },
    "planted-mupdf-logical": {
     "arabic": 44,
@@ -248,7 +284,7 @@
     "lexical_max": null,
     "missing_unicode": 0,
     "pair_min": 0.6667,
-    "visual_share": 0.8
+    "visual_share": 0.833
    },
    "planted-no-tounicode": {
     "arabic": 0,
@@ -256,7 +292,7 @@
     "lexical_max": null,
     "missing_unicode": 128,
     "pair_min": 0.0,
-    "visual_share": 0.2
+    "visual_share": 0.167
    },
    "planted-presentation-forms": {
     "arabic": 4,
@@ -264,7 +300,7 @@
     "lexical_max": null,
     "missing_unicode": 0,
     "pair_min": 0.5556,
-    "visual_share": 0.8
+    "visual_share": 0.833
    }
   },
   "refused": {
@@ -280,9 +316,9 @@
    "value": 200
   },
   "lam_alef_rate_per_1000": {
-   "declared": 6.2,
-   "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 0.88 per 1000 runs (doc:report, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12). sqrt(0.8795*43.03)=6.15 -> 6.2. Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact",
-   "value": 6.2
+   "declared": 8.7,
+   "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 1.77 per 1000 runs (doc:report read by pdfjs, which joins the matrix on 2026-11-27; 0.88 for every other reader, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12, pdfjs 56.21). sqrt(1.7683*43.03)=8.72 -> 8.7 (was 6.2 before pdfjs; re-run of 149 files at 8.7 vs 6.2: zero level or signal change, docs/checker-v0/measurements/pr5c). Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact",
+   "value": 8.7
   },
   "lexical_min_runs": {
    "declared": 20,
@@ -291,7 +327,7 @@
   },
   "lexical_validity": {
    "declared": 0.4,
-   "source": "derived: clean_set_minimum - 0.20 (higher = better); clean minimum 0.8684 (governing doc:report); 4 document(s) of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The calibration lesson's defect is a measured lam-alef transposition, not lexical-only (measurements/lam-alef-separation.json); its lexical ratio is above this floor and is NOT repaired by lowering the threshold.",
+   "source": "derived: clean_set_minimum - 0.20 (higher = better); clean minimum 0.8665 (governing doc:report); 4 document(s) of 8 judged clean files (the other 62 are below the 20-run floor; all judged minimum 0.8333). The planted letter-swap is the negative side. The calibration lesson's defect is a measured lam-alef transposition, not lexical-only (measurements/lam-alef-separation.json); its lexical ratio is above this floor and is NOT repaired by lowering the threshold.",
    "value": 0.67
   },
   "min_arabic_chars": {
@@ -306,7 +342,7 @@
   },
   "segment_order_min": {
    "declared": 2,
-   "source": "derived: clean maximum + 1 (declared floor 2). The clean set (70 files) measures at most 1 reversed segment(s) per reader, 7 in 7 file(s) across all readers — reader findings on clean files (a reader that reverses a segment around a number or a Latin run), not file defects. Broken side, measured in measurements/segment-order.json: PDFium returns 52 reversed segment(s) in 11 of the 16 samples, 2-6 per affected file, and the signal fires at count >= value, so 1 < 2 <= 2 separates. A reader signal: it never raises the file",
+   "source": "derived: clean maximum + 1 (declared floor 2). The clean set (70 files) measures at most 1 reversed segment(s) per reader, 7 in 6 file(s) across all readers — reader findings on clean files (a reader that reverses a segment around a number or a Latin run), not file defects. pdf.js is outside this maximum: it reverses 25 segment(s) in 13 clean file(s), and its text equals a hand copy from Firefox (measurements/pr5c/firefox-compare.json, which includes a reversed mixed line on guide page 5), so these are Firefox copy defects on clean files that the signal reports at reader level. Broken side, measured in measurements/segment-order.json: PDFium returns 52 reversed segment(s) in 11 of the 16 samples, 2-6 per affected file, and the signal fires at count >= value, so 1 < 2 <= 2 separates. A reader signal: it never raises the file",
    "value": 2
   },
   "tounicode_gap_ratio": {

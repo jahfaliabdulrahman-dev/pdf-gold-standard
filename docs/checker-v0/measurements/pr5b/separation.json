@@ -1,0 +1,205 @@
+{
+ "generated_at": "2026-11-26T23:08:30Z",
+ "sides": {
+  "all": {
+   "clean_max_lam_alef_rate": 0.8795074758135445,
+   "clean_max_missing_unicode": 0,
+   "clean_max_presentation_forms": 0.0,
+   "clean_max_tounicode_gap": 0.0,
+   "clean_max_visual_share": 0.2,
+   "clean_min_lexical": 0.8333,
+   "planted": {
+    "planted-chrome-raw": {
+     "lam_alef_max": 1,
+     "lexical_max": null,
+     "missing_unicode": 0,
+     "pf_ratio": 0.6964285714285714,
+     "visual_readers": [
+      "pdfminer"
+     ]
+    },
+    "planted-lam-alef": {
+     "lam_alef_max": 30,
+     "lexical_max": 0.8473,
+     "missing_unicode": 0,
+     "pf_ratio": 0.0,
+     "visual_readers": [
+      "pdfminer"
+     ]
+    },
+    "planted-letter-swap": {
+     "lam_alef_max": 2,
+     "lexical_max": 0.0,
+     "missing_unicode": 0,
+     "pf_ratio": 0.0,
+     "visual_readers": [
+      "pdfium",
+      "pdfkit",
+      "mupdf",
+      "poppler"
+     ]
+    },
+    "planted-mupdf-logical": {
+     "lam_alef_max": 0,
+     "lexical_max": null,
+     "missing_unicode": 0,
+     "pf_ratio": 0.0,
+     "visual_readers": [
+      "pdfium",
+      "pdfkit",
+      "mupdf",
+      "poppler"
+     ]
+    },
+    "planted-no-tounicode": {
+     "lam_alef_max": 0,
+     "lexical_max": null,
+     "missing_unicode": 128,
+     "pf_ratio": 0.0,
+     "visual_readers": [
+      "pdfminer"
+     ]
+    },
+    "planted-presentation-forms": {
+     "lam_alef_max": 0,
+     "lexical_max": null,
+     "missing_unicode": 0,
+     "pf_ratio": 0.9090909090909091,
+     "visual_readers": [
+      "pdfium",
+      "pdfkit",
+      "mupdf",
+      "poppler"
+     ]
+    }
+   },
+   "readers": [
+    "pdfium",
+    "pdfkit",
+    "mupdf",
+    "poppler",
+    "pdfminer"
+   ],
+   "separation": {
+    "lam-alef-transposition": {
+     "broken_max": 30,
+     "clean_min": 0.8795074758135445
+    },
+    "lexical-validity": {
+     "broken_max": 0.0,
+     "clean_min": 0.8333
+    },
+    "presentation-forms": {
+     "broken_min": 0.9090909090909091,
+     "clean_max": 0.0
+    },
+    "tounicode-gaps": {
+     "broken_min": 128,
+     "clean_max": 0.0
+    },
+    "visual-order": {
+     "broken_min": 0.2,
+     "clean_max": 0.2
+    }
+   }
+  },
+  "ship": {
+   "clean_max_lam_alef_rate": 1.7683465959328026,
+   "clean_max_missing_unicode": 0,
+   "clean_max_presentation_forms": 0.0,
+   "clean_max_tounicode_gap": 0.0,
+   "clean_max_visual_share": 0.25,
+   "clean_min_lexical": 0.8333,
+   "planted": {
+    "planted-chrome-raw": {
+     "lam_alef_max": 1,
+     "lexical_max": null,
+     "missing_unicode": 0,
+     "pf_ratio": 0.6964285714285714,
+     "visual_readers": [
+      "pdfminer"
+     ]
+    },
+    "planted-lam-alef": {
+     "lam_alef_max": 30,
+     "lexical_max": 0.8053,
+     "missing_unicode": 0,
+     "pf_ratio": 0.0,
+     "visual_readers": [
+      "pdfminer"
+     ]
+    },
+    "planted-letter-swap": {
+     "lam_alef_max": 2,
+     "lexical_max": 0.0,
+     "missing_unicode": 0,
+     "pf_ratio": 0.0,
+     "visual_readers": [
+      "pdfium",
+      "poppler",
+      "pdfjs"
+     ]
+    },
+    "planted-mupdf-logical": {
+     "lam_alef_max": 0,
+     "lexical_max": null,
+     "missing_unicode": 0,
+     "pf_ratio": 0.0,
+     "visual_readers": [
+      "pdfium",
+      "poppler",
+      "pdfjs"
+     ]
+    },
+    "planted-no-tounicode": {
+     "lam_alef_max": 0,
+     "lexical_max": null,
+     "missing_unicode": 128,
+     "pf_ratio": 0.0,
+     "visual_readers": [
+      "pdfminer"
+     ]
+    },
+    "planted-presentation-forms": {
+     "lam_alef_max": 0,
+     "lexical_max": null,
+     "missing_unicode": 0,
+     "pf_ratio": 0.9090909090909091,
+     "visual_readers": [
+      "pdfium",
+      "poppler",
+      "pdfjs"
+     ]
+    }
+   },
+   "readers": [
+    "pdfium",
+    "poppler",
+    "pdfminer",
+    "pdfjs"
+   ],
+   "separation": {
+    "lam-alef-transposition": {
+     "broken_max": 30,
+     "clean_min": 1.7683465959328026
+    },
+    "lexical-validity": {
+     "broken_max": 0.0,
+     "clean_min": 0.8333
+    },
+    "presentation-forms": {
+     "broken_min": 0.9090909090909091,
+     "clean_max": 0.0
+    },
+    "tounicode-gaps": {
+     "broken_min": 128,
+     "clean_max": 0.0
+    },
+    "visual-order": {
+     "broken_min": 0.25,
+     "clean_max": 0.25
+    }
+   }
+  }
+ }
+}

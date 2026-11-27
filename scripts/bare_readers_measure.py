@@ -28,10 +28,25 @@ SHIPPED_LINUX = ("pdfium", "poppler", "pdfminer")
 
 
 def check_as(pdf_path: str, thresholds: dict, keep: tuple[str, ...] | None):
-    """`blind.check` with `available()` narrowed to `keep`; returns the report."""
+    """`blind.check` with `available()` narrowed to `keep`; returns the report.
+
+    A name in `keep` that the shipped MATRIX does not declare yet (a CANDIDATE reader, e.g. `pdfjs`) is imported
+    directly and added to the voting set — the measurement must be able to ask «what would this reader say?»
+    before anybody ships it, and `shipped.available()` is untouched by that.
+    """
     if keep is None:
         return blind.check(pdf_path, thresholds)
     ok, missing = real_available()
+    for name in keep:
+        if name in ok:
+            continue
+        try:
+            from conformance.readers import load
+            mod = load(name)
+            mod.version()
+            ok[name] = mod
+        except Exception as exc:
+            missing[name] = f"{type(exc).__name__}: {exc}"
     kept = {n: m for n, m in ok.items() if n in keep}
     dropped = {n: why for n, why in missing.items()}
     for n in ok:

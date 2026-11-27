@@ -14,6 +14,8 @@ import re
 # imports nothing optional, because three places print it (the reader's ImportError, the manifest, the CI proof)
 # and a second copy is how the sentence drifts from the command it names.
 MUPDF_INSTALL = "pip install 'arabic-pdf-check[mupdf]'"
+# The same rule for the pdf.js reader: Node (any LTS) plus the pinned package, installed from the lockfile.
+PDFJS_INSTALL = "npm ci --prefix conformance/readers"
 
 # A reason travels into a customer's report and certificate, so it is one function, not three copies. A path is
 # two segments or a drive letter (a bare `/tmp` is a directory, not somebody's file); `<path>` replaces it.
@@ -33,7 +35,10 @@ def why_reason(why) -> str:
     raw = sanitize_line(str(why) if why is not None else "")
     return " ".join(_PATH.sub("<path>", raw).split())[:160]
 
-MATRIX = ("pdfium", "pdfkit", "mupdf", "poppler", "pdfminer")     # order: tier-1 first
+MATRIX = ("pdfium", "pdfkit", "mupdf", "poppler", "pdfminer", "pdfjs")     # order: tier-1 first
+# pdf.js (Apache-2.0) is the fourth vote on a bare Linux install: without it a file-level verdict is withheld
+# (`FILE_CLAIM_MIN_VOTERS = 4`). Measured in docs/checker-v0/measurements/pr5b, pr5c (149 files) and gated on a
+# copy from Firefox (pr5c/firefox-compare.json).
 TIER1 = ("pdfium", "pdfkit")
 
 

@@ -1,0 +1,6609 @@
+{
+ "files": [
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "doc:guide",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "doc:report",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "doc:najd",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "doc:print",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:bld-heading",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:bld-th",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:bld-word",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-article",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-date-hindi",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-in-table",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-mixed-order",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-mixed-scripts",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-paren-eol",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-percent",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-phone",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:dig-year",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:head-deep",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:head-h1-h3",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:head-latin",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:head-numbered",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:kash-explicit",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:kash-justify-tatweel",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:kash-justify",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:lst-bullet",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:lst-ordered",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mix-acronym",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mix-email-url",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mix-latin-sentence",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mix-latin-word",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mix-numbers-ltr",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mix-parens",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mix-version",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mon-decimal-table",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "no-text-layer": "low"
+    },
+    "signals": [
+     "no-text-layer"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mon-iban",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "no-text-layer": "low"
+    },
+    "signals": [
+     "no-text-layer"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mon-negative-hindi",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mon-negative-line-start",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mon-negative-table",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mon-riyal-sign",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mon-rs-abbrev",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:mon-thousands",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:num-ids-latn-in-arab",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:num-invoice-arab",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:num-invoice-kv-table",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:num-invoice-latn",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:num-negative-arab",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:pun-comma",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:pun-edge",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:pun-quotes",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:pun-semicolon-question",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:shp-allah-sentence",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:shp-allah",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:shp-kaf-kitaba",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:shp-lam-alef-forms",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:shp-nonjoining",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:shp-single-letter",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:tbl-2col",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:tbl-5col",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:tbl-empty-cell",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:tbl-page-break",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:tbl-plain-fragment",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:tbl-two-header-rows",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:tbl-two-line-cell",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:tbl-width-100",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:voc-full",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:voc-lam-alef-marks",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:voc-no-heading",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:voc-partial",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:voc-shadda-tanween",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:voc-shadda",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "clean",
+   "label": "case:voc-tanween",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "visual-order": "high"
+    },
+    "signals": [
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "planted",
+   "label": "planted-mupdf-logical",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "visual-order": "high"
+    },
+    "signals": [
+     "visual-order"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "planted",
+   "label": "planted-chrome-raw",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "planted",
+   "label": "planted-presentation-forms",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "no-text-layer": "low",
+     "tounicode-gaps": "high"
+    },
+    "signals": [
+     "no-text-layer",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "planted",
+   "label": "planted-no-tounicode",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "no-text-layer": "low",
+     "tounicode-gaps": "high"
+    },
+    "signals": [
+     "no-text-layer",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lexical-validity": "high",
+     "visual-order": "high"
+    },
+    "signals": [
+     "lexical-validity",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "planted",
+   "label": "planted-letter-swap",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lexical-validity": "high",
+     "visual-order": "high"
+    },
+    "signals": [
+     "lexical-validity",
+     "visual-order"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "planted",
+   "label": "planted-lam-alef",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-01",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-02",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-03",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-04",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-05",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-06",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-07",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-08",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-09",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-10",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-11",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium",
+     "lexical-validity": "high"
+    },
+    "signals": [
+     "lam-alef-transposition",
+     "lexical-validity"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "calibration",
+   "label": "calibration-12",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium",
+     "lexical-validity": "high"
+    },
+    "signals": [
+     "lam-alef-transposition",
+     "lexical-validity"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-13",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-14",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-15",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-16",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-17",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-18",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-19",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-20",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-21",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-22",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-23",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-24",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-25",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-26",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-27",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-28",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-29",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-30",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-31",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-32",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-33",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-34",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium",
+     "numerals-mixed": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition",
+     "numerals-mixed"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-35",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium",
+     "numerals-mixed": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition",
+     "numerals-mixed"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-36",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-37",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "visual-order"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-38",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-39",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-40",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium",
+     "lexical-validity": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition",
+     "lexical-validity",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-41",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium",
+     "lexical-validity": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition",
+     "lexical-validity",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "numerals-mixed": "medium",
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "numerals-mixed",
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-42",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "numerals-mixed": "medium",
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "numerals-mixed",
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-43",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-44",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-45",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-46",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-47",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-48",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-49",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-50",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium",
+     "numerals-mixed": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition",
+     "numerals-mixed"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "calibration",
+   "label": "calibration-51",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium",
+     "numerals-mixed": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition",
+     "numerals-mixed"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "no-text-layer": "low"
+    },
+    "signals": [
+     "no-text-layer"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-52",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "no-text-layer": "low"
+    },
+    "signals": [
+     "no-text-layer"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-53",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium",
+     "visual-order": "high"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps",
+     "visual-order"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "owner",
+   "label": "owner-54",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high",
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "presentation-forms",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": [
+    "visual-order"
+   ]
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "calibration",
+   "label": "calibration-55",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "lam-alef-transposition": "medium"
+    },
+    "signals": [
+     "lam-alef-transposition"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "foreign",
+   "label": "lo-arabic-body.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "medium",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "tounicode-gaps": "medium"
+    },
+    "signals": [
+     "tounicode-gaps",
+     "tounicode-gaps"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "foreign",
+   "label": "lo-arabic-table.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "low",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {},
+    "signals": [],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Advance Payment adjustments with foreign currency invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Advance Payment adjustments with rate change scenarios.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Advance Payment adjustments.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Credit Note of a Simplified Tax Invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Exempt Tax Invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Export invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Nominal supply invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Out of Scope Standard Tax Invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Self-billing invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Simplified Tax Invoice with Zero Rated Item.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Simplified_Invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Standard_Credit_Note.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Standard_Debit_Note.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Standard_Invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Summary Invoice.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  },
+  {
+   "all": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 5,
+    "withheld": null
+   },
+   "group": "zatca",
+   "label": "Third party billing.pdf",
+   "level_moved": false,
+   "ship": {
+    "failed": {},
+    "level": "high",
+    "readers": [
+     "mupdf",
+     "pdfium",
+     "pdfjs",
+     "pdfkit",
+     "pdfminer",
+     "poppler"
+    ],
+    "signal_levels": {
+     "presentation-forms": "high"
+    },
+    "signals": [
+     "presentation-forms"
+    ],
+    "voters": 6,
+    "withheld": null
+   },
+   "signals_added": [],
+   "signals_dropped": []
+  }
+ ],
+ "generated_at": "2026-11-27T14:20:29Z",
+ "groups": [
+  "calibration",
+  "clean",
+  "foreign",
+  "owner",
+  "planted",
+  "zatca"
+ ],
+ "level_moved": [],
+ "sides": {
+  "all": [
+   "pdfium",
+   "pdfkit",
+   "mupdf",
+   "poppler",
+   "pdfminer"
+  ],
+  "ship": [
+   "pdfium",
+   "pdfkit",
+   "mupdf",
+   "poppler",
+   "pdfminer",
+   "pdfjs"
+  ]
+ }
+}
