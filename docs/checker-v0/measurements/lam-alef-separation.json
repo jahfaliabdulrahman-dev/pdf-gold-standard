@@ -1,6 +1,6 @@
 {
  "schema": "lam-alef-separation/1",
- "generated_at": "2026-11-25T15:46:40Z",
+ "generated_at": "2026-11-27T14:21:15Z",
  "files": [
   {
    "label": "calibration:python-lesson",
@@ -30,6 +30,11 @@
      "runs": 473,
      "lam_alef": 0,
      "rate_per_1000": 0.0
+    },
+    "pdfjs": {
+     "runs": 427,
+     "lam_alef": 24,
+     "rate_per_1000": 56.21
     }
    },
    "missing_readers": []
@@ -60,6 +65,11 @@
     },
     "pdfminer": {
      "runs": 614,
+     "lam_alef": 0,
+     "rate_per_1000": 0.0
+    },
+    "pdfjs": {
+     "runs": 613,
      "lam_alef": 0,
      "rate_per_1000": 0.0
     }
@@ -94,6 +104,11 @@
      "runs": 666,
      "lam_alef": 0,
      "rate_per_1000": 0.0
+    },
+    "pdfjs": {
+     "runs": 658,
+     "lam_alef": 0,
+     "rate_per_1000": 0.0
     }
    },
    "missing_readers": []
@@ -126,6 +141,11 @@
      "runs": 1121,
      "lam_alef": 0,
      "rate_per_1000": 0.0
+    },
+    "pdfjs": {
+     "runs": 1131,
+     "lam_alef": 2,
+     "rate_per_1000": 1.77
     }
    },
    "missing_readers": []
@@ -158,6 +178,11 @@
      "runs": 1122,
      "lam_alef": 0,
      "rate_per_1000": 0.0
+    },
+    "pdfjs": {
+     "runs": 1132,
+     "lam_alef": 2,
+     "rate_per_1000": 1.77
     }
    },
    "missing_readers": []
