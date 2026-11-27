@@ -50,6 +50,9 @@ DOCS = {"guide": "guide-v2-ar.pdf", "report": "report.pdf", "najd": "najd.pdf", 
 # not the code's, so it comes from the environment and is never committed.
 OWNER_DIR = os.path.expanduser(os.environ.get("OWNER_CORPUS_DIR", ""))
 THRESHOLDS = os.path.join(REPO, "arabic_pdf_check", "thresholds.json")
+# Readers whose segment reversals on the clean set are TRUE reader findings (a hand copy in the real application
+# reverses the same line), and therefore do not raise the clean floor of `segment_order_min`. See derive().
+SEGMENT_ORDER_TRUE_ON_CLEAN = ("pdfjs",)
 
 
 def content_f1(a: str, b: str) -> float:
@@ -346,11 +349,20 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     # side in the deposited artifact: its numbers are quoted here, never typed, so a regenerated artifact and
     # this sentence cannot disagree.
     seg_by_file = {r["label"]: r.get("segment_order") or {} for r in clean_rows}
-    clean_seg = max([v for rows in seg_by_file.values() for v in rows.values()] or [0])
+    # pdf.js is NOT in the clean maximum, and the reason is measured, not convenient: on the clean set it returns
+    # up to 6 reversed segments per file (doc:report), and a copy made by hand in Firefox 161 returns the same
+    # reversed line on guide-v2-ar.pdf page 5 (measurements/pr5c/firefox-compare.json) — a TRUE reader finding
+    # on a clean file. The clean side of this rule is «files whose readers reconstruct the order», so a reader
+    # that really reverses the line there is the defect the signal names, not noise that lifts the floor.
+    seg_clean_rows = {k: {n: v for n, v in rows.items() if n not in SEGMENT_ORDER_TRUE_ON_CLEAN}
+                      for k, rows in seg_by_file.items()}
+    seg_pdfjs = {k: rows.get("pdfjs", 0) for k, rows in seg_by_file.items() if rows.get("pdfjs")}
+    clean_seg = max([v for rows in seg_clean_rows.values() for v in rows.values()] or [0])
     seg_floor = th["values"]["segment_order_min"]["declared"]
     th["values"]["segment_order_min"]["value"] = max(seg_floor, clean_seg + 1)
-    seg_hits = {k: v for k, v in seg_by_file.items() if any(v.values())}
-    seg_total = sum(v for rows in seg_by_file.values() for v in rows.values())
+    seg_hits = {k: v for k, v in seg_clean_rows.items() if any(v.values())}
+    seg_total = sum(v for rows in seg_clean_rows.values() for v in rows.values())
+    th["observed"]["clean_segment_order_true_on_clean"] = seg_pdfjs
     th["observed"]["clean_max_segment_order"] = clean_seg
     th["observed"]["clean_segment_order_total"] = seg_total
     th["observed"]["clean_segment_order_files"] = seg_hits
@@ -358,7 +370,10 @@ def derive(clean_rows: list[dict], planted_rows: dict, thresholds: dict) -> tupl
     lead = (f"derived: clean maximum + 1 (declared floor {seg_floor}). The clean set ({len(clean_rows)} files) "
             f"measures at most {clean_seg} reversed segment(s) per reader, {seg_total} in {len(seg_hits)} "
             f"file(s) across all readers — reader findings on clean files (a reader that reverses a segment "
-            f"around a number or a Latin run), not file defects. ")
+            f"around a number or a Latin run), not file defects. pdf.js is outside this maximum: it reverses "
+            f"{sum(seg_pdfjs.values())} segment(s) in {len(seg_pdfjs)} clean file(s), and Firefox reverses the "
+            f"same line when copied by hand (measurements/pr5c/firefox-compare.json), so its hits are the "
+            f"reader defect this signal reports. ")
     if broken["artifact"] != "present":
         # No artifact: the CLEAN half still holds (it is this run), but the separation claim needs the broken
         # side. Inventing a range here produced «1 < 2 <= 0 separates» — a sentence with no referent.
