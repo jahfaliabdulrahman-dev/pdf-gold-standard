@@ -194,6 +194,14 @@ def phase_verdicts(args, built, foreign_dir) -> int:
     return 0
 
 
+def _lam_rate(row: dict, floor: int) -> float | None:
+    """The highest per-reader lam-alef density (per 1000 runs) in a raw() row — the side that must clear the
+    threshold. `runs` is the denominator, so a quoted example (1/n) never masquerades as a rate."""
+    rates = [v["lam_alef"] / v["runs"] * 1000.0 for v in (row.get("lexical_by_reader") or {}).values()
+             if v["runs"] >= floor]
+    return round(max(rates), 3) if rates else None
+
+
 def phase_separation(args, built, foreign_dir) -> int:
     """Per signal: the clean maximum and the broken minimum, both sides, from the same `raw()` the manifest uses."""
     th = thresholds()
@@ -236,7 +244,7 @@ def phase_separation(args, built, foreign_dir) -> int:
                             "lam_alef_max": r["lam_alef_max"]} for n, r in p_rows.items()},
         }
         swap = p_rows.get("planted-letter-swap", {}).get("lexical_max")
-        lam_broken = p_rows.get("planted-lam-alef", {}).get("lam_alef_max")
+        lam_broken_rate = _lam_rate(p_rows.get("planted-lam-alef", {}), lam_floor)
         side_out["separation"] = {
             # Lower is better for these three: the broken side must sit above the clean maximum.
             "tounicode-gaps": {"clean_max": side_out["clean_max_tounicode_gap"],
@@ -246,9 +254,12 @@ def phase_separation(args, built, foreign_dir) -> int:
             "visual-order": {"clean_max": side_out["clean_max_visual_share"],
                              "broken_min": len(p_rows.get("planted-chrome-raw", {}).get("visual_readers", []))
                              / len(names)},
-            # Higher is better for these two: the clean minimum must sit above the broken maximum.
+            # Higher is better for lexical; for lam-alef HIGHER IS WORSE (a density per 1000 runs) and the two
+            # bounds must be the same UNIT: clean maximum RATE vs calibration minimum RATE. Mixing a count with
+            # a rate is how «30 vs 0.88» read like a 29-point gap.
             "lexical-validity": {"clean_min": side_out["clean_min_lexical"], "broken_max": swap},
-            "lam-alef-transposition": {"clean_min": side_out["clean_max_lam_alef_rate"], "broken_max": lam_broken},
+            "lam-alef-transposition": {"clean_max_rate": side_out["clean_max_lam_alef_rate"],
+                                       "broken_min_rate": lam_broken_rate},
         }
         out["sides"][side] = side_out
     with open(args.out, "w", encoding="utf-8") as fh:
@@ -256,6 +267,57 @@ def phase_separation(args, built, foreign_dir) -> int:
         fh.write("\n")
     for side in SIDES:
         print(f"\n== {side}: " + json.dumps(out["sides"][side]["separation"], ensure_ascii=False))
+    return 0
+
+
+def phase_lamalef(args, built, foreign_dir) -> int:
+    """The two bounds the lam-alef threshold is derived from, per side, in rate per 1000 runs.
+
+    clean maximum and calibration minimum are the SAME unit on purpose: the shipped formula is
+    `sqrt(clean_max x calibration_min)`, so a count anywhere in it silently changes the threshold's meaning.
+    """
+    th = thresholds()
+    floor = th["values"]["lam_alef_min_runs"]["value"]
+    clean = cm.clean_files(os.environ.get("CASES_DIR", "/tmp/cases-a"), reuse=True)[0]
+    cal = [(lbl, p) for grp, lbl, p in groups(built, foreign_dir) if grp == "calibration"]
+    out = {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+           "min_runs": floor, "sides": {}}
+    for side, names in SIDES.items():
+        restore = side_patch(names)
+        try:
+            c_rows = [(lbl, cm.raw(p)) for lbl, p in clean]
+            k_rows = [(lbl, cm.raw(p)) for lbl, p in cal]
+            planted = cm.raw(built["planted"]["planted-lam-alef"])
+        finally:
+            restore()
+
+        def worst(row):                                  # noqa: ANN001 — (rate, reader) of the highest density
+            pairs = [(v["lam_alef"] / v["runs"] * 1000.0, n) for n, v in (row["lexical_by_reader"] or {}).items()
+                     if v["runs"] >= floor]
+            return max(pairs) if pairs else (None, None)
+
+        clean_pairs = [(worst(r)[0], worst(r)[1], lbl) for lbl, r in c_rows]
+        clean_pairs = [c for c in clean_pairs if c[0] is not None]
+        cal_pairs = [(worst(r)[0], worst(r)[1], lbl) for lbl, r in k_rows]
+        cal_pairs = [c for c in cal_pairs if c[0] is not None]
+        c_max = max(clean_pairs) if clean_pairs else (None, None, None)
+        c_min = min(cal_pairs) if cal_pairs else (None, None, None)
+        out["sides"][side] = {
+            "readers": list(names),
+            "clean_max_rate": None if c_max[0] is None else round(c_max[0], 3),
+            "clean_max_reader": c_max[1], "clean_max_label": c_max[2],
+            "calibration_min_rate": None if c_min[0] is None else round(c_min[0], 3),
+            "calibration_min_reader": c_min[1], "calibration_min_label": c_min[2],
+            "planted_rate": _lam_rate(planted, floor),
+            "calibration": [{"label": r[2], "rate": None if r[0] is None else round(r[0], 3), "reader": r[1]}
+                            for r in cal_pairs],
+        }
+    with open(args.out, "w", encoding="utf-8") as fh:
+        json.dump(out, fh, ensure_ascii=False, indent=1, sort_keys=True)
+        fh.write("\n")
+    for side, v in out["sides"].items():
+        print(f"{side:5} clean_max={v['clean_max_rate']} ({v['clean_max_reader']} on {v['clean_max_label']}) "
+              f"cal_min={v['calibration_min_rate']} ({v['calibration_min_reader']}) planted={v['planted_rate']}")
     return 0
 
 
@@ -287,7 +349,7 @@ def phase_timing(args, built, foreign_dir) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--phase", choices=("verdicts", "separation", "timing"), required=True)
+    ap.add_argument("--phase", choices=("verdicts", "separation", "timing", "lamalef"), required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--runs", type=int, default=10)
     ap.add_argument("--timing-file", default=None)
@@ -297,8 +359,8 @@ def main() -> int:
     if not args.foreign_dir:
         args.foreign_dir = os.environ.get("FOREIGN_DIR")
     built = checker_fixtures.build_all(tempfile.mkdtemp(prefix="pdfjs-measure-"))
-    return {"verdicts": phase_verdicts, "separation": phase_separation, "timing": phase_timing}[args.phase](
-        args, built, args.foreign_dir)
+    return {"verdicts": phase_verdicts, "separation": phase_separation, "timing": phase_timing,
+            "lamalef": phase_lamalef}[args.phase](args, built, args.foreign_dir)
 
 
 if __name__ == "__main__":

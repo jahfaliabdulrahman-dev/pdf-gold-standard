@@ -14,7 +14,7 @@ import re
 
 LEVEL_AR = {"low": "منخفض", "medium": "متوسط", "high": "عالٍ"}
 # The reader's working name, in the words a customer knows it by. Used when a statement has to name who voted.
-READER_AR = {"pdfium": "PDFium (Chrome)", "pdfjs": "pdf.js (Firefox)", "pdfminer": "pdfminer",
+READER_AR = {"pdfium": "PDFium (Chrome)", "pdfjs": "pdf.js", "pdfminer": "pdfminer",
              "poppler": "poppler", "mupdf": "MuPDF", "pdfkit": "PDFKit (Preview)"}
 
 

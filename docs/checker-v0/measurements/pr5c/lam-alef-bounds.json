@@ -1,0 +1,71 @@
+{
+ "generated_at": "2026-11-27T10:22:42Z",
+ "min_runs": 200,
+ "sides": {
+  "all": {
+   "calibration": [
+    {
+     "label": "calibration-12",
+     "rate": 85.167,
+     "reader": "mupdf"
+    },
+    {
+     "label": "calibration-51",
+     "rate": 74.995,
+     "reader": "pdfium"
+    },
+    {
+     "label": "calibration-55",
+     "rate": 43.659,
+     "reader": "pdfium"
+    }
+   ],
+   "calibration_min_label": "calibration-55",
+   "calibration_min_rate": 43.659,
+   "calibration_min_reader": "pdfium",
+   "clean_max_label": "doc:report",
+   "clean_max_rate": 0.88,
+   "clean_max_reader": "poppler",
+   "planted_rate": 114.504,
+   "readers": [
+    "pdfium",
+    "pdfkit",
+    "mupdf",
+    "poppler",
+    "pdfminer"
+   ]
+  },
+  "ship": {
+   "calibration": [
+    {
+     "label": "calibration-12",
+     "rate": 85.086,
+     "reader": "poppler"
+    },
+    {
+     "label": "calibration-51",
+     "rate": 74.995,
+     "reader": "pdfium"
+    },
+    {
+     "label": "calibration-55",
+     "rate": 56.206,
+     "reader": "pdfjs"
+    }
+   ],
+   "calibration_min_label": "calibration-55",
+   "calibration_min_rate": 56.206,
+   "calibration_min_reader": "pdfjs",
+   "clean_max_label": "doc:report",
+   "clean_max_rate": 1.768,
+   "clean_max_reader": "pdfjs",
+   "planted_rate": 114.504,
+   "readers": [
+    "pdfium",
+    "poppler",
+    "pdfminer",
+    "pdfjs"
+   ]
+  }
+ }
+}
