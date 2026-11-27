@@ -95,9 +95,37 @@
    "public": false,
    "word_agreement": 0.983,
    "words_agree": true
+  },
+  {
+   "firefox": {
+    "chars": 602,
+    "lam_alef": 3,
+    "runs": 44,
+    "score": -1.0,
+    "visual": false
+   },
+   "label": "owner-python-lesson-p11",
+   "lam_alef_agrees": true,
+   "order_agrees": true,
+   "pages_compared": [
+    11,
+    11
+   ],
+   "pages_in_document": 24,
+   "passes": true,
+   "pdfjs": {
+    "chars": 602,
+    "lam_alef": 3,
+    "runs": 44,
+    "score": -1.0,
+    "visual": false
+   },
+   "public": false,
+   "word_agreement": 1.0,
+   "words_agree": true
   }
  ],
  "firefox_version": "161.0 (macOS arm64, build 20261118180411; bundles pdf.js 6.5.447 — the reader pins pdfjs-dist 6.5.438)",
- "generated_at": "2026-11-27T13:48:30Z",
+ "generated_at": "2026-11-27T14:01:20Z",
  "verdict": "pass"
 }
