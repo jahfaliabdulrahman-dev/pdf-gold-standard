@@ -13,6 +13,8 @@ import os
 import shutil
 import subprocess
 
+from . import PDFJS_INSTALL
+
 NAME = "pdfjs"
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCRIPT = os.path.join(HERE, "pdfjs_text.mjs")
@@ -22,11 +24,11 @@ NODE_MODULES = os.path.join(HERE, "node_modules", "pdfjs-dist")
 def _node() -> str:
     path = shutil.which("node")
     if not path:
-        raise RuntimeError("`node` is not on PATH — the pdf.js reader needs Node (any LTS)")
+        raise RuntimeError(f"`node` is not on PATH — the pdf.js reader needs Node (any LTS), then {PDFJS_INSTALL}")
     if not os.path.isfile(SCRIPT):
         raise RuntimeError(f"{os.path.basename(SCRIPT)} is missing")
     if not os.path.isdir(NODE_MODULES):
-        raise RuntimeError("pdfjs-dist is not installed — run `npm ci` in conformance/readers")
+        raise RuntimeError(f"pdfjs-dist is not installed — {PDFJS_INSTALL}")
     return path
 
 

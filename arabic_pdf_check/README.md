@@ -18,6 +18,8 @@ python3.12 -m venv .venv && source .venv/bin/activate
 python3 -m pip install -e .                          # التبعيات المشحونة وحدها + الأمر arabic-pdf-check
 # اختياري: قارئ MuPDF (PyMuPDF بترخيص AGPLv3 أو تجاري — ليس جزءًا من التبعيات المشحونة)
 python3 -m pip install -e '.[mupdf]'
+# القارئ الرابع على Linux: pdf.js (Apache-2.0) — يحتاج Node (أي LTS). بدونه يُحجب حكم الملف على Linux
+npm ci --prefix conformance/readers
 
 arabic-pdf-check check invoice.pdf -o invoice.report.json --md invoice.report.md
 arabic-pdf-check verify invoice.pdf --truth invoice.txt -o invoice.cert.json --md invoice.cert.md

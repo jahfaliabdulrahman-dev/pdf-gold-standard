@@ -49,6 +49,7 @@ SIDES = {
 # jury (`ship`) was measured in PR-5b/5c; these two were not, and `--ship-side` measures them against `all`.
 SHIP_SIDES = {
     "linux4": ("pdfium", "poppler", "pdfminer", "pdfjs"),
+    "linux5": ("pdfium", "mupdf", "poppler", "pdfminer", "pdfjs"),
     "mac5": ("pdfium", "pdfkit", "poppler", "pdfminer", "pdfjs"),
     "mac6": ("pdfium", "pdfkit", "mupdf", "poppler", "pdfminer", "pdfjs"),
 }

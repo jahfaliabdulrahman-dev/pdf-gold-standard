@@ -6,6 +6,7 @@ The population this rule was derived from is the owner's private lesson (21 tran
 checks drive `blind.lam_alef_majority` — the function the report calls — with those numbers, and with the
 cases that must NOT fire: a single quoted example, a short reading, a two-two split.
 """
+import json
 import os
 import sys
 
@@ -14,8 +15,12 @@ sys.path.insert(0, REPO)
 
 from arabic_pdf_check import blind                                              # noqa: E402
 
-RATE = 6.2          # the shipped value; test_lam_alef_separation re-derives it from the artifact
-MIN_RUNS = 200
+# The shipped values, read from the manifest (a literal here would be a second registry, free to drift);
+# test_lam_alef_separation re-derives the rate from the artifact.
+with open(os.path.join(REPO, "arabic_pdf_check", "thresholds.json"), encoding="utf-8") as _fh:
+    _TH = json.load(_fh)["values"]
+RATE = _TH["lam_alef_rate_per_1000"]["value"]
+MIN_RUNS = _TH["lam_alef_min_runs"]["value"]
 
 passed = 0
 
@@ -39,6 +44,13 @@ def main() -> int:
     clean = readers(pdfium=(1, 1140), pdfkit=(1, 1140), mupdf=(1, 1140), poppler=(1, 1137), pdfminer=(0, 1121))
     rates, over, need = blind.lam_alef_majority(clean, RATE, MIN_RUNS)
     check("clean: a single quoted example is below the density", over == {} and need == 3 and len(rates) == 5,
+          f"{over} {need} {len(rates)}")
+
+    # the same report read by pdf.js: two hits in 1131 runs (1.77 per 1000) — the clean maximum since pdf.js
+    # joined the matrix, and still far below the density
+    with_pdfjs = dict(clean, pdfjs={"lam_alef": 2, "runs": 1131})
+    rates, over, need = blind.lam_alef_majority(with_pdfjs, RATE, MIN_RUNS)
+    check("clean + pdf.js: 1.77 per 1000 is below the density", over == {} and need == 4 and len(rates) == 6,
           f"{over} {need} {len(rates)}")
 
     # the measured broken reading: 21 in ~480 runs, three readers; PDFKit 0, PDFMiner reads reversed
@@ -65,7 +77,8 @@ def main() -> int:
     check("split: 2 of 4 is not a majority", len(over) == 2 and need == 3, f"{over} {need}")
 
     # the boundary is inclusive on the density, and min_runs itself is judged
-    at_rate = readers(a=(31, 5000), b=(0, 5000), c=(0, 5000))       # 31/5000 = exactly 6.2 per 1000
+    at_count = round(RATE * 10)                                     # RATE per 1000 = RATE*10 per 10000
+    at_rate = readers(a=(at_count, 10000), b=(0, 10000), c=(0, 10000))
     rates, over, need = blind.lam_alef_majority(at_rate, RATE, MIN_RUNS)
     check("boundary: exactly the density counts as at-or-above", "a" in over and need == 2, f"{over} {need}")
     at_runs = readers(a=(2, MIN_RUNS))                              # 10 per 1000, but only one voter

@@ -2,6 +2,12 @@
 
 **الدليل الخام المودع:** `docs/checker-v0/measurements/pr3/zatca-forensics.json` — 16 ملفًا، نسخ كل قارئ، وعدّادات `pf_file`/`pf_reader`/`missing_unicode`.
 
+> **ملحق ٢٧ نوفمبر — بعد دخول pdf.js قارئًا:** هذه الوثيقة قياس بخمسة قرّاء وتبقى كما قيست. مع pdf.js
+> صار حكم `visual-order` على خمس من الفواتير (Standard_Invoice وSimplified_Invoice وStandard_Credit_Note
+> وStandard_Debit_Note وSelf-billing invoice) **وصفًا للقرّاء** لا «عيب قارئ» مطلقًا: يُنسخ النص معكوسًا في
+> PDFium (Chrome) وpdf.js (Firefox) وpdfminer، ومنطقيًا في poppler وMuPDF وPreview. المستوى لم يتغيّر (`high`
+> بسبب `presentation-forms`). الأثر: `measurements/pr5b/verdicts.json` و`measurements/pr5c/firefox-compare.json`.
+
 قياس آلي على 16 ملف PDF/A-3 من عيّنات ZATCA (المنتِج iText 7.1.16 في الستة عشر). لا OCR، ولا تعديل في المستودع، ولا استدعاء حكم على قارئ واحد: كل إشارة تُقرأ بثلاثة مستويات — ما تقوله طبقة الملف نفسها، وما يفعله كل قارئ من الخمسة، ثم الأغلبية.
 
 ## الطبعات والأمر

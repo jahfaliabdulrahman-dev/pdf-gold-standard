@@ -35,9 +35,9 @@
       "source": "declared policy: a reading with fewer than 20 Arabic runs is not judged for lexical validity (it can be neither passed nor failed)"
     },
     "lam_alef_rate_per_1000": {
-      "value": 6.2,
-      "declared": 6.2,
-      "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 0.88 per 1000 runs (doc:report, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12). sqrt(0.8795*43.03)=6.15 -> 6.2. Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact"
+      "value": 8.7,
+      "declared": 8.7,
+      "source": "derived: geometric midpoint of the two measured bounds (sqrt(clean_max x broken_min)). Clean maximum 1.77 per 1000 runs (doc:report read by pdfjs, which joins the matrix on 2026-11-27; 0.88 for every other reader, quoting the defect once in 1140 runs); calibration minimum 43.03 per 1000 (poppler; pdfium 43.66, mupdf 43.12, pdfjs 56.21). sqrt(1.7683*43.03)=8.72 -> 8.7 (was 6.2 before pdfjs; re-run of 149 files at 8.7 vs 6.2: zero level or signal change, docs/checker-v0/measurements/pr5c). Artifact: docs/checker-v0/measurements/lam-alef-separation.json; scripts/test_lam_alef_separation.py re-derives the value from that artifact"
     },
     "lam_alef_min_runs": {
       "value": 200,
