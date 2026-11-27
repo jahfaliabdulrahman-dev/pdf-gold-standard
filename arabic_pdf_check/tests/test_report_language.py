@@ -97,6 +97,35 @@ check("the-header-carries-no-english-sentence",
       not any(latin_sentence(ln) for ln in header),
       "\n".join(ln for ln in header if latin_sentence(ln)))
 
+# ---------------------------------------------------------------- 3. the copy order is a table, not a verdict
+copy = BARE.get("copy_order") or {}
+section = (re.split(r"(?m)^## ", md.split("## ترتيب النص عند النسخ", 1)[1], maxsplit=1)[0]
+           if "## ترتيب النص عند النسخ" in md else "")
+rev = [markdown.READER_AR.get(n, n) for n in copy.get("reversed") or []]
+log = [markdown.READER_AR.get(n, n) for n in copy.get("logical") or []]
+check("copy-order-section-is-in-every-report", bool(section.strip()), "no «ترتيب النص عند النسخ» section")
+# The sentence is generated from the rows: the reversed clause exists only when a row says reversed, and the
+# logical clause lists exactly the rows that say logical — never a fixed sentence, never a name typed by hand.
+check("copy-order-sentence-is-built-from-the-rows",
+      (f"عند النسخ يخرج النص معكوسًا في: {'، '.join(rev)}" in section) if rev
+      else ("عند النسخ يخرج النص معكوسًا في:" not in section),
+      f"reversed={copy.get('reversed')} logical={copy.get('logical')} section={section[:200]}")
+check("copy-order-sentence-names-the-logical-readers",
+      (not log) or f"ويخرج سليمًا في: {'، '.join(log)}" in section, f"logical={log}")
+check("copy-order-table-has-a-row-per-reader-that-read",
+      all(markdown.READER_AR.get(r["reader"], r["reader"]) in section for r in copy.get("rows") or [])
+      and len(copy.get("rows") or []) == len(BARE["readers"]),
+      str([r["reader"] for r in copy.get("rows") or []]))
+check("copy-order-never-blames-the-file",
+      not any(s["id"] == "visual-order" and s["cause"] == "file" for s in BARE["signals"])
+      and "لا عيب في الملف" in section,
+      str([(s["id"], s["cause"]) for s in BARE["signals"]]))
+check("copy-order-names-the-readers-that-did-not-run",
+      (not copy.get("missing")) or "غير مثبَّت" in section, f"missing={copy.get('missing')}")
+check("copy-order-sits-near-the-header",
+      md.index("## ترتيب النص عند النسخ") < md.index("## القرّاء"),
+      "the table must precede the reader list, not sit in the tail")
+
 print()
 if fails:
     print(f"REPORT LANGUAGE FAILED — {len(fails)}: {', '.join(fails)}")

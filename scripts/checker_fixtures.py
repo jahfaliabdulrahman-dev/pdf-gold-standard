@@ -5,7 +5,8 @@ Four planted files, each a named defect, and one clean base built by the pipelin
 
   1. `planted-mupdf-logical`   — MuPDF writes logical Arabic (as it does), and 4 of the 5 readers return it
                                  reversed. Measured, not assumed: the file stores logical order and most
-                                 readers paste it backwards.
+                                 readers paste it backwards. Since PR-6 that is a ROW in `copy_order`, not a
+                                 file-level signal: the file's expected level is `low` (`PLANTED_COPY_ORDER`).
   2. `planted-chrome-raw`      — the corpus case built by the raw engine, before `fix_text_layer`: the text
                                  layer carries presentation forms.
   3. `planted-presentation-forms` — MuPDF writes the same text with the presentation-form characters.
@@ -36,7 +37,6 @@ TEXT = "التاريخ ٢٠٢٦ والمبلغ 1,250.75 ريال.\nهذا سطر
 CASE_ID = "num-invoice-latn"
 
 PLANTED = {
-    "planted-mupdf-logical": "visual-order",
     "planted-chrome-raw": "presentation-forms",
     "planted-presentation-forms": "presentation-forms",
     "planted-no-tounicode": "tounicode-gaps",
@@ -46,7 +46,12 @@ PLANTED = {
 
 #: The level each fixture is DECLARED to reach; absent = "high". A fixture whose signal is deliberately
 #: medium is named here rather than by weakening the default rule — «planted ⇒ high» stays the rule.
-PLANTED_LEVEL: dict[str, str] = {"planted-lam-alef": "medium"}
+PLANTED_LEVEL: dict[str, str] = {"planted-lam-alef": "medium", "planted-mupdf-logical": "low"}
+# NOT a file-level signal: `planted-mupdf-logical` stores LOGICAL Arabic and 4 of 5 readers paste it backwards.
+# That is a fact about those readers' copies, so since PR-6 it is declared here — the copy order the table must
+# show — instead of an accusation against the file. The expected level is `low`, declared BEFORE the run from
+# the signals that remain (there are none), not read off the result afterwards.
+PLANTED_COPY_ORDER: dict[str, str] = {"planted-mupdf-logical": "reversed"}
 
 SWAP_WORDS = ("الكتاب المدرسي يحتوي الدروس الجديدة الفصل الطلاب يقرؤون النصوص بسهولة المعلم الشرح "
               "الواضح أمثلة تدريب نتائج الاختبار المراجعة الأسئلة الواجبات المنزلية المكتبة الحاسوب "

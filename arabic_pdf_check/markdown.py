@@ -18,15 +18,46 @@ READER_AR = {"pdfium": "PDFium (Chrome)", "pdfjs": "pdf.js (Firefox)", "pdfminer
              "poppler": "poppler", "mupdf": "MuPDF", "pdfkit": "PDFKit (Preview)"}
 
 
-def _visual_order_ar(sig: dict) -> str:
-    """The visual-order statement, in Arabic, naming the readers — built from the vote, never from a literal."""
-    ev = sig.get("evidence") or {}
-    rev = [READER_AR.get(n, n) for n in ev.get("readers") or []]
-    log = [READER_AR.get(n, n) for n in ev.get("logical_readers") or []]
-    voters = ev.get("voters") or (len(rev) + len(log))
-    head = f"يُنسخ النص معكوسًا في {len(rev)} من {voters} قرّاء: {'، '.join(rev) or 'لا أحد'}"
-    tail = f"؛ ويُقرأ منطقيًا في: {'، '.join(log)}" if log else "؛ ولم يقرأه منطقيًا أحد"
-    return head + tail + " — والطبقة البصرية ليست عيبًا في الملف، بل طريقة أكثر المنتجين في تخزين العربية"
+ORDER_AR = {"reversed": "معكوس", "logical": "سليم", "inconclusive": "غير حاسم"}
+
+
+def _copy_order_section(report: dict) -> list[str]:
+    """The copy-order table, near the header, in every report — built from `copy_order`, never from a literal.
+
+    The reversal is a property of the reader's copy: the same file is reversed in some programs and logical in
+    others. So this section names the programs. It never says the file is the problem, and it never disappears
+    when nothing is reversed — a table that only appears on bad news is a verdict wearing a table's clothes.
+    """
+    order = report.get("copy_order") or {}
+    rows = order.get("rows") or []
+    if not rows:
+        return []
+    def names(key):
+        return "، ".join(READER_AR.get(n, n) for n in order.get(key) or [])
+    parts = []
+    if order.get("reversed"):
+        parts.append("عند النسخ يخرج النص معكوسًا في: " + names("reversed"))
+    if order.get("logical"):
+        parts.append("ويخرج سليمًا في: " + names("logical"))
+    if order.get("inconclusive"):
+        parts.append("ولم يحسم الأمر في: " + names("inconclusive"))
+    head = "؛ ".join(parts) if parts else "لم يُقرأ الملف بعد."
+    out = ["## ترتيب النص عند النسخ", "", head + ".",
+           "الانعكاس صفة نسخة القارئ لا عيب في الملف: التقرير يسمّي البرامج ولا يتّهم الملف.", "",
+           "| القارئ | عند النسخ | الدرجة |", "|---|---|---|"]
+    for row in rows:
+        score = row.get("score")
+        shown = "—" if score is None else f"{score:+.2f}"
+        out.append(f"| {_cell(READER_AR.get(row['reader'], row['reader']))} | "
+                   f"{ORDER_AR.get(row['order'], row['order'])} | {shown} |")
+    missing = order.get("missing") or {}
+    if missing:
+        reasons = (report.get("missing_reasons") or {})
+        out += ["", "**غير مثبَّت:** " + "؛ ".join(
+            f"`{n}` ({reasons.get(n) or why})" for n, why in missing.items())
+                + " — لم يُقرأ، فغيابه ليس ترتيبًا سليمًا."]
+    out.append("")
+    return out
 
 
 CONF_AR = {"low": "منخفضة", "medium": "متوسطة", "high": "عالية"}
@@ -34,8 +65,13 @@ CONF_AR = {"low": "منخفضة", "medium": "متوسطة", "high": "عالية"
 
 def _statement(sig: dict) -> str:
     """A signal's sentence for a human: Arabic where a sentence is a claim, the machine's `detail` elsewhere."""
-    if sig["id"] == "visual-order" and sig.get("cause") == "file" and (sig.get("evidence") or {}).get("readers"):
-        return _visual_order_ar(sig)
+    if sig["id"] == "visual-order":
+        # A reader-level orientation signal: the COPY is reversed for this reader, and the score says so with
+        # the sign convention a reader of the table can check (+1 reversed, −1 logical).
+        score = (sig.get("evidence") or {}).get("score")
+        shown = "—" if score is None else f"{score:+.2f}"
+        return (f"يعيد النص معكوسًا عند النسخ (الدرجة {shown}؛ +1 معكوس، −1 منطقي) — "
+                f"صفّ هذا القارئ في جدول «ترتيب النص عند النسخ»")
     return sig["detail"]
 
 
@@ -93,6 +129,7 @@ def render_blind(report: dict) -> str:
                     "ليصدر الحكم." if withheld else
                     "**ملاحظة:** إشارات القرّاء أدناه تُحسب على أداة النسخ، لا على الملف.")),
              ""]
+    lines += _copy_order_section(report)
     lines += ["## القرّاء", "", "| القارئ | الإصدار | الخطر | الثقة | الإشارات |", "|---|---|---|---|---|"]
     for name, r in report["readers"].items():
         ids = "، ".join(sorted({s["id"] for s in r["signals"]})) or "—"

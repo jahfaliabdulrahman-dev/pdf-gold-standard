@@ -4,7 +4,8 @@
 The planted files are built by `scripts/checker_fixtures.py` with the pinned engine — no PDF is committed,
 and the fixture cannot drift from its generator. Expectation per file:
 
-  · planted-mupdf-logical        → visual-order   (4 of 5 readers return the opposite order — measured)
+  · planted-mupdf-logical        → NOT a file signal: the copy order, 4 of 5 readers reversed (measured).
+                                    Its file level is declared `low`; the table names the readers.
   · planted-chrome-raw           → presentation-forms (the raw layer carries the forms)
   · planted-presentation-forms   → presentation-forms
   · planted-no-tounicode         → tounicode-gaps (every drawn code lost its Unicode value)
@@ -47,6 +48,8 @@ built = checker_fixtures.build_all(tempfile.mkdtemp(prefix="blind-accept-"))
 thresholds = json.load(open(os.path.join(REPO, "arabic_pdf_check", "thresholds.json"), encoding="utf-8"))
 
 for name, path in built["planted"].items():
+    if name not in checker_fixtures.PLANTED:
+        continue          # declared as a COPY ORDER, not a file signal — checked below as `copy-order:*`
     report = blind.check(path, thresholds)
     ids = [s["id"] for s in report["signals"]]
     expected = checker_fixtures.PLANTED[name]
@@ -55,6 +58,34 @@ for name, path in built["planted"].items():
           blind.LEVELS[report["risk"]["file"]["level"]] >= blind.LEVELS[declared],
           f"declared {declared} file={report['risk']['file']['level']} signals={ids}")
     check(f"planted:{name}:named-signal", expected in ids, f"expected {expected}, got {ids}")
+
+# The copy-order file: the reversal is a property of the readers' COPIES, so the file gets no accusation, the
+# table names who reversed, and the names come from the measurement (a row per reader that read) — never a
+# literal in the test or in the sentence.
+order_file = blind.check(built["planted"]["planted-mupdf-logical"], thresholds)
+order = order_file["copy_order"]
+check("copy-order:planted-file-level-is-declared-low",
+      order_file["risk"]["file"]["level"] == checker_fixtures.PLANTED_LEVEL["planted-mupdf-logical"],
+      f"file={order_file['risk']['file']['level']} signals={[s['id'] for s in order_file['signals']]}")
+check("copy-order:no-file-level-visual-accusation",
+      not any(s["id"] == "visual-order" and s["cause"] == "file" for s in order_file["signals"]),
+      str([(s["id"], s["cause"]) for s in order_file["signals"]]))
+check("copy-order:majority-reversed",
+      len(order["reversed"]) > len(order["logical"]) and
+      checker_fixtures.PLANTED_COPY_ORDER["planted-mupdf-logical"] == "reversed",
+      f"reversed={order['reversed']} logical={order['logical']} inconclusive={order['inconclusive']}")
+check("copy-order:names-are-the-readers-that-read",
+      {r["reader"] for r in order["rows"]} == set(order_file["readers"]),
+      f"{[r['reader'] for r in order['rows']]} vs {list(order_file['readers'])}")
+check("copy-order:rows-agree-with-the-reader-signals",
+      all((row["order"] == "reversed") == any(s["id"] == "visual-order" for s in order_file["readers"][row["reader"]]["signals"])
+          for row in order["rows"]),
+      str([(r["reader"], r["order"], [s["id"] for s in order_file["readers"][r["reader"]]["signals"]])
+           for r in order["rows"]]))
+check("copy-order:every-report-carries-it",
+      all(isinstance(rep.get("copy_order"), dict) and rep["copy_order"].get("rows")
+          for rep in [order_file, blind.check(built["clean"], thresholds)]),
+      "a table that only appears on bad news is a verdict wearing a table's clothes")
 
 clean = blind.check(built["clean"], thresholds)
 check("clean:file-not-high", clean["risk"]["file"]["level"] != "high",
@@ -138,7 +169,7 @@ check("jury:withheld-is-not-a-low-verdict", three["risk"]["file"]["level"] != "l
 # A VOTE is withheld; a FACT is not (PR-4.2). The majority-derived signals drop to reader level with the
 # reason attached, while the ToUnicode gap keeps `cause: file` — it is a property of the document, not of the
 # number of readers installed.
-_VOTED = ("visual-order", "lexical-validity", "lam-alef-transposition")
+_VOTED = ("lexical-validity", "lam-alef-transposition")   # visual-order left the jury in PR-6
 check("jury:the-vote-derived-accusation-stays-at-reader-level",
       all(s.get("cause") != "file" for s in three["signals"] if s["id"] in _VOTED) and
       any(s.get("withheld_from_file_level") for s in three["signals"]),

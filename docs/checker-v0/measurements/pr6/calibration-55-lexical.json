@@ -1,0 +1,52 @@
+{
+ "failing": [
+  "pdfium",
+  "pdfjs",
+  "pdfminer"
+ ],
+ "generated_at": "2026-11-28T00:00:00Z",
+ "judged": 6,
+ "label": "calibration-55",
+ "majority_needed": 4,
+ "min_runs": 20,
+ "note": "the file-level lexical claim needs a majority of the JUDGED readers; on six readers three failures are not a majority (needs four), on four readers three are (needs three). That is why the level of this one file still depends on the jury after visual-order left it.",
+ "readers": {
+  "mupdf": {
+   "fails": false,
+   "known": 329,
+   "ratio": 0.6756,
+   "runs": 487
+  },
+  "pdfium": {
+   "fails": true,
+   "known": 320,
+   "ratio": 0.6653,
+   "runs": 481
+  },
+  "pdfjs": {
+   "fails": true,
+   "known": 263,
+   "ratio": 0.6159,
+   "runs": 427
+  },
+  "pdfkit": {
+   "fails": false,
+   "known": 345,
+   "ratio": 0.7113,
+   "runs": 485
+  },
+  "pdfminer": {
+   "fails": true,
+   "known": 314,
+   "ratio": 0.6638,
+   "runs": 473
+  },
+  "poppler": {
+   "fails": false,
+   "known": 335,
+   "ratio": 0.6865,
+   "runs": 488
+  }
+ },
+ "threshold": 0.67
+}

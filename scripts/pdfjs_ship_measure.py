@@ -104,6 +104,9 @@ def verdict(path: str, th: dict) -> dict:
         "signal_levels": {s["id"]: s["level"] for s in rep["signals"]},
         "readers": sorted(rep["readers"]),
         "failed": rep.get("failed_readers") or {},
+        # PR-6: the copy order travels with every row, so «the level did not move» can be checked against «the
+        # table did», and a verdict change can be traced to the signal that caused it.
+        "copy_order": rep.get("copy_order") or {},
     }
 
 
@@ -199,6 +202,56 @@ def phase_verdicts(args, built, foreign_dir) -> int:
         json.dump(payload, fh, ensure_ascii=False, indent=1, sort_keys=True)
         fh.write("\n")
     print(f"\n{len(changed)} file(s) moved level of {len(rows)}")
+    return 0
+
+
+# The juries PR-6 is measured on. `mac6` is the shipped matrix; `linux4` is a bare Linux install (no pdfkit, no
+# mupdf); `mac5` is the pre-pdf.js matrix the pr5d artifacts were measured with. A verdict must not depend on
+# which of these is installed — that is the whole point of taking `visual-order` out of the vote.
+JURIES = {
+    "mac6": ("pdfium", "pdfkit", "mupdf", "poppler", "pdfminer", "pdfjs"),
+    "linux4": ("pdfium", "poppler", "pdfminer", "pdfjs"),
+    "mac5": ("pdfium", "pdfkit", "mupdf", "poppler", "pdfminer"),
+}
+
+
+def phase_juries(args, built, foreign_dir) -> int:
+    """One jury, all 149 files, with the copy-order table kept — the artifact conditions أ/هـ are read from."""
+    th = thresholds()
+    jury = args.jury or "mac6"
+    names = JURIES[jury]
+    rows, moved = [], []
+    partial = args.out + "l"
+    done = set()
+    if os.path.exists(partial):
+        with open(partial, encoding="utf-8") as fh:
+            for line in fh:
+                try:
+                    done.add(json.loads(line)["label"])
+                except Exception:                        # noqa: BLE001
+                    pass
+        print(f"resuming: {len(done)} file(s) already measured")
+    restore = side_patch(names)
+    try:
+        for group, label, path in groups(built, foreign_dir):
+            if not path:
+                continue
+            if label in done:
+                continue
+            got = verdict(path, th)
+            row = {"group": group, "label": label, **got}
+            rows.append(row)
+            with open(partial, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            print(f"{group:12} {label:28} level={got['level']!s:6} "
+                  f"reversed={len(got['copy_order'].get('reversed') or [])}", flush=True)
+    finally:
+        restore()
+    payload = {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+               "jury": jury, "readers": list(names), "files": rows}
+    with open(args.out, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=1, sort_keys=True)
+        fh.write("\n")
     return 0
 
 
@@ -390,7 +443,8 @@ def phase_timing(args, built, foreign_dir) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--phase", choices=("verdicts", "separation", "timing", "lamalef"), required=True)
+    ap.add_argument("--phase", choices=("verdicts", "separation", "timing", "lamalef", "juries"), required=True)
+    ap.add_argument("--jury", choices=tuple(JURIES), default=None, help="the jury for --phase juries")
     ap.add_argument("--out", required=True)
     ap.add_argument("--runs", type=int, default=10)
     ap.add_argument("--timing-file", default=None)
@@ -404,7 +458,7 @@ def main() -> int:
         args.foreign_dir = os.environ.get("FOREIGN_DIR")
     built = checker_fixtures.build_all(tempfile.mkdtemp(prefix="pdfjs-measure-"))
     return {"verdicts": phase_verdicts, "separation": phase_separation, "timing": phase_timing,
-            "lamalef": phase_lamalef}[args.phase](args, built, args.foreign_dir)
+            "lamalef": phase_lamalef, "juries": phase_juries}[args.phase](args, built, args.foreign_dir)
 
 
 if __name__ == "__main__":
