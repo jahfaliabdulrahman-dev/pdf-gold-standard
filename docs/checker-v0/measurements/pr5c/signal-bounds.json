@@ -1,0 +1,217 @@
+{
+ "generated_at": "2026-11-27T10:53:21Z",
+ "min_runs": 200,
+ "note": "The calibration group exercises lexical-validity and lam-alef; it carries NO tounicode or presentation-form defect (all three read 0.0 there), so those two signals find their evidence side in the planted fixtures. Stating that is part of the result: the corpus has a hole, not a pass.",
+ "sides": {
+  "all": {
+   "calibration": [
+    {
+     "label": "calibration-12",
+     "rate": 85.167,
+     "reader": "mupdf"
+    },
+    {
+     "label": "calibration-51",
+     "rate": 74.995,
+     "reader": "pdfium"
+    },
+    {
+     "label": "calibration-55",
+     "rate": 43.659,
+     "reader": "pdfium"
+    }
+   ],
+   "calibration_min_label": "calibration-55",
+   "calibration_min_rate": 43.659,
+   "calibration_min_reader": "pdfium",
+   "clean_max_label": "doc:report",
+   "clean_max_rate": 0.88,
+   "clean_max_reader": "poppler",
+   "planted_rate": 114.504,
+   "readers": [
+    "pdfium",
+    "pdfkit",
+    "mupdf",
+    "poppler",
+    "pdfminer"
+   ],
+   "signals": {
+    "lexical-validity": {
+     "calibration_min": {
+      "label": "calibration-12",
+      "value": 0.3437
+     },
+     "clean_min": {
+      "label": "case:pun-edge",
+      "value": 0.8333
+     },
+     "direction": "higher-is-better"
+    },
+    "presentation-forms": {
+     "calibration_min": {
+      "label": null,
+      "value": null
+     },
+     "clean_max": {
+      "label": "doc:report",
+      "value": 0.0
+     },
+     "direction": "higher-is-worse"
+    },
+    "tounicode-gaps": {
+     "calibration_min": {
+      "label": null,
+      "value": null
+     },
+     "clean_max": {
+      "label": "doc:report",
+      "value": 0.0
+     },
+     "direction": "higher-is-worse"
+    },
+    "visual-order": {
+     "direction": "vote-not-a-ratio",
+     "note": "the share of readers that reverse the order is 1/n on both a clean file and the planted one, so no share separates them; the signal is a majority vote and its own threshold is the jury, not a number"
+    }
+   }
+  },
+  "ship": {
+   "calibration": [
+    {
+     "label": "calibration-12",
+     "rate": 85.086,
+     "reader": "poppler"
+    },
+    {
+     "label": "calibration-51",
+     "rate": 74.995,
+     "reader": "pdfium"
+    },
+    {
+     "label": "calibration-55",
+     "rate": 56.206,
+     "reader": "pdfjs"
+    }
+   ],
+   "calibration_55_readers": {
+    "pdfium": {
+     "lam_alef": 21,
+     "rate_per_1000": 43.659,
+     "runs": 481
+    },
+    "pdfjs": {
+     "lam_alef": 24,
+     "rate_per_1000": 56.206,
+     "runs": 427
+    },
+    "pdfminer": {
+     "lam_alef": 0,
+     "rate_per_1000": 0.0,
+     "runs": 473
+    },
+    "poppler": {
+     "lam_alef": 21,
+     "rate_per_1000": 43.033,
+     "runs": 488
+    }
+   },
+   "calibration_min_label": "calibration-55",
+   "calibration_min_rate": 56.206,
+   "calibration_min_reader": "pdfjs",
+   "calibration_min_reader_rate": 43.033,
+   "clean_max_label": "doc:report",
+   "clean_max_rate": 1.768,
+   "clean_max_reader": "pdfjs",
+   "planted_evidence": [
+    {
+     "gap_ratio_max": 0.0,
+     "label": "planted-chrome-raw",
+     "lam_alef_rate": 0.0,
+     "lexical_min": null,
+     "pf_ratio": 0.6964285714285714
+    },
+    {
+     "gap_ratio_max": 0.0,
+     "label": "planted-lam-alef",
+     "lam_alef_rate": 114.504,
+     "lexical_min": 0.8053,
+     "pf_ratio": 0.0
+    },
+    {
+     "gap_ratio_max": 0.0,
+     "label": "planted-letter-swap",
+     "lam_alef_rate": 55.556,
+     "lexical_min": 0.0,
+     "pf_ratio": 0.0
+    },
+    {
+     "gap_ratio_max": 0.0,
+     "label": "planted-mupdf-logical",
+     "lam_alef_rate": 0.0,
+     "lexical_min": null,
+     "pf_ratio": 0.0
+    },
+    {
+     "gap_ratio_max": 0.0,
+     "label": "planted-no-tounicode",
+     "lam_alef_rate": 0.0,
+     "lexical_min": null,
+     "pf_ratio": 0.0
+    },
+    {
+     "gap_ratio_max": 0.0,
+     "label": "planted-presentation-forms",
+     "lam_alef_rate": 0.0,
+     "lexical_min": null,
+     "pf_ratio": 0.9090909090909091
+    }
+   ],
+   "planted_rate": 114.504,
+   "readers": [
+    "pdfium",
+    "poppler",
+    "pdfminer",
+    "pdfjs"
+   ],
+   "signals": {
+    "lexical-validity": {
+     "calibration_min": {
+      "label": "calibration-12",
+      "value": 0.34
+     },
+     "clean_min": {
+      "label": "case:pun-edge",
+      "value": 0.8333
+     },
+     "direction": "higher-is-better"
+    },
+    "presentation-forms": {
+     "calibration_min": {
+      "label": null,
+      "value": null
+     },
+     "clean_max": {
+      "label": "doc:report",
+      "value": 0.0
+     },
+     "direction": "higher-is-worse"
+    },
+    "tounicode-gaps": {
+     "calibration_min": {
+      "label": null,
+      "value": null
+     },
+     "clean_max": {
+      "label": "doc:report",
+      "value": 0.0
+     },
+     "direction": "higher-is-worse"
+    },
+    "visual-order": {
+     "direction": "vote-not-a-ratio",
+     "note": "the share of readers that reverse the order is 1/n on both a clean file and the planted one, so no share separates them; the signal is a majority vote and its own threshold is the jury, not a number"
+    }
+   }
+  }
+ }
+}

@@ -270,6 +270,38 @@ def phase_separation(args, built, foreign_dir) -> int:
     return 0
 
 
+def _signal_bounds(clean_rows, cal_rows) -> dict:
+    """Every shipped signal's two bounds, per side, with the direction spelled out.
+
+    A bound is only comparable to a threshold when it is the same kind of number: `tounicode-gaps` and
+    `presentation-forms` are shares (higher is worse, and a reader that reads zero simply did not see the defect,
+    so only non-zero readings count as evidence); `lexical-validity` is a share where HIGHER IS BETTER, so its
+    bounds are inverted on purpose — the broken side is a maximum, not a minimum.
+    """
+    def worst(rows, key, high_is_bad, drop_zero=False):
+        vals = [(r[key], lbl) for lbl, r in rows if r.get(key) is not None and (r[key] or not drop_zero)]
+        if not vals:
+            return {"value": None, "label": None}
+        value, label = (max(vals) if high_is_bad else min(vals))
+        return {"value": round(value, 4), "label": label}
+
+    out = {}
+    # The clean side keeps its ZEROS (a clean maximum of 0.0 is a real bound); the evidence side drops them (a
+    # reader that reads no defect has not seen one). Both sides of lexical are read at the SAME end — the minimum —
+    # because the defect is a low reading, so the maximum is the reader that missed it, not the evidence.
+    out["tounicode-gaps"] = {"direction": "higher-is-worse", "clean_max": worst(clean_rows, "gap_ratio_max", True),
+                             "calibration_min": worst(cal_rows, "gap_ratio_max", False, drop_zero=True)}
+    out["presentation-forms"] = {"direction": "higher-is-worse", "clean_max": worst(clean_rows, "pf_ratio", True),
+                                 "calibration_min": worst(cal_rows, "pf_ratio", False, drop_zero=True)}
+    out["lexical-validity"] = {"direction": "higher-is-better", "clean_min": worst(clean_rows, "lexical_min", False),
+                               "calibration_min": worst(cal_rows, "lexical_min", False)}
+    out["visual-order"] = {"direction": "vote-not-a-ratio",
+                           "note": ("the share of readers that reverse the order is 1/n on both a clean file and the "
+                                    "planted one, so no share separates them; the signal is a majority vote and its "
+                                    "own threshold is the jury, not a number")}
+    return out
+
+
 def phase_lamalef(args, built, foreign_dir) -> int:
     """The two bounds the lam-alef threshold is derived from, per side, in rate per 1000 runs.
 
@@ -311,6 +343,7 @@ def phase_lamalef(args, built, foreign_dir) -> int:
             "planted_rate": _lam_rate(planted, floor),
             "calibration": [{"label": r[2], "rate": None if r[0] is None else round(r[0], 3), "reader": r[1]}
                             for r in cal_pairs],
+            "signals": _signal_bounds(c_rows, k_rows),
         }
     with open(args.out, "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, indent=1, sort_keys=True)
