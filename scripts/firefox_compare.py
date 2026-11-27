@@ -7,9 +7,10 @@ Three criteria, declared before the measurement and not re-interpreted afterward
   2. the lam-alef transposition appears in both or in neither;
   3. word agreement on the compared passage >= 0.90 (multiset F1, digits and order blind).
 
-The comparison is made on THE SAME PAGES on both sides. A copy covers a contiguous run of pages from the first
-(a selection of page 1, or Cmd+A over the pages Firefox has rendered); the reader's text is cut to the prefix of
-pages 1..k that best matches the copy, and k is recorded. Comparing a copied page against the whole document's
+The comparison is made on THE SAME PAGES on both sides. A copy covers a contiguous run of pages
+(the page in front of the person, or several); the reader's text is cut to the contiguous run of pages i..j that
+best matches the copy, and i..j is recorded; inside those pages the reader's words are cut to the contiguous run
+that best matches the copied passage (a hand selection rarely spans a whole page). Comparing a copied page against the whole document's
 reader text fails a perfect copy (a passage identical to the reader's own text scored F1 0.347 against the whole
 document), and a lam-alef present elsewhere in the document would be counted against a passage that has none.
 
@@ -57,14 +58,49 @@ def f1(a: str, b: str) -> float:
     return 2 * p * r / (p + r)
 
 
-def matched_window(copy: str, pages: list[str]) -> tuple[str, int, float]:
-    """The prefix of pages 1..k whose words best match the copy: (text, k, F1). Ties keep the shorter prefix."""
-    best = ("", 0, -1.0)
-    for k in range(1, len(pages) + 1):
-        window = "\n".join(pages[:k])
-        score = f1(copy, window)
-        if score > best[2] + 1e-9:
-            best = (window, k, score)
+def matched_window(copy: str, pages: list[str]) -> tuple[str, tuple[int, int], float]:
+    """The contiguous run of pages i..j (1-based) whose words best match the copy: (text, (i, j), F1).
+
+    A person copies the page in front of them, not necessarily page 1, so every contiguous run is tried; ties
+    keep the shorter run."""
+    best = ("", (0, 0), -1.0)
+    for i in range(len(pages)):
+        for j in range(i + 1, len(pages) + 1):
+            window = "\n".join(pages[i:j])
+            score = f1(copy, window)
+            if score > best[2] + 1e-9 or (abs(score - best[2]) <= 1e-9 and (j - i) < (best[1][1] - best[1][0] + 1)):
+                best = (window, (i + 1, j), score)
+    return best
+
+
+def matched_span(copy: str, window: str) -> tuple[str, float]:
+    """Inside the matched pages, the contiguous run of the reader's words that best matches the copy: (text, F1).
+
+    A selection made by hand rarely starts on the page's first word or ends on its last; the criterion is
+    agreement on THE COPIED PASSAGE, so the reader's side is cut to the same passage. Every word the copy
+    holds still has to be found, in the reader's order, for the F1 to stay high — the cut only removes words
+    the person did not select."""
+    from collections import Counter
+    from conformance.checks.structure import _token, metrics
+    raw = metrics.N(window).split()
+    toks = [_token(t) for t in raw]
+    want = structure.words_multi(copy)
+    total_want = sum(want.values())
+    best = (window, f1(copy, window))
+    if not toks or not total_want:
+        return best
+    for i in range(len(toks)):
+        have, overlap = Counter(), 0
+        for j in range(i, len(toks)):
+            t = toks[j]
+            have[t] += 1
+            if have[t] <= want.get(t, 0):
+                overlap += 1
+            if overlap:
+                p, r = overlap / (j - i + 1), overlap / total_want
+                score = 2 * p * r / (p + r)
+                if score > best[1] + 1e-9:
+                    best = (" ".join(raw[i:j + 1]), score)
     return best
 
 
@@ -77,9 +113,12 @@ def self_test() -> int:
         return 2
     pages = pdfjs.pages_many([probe])[0]
     window, k, score = matched_window(pages[0], pages)
-    ok_same = k == 1 and score == 1.0
+    ok_same = k == (1, 1) and score == 1.0
+    _, k_last, score_last = matched_window(pages[-1], pages)
+    ok_same = ok_same and k_last == (len(pages), len(pages)) and score_last == 1.0
+    print(f"last page vs its own window: pages={k_last} F1={score_last:.3f}")
     whole = f1(pages[0], "\n".join(pages)) if len(pages) > 1 else 1.0
-    print(f"page 1 vs its own window: k={k} F1={score:.3f} -> {'ok' if ok_same else 'FAIL'}")
+    print(f"page 1 vs its own window: pages={k} F1={score:.3f} -> {'ok' if ok_same else 'FAIL'}")
     print(f"page 1 vs whole document (the old comparison): F1={whole:.3f} (pages={len(pages)})")
     return 0 if ok_same else 1
 
@@ -103,7 +142,8 @@ def main() -> int:
         label, public = entry["label"], bool(entry.get("public"))
         firefox_text = open(entry["copy"], encoding="utf-8", errors="replace").read()
         pages = pdfjs.pages_many([entry["pdf"]])[0]
-        ours, k, _ = matched_window(firefox_text, pages)
+        page_text, k, _ = matched_window(firefox_text, pages)
+        ours, _ = matched_span(firefox_text, page_text)
         row = {
             "label": label,
             "public": public,
@@ -112,7 +152,7 @@ def main() -> int:
             "pdfjs": {**direction(ours), "lam_alef": lam_alef(ours),
                       "chars": len(ours), "runs": lexical.validity(ours)["runs"]},
             "word_agreement": round(f1(firefox_text, ours), 3),
-            "pages_compared": k,
+            "pages_compared": list(k),
             "pages_in_document": len(pages),
         }
         row["order_agrees"] = row["firefox"]["visual"] == row["pdfjs"]["visual"]

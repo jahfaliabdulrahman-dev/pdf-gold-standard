@@ -45,6 +45,13 @@ SIDES = {
     "all": ("pdfium", "pdfkit", "mupdf", "poppler", "pdfminer"),
     "ship": ("pdfium", "poppler", "pdfminer", "pdfjs"),
 }
+# The juries pdf.js creates on macOS once it ships: without the AGPL extra (five), and with it (six). The Linux
+# jury (`ship`) was measured in PR-5b/5c; these two were not, and `--ship-side` measures them against `all`.
+SHIP_SIDES = {
+    "linux4": ("pdfium", "poppler", "pdfminer", "pdfjs"),
+    "mac5": ("pdfium", "pdfkit", "poppler", "pdfminer", "pdfjs"),
+    "mac6": ("pdfium", "pdfkit", "mupdf", "poppler", "pdfminer", "pdfjs"),
+}
 OWNER_DIR = os.path.expanduser(os.environ.get("OWNER_CORPUS_DIR", ""))
 ZATCA_GLOB = os.path.expanduser("~/.cache/zatca-sdk/**/Data/Samples/PDF-A3/*.pdf")
 
@@ -388,7 +395,10 @@ def main() -> int:
     ap.add_argument("--timing-file", default=None)
     ap.add_argument("--foreign-dir", default=None,
                     help="the directory holding the LibreOffice-converted PDFs (built outside the repository)")
+    ap.add_argument("--ship-side", choices=sorted(SHIP_SIDES), default="linux4",
+                    help="which jury the `ship` side is (default: the Linux four measured in PR-5b/5c)")
     args = ap.parse_args()
+    SIDES["ship"] = SHIP_SIDES[args.ship_side]
     if not args.foreign_dir:
         args.foreign_dir = os.environ.get("FOREIGN_DIR")
     built = checker_fixtures.build_all(tempfile.mkdtemp(prefix="pdfjs-measure-"))

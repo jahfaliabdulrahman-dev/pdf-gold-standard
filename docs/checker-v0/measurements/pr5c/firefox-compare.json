@@ -1,0 +1,103 @@
+{
+ "criteria": {
+  "word_agreement": 0.9
+ },
+ "failures": [],
+ "files": [
+  {
+   "excerpt": {
+    "firefox": "Seller Identification ردﻮﻤﻟا ﺔﻳﻮﻫ Seller Name Maximum Speed Tech Supply LTD ردﻮﻤﻟا ﻢﺳا ودةﺪﺤﻤﻟا ﺔﻋﺮﺳ ﻰﺼﻗﺄﺑ ﺎﻴﺟﻮﻟﻮﻨﻜﺘﻟا ﺪﻳرﻮﺗ ﺔﻛﺮﺷ VAT Registration Number 399999",
+    "pdfjs": "Seller Identification ردﻮﻤﻟا ﺔﻳﻮﻫ Seller Name Maximum Speed Tech Supply LTD ردﻮﻤﻟا ﻢﺳا ودةﺪﺤﻤﻟا ﺔﻋﺮﺳ ﻰﺼﻗﺄﺑ ﺎﻴﺟﻮﻟﻮﻨﻜﺘﻟا ﺪﻳرﻮﺗ ﺔﻛﺮﺷ VAT Registration Number 399999"
+   },
+   "firefox": {
+    "chars": 2012,
+    "lam_alef": 0,
+    "runs": 151,
+    "score": 0.878,
+    "visual": true
+   },
+   "label": "Standard_Invoice.pdf",
+   "lam_alef_agrees": true,
+   "order_agrees": true,
+   "pages_compared": [
+    1,
+    2
+   ],
+   "pages_in_document": 2,
+   "passes": true,
+   "pdfjs": {
+    "chars": 2008,
+    "lam_alef": 0,
+    "runs": 150,
+    "score": 0.878,
+    "visual": true
+   },
+   "public": true,
+   "word_agreement": 0.998,
+   "words_agree": true
+  },
+  {
+   "excerpt": {
+    "firefox": "لماذا هذا المعيار؟ — »الأتمتة« بنيناه بعد فحص جنائي كامل لدليل .هذا المعيار :كل ملف ننتجه من اليوم يمر ببوابة واحدة في وتضمن طبقة تفاعلية نادرا ما ترى ،Adobe In",
+    "pdfjs": "لماذا هذا المعيار؟ — »الأتمتة« بنيناه بعد فحص جنائي كامل لدليل .هذا المعيار :كل ملف ننتجه من اليوم يمر ببوابة واحدة في وتضمن طبقة تفاعلية نادرا ما ترى ،Adobe In"
+   },
+   "firefox": {
+    "chars": 687,
+    "lam_alef": 0,
+    "runs": 96,
+    "score": -0.982,
+    "visual": false
+   },
+   "label": "guide-v2-ar.pdf",
+   "lam_alef_agrees": true,
+   "order_agrees": true,
+   "pages_compared": [
+    5,
+    5
+   ],
+   "pages_in_document": 12,
+   "passes": true,
+   "pdfjs": {
+    "chars": 687,
+    "lam_alef": 0,
+    "runs": 96,
+    "score": -0.982,
+    "visual": false
+   },
+   "public": true,
+   "word_agreement": 1.0,
+   "words_agree": true
+  },
+  {
+   "firefox": {
+    "chars": 240,
+    "lam_alef": 0,
+    "runs": 29,
+    "score": -1.0,
+    "visual": false
+   },
+   "label": "owner-python-lesson",
+   "lam_alef_agrees": true,
+   "order_agrees": true,
+   "pages_compared": [
+    5,
+    5
+   ],
+   "pages_in_document": 24,
+   "passes": true,
+   "pdfjs": {
+    "chars": 231,
+    "lam_alef": 0,
+    "runs": 28,
+    "score": -1.0,
+    "visual": false
+   },
+   "public": false,
+   "word_agreement": 0.983,
+   "words_agree": true
+  }
+ ],
+ "firefox_version": "161.0 (macOS arm64, build 20261118180411; bundles pdf.js 6.5.447 — the reader pins pdfjs-dist 6.5.438)",
+ "generated_at": "2026-11-27T13:48:30Z",
+ "verdict": "pass"
+}
