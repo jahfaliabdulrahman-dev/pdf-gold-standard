@@ -15,6 +15,7 @@
     "failed_readers",
     "majority",
     "fonts",
+    "copy_order",
     "signals",
     "risk",
     "known_limits",
@@ -538,6 +539,88 @@
         "type": "string"
       },
       "description": "Why each missing reader is missing, in words the customer can act on (no absolute paths). OPTIONAL in v1: a report written before this field existed must still validate."
+    },
+    "copy_order": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rows",
+        "reversed",
+        "logical",
+        "inconclusive",
+        "missing",
+        "threshold"
+      ],
+      "description": "What the copied text looks like, per reader. A property of the COPY, not a verdict on the file: the same file is reversed in some readers and logical in others, so this table never raises risk.file and is printed whether or not anything is reversed.",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "reader",
+              "order",
+              "score"
+            ],
+            "properties": {
+              "reader": {
+                "type": "string"
+              },
+              "order": {
+                "enum": [
+                  "reversed",
+                  "logical",
+                  "inconclusive"
+                ]
+              },
+              "score": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "confidence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "reversed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "logical": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "inconclusive": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
     }
   },
   "$defs": {

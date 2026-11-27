@@ -230,6 +230,7 @@ jobs:
           python3 arabic_pdf_check/tests/test_refusals.py
           python3 arabic_pdf_check/tests/test_packaging.py
           python3 arabic_pdf_check/tests/test_blind.py
+          python3 scripts/test_copy_order.py
           python3 arabic_pdf_check/tests/test_lam_alef_signal.py
           python3 arabic_pdf_check/tests/test_segment_order.py
           python3 scripts/build_wiki_lexicon.py --verify-source
@@ -426,9 +427,16 @@ jobs:
           assert len(ran) == 3, f"this install is the three-reader case: {ran}"
           assert file.get("level") is None, f"a three-reader jury cannot convict a file: {file}"
           assert "no file-level verdict" in str(file.get("withheld") or ""), f"the withholding must be named: {file}"
-          VOTED = ("visual-order", "lexical-validity", "lam-alef-transposition")
+          VOTED = ("lexical-validity", "lam-alef-transposition")   # visual-order left the jury in PR-6
           assert all(s.get("cause") != "file" for s in report.get("signals") or [] if s["id"] in VOTED), \
               "a majority-derived accusation must stay at reader level on a shrunken jury"
+          # PR-6: the copy order is a TABLE in every report, one row per reader that read — a reader's reversed
+          # copy is never an accusation against the file, on any jury.
+          order = report.get("copy_order") or {}
+          assert {r["reader"] for r in order.get("rows") or []} == set(ran), \
+              f"a row per reader that read: {order.get('rows')} vs {ran}"
+          assert not any(s.get("id") == "visual-order" and s.get("cause") == "file"
+                         for s in report.get("signals") or []), "visual-order never accuses the file"
           # A structural fact is not a vote: the ToUnicode gap stays a file cause on any jury, and only the
           # vote-derived signal is withheld. (The Markdown face of this is `test_report_language.py`.)
           gaps = [x for x in (report.get("signals") or []) if x["id"] == "tounicode-gaps"]
@@ -462,6 +470,12 @@ jobs:
           ids = {s["id"]: s for s in report.get("signals") or []}
           assert ids.get("tounicode-gaps", {}).get("cause") == "file", f"the planted gap is a file fact: {ids}"
           assert "لا حكم" not in md.split("\n## ")[0], "the Markdown header must carry the verdict, not withhold it"
+          order = report.get("copy_order") or {}
+          rows = order.get("rows") or []
+          assert len(rows) == 4 and {r["reader"] for r in rows} == set(ran), \
+              f"the table has one row per Linux reader: {rows}"
+          assert all(r["order"] in ("reversed", "logical", "inconclusive") for r in rows), rows
+          assert "## ترتيب النص عند النسخ" in md, "the table must reach the page the customer reads"
           print(f"readers {ran} · file {file['level']} · signals {sorted(ids)}")
           PY
       - name: The file a customer names is the file every reader opens (relative path, from another directory)

@@ -66,7 +66,12 @@ FILE_CLAIM_MIN_VOTERS = 4
 # The signals whose ACCUSATION is a majority vote (as opposed to a fact the file itself carries, like
 # `no-text-layer` or `numerals-persian`). Only these can be withdrawn when the jury is too small: the facts keep
 # their level on any jury, the votes do not.
-_MAJORITY_SIGNALS = ("visual-order", "lexical-validity", "lam-alef-transposition")
+# `visual-order` is NOT here, and not because it was quiet: it is a property of the READER'S COPY, not of the
+# file (the same file is reversed in pdfium, pdf.js and pdfminer and logical in poppler and Preview). A majority
+# vote on it produced a verdict that moved when only the JURY changed — +5 ZATCA invoices between juries, −14
+# owner files between juries — while the file stayed byte-identical. So it no longer produces a file cause and
+# never raises `risk.file`; it is reported as a permanent table (`copy_order`), one row per reader.
+_MAJORITY_SIGNALS = ("lexical-validity", "lam-alef-transposition")
 # `tounicode-gaps` is deliberately NOT here. A composite font with no `/ToUnicode`, a code mapped to U+0000,
 # U+FFFD or a PUA, a drawn `.notdef` — those are facts the FILE carries, whatever jury is installed; hiding them
 # because three readers happened to vote would hide the one defect a silent layer is actually made of. What the
@@ -127,6 +132,38 @@ def visual_orders(texts: dict, th: dict) -> dict:
                   "presentation_forms": th["presentation_forms"]["value"],
                   "min_arabic_chars": th["min_arabic_chars"]["value"]}
     return {name: visual_order.inspect(text, thresholds) for name, text in texts.items()}
+
+
+def _copy_order(orders: dict, threshold: float, missing: dict) -> dict:
+    """{'rows', 'reversed', 'logical', 'inconclusive', 'missing'} — what the copy looks like, per reader.
+
+    `reversed` and `logical` are the two ends; a score between the two thresholds is `inconclusive`, which is a
+    real answer and not a quiet `logical`. The Arabic names are NOT here: this is data, and the report's words
+    live in `markdown.py` (`READER_AR`), so a renamed reader cannot leave two spellings behind.
+    """
+    rows = []
+    for name, got in orders.items():
+        score = got.get("score")
+        if got.get("visual"):
+            order = "reversed"
+        elif score is not None and score <= -float(threshold):
+            order = "logical"
+        else:
+            order = "inconclusive"
+        rows.append({"reader": name, "order": order, "score": score,
+                     "confidence": got.get("confidence")})
+    return {
+        "rows": rows,
+        "reversed": [r["reader"] for r in rows if r["order"] == "reversed"],
+        "logical": [r["reader"] for r in rows if r["order"] == "logical"],
+        "inconclusive": [r["reader"] for r in rows if r["order"] == "inconclusive"],
+        # A reader that is not installed is not a reader that read logically: it is named so the table never
+        # looks complete when it is not.
+        "missing": {n: why_class(w) for n, w in missing.items()},
+        "threshold": float(threshold),
+        "note": ("the copied text keeps the order this reader stores; a reversed copy is a property of the "
+                 "reader, not a defect of the file"),
+    }
 
 
 def empty_pages_for(pages: dict, names) -> dict:
@@ -345,25 +382,9 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
     orders = visual_orders(texts, th)
     visual_readers = [n for n, o in orders.items() if o["visual"]]
     need_visual = majority_needed(len(ok))
-    visual_cause = "file" if need_visual is not None and len(visual_readers) >= need_visual else "reader"
-    if visual_cause == "file":
-        conf = min(("high" if (o["confidence"] or 0) >= 0.9 else
-                    "medium" if (o["confidence"] or 0) >= 0.6 else "low")
-                   for o in (orders[n] for n in visual_readers))
-        # The statement NAMES the readers and counts them from the vote: «3 of 4: pdfium, pdfjs, pdfminer;
-        # logical: poppler». A bare «N readers disagree» invites the reader to guess which, and the answer is the
-        # whole point — a visual layer is a property of the copy, not a defect of the file. `logical_readers` is
-        # carried so the Arabic page can be built from the vote instead of re-deriving it.
-        logical_readers = [n for n in orders if n not in visual_readers]
-        file_signals.append(_finding(
-            "visual-order", "high", "file", conf,
-            f"{len(visual_readers)} of {len(orders)} readers that read return reversed text "
-            f"({', '.join(visual_readers) or 'none'}); read logically by "
-            f"({', '.join(logical_readers) or 'none'}) — the copied text keeps the opposite order for that "
-            f"group, and a visual layer is how most producers store Arabic, so this describes the copy rather "
-            f"than a defect of the file",
-            readers=visual_readers, logical_readers=logical_readers, voters=len(orders),
-            scores={n: orders[n]["score"] for n in visual_readers}))
+    # The rows are built ONCE, from the measurement, and every surface (JSON, Markdown, tests) reads them — a
+    # second derivation of "who reversed" is how one page starts disagreeing with another.
+    copy_order = _copy_order(orders, th["visual_order"]["value"], missing)
     # Lexical validity: the words themselves. A majority of the readers that can judge words is a file
     # finding; one failing reader is that reader's risk and never the file's.
     lexical_file_high = need_lex is not None and len(lexical_failing) >= need_lex
@@ -447,7 +468,7 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
             confidence = "high" if (order["confidence"] or 0) >= 0.9 else \
                          ("medium" if (order["confidence"] or 0) >= 0.6 else "low")
             signals.append(_finding(
-                "visual-order", "high", visual_cause, confidence,
+                "visual-order", "high", "reader", confidence,
                 f"returns {'reversed' if (order['score'] or 0) > 0 else 'logical'} text "
                 f"(score {order['score']:+.2f}; +1 reversed, −1 logical) — "
                 f"{len(visual_readers)} of {len(ok)} readers that read return reversed text",
@@ -575,6 +596,10 @@ def check(pdf_path: str, thresholds: dict, lexicon_path: str = lexical.SHIPPED_D
             "recovery": recovery,
         },
         "fonts": font_rows,
+        # A permanent description of the copy, one row per reader that read, whether or not anything is reversed:
+        # the reader that reads logically and the one that cannot decide are part of the answer, and a missing
+        # reader is named instead of dropped.
+        "copy_order": copy_order,
         "signals": file_signals,
         "risk": {"level": total, "confidence": _confidence(at_top), "causes": causes, "floor": FILE_CLAIM_MIN_VOTERS,
                  "file": {"level": file_level, "confidence": file_conf, "voters": len(ok),
